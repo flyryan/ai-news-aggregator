@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  ai-news-aggregator:
+    build: .
+    container_name: ai-news-aggregator
+    ports:
+      - "8080:80"
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./web:/app/web
+      - ./logs:/app/logs
+    environment:
+      # LiteLLM Configuration
+      - LITELLM_API_BASE=${LITELLM_API_BASE}
+      - LITELLM_API_KEY=${LITELLM_API_KEY}
+      - LITELLM_MODEL=${LITELLM_MODEL:-claude-opus-4.5}
+      
+      # Collection Settings
+      - COLLECTION_SCHEDULE=${COLLECTION_SCHEDULE:-0 6 * * *}
+      - LOOKBACK_HOURS=${LOOKBACK_HOURS:-24}
+      
+      # Timezone
+      - TZ=${TZ:-America/New_York}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
