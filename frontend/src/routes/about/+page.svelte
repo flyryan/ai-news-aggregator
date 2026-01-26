@@ -39,6 +39,16 @@
 			How It Works
 		</h2>
 		<div class="prose dark:prose-invert max-w-none text-trend-gray-600 dark:text-trend-gray-400">
+			<figure class="my-6">
+				<img
+					src="/assets/agent-architecture.webp"
+					alt="Agent architecture diagram showing data sources flowing through gatherers and analyzers to the orchestrator"
+					class="w-full rounded-lg shadow-md"
+				/>
+				<figcaption class="text-center text-sm text-trend-gray-500 dark:text-trend-gray-500 mt-2">
+					Multi-agent pipeline architecture
+				</figcaption>
+			</figure>
 			<p>Each day, the pipeline runs through several phases:</p>
 			<ol>
 				<li>
