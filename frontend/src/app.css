@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		--color-trend-red: #E63946;
+		--color-guardian-red: #C1272D;
+	}
+
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body {
+		@apply font-sans antialiased;
+	}
+}
+
+@layer components {
+	/* Card component */
+	.card {
+		@apply bg-white dark:bg-trend-gray-800
+		       rounded-xl p-6
+		       shadow-card hover:shadow-card-hover
+		       transition-shadow duration-200
+		       border border-trend-gray-200 dark:border-trend-gray-700;
+	}
+
+	/* Category accent borders */
+	.category-accent-news {
+		@apply border-l-4 border-category-news;
+	}
+
+	.category-accent-research {
+		@apply border-l-4 border-category-research;
+	}
+
+	.category-accent-social {
+		@apply border-l-4 border-category-social;
+	}
+
+	.category-accent-reddit {
+		@apply border-l-4 border-category-reddit;
+	}
+
+	/* Primary button */
+	.btn-primary {
+		@apply px-4 py-2 rounded-lg
+		       bg-trend-red hover:bg-guardian-red
+		       text-white font-medium
+		       transition-colors duration-200;
+	}
+
+	/* Secondary button */
+	.btn-secondary {
+		@apply px-4 py-2 rounded-lg
+		       bg-trend-gray-200 hover:bg-trend-gray-300
+		       dark:bg-trend-gray-700 dark:hover:bg-trend-gray-600
+		       text-trend-dark dark:text-trend-gray-100
+		       font-medium transition-colors duration-200;
+	}
+
+	/* Badge */
+	.badge {
+		@apply inline-block px-2 py-0.5 rounded-full text-xs font-medium;
+	}
+
+	.badge-news {
+		@apply bg-category-news/20 text-category-news;
+	}
+
+	.badge-research {
+		@apply bg-category-research/20 text-category-research;
+	}
+
+	.badge-social {
+		@apply bg-category-social/20 text-category-social;
+	}
+
+	.badge-reddit {
+		@apply bg-category-reddit/20 text-category-reddit;
+	}
+
+	/* Input field */
+	.input {
+		@apply w-full px-4 py-2 rounded-lg
+		       border border-trend-gray-200 dark:border-trend-gray-700
+		       bg-white dark:bg-trend-gray-800
+		       text-trend-dark dark:text-trend-gray-100
+		       placeholder-trend-gray-400
+		       focus:border-trend-red focus:ring-2 focus:ring-trend-red/20
+		       outline-none transition-all duration-200;
+	}
+
+	/* Navigation link */
+	.nav-link {
+		@apply px-1.5 sm:px-4 py-2 rounded-lg
+		       text-trend-gray-600 dark:text-trend-gray-400
+		       hover:bg-trend-gray-200 dark:hover:bg-trend-gray-700
+		       transition-colors duration-200;
+	}
+
+	.nav-link-active {
+		@apply text-trend-red bg-trend-red/10;
+	}
+
+	/* Importance-driven card tiers */
+	.card-importance-high {
+		@apply shadow-lg border-l-4 border-l-trend-red
+		       hover:-translate-y-0.5 transition-all duration-200;
+	}
+
+	.card-importance-medium {
+		@apply shadow-md border-l-4 border-l-amber-500
+		       hover:-translate-y-0.5 transition-all duration-200;
+	}
+
+	.card-importance-standard {
+		@apply shadow-card border-l-4 border-l-trend-gray-300 dark:border-l-trend-gray-600
+		       hover:-translate-y-0.5 transition-all duration-200;
+	}
+
+	.card-importance-low {
+		@apply shadow-sm border-l-2 border-l-trend-gray-200 dark:border-l-trend-gray-700 opacity-90;
+	}
+}
+
+@layer utilities {
+	/* Summary prose styling - for formatted markdown content */
+	.prose-summary {
+		@apply text-trend-gray-700 dark:text-trend-gray-300;
+	}
+
+	.prose-summary h4 {
+		@apply font-semibold text-trend-gray-800 dark:text-trend-gray-100 text-base mt-4 mb-2;
+	}
+
+	.prose-summary h4:first-child {
+		@apply mt-0;
+	}
+
+	.prose-summary strong {
+		@apply text-trend-gray-900 dark:text-white font-semibold;
+	}
+
+	.prose-summary ul {
+		@apply my-2 pl-5 space-y-1 list-disc;
+	}
+
+	.prose-summary li {
+		@apply text-trend-gray-700 dark:text-trend-gray-300;
+	}
+
+	.prose-summary a {
+		@apply text-trend-red hover:text-guardian-red underline;
+	}
+
+	/* Internal links (to items on our site) - WCAG compliant contrast */
+	.prose-summary a.internal-link {
+		@apply text-trend-red/90 underline decoration-trend-red/50
+		       hover:text-trend-red hover:decoration-trend-red
+		       dark:text-red-300 dark:decoration-red-300/60
+		       dark:hover:text-red-200 dark:hover:decoration-red-200;
+	}
+
+	/* Keep link color for bold text inside links */
+	.prose-summary a.internal-link strong {
+		@apply text-inherit font-semibold;
+	}
+
+	.prose-summary p {
+		@apply mb-3 leading-relaxed text-trend-gray-700 dark:text-trend-gray-300;
+	}
+
+	.prose-summary p:last-child {
+		@apply mb-0;
+	}
+
+	/* Text gradient */
+	.text-gradient {
+		@apply bg-gradient-to-r from-trend-red to-guardian-red bg-clip-text text-transparent;
+	}
+
+	/* Scroll shadows */
+	.scroll-shadow-x {
+		background:
+			linear-gradient(90deg, white 30%, transparent),
+			linear-gradient(90deg, transparent, white 70%);
+		background-size: 40px 100%, 40px 100%;
+		background-position: left center, right center;
+		background-repeat: no-repeat;
+	}
+}

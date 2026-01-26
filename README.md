@@ -1,427 +1,560 @@
 # AI News Aggregator
 
-A comprehensive Docker-based workflow that automatically collects, analyzes, and presents AI news from multiple sources daily. Powered by Claude Opus 4.5 via LiteLLM.
+![Pipeline Banner](assets/pipeline-banner.webp)
 
-## Features
+> Multi-agent AI news pipeline powered by Claude Opus 4.5 with extended thinking
 
-- **Multi-Source Collection**: Aggregates from 100+ RSS feeds, arXiv papers, Twitter, Reddit, and more
-- **AI-Powered Analysis**: Uses Claude Opus 4.5 to summarize, categorize, and rank news items
-- **Daily Website Generation**: Creates a beautiful, browsable website with the day's AI news
-- **Automated Workflow**: Runs on a schedule (default: daily at 6 AM)
-- **Docker-Based**: Easy deployment with Docker Compose
-- **Trend Detection**: Identifies emerging themes and important developments
-- **Executive Summaries**: Provides high-level overviews for busy professionals
+> **Live Site:** [https://news.aatf.ai](https://news.aatf.ai)
 
-## Architecture
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 
-The system consists of four main phases:
-
-1. **Data Collection**: Fetches content from RSS feeds, arXiv, Twitter, Reddit, and other sources
-2. **Data Processing**: Normalizes, deduplicates, and enriches collected data
-3. **LLM Analysis**: Uses Claude Opus 4.5 to analyze, summarize, and categorize content
-4. **HTML Generation**: Creates a static website with the analyzed news
-
-## Prerequisites
-
-- Docker and Docker Compose installed
-- LiteLLM endpoint with access to Claude Opus 4.5 (or compatible model)
-- (Optional) Manus Data API access for Twitter/Reddit collection
-
-## Quick Start
-
-### 1. Clone or Download
-
-```bash
-# If you have the files, navigate to the directory
-cd ai-news-aggregator
-```
-
-### 2. Configure Environment
-
-```bash
-# Copy the example environment file
-cp .env.example .env
-
-# Edit .env with your settings
-nano .env
-```
-
-Required environment variables:
-- `LITELLM_API_BASE`: Your LiteLLM endpoint URL
-- `LITELLM_API_KEY`: Your API key
-- `LITELLM_MODEL`: Model name (default: claude-opus-4.5)
-
-### 3. Build and Run
-
-```bash
-# Build the Docker image
-docker-compose build
-
-# Start the container
-docker-compose up -d
-```
-
-The system will:
-1. Create default configuration files in `./config/`
-2. Run an initial collection and analysis
-3. Start the web server on port 8080
-4. Schedule daily updates
-
-### 4. Access the Website
-
-Open your browser and navigate to:
-```
-http://localhost:8080
-```
-
-## Configuration
-
-### RSS Feeds
-
-Edit `config/rss_feeds.txt` to add or remove RSS feeds:
-
-```
-# One feed URL per line
-https://feeds.arstechnica.com/arstechnica/index
-https://www.wired.com/feed/tag/ai/latest/rss
-https://venturebeat.com/category/ai/feed/
-```
-
-### Twitter Accounts
-
-Edit `config/twitter_accounts.txt` to monitor specific Twitter accounts:
-
-```
-# One username per line (without @)
-sama
-karpathy
-OpenAI
-AnthropicAI
-```
-
-**Note**: Twitter collection requires Manus Data API access. The system will skip Twitter if the API is not available.
-
-### Reddit Subreddits
-
-Edit `config/reddit_subreddits.txt` to monitor subreddits:
-
-```
-# One subreddit per line (without r/)
-MachineLearning
-artificial
-LocalLLaMA
-```
-
-**Note**: Reddit collection requires Manus Data API access. The system will skip Reddit if the API is not available.
-
-### Schedule
-
-The collection schedule is set via the `COLLECTION_SCHEDULE` environment variable in `.env`:
-
-```
-# Cron format: minute hour day month weekday
-COLLECTION_SCHEDULE=0 6 * * *  # Daily at 6 AM
-```
-
-Examples:
-- `0 6 * * *` - Daily at 6 AM
-- `0 */6 * * *` - Every 6 hours
-- `0 9,18 * * *` - Twice daily at 9 AM and 6 PM
-
-## Manual Execution
-
-To run the pipeline manually:
-
-```bash
-# Enter the container
-docker exec -it ai-news-aggregator bash
-
-# Run the pipeline
-python3 /app/run_pipeline.py
-```
-
-Or from outside the container:
-
-```bash
-docker exec ai-news-aggregator python3 /app/run_pipeline.py
-```
-
-## Directory Structure
-
-```
-ai-news-aggregator/
-├── collectors/           # Data collection modules
-│   ├── rss_collector.py
-│   ├── arxiv_collector.py
-│   └── social_collector.py
-├── processors/          # Data processing modules
-│   ├── data_processor.py
-│   └── llm_analyzer.py
-├── generators/          # HTML generation
-│   └── html_generator.py
-├── config/             # Configuration files (created on first run)
-│   ├── rss_feeds.txt
-│   ├── twitter_accounts.txt
-│   └── reddit_subreddits.txt
-├── data/               # Data storage
-│   ├── raw/           # Raw collected data
-│   └── processed/     # Processed and analyzed data
-├── web/               # Generated website
-├── logs/              # Application logs
-├── templates/         # HTML templates (created on first run)
-├── run_pipeline.py    # Main orchestration script
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── nginx.conf
-├── entrypoint.sh
-└── README.md
-```
-
-## Data Sources
-
-### RSS Feeds (100+ sources)
-
-The system monitors a curated list of AI news sources including:
-
-- **Major Tech News**: Ars Technica, WIRED, VentureBeat, The Guardian
-- **AI-Specific Sites**: AI Business, Analytics India Magazine, MarkTechPost
-- **Research Blogs**: DeepMind, Hugging Face, LangChain, Cohere
-- **Industry Analysis**: Chain of Thought, Last Week in AI, Latent Space
-- **Academic**: ScienceDaily AI, Nature ML, MIT News ML
-
-### arXiv Papers
-
-Monitors key categories:
-- cs.AI (Artificial Intelligence)
-- cs.LG (Machine Learning)
-- cs.CL (Computation and Language)
-- cs.CV (Computer Vision)
-- cs.NE (Neural and Evolutionary Computing)
-
-### Social Media
-
-- **Twitter**: Monitors key AI researchers, companies, and thought leaders
-- **Reddit**: Tracks discussions in AI-related subreddits
-- **YouTube**: (Future enhancement) AI channels and videos
-
-## LLM Analysis Features
-
-Claude Opus 4.5 performs the following analysis:
-
-1. **Content Summarization**: Generates concise summaries of articles and papers
-2. **Categorization**: Groups content into topics (Research, Industry, Products, etc.)
-3. **Importance Ranking**: Identifies the most significant developments
-4. **Executive Summary**: Creates a daily overview of AI developments
-5. **Trend Detection**: Identifies emerging themes and patterns
-
-## Customization
-
-### Adding New Data Sources
-
-1. Create a new collector module in `collectors/`
-2. Implement the collection logic
-3. Update `run_pipeline.py` to include the new collector
-4. Rebuild the Docker image
-
-### Modifying the Website
-
-1. Edit templates in `templates/` directory
-2. Customize CSS in `templates/base.html`
-3. Modify `generators/html_generator.py` for structural changes
-4. Rebuild and restart the container
-
-### Using Different LLM Models
-
-The system supports any model available through LiteLLM:
-
-```bash
-# In .env file
-LITELLM_MODEL=gpt-4
-# or
-LITELLM_MODEL=claude-3-opus-20240229
-# or any other supported model
-```
-
-## Monitoring
-
-### View Logs
-
-```bash
-# Application logs
-docker logs ai-news-aggregator
-
-# Cron logs
-docker exec ai-news-aggregator cat /app/logs/cron.log
-
-# Nginx logs
-docker exec ai-news-aggregator cat /app/logs/nginx-access.log
-```
-
-### Check Status
-
-```bash
-# Container status
-docker ps
-
-# Health check
-curl http://localhost:8080
-```
-
-## Troubleshooting
-
-### Pipeline Fails to Run
-
-1. Check logs: `docker logs ai-news-aggregator`
-2. Verify LiteLLM endpoint is accessible
-3. Ensure API key is correct in `.env`
-4. Check if config files exist in `config/`
-
-### No Data Collected
-
-1. Verify RSS feeds are accessible
-2. Check internet connectivity from container
-3. Review collection logs in `logs/`
-4. Some sources may be temporarily unavailable (system continues with available sources)
-
-### Website Not Accessible
-
-1. Check if nginx is running: `docker exec ai-news-aggregator ps aux | grep nginx`
-2. Verify port mapping: `docker ps`
-3. Check nginx logs: `docker exec ai-news-aggregator cat /app/logs/nginx-error.log`
-
-### LLM Analysis Fails
-
-1. Verify LiteLLM endpoint is accessible from container
-2. Check API key and model name
-3. Ensure model supports required context length
-4. Review analysis logs for specific errors
-
-## Performance Optimization
-
-### Reduce Collection Time
-
-- Limit number of RSS feeds
-- Reduce `LOOKBACK_HOURS` to collect less data
-- Adjust parallel workers in collector modules
-
-### Reduce LLM Costs
-
-- Limit number of items analyzed
-- Use a smaller/cheaper model for less critical analysis
-- Adjust summarization depth in `llm_analyzer.py`
-
-### Improve Website Performance
-
-- Enable caching in nginx (already configured)
-- Reduce number of items per category page
-- Optimize images and assets
-
-## Backup and Archival
-
-### Backup Data
-
-```bash
-# Backup all data
-docker exec ai-news-aggregator tar -czf /app/backup.tar.gz /app/data /app/config
-
-# Copy to host
-docker cp ai-news-aggregator:/app/backup.tar.gz ./backup.tar.gz
-```
-
-### Archive Old Reports
-
-The system stores all generated reports in `web/`. To archive:
-
-```bash
-# Create archive directory
-mkdir -p archives
-
-# Move old reports
-mv web/archive/YYYY-MM-DD archives/
-```
-
-## Advanced Usage
-
-### Running Without Docker
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Create config
-python3 run_pipeline.py --create-config
-
-# Run pipeline
-python3 run_pipeline.py
-```
-
-### Integrating with External Systems
-
-The pipeline generates JSON files that can be consumed by other systems:
-
-- `data/processed/processed.json`: All collected and normalized items
-- `data/processed/analyzed.json`: Complete analysis results
-
-### Custom Analysis Prompts
-
-Edit `processors/llm_analyzer.py` to customize prompts for:
-- Summarization style
-- Categorization criteria
-- Ranking factors
-- Trend detection sensitivity
-
-## Security Considerations
-
-- Store API keys securely in `.env` file (never commit to version control)
-- Use Docker secrets for production deployments
-- Implement authentication if exposing website publicly
-- Regularly update dependencies for security patches
-- Use HTTPS if accessing over network (configure reverse proxy)
-
-## Contributing
-
-To contribute improvements:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is provided as-is for personal and commercial use.
-
-## Support
-
-For issues and questions:
-- Check logs for error messages
-- Review configuration files
-- Ensure all prerequisites are met
-- Verify API endpoints are accessible
-
-## Roadmap
-
-Future enhancements:
-- [ ] Email digest delivery
-- [ ] Slack/Discord integration
-- [ ] PDF report generation
-- [ ] Search functionality
-- [ ] Historical trend analysis
-- [ ] Multi-language support
-- [ ] Mobile app
-- [ ] RSS feed output
-- [ ] API for external access
-- [ ] Machine learning for personalization
-
-## Acknowledgments
-
-- Built for AI professionals who need to stay informed
-- Powered by Claude Opus 4.5 for intelligent analysis
-- Inspired by the need for comprehensive AI news aggregation
-- Uses open-source tools and libraries
+Daily AI/ML news briefings curated by specialized agents with extended thinking. Updated every morning at 6 AM ET.
 
 ---
 
-**Note**: This system is designed for local deployment on a server you control. For production use at scale, consider additional infrastructure for reliability, monitoring, and performance.
+## Navigation
+
+| Section | Description |
+|---------|-------------|
+| [What It Does](#what-it-does) | Key stats and capabilities |
+| [How It Works](#how-it-works) | Pipeline phases, thinking levels, architecture |
+| [Quick Start](#quick-start) | Docker and local setup |
+| [Configuration](#configuration) | Provider modes, prompts, data sources |
+| [Features](#features) | Multi-agent, continuity detection, frontend |
+| [Architecture](#architecture) | Directory structure, agent pairs, data output |
+| [Frontend Development](#frontend-development) | Dev server, build, URL routes |
+| [Operational Notes](#operational-notes) | arXiv schedule, date semantics |
+| [Local Development](#local-development) | Pipeline dev, hero regeneration |
+| [Contributing](#contributing) | How to contribute |
+
+---
+
+## What It Does
+
+A Python-based pipeline that collects AI/ML news from multiple sources, analyzes them using specialized agents with Claude's extended thinking, and serves a modern Svelte SPA frontend.
+
+**Key Stats:**
+- **100+ RSS feeds** from AI news sites, blogs, and research organizations
+- **7 arXiv categories** (cs.AI, cs.LG, cs.CL, cs.CV, cs.NE, cs.RO, stat.ML)
+- **6 social platforms** (Twitter, Bluesky, Mastodon, Reddit, LessWrong, research blogs)
+- **~80-85K thinking tokens** per daily run
+- **Daily hero image** generated with AATF skunk mascot
+
+---
+
+## How It Works
+
+![Pipeline Architecture](assets/pipeline-architecture.webp)
+
+### The Multi-Phase Pipeline
+
+| Phase | Description | Thinking Level |
+|-------|-------------|----------------|
+| **0. Ecosystem Context** | Load AI model release dates for LLM grounding | - |
+| **1. Parallel Gathering** | 4 gatherers collect from RSS, arXiv, Twitter, Reddit, Bluesky, Mastodon | - |
+| **2. Parallel Analysis** | MAP-REDUCE pattern: batch items (75 each), analyze, then synthesize | STANDARD (8K) → DEEP (16K) |
+| **2.5. Continuity Detection** | Track developing stories, detect rehashes, link related coverage | - |
+| **3. Cross-Category Topics** | Identify 3-6 themes spanning all categories | ULTRATHINK (32K) |
+| **4. Executive Summary** | Generate daily briefing (500-800 words) | DEEP (16K) |
+| **4.5. Link Enrichment** | Inject internal links to referenced items | STANDARD (8K) |
+| **4.6. Ecosystem Enrichment** | Auto-detect new model releases from news | STANDARD (8K) |
+| **4.7. Hero Image** | Generate branded banner with Gemini 3 Pro | - |
+| **5-7. Output** | JSON data generation + RSS feeds + Lunr.js search index | - |
+
+### Extended Thinking Levels
+
+| Level | Budget | Use Case |
+|-------|--------|----------|
+| QUICK | 4,096 tokens | Link relevance decisions |
+| STANDARD | 8,192 tokens | Batch analysis, link enrichment |
+| DEEP | 16,000 tokens | Category ranking, executive summary |
+| ULTRATHINK | 32,000 tokens | Cross-category topic detection |
+
+### Agent Architecture
+
+![Agent Architecture](assets/agent-architecture.webp)
+
+---
+
+## Quick Start
+
+### Option A: Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/flyryan/ai-news-aggregator.git
+cd ai-news-aggregator
+
+# Create config file
+cp config/providers.yaml.example config/providers.yaml
+# Edit config/providers.yaml with your API keys
+
+# Build and run
+docker-compose build
+docker-compose up -d
+```
+
+Open [http://localhost:8080](http://localhost:8080)
+
+### Option B: Local Development
+
+```bash
+# Clone and setup
+git clone https://github.com/trend-ai-acceleration-task-force/ai-news-aggregator.git
+cd ai-news-aggregator
+
+# Python setup
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Create config
+cp config/providers.yaml.example config/providers.yaml
+# Edit config/providers.yaml with your API keys
+
+# Run pipeline
+python3 run_pipeline.py --config-dir ./config --data-dir ./data --web-dir ./web
+
+# Frontend development (separate terminal)
+cd frontend
+npm install
+npm run dev
+# Open http://localhost:5173
+```
+
+### Manual Pipeline Run
+
+```bash
+# Run pipeline (local)
+python3 run_pipeline.py
+
+# Run pipeline (Docker)
+docker exec ai-news-aggregator python3 /app/run_pipeline.py
+
+# Run for a specific date
+python3 run_pipeline.py -d 2026-01-05
+
+# Enable scheduled collection (cron, Docker only)
+ENABLE_CRON=true docker-compose up -d
+```
+
+---
+
+## Configuration
+
+All configuration is done via `config/providers.yaml`. Copy the example file and customize:
+
+```bash
+cp config/providers.yaml.example config/providers.yaml
+```
+
+### LLM Provider
+
+Supports two modes:
+
+| Mode | Description | Auth | Extended Thinking |
+|------|-------------|------|-------------------|
+| `anthropic` (default) | Direct Anthropic API | x-api-key header | Full support |
+| `openai-compatible` | LiteLLM, vLLM, or other proxies | Bearer token | May not be supported |
+
+**Direct Anthropic API:**
+
+```yaml
+llm:
+  mode: "anthropic"
+  api_key: "${ANTHROPIC_API_KEY}"  # Use env var reference
+  # base_url: "https://api.anthropic.com"  # Default, uncomment to override
+  model: "claude-opus-4-5-20251101"
+  timeout: 300
+```
+
+**OpenAI-compatible proxies (LiteLLM, etc.):**
+
+```yaml
+llm:
+  mode: "openai-compatible"
+  api_key: "${PROXY_API_KEY}"
+  base_url: "https://your-litellm-proxy.example.com"
+  model: "claude-opus-4-5"  # Your proxy's model alias
+  timeout: 300
+```
+
+### Image Provider (Optional)
+
+Hero image generation is optional. Comment out the entire `image:` section to skip.
+
+| Mode | Description | Requirements |
+|------|-------------|--------------|
+| `native` (default) | Google Gemini API via google-genai SDK | Google AI API key |
+| `openai-compatible` | OpenAI-compatible image endpoint | Proxy endpoint + key |
+
+```yaml
+image:
+  mode: "native"
+  api_key: "${GOOGLE_API_KEY}"
+  model: "gemini-3-pro-image-preview"
+```
+
+If no image provider is configured, the pipeline runs successfully without hero images.
+
+### Pipeline Settings
+
+```yaml
+pipeline:
+  base_url: "http://localhost:8080"  # Your deployment URL (used in RSS feeds)
+  lookback_hours: 24  # How far back to collect news
+```
+
+### Environment Variables
+
+You can reference environment variables in your YAML config using `${VAR_NAME}` syntax:
+
+```bash
+export ANTHROPIC_API_KEY="your-key-here"
+export GOOGLE_API_KEY="your-key-here"
+export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
+```
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `ANTHROPIC_API_KEY` | Anthropic API key | Yes |
+| `GOOGLE_API_KEY` | Google AI API key | No (hero images) |
+| `TWITTERAPI_IO_KEY` | TwitterAPI.io key ($0.15/1000 tweets) | No |
+| `TARGET_DATE` | Report date (YYYY-MM-DD) | No |
+| `ENABLE_CRON` | Enable scheduled collection | No |
+| `COLLECTION_SCHEDULE` | Cron schedule (default: `0 6 * * *`) | No |
+| `TZ` | Timezone (default: `America/New_York`) | No |
+
+### Prompt Customization
+
+All LLM prompts are externalized to `config/prompts.yaml`. You can customize analysis behavior without changing code:
+
+```yaml
+# Example: Customize the executive summary prompt
+orchestration:
+  executive_summary: |
+    Write a structured executive summary of today's AI news...
+
+    FORMAT YOUR SUMMARY LIKE THIS:
+    #### Top Story
+    ...
+```
+
+Prompt categories:
+- **gathering** - Link relevance decisions
+- **analysis** - Category-specific analysis (news, research, social, reddit)
+- **orchestration** - Cross-category topic detection, executive summary
+- **post_processing** - Link enrichment, ecosystem enrichment
+
+Variables use `${var}` syntax and are resolved at runtime.
+
+### Adding Data Sources
+
+Edit files in `config/`:
+
+| Source Type | Config File | Format |
+|-------------|-------------|--------|
+| RSS feeds | `rss_feeds.txt` | One URL per line |
+| Research blogs | `research_feeds.txt` | LessWrong, AI Alignment Forum URLs |
+| Twitter | `twitter_accounts.txt` | Usernames (requires TWITTERAPI_IO_KEY) |
+| Bluesky | `bluesky_accounts.txt` | Handles (e.g., `karpathy.bsky.social`) |
+| Mastodon | `mastodon_accounts.txt` | Full addresses (e.g., `user@mastodon.social`) |
+| Reddit | `reddit_subreddits.txt` | Subreddit names (free, no key needed) |
+
+### Model Release Tracking
+
+The pipeline tracks AI model releases to ground LLM analysis:
+
+```yaml
+# config/model_releases.yaml
+openai:
+  GPT-5.2:
+    ga_date: "2026-01-10"
+    api_date: "2026-01-11"
+```
+
+Phase 4.6 auto-detects new releases from daily news and updates this file.
+
+---
+
+## Features
+
+### Multi-Agent Architecture
+- **4 Gatherer agents** collecting from different source types in parallel
+- **4 Analyzer agents** with MAP-REDUCE batching for scalability
+- **Continuity detection** tracks developing stories across days
+
+### Continuity Detection
+Automatically identifies when today's stories continue from previous coverage:
+- **Continuation types**: `new_development` (builds on prior story), `mainstream_pickup` (gains wider attention), `community_reaction` (discussion response), `rehash` (repetitive coverage), `follow_up` (next chapter)
+- **Smart ranking**: Items flagged as `rehash` can be demoted from top stories
+- **2-day lookback**: Compares against items from the past 2 days
+
+### Extended Thinking
+- Configurable thinking budgets from 4K to 32K tokens
+- ULTRATHINK mode for complex cross-category analysis
+- **Cost tracking**: Per-phase breakdown with input/output/cache token tracking, logged at end of each run
+
+### Ecosystem Grounding
+Prevents hallucinations about AI model releases by injecting accurate release dates into analyzer prompts:
+- **Dual date tracking**: GA (General Availability) date vs API date for each model
+- **Curated source of truth**: `config/model_releases.yaml` with verified dates from Nov 2025+
+- **OpenRouter integration**: Auto-discovers new models and API availability dates
+- **Agent enrichment**: Phase 4.6 auto-detects new model releases from daily news and updates the context
+
+### Collection Status Tracking
+Each pipeline run tracks collection status per source:
+- **Status values**: `success`, `partial` (some items collected), `failed`
+- **Per-source tracking**: News, Research, Social, Reddit
+- **Per-platform tracking**: Twitter, Bluesky, Mastodon (within Social)
+- Status is included in `summary.json` and displayed in the frontend
+
+### Data Sources
+
+| Category | Sources | Collection Method |
+|----------|---------|-------------------|
+| **News** | 100+ RSS feeds + linked articles | RSS + LLM-guided link following |
+| **Research** | arXiv (7 categories) + LessWrong | RSS/OAI-PMH + GraphQL API |
+| **Social** | Twitter, Bluesky, Mastodon | TwitterAPI.io + free APIs |
+| **Reddit** | Configurable subreddits | JSON endpoint (free) |
+
+### Frontend Features
+- **AATF Branding** - Trend Red (#E63946) color scheme with skunk mascot
+- **Calendar Navigation** - Browse historical reports by date
+- **Full-text Search** - Client-side search using Lunr.js indexes
+- **Dark Mode** - System-aware with manual toggle
+- **Responsive Design** - Mobile-first with Tailwind CSS
+
+### Daily Hero Image
+Each report includes a generated hero image featuring the AATF skunk mascot in a scene representing the day's top stories, created via Gemini 3 Pro.
+
+### RSS Feeds
+Multiple Atom 1.0 feeds for different use cases:
+- **Main Feed** - Executive summary + top 5 items per category
+- **Daily Briefing** - Executive summaries only with hero image
+- **Category Feeds** - News, Research, Social, Reddit separately
+- **Summary Feeds** - All category summaries
+
+---
+
+## Architecture
+
+### Directory Structure
+
+```
+ai-news-aggregator/
+├── agents/
+│   ├── llm_client.py          # Anthropic client with extended thinking
+│   ├── base.py                # BaseGatherer, BaseAnalyzer classes
+│   ├── orchestrator.py        # Main coordinator
+│   ├── ecosystem_context.py   # AI model release dates for LLM grounding
+│   ├── link_enricher.py       # Adds internal links to summaries
+│   ├── cost_tracker.py        # LLM API cost tracking
+│   ├── gatherers/             # News, Research, Social, Reddit gatherers
+│   ├── analyzers/             # Category-specific analyzers
+│   └── continuity/            # Story tracking across days
+├── generators/
+│   ├── json_generator.py      # JSON data for SPA frontend
+│   ├── search_indexer.py      # Lunr.js search index builder
+│   ├── feed_generator.py      # Atom RSS feeds
+│   └── hero_generator.py      # Daily hero image with skunk mascot
+├── frontend/                  # Svelte SPA
+│   ├── src/
+│   │   ├── lib/components/    # UI components
+│   │   ├── lib/stores/        # State management
+│   │   ├── lib/services/      # Data loading, search
+│   │   └── routes/            # SvelteKit routing
+│   └── static/assets/         # Logo, fonts
+├── config/
+│   ├── providers.yaml         # Provider configuration
+│   ├── prompts.yaml           # LLM prompts (customizable)
+│   ├── rss_feeds.txt          # RSS feed URLs
+│   ├── model_releases.yaml    # AI model release dates
+│   └── ...                    # Other source lists
+├── data/                      # Raw and processed JSON
+├── web/                       # Generated output
+├── assets/                    # Pipeline diagrams
+├── run_pipeline.py            # Entry point
+├── Dockerfile
+└── docker-compose.yml
+```
+
+### Agent Pairs
+
+| Category | Gatherer | Analyzer Focus |
+|----------|----------|----------------|
+| **News** | RSS + linked articles from social | Product releases, company news |
+| **Research** | arXiv + LessWrong GraphQL | Papers, breakthroughs |
+| **Social** | Twitter, Bluesky, Mastodon | Discussions, reactions |
+| **Reddit** | Reddit JSON API | Community debates |
+
+### Data Output
+
+```
+web/data/
+├── index.json              # Date manifest
+├── search-index.json       # Lunr.js index (30-day window)
+├── search-documents.json   # Document lookup
+├── feeds/                  # Atom RSS feeds
+│   ├── main.xml
+│   ├── summaries-executive.xml
+│   └── ...
+└── {YYYY-MM-DD}/
+    ├── summary.json        # Executive summary + top items
+    ├── hero.webp           # Daily hero image
+    ├── news.json           # Full news items
+    ├── research.json       # Full research items
+    ├── social.json         # Full social items
+    └── reddit.json         # Full reddit items
+```
+
+---
+
+## Frontend Development
+
+```bash
+cd frontend
+npm install              # Install dependencies
+npm run dev              # Start dev server (http://localhost:5173)
+npm run build            # Build production (outputs to ../web)
+npm run check            # TypeScript type checking
+```
+
+### URL Routes
+
+| Route | Content |
+|-------|---------|
+| `/` | Redirects to latest date |
+| `/?date=2026-01-05` | Specific date overview |
+| `/?date=2026-01-05&category=research` | Category page |
+| `/archive` | Calendar browser |
+| `/feeds` | RSS feed directory |
+| `/about` | Project info and AI disclaimer |
+
+---
+
+## Operational Notes
+
+### arXiv Collection Schedule
+- Papers announced Sun-Thu ~8PM ET
+- **Sat/Sun reports**: Skip arXiv (no new papers)
+- **Monday reports**: 3-day catchup (Sat-Mon announcements)
+
+### Date Semantics
+- `TARGET_DATE` = report date
+- Coverage period = day BEFORE report date (00:00-23:59 ET)
+- Example: `TARGET_DATE=2026-01-05` covers news from January 4th
+
+### LessWrong Collection
+Uses GraphQL API instead of RSS because RSS doesn't support date-range queries - only returns the ~10-20 most recent posts which scroll off within hours.
+
+### Item IDs
+12-character SHA256 hashes (~280 trillion unique values) for compact, stable URLs.
+
+---
+
+## Local Development
+
+### Pipeline Development
+
+```bash
+# Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run pipeline
+python3 run_pipeline.py --config-dir ./config --data-dir ./data --web-dir ./web
+```
+
+### Hero Image Regeneration
+
+The `regenerate_hero.py` script regenerates hero images for daily reports.
+
+```bash
+# Basic usage (prompts for confirmation)
+python3 scripts/regenerate_hero.py 2026-01-06
+
+# Auto-confirm (no prompt)
+python3 scripts/regenerate_hero.py 2026-01-06 -y
+
+# With custom prompt override
+python3 scripts/regenerate_hero.py 2026-01-06 --prompt "Custom scene description"
+
+# Regenerate ALL dates
+python3 scripts/regenerate_hero.py -a
+
+# Skip specific dates or ranges
+python3 scripts/regenerate_hero.py -a -s 2026-01-05              # Skip one date
+python3 scripts/regenerate_hero.py -a -s 2026-01-05:2026-01-08   # Skip range (inclusive)
+python3 scripts/regenerate_hero.py -a -s 2026-01-01,2026-01-05   # Skip multiple
+
+# Parallel processing (faster for --all)
+python3 scripts/regenerate_hero.py -a -t 4                        # 4 parallel threads
+
+# Edit existing image instead of regenerating
+python3 scripts/regenerate_hero.py 2026-01-06 -e "Add a coffee cup to the scene"
+```
+
+### Other Utility Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `daily_pipeline.sh` | Cron wrapper: pulls latest, runs pipeline, auto-commits and pushes results |
+| `cleanup_external_links.py` | Strips external links from topic descriptions and re-enriches with internal links only |
+| `convert_hero_images.py` | One-time migration: converts PNG hero images to WebP format |
+| `patch_news_notice.py` | One-time: adds collection start notice to early dates |
+
+---
+
+## Requirements
+
+- **Python 3.10+**
+- **Node.js 18+** (for frontend development)
+- **Docker & Docker Compose** (for containerized deployment)
+- **Claude Opus 4.5** (recommended for best analysis quality)
+- **Gemini 3 Pro** (optional, for hero image generation)
+
+### API Keys
+
+| Service | Required | Cost | Purpose |
+|---------|----------|------|---------|
+| Anthropic API | Yes | Pay-per-token | LLM analysis |
+| Google AI | No | Pay-per-image | Hero images |
+| TwitterAPI.io | No | $0.15/1000 tweets | Twitter collection |
+
+---
+
+## Contributing
+
+Contributions are welcome!
+
+- **Bug Reports**: [Open an issue](https://github.com/flyryan/ai-news-aggregator/issues)
+- **Feature Requests**: [Open an issue](https://github.com/flyryan/ai-news-aggregator/issues)
+- **Pull Requests**: Fork, make changes, submit PR
+
+Please ensure your contributions maintain backwards compatibility with existing configurations.
+
+---
+
+## License
+
+Apache License 2.0 - See [LICENSE](LICENSE) file for details.
+
+Copyright 2026 AI Acceleration Task Force (AATF)
+
+---
+
+## Built by TrendAI
+
+**AI Acceleration Task Force** | [TrendAI](https://www.trendmicro.com)
+
+Originally built as an internal tool to keep our team informed about AI developments, now open-sourced so others can run their own instances.
+
+---
+
+**Interested in being a Trender?** [Join us!](https://www.trendmicro.com/en_us/about/careers.html)

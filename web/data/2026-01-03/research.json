@@ -1,0 +1,323 @@
+{
+  "category": "research",
+  "date": "2026-01-03",
+  "category_summary": "This batch features notable technical contributions alongside alignment theory and community analysis. **Instruct Vectors** [demonstrates that steering vectors](/?date=2026-01-03&category=research#item-81d170d238c3) trained on frozen base models can induce consistent assistant behavior without traditional post-training, offering new insight into what instruction-tuning actually accomplishes.\n\n- Critical analysis [debunks subquadratic attention claims](/?date=2026-01-03&category=research#item-93f4151426b2)—**Kimi Linear**, **DeepSeek Sparse Attention**, **Mamba**, and **RWKV** remain effectively quadratic in practice\n- **Scale-Free Goodness** [proposes alignment frameworks](/?date=2026-01-03&category=research#item-389bbb3faadf) that remain verifiable by less capable actors as AI scales beyond human comprehension\n- Empirical study of **600+ AI safety fellowship alumni** [reveals career trajectories](/?date=2026-01-03&category=research#item-0f0efc157049), with **10%+** completing subsequent fellowships\n\nSupplementary work includes **2025 prediction calibration** ([finding forecasts were overestimated](/?date=2026-01-03&category=research#item-e671d83d0518)), educational alignment content [covering distributional leap problems](/?date=2026-01-03&category=research#item-d2851419a1ab), and speculative explorations drawing on [developmental psychology](/?date=2026-01-03&category=research#item-145c6dda3b00) and [evolutionary biology](/?date=2026-01-03&category=research#item-8f2fa390cd0b) for alignment insights.",
+  "category_summary_html": "<p>This batch features notable technical contributions alongside alignment theory and community analysis. <strong>Instruct Vectors</strong> <a href=\"/?date=2026-01-03&category=research#item-81d170d238c3\" class=\"internal-link\">demonstrates that steering vectors</a> trained on frozen base models can induce consistent assistant behavior without traditional post-training, offering new insight into what instruction-tuning actually accomplishes.</p>\n<ul>\n<li>Critical analysis <a href=\"/?date=2026-01-03&category=research#item-93f4151426b2\" class=\"internal-link\">debunks subquadratic attention claims</a>—<strong>Kimi Linear</strong>, <strong>DeepSeek Sparse Attention</strong>, <strong>Mamba</strong>, and <strong>RWKV</strong> remain effectively quadratic in practice</li>\n<li><strong>Scale-Free Goodness</strong> <a href=\"/?date=2026-01-03&category=research#item-389bbb3faadf\" class=\"internal-link\">proposes alignment frameworks</a> that remain verifiable by less capable actors as AI scales beyond human comprehension</li>\n<li>Empirical study of <strong>600+ AI safety fellowship alumni</strong> <a href=\"/?date=2026-01-03&category=research#item-0f0efc157049\" class=\"internal-link\">reveals career trajectories</a>, with <strong>10%+</strong> completing subsequent fellowships</li>\n</ul>\n<p>Supplementary work includes <strong>2025 prediction calibration</strong> (<a href=\"/?date=2026-01-03&category=research#item-e671d83d0518\" class=\"internal-link\">finding forecasts were overestimated</a>), educational alignment content <a href=\"/?date=2026-01-03&category=research#item-d2851419a1ab\" class=\"internal-link\">covering distributional leap problems</a>, and speculative explorations drawing on <a href=\"/?date=2026-01-03&category=research#item-145c6dda3b00\" class=\"internal-link\">developmental psychology</a> and <a href=\"/?date=2026-01-03&category=research#item-8f2fa390cd0b\" class=\"internal-link\">evolutionary biology</a> for alignment insights.</p>",
+  "themes": [
+    {
+      "name": "Language Models",
+      "description": "Technical research on transformer architectures, attention mechanisms, and training methods for large language models",
+      "item_count": 3,
+      "example_items": [],
+      "importance": 70
+    },
+    {
+      "name": "AI Safety/Alignment",
+      "description": "Research on ensuring AI systems remain beneficial and aligned with human values, including theoretical frameworks and practical approaches",
+      "item_count": 7,
+      "example_items": [],
+      "importance": 65
+    },
+    {
+      "name": "AI Forecasting",
+      "description": "Prediction evaluation and timeline analysis for AI capabilities and AGI development",
+      "item_count": 1,
+      "example_items": [],
+      "importance": 50
+    },
+    {
+      "name": "Off-topic/Non-AI",
+      "description": "Content unrelated to AI research including demographics, health, dating, and personal reflections",
+      "item_count": 4,
+      "example_items": [],
+      "importance": 5
+    }
+  ],
+  "total_items": 14,
+  "items": [
+    {
+      "id": "81d170d238c3",
+      "title": "Instruct Vectors - Base models can be instruct with activation vectors",
+      "content": "Post-training is not necessary for consistent assistant behavior from base modelsImage by Nano Banana ProBy training per-layer steering vectors via descent on a frozen base model, I found that it is possible to induce consistent assistant behavior, including the proper use of EOS tokens at the end of assistant turns and consistent reference to the self as an AI assistant. Using the steering vectors, Qwen3-4B-Base was able to imitate the behavior of an instruction/chat tuned model.Many of the images in this post have text too small to read by default, I recommend opening them in a new tab and zooming in. I was not able to find an option to make the images larger and it does not seem like LW has a click-to-zoom feature.RationaleThe idea for this project came from Simulators, more specifically, I wondered if modern base models knew enough about LLMs and AI assistants in general that it would be possible to apply a steering vector to 'play the assistant character' consistently in the same way steering vectors can be created to cause assistants or base models to express behavior of a specific emotion or obsess over a specific topic. In a higher level sense, I wondered if it was possible to directly select a specific simulacra via applying a vector to the model, rather than altering the probabilities of specific simulacra being selected in-context (which is what I believe post-training largely does) via post-training/RL.Related WorkMy work differs from most other activation steering work in that the vectors are trained directly with descent rather than being created with contrastive pairs of vectors. The two closest works to this strategy I could find are Extracting Latent Steering Vectors from Pretrained Language Models, which trained a single vector for the entire model and tested different injection layers and locations with the goal of reproducing a specific text sequence, as well as Personalized Steering of Large Language Models: Versatile Steering Vectors Through Bi...",
+      "url": "https://www.lesswrong.com/posts/kyWCXaw4tPtcZkrSK/instruct-vectors-base-models-can-be-instruct-with-activation",
+      "author": "Eriskii",
+      "published": "2026-01-02T13:14:15.891000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Demonstrates that steering vectors trained on frozen base models can induce consistent assistant behavior without traditional post-training. Qwen3-4B-Base successfully imitates instruction-tuned behavior using per-layer vectors.",
+      "importance_score": 72,
+      "reasoning": "Novel technical finding with implications for understanding what instruction-tuning actually does. Shows assistant behavior is already latent in base models. Relevant to mechanistic interpretability and alignment.",
+      "themes": [
+        "Language Models",
+        "Activation Steering",
+        "Mechanistic Interpretability",
+        "Alignment"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "93f4151426b2",
+      "title": "Debunking claims about subquadratic attention",
+      "content": "TL;DR:&nbsp;In the last couple years, there have been multiple hype moments of the form \"&lt;insert paper&gt; figured out subquadratic/linear attention, this is a game changer!\" However, all the subquadratic attention mechanisms I'm aware of either are quadratic the way they are implemented in practice (with efficiency improved by only a constant factor) or underperform quadratic attention on downstream capability benchmarks.&nbsp;A central issue with attention is that its FLOP complexity is quadratic in the context length (number of tokens in a sequence) and its memory complexity during inference is linear in the context length. In the last couple years, there have been multiple claims, and hype around those claims, that new architectures solved some (often all) of those problems by making alternatives to attention whose FLOP complexity is linear and/or whose memory complexity during inference is constant. These are often called subquadratic/linear attention (as opposed to regular attention which I’ll call quadratic attention). The ones I’m aware of are&nbsp;Kimi Linear,&nbsp;DeepSeek Sparse Attention (DSA),&nbsp;Mamba (and variants),&nbsp;RWKV (and variants), and&nbsp;text diffusion. If this were true, it would be a big deal because it would make transformer inference a lot more efficient at long contexts.In this blogpost, I argue that they are all better thought of as “incremental improvement number 93595 to the transformer architecture” than as “subquadratic attention, a more than incremental improvement to the transformer architecture\". This is because the implementations that work in practice are quadratic and only improve attention by a constant factor and subquadratic implementations underperform quadratic attention on downstream benchmarks. I think some of them are still important and impressive - for instance, Kimi Linear’s 6.3x increased inference speed at 1 million token context lengths is impressive. I just argue that they are not particularly special a...",
+      "url": "https://www.lesswrong.com/posts/kpSXeMcthtHgnwMx3/debunking-claims-about-subquadratic-attention",
+      "author": "Vladimir Ivanov",
+      "published": "2026-01-01T23:23:59.239000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Critical analysis arguing that claimed subquadratic attention mechanisms (Kimi Linear, DeepSeek Sparse Attention, Mamba, RWKV) either remain quadratic in practice or underperform standard attention on capability benchmarks.",
+      "importance_score": 70,
+      "reasoning": "Important reality check on hyped architectural claims. Technically substantive analysis covering multiple recent architectures. Valuable for practitioners evaluating efficiency claims.",
+      "themes": [
+        "Language Models",
+        "Transformer Architecture",
+        "Efficiency",
+        "Technical Analysis"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "389bbb3faadf",
+      "title": "Scale-Free Goodness",
+      "content": "Introduction Previously I wrote about what it would mean for AI to “go well”. I would like to elaborate on this and propose some details towards a “scale-free” definition of alignment. Here “scale-free alignment” means a version of alignment that does not feature sudden and rapid “phase shifts”, so as aligned actors get more intelligent their behaviour remains understandable and approved by less intelligent actors. In other words, there should be no moment where a superintelligence looks at us and says “I understand that to you it looks like I’m about to annihilate Earth and everyone you love, but trust me this is going to work out great. After all, which one of us as 10,000 IQ?” This is an extension of the idea that to understand something well, you should be able to explain it simply, even to a five year-old. Similarly, a good actor should endeavour to be “good-registering” to everyone who is not actively malicious, including five year-olds. Certainly many things will get lost in the translation, but I believe that there is some core element of “good-alignedness” that can be sketched out and made consistent across scales. This work has been carried out as part of the Human Inductive Bias Project. Defining “the Good” It is notoriously difficult to define “gthood”. However, humans do have rather robust intuitions around “care” which derive from cultural ideas like motherhood, family, the relationship between a master and an apprentice, conservation of both nature and human artefacts, etc. So instead of writing down a one-line definition that will be argued to death, I will instead use a scale and sketch out different ideas of “care” for different kinds of entities with different levels of complexity. These, when taken together, will point us towards the definition of scale-free alignment. And then, at the end, I will try to do a shorter definition that encapsulates all of what I have said above. A key idea behind scale-free alignment is that what works at lower scal...",
+      "url": "https://www.lesswrong.com/posts/jywhehwHC76EptTSb/scale-free-goodness",
+      "author": "testingthewaters",
+      "published": "2026-01-02T16:00:02.710000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Proposes 'scale-free alignment' where aligned AI behavior remains understandable and approvable by less intelligent actors even as AI capabilities increase. Argues good actors should be 'good-registering' across intelligence scales.",
+      "importance_score": 55,
+      "reasoning": "Conceptually valuable contribution to alignment theory addressing the core problem of trusting superintelligent decisions. Novel framing though lacks formal methodology or empirical grounding.",
+      "themes": [
+        "AI Safety",
+        "Alignment",
+        "Superintelligence"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "0f0efc157049",
+      "title": "Where do AI Safety Fellows go? Analyzing a dataset of 600+ alumni",
+      "content": "We invest heavily in fellowships, but do we know exactly where people go and the impact the fellowships have? To begin answering this question I manually analyzed over 600 alumni profiles from 9 major late-stage fellowships (fellowships that I believe could lead directly into a job following). These profiles represent current participants and alumni from MATS, GovAI, ERA, Pivotal, Talos Network, Tarbell, Apart Labs, IAPS, and PIBBS.Executive SummaryI’ve compiled a dataset of over 600 alumni profiles of 9&nbsp;major 'late stage' AI Safety and Governance Fellowships.I found over 10% of fellows did another fellowship after their fellowship. This doesn’t feel enormously efficient.Almost ⅓ of ERA and Talos Network fellows (29.8% and 32.3%&nbsp;respectively) did another fellowship before or after, much higher than the average of 21.5%.ERA particularly seemed to be a ‘feeder’ fellowship for other fellowships. Only 9.5% of ERA fellows had done a fellowship before ERA, but 20.2% did another fellowship following, almost double the 11.1% average.GovAI Fellowship had strong direct links with other governance fellowships - i.e. many people went directly to or from other governance fellowships to GovAI. There were 13, 9&nbsp;and 7 direct links between GovAI&nbsp;and ERA, IAPS&nbsp;and Talos Network&nbsp;respectively.This is more directional than a conclusion, but according to preliminary results around 80% of alumni are still working in AI Safety.I'm actively looking for collaborators/mentors to analyse counterfactual impact.Key Insights from mini-projectOf the target fellowships I looked at, 21.5% (139) did at least one other fellowship alongside their target fellowship. 12.4%&nbsp;of fellows (80) had done a fellowship before the fellowship and 11.1%&nbsp;(72) did a fellowship after.Since these fellowships are ‘late-stage’ - none of them are designed to be much more senior than many of the others - I think it is quite surprising that over 10%&nbsp;of alumni do another fellowship...",
+      "url": "https://www.lesswrong.com/posts/8p2vmQWQbt55qwq98/where-do-ai-safety-fellows-go-analyzing-a-dataset-of-600",
+      "author": "Christopher_Clay",
+      "published": "2026-01-02T13:14:37.056000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Empirical analysis of 600+ alumni from 9 major AI safety fellowships, tracking career outcomes. Finds 10%+ of fellows did another fellowship afterward, questioning efficiency of current pipeline.",
+      "importance_score": 55,
+      "reasoning": "Valuable empirical data for AI safety community strategy. Concrete findings about fellowship effectiveness and career trajectories. Useful for funders and program designers.",
+      "themes": [
+        "AI Safety",
+        "Community Building",
+        "Career Trajectories"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "e671d83d0518",
+      "title": "2025 in AI predictions",
+      "content": "Past years:&nbsp;2023&nbsp;2024Continuing a yearly tradition, I evaluate AI predictions from past years, and collect a convenience sample of AI predictions made this year. I prefer selecting specific predictions, especially ones made about the near term, enabling faster evaluation.Evaluated predictions made about 2025 in 2023, 2024, or 2025 mostly overestimate AI capabilities advances, although there's of course a selection effect (people making notable predictions about the near-term are more likely to believe AI will be impressive near-term).As time goes on, \"AGI\" becomes a less useful term, so operationalizing predictions is especially important. In terms of predictions made in 2025, there is a significant cluster of people predicting very large AI effects by 2030. Observations in the coming years will disambiguate.Predictions about 20252023Jessica Taylor: \"Wouldn't be surprised if this exact prompt got solved, but probably something nearby that's easy for humans won't be solved?\"The prompt: \"Find a sequence of words that is: - 20 words long - contains exactly 2 repetitions of the same word twice in a row - contains exactly 2 repetitions of the same word thrice in a row\"Self-evaluation: False; I underestimated LLM progress, especially from reasoning models.2024teortaxesTex: \"We can have effectively o3 level models fitting into 256 Gb VRAM by Q3 2025, running at &gt;40 t/s. Basically it’s a matter of Liang and co. having the compute and the political will to train and upload r3 on Huggingface.\"Evaluation: False, but close. DeepSeek V3.1 scores worse than o3 according to Artificial Analysis. DeepSeek V3.2 scores similarly but was Q4 2025.Jack Gallagher: \"calling it now - there's enough different promising candidates rn that I bet by this time [Oct 30] next year we mostly don't use Adam anymore.\"Evaluation: Partially correct. Muon is popular, and was used for Kimi K2 and GLM 4.5. Self-evaluated as: “more mixed than I expected. In particular I was expecting more algo...",
+      "url": "https://www.lesswrong.com/posts/69qnNx8S7wkSKXJFY/2025-in-ai-predictions",
+      "author": "jessicata",
+      "published": "2026-01-01T23:29:27.503000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Annual evaluation of AI predictions, finding 2025 predictions mostly overestimated capabilities. Notes 'AGI' is becoming less useful as a term and identifies cluster of predictions expecting large AI effects by 2030.",
+      "importance_score": 50,
+      "reasoning": "Useful calibration exercise for AI forecasting community. Provides concrete evaluation of past predictions and documents current prediction landscape. Important for epistemic hygiene.",
+      "themes": [
+        "AI Forecasting",
+        "Predictions",
+        "AGI Timelines"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "d2851419a1ab",
+      "title": "[Advanced Intro to AI Alignment] 2. What Values May an AI Learn? — 4 Key Problems",
+      "content": "2.1 SummaryIn the last post, I introduced model-based RL, which is the frame we will use to analyze the alignment problem, and we learned that the critic is trained to predict reward.I already briefly mentioned that the alignment problem is centrally about making the critic assign high value to outcomes we like and low value to outcomes we don’t like. In this post, we’re going to try to get some intuition for what values a critic may learn, and thereby also learn about some key difficulties of the alignment problem.Section-by-section summary:2.2 The Distributional Leap: The distributional leap is the shift from the training domain to the dangerous domain (where the AI could take over). We cannot test safety in that domain, so we need to predict how values generalize.2.3 A Naive Training Strategy: We set up a toy example: a model-based RL chatbot trained on human feedback, where the critic learns to predict reward from the model's internal thoughts. This isn't meant as a good alignment strategy—it's a simplified setup for analysis.2.4 What might the critic learn?: The critic learns aspects of the model's thoughts that correlate with reward. We analyze whether honesty might be learned, and find that \"say what the user believes is true\" is similarly simple and predicts reward better, so it may outcompete honesty.2.5 Niceness is not optimal: Human feedback contains predictable mistakes, so strategies that predict reward (including the mistakes) outperform genuinely nice strategies.2.6 Niceness is not (uniquely) simple: Concepts like \"what the human wants\" or \"follow instructions as intended\" are more complex to implement than they intuitively seem. The anthropomorphic optimism fallacy—expecting optimization processes to find solutions in the same order humans would—applies here. Furthermore, we humans have particular machinery in our brains that makes us want to follow social norms, which gives us bad intuitions for what may be learned absent this machinery.2.7 Natural ...",
+      "url": "https://www.lesswrong.com/posts/vv6QojgvprM4jYJLr/advanced-intro-to-ai-alignment-2-what-values-may-an-ai-learn",
+      "author": "Towards_Keeperhood",
+      "published": "2026-01-02T09:51:35.408000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Educational post in an alignment series covering the 'distributional leap' problem, how critics learn to predict reward, and four key difficulties in ensuring AI systems learn desired values.",
+      "importance_score": 45,
+      "reasoning": "Well-structured pedagogical content covering core alignment concepts. Not novel research but useful synthesis for education. Good introduction to important problems.",
+      "themes": [
+        "AI Safety",
+        "Alignment",
+        "Reinforcement Learning",
+        "Education"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "59b6d5655e73",
+      "title": "On Moral Scaling Laws",
+      "content": "INTRODUCTIONIn Utilitarian ethics, one important factor in making moral decisions is the relative moral weight of all moral patients affected by the decision. For instance, when EAs try to determine whether or not shrimp or bee welfare (or even that of chickens or hogs) is a cause worth putting money and effort into advancing, the importance of an individual bee or shrimp’s hedonic state (relative that of a human, or a fish, or a far-future mind affected by the long-term fate of civilization) is a crucial consideration. If shrimp suffer, say, 10% as much as humans would in analogous mental states, then shrimp welfare charities are likely the most effective animal welfare organizations to donate to (in terms of suffering averted per dollar) by orders of magnitude, but if the real ratio is closer to 10-5 (like the ratio between shrimp and human brain neuron counts), then the cause seems much less important.One property of a moral patient that many consider an important contributor to its moral worth is its size or complexity. As it happens, there are a number of different ways that moral worth could plausibly scale with a moral patient’s mental complexity, ranging from constant moral worth all the way up to exponential scaling laws. Furthermore, these are affected by one’s philosophy of consciousness and of qualia in perhaps unintuitive ways. I will break down some different plausible scaling laws and some beliefs about phenomenology that could lead to them one-by-one in the remainder of this essay.&nbsp;&nbsp;ASSUMPTIONS AND DISCLAIMERSIn this post, I am assuming:PhysicalismComputationalism&nbsp;Hedonic Utilitarianism, andThat qualia exist and are the source of moral utility.This blog post will likely be of little value to you if you think that these premises are incorrect, especially the second two, partially because I'm working from assumptions you think are wrong and partially because I frequently equivocate between things that are situationally equivalent under t...",
+      "url": "https://www.lesswrong.com/posts/pJNRWPXDzckcZzn5T/on-moral-scaling-laws",
+      "author": "unduePestilence",
+      "published": "2026-01-02T16:54:26.239000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Explores how moral weight might scale with the mental complexity of moral patients, examining implications for utilitarian ethics and effective altruism cause prioritization (e.g., shrimp welfare).",
+      "importance_score": 40,
+      "reasoning": "Philosophically relevant to questions of AI moral patienthood and how we might weight AI welfare. Provides useful conceptual framework but limited direct AI application.",
+      "themes": [
+        "AI Ethics",
+        "Philosophy",
+        "Effective Altruism"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "5119e5a8d7eb",
+      "title": "Can AI learn human societal norms from social feedback (without recapitulating all the ways this has failed in human history?) ",
+      "content": "tl;dr: rambling thoughts on why community-based RLHF might help with alignment but have the unintended bad consequence of effectively adopting a social epistemology/consensus theory of truth in general.&nbsp;Epistemic status:&nbsp;this is Part 3[1]&nbsp;of a raw and unfiltered brain dump of the notes I jotted down while attending NeurIPS and its adjacent workshops in December. None of it has been thought through deeply, it's not carefully written and there are no pretty pictures. But I won’t have time to research or refine these ideas in the next 6 months, so I figured I’d throw them against the wall in case there’s a useful nugget in here someone else can run with. &nbsp;I have only a non-expert understanding of the anthropology or anthropogeny or primatology of social norm enforcement. I have an extremely naive, minimal grasp of how AI models work or of past/current work in the field of AI alignment.AI alignment context&nbsp;The following thoughts were not about the risk that superhuman AGI could become evil. They were more about the risk that insufficiently-aligned or rogue AI’s could be used by bad actors do bad things, or used by well-meaning humans in such a way as to eventually convince those humans to do things many of us think are bad (whether evil, like murder, or unfortunate, like suicide). These ramblings stemmed from the starting thought that social feedback is an important mechanism for keeping human individuals in line with their own cultures, and keeping world cultures at least roughly compatible with overall requirements of human life on this planet.Federated fine-tuning&nbsp;To continuously steer AI models toward “socially acceptable” behavior and “cultural norms”, there's the idea that a subset of their weights be subject to continual weak updating by human feedback from all users, via anonymous weight gradient data returned to the model provider.&nbsp;To mitigate the concern about who will decide what those values and norms should be, there's the...",
+      "url": "https://www.lesswrong.com/posts/YsnDcvDn9fkdYPobQ/can-ai-learn-human-societal-norms-from-social-feedback",
+      "author": "foodforthought",
+      "published": "2026-01-02T17:11:40.446000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Speculative exploration of whether community-based RLHF might inadvertently lead AI systems to adopt social consensus as a proxy for truth. Raises concerns about social epistemology being embedded in AI alignment approaches.",
+      "importance_score": 35,
+      "reasoning": "Touches on important alignment themes around RLHF limitations, but author explicitly notes non-expert understanding and 'brain dump' status. Ideas are preliminary and unrefined.",
+      "themes": [
+        "AI Safety",
+        "Alignment",
+        "RLHF"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "145c6dda3b00",
+      "title": "Does developmental cognitive psychology provide any hints for making model alignment more robust?",
+      "content": "tl;dr: brainstorming on alternative curriculum approaches to training models that might cause the embedded knowledge to be structured in a better way (more truth aligned, interpretable, corrigible...)Epistemic status: this is Part 2[1]&nbsp;of a raw and unfiltered brain dump of the notes I jotted down while attending NeurIPS and its adjacent workshops in December. None of it has been thought through deeply, it's not carefully written and there are no pretty pictures. But I won’t have time to research or refine these ideas in the next 6 months, so I figured I’d throw them against the wall in case there’s a useful nugget in here someone else can run with. I have only a non-expert understanding of the science of human cognitive development, informed a bit by personal experience with parenting. I have an extremely naive, minimal grasp of how AI models work or of past/current work in the field of AI alignment.Basic science of cognitive development and moral cognition &nbsp;As far as I can tell nobody has done a systematic Piaget- or Montessori-type&nbsp; observational descriptive study of the stages of cognitive development in LLM models over the course of pretraining. Do specific kinds of 'understanding' or reasoning capacities reliably emerge in a certain sequence? Are there some types of concepts, inferences etc. that must develop before others can develop? Such insight would be foundational for developmental alignment work.&nbsp;If it hasn't been done, I think this would be a great project for someone to do[2].In the absence of that, here are some half-baked ideas for how RLHF might be improved by mimicking stages of human cognitive and moral development:RLFH over the lifespan: continuous tuning for alignment over the lifespan seems like a much better idea than tacking it on at the end of pre-training. (see also&nbsp;[1])&nbsp;Epistemic RLHF: Pretrain heavily on primary alignment to truth, &nbsp;including best practices for truth-seeking. Honestly the Sequences would...",
+      "url": "https://www.lesswrong.com/posts/rCzC82NW5JydykHgc/does-developmental-cognitive-psychology-provide-any-hints",
+      "author": "foodforthought",
+      "published": "2026-01-02T15:31:02.671000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Brainstorms whether insights from developmental cognitive psychology (Piaget, Montessori) could inform curriculum design for AI training to produce more aligned, interpretable models.",
+      "importance_score": 30,
+      "reasoning": "Interesting interdisciplinary angle but highly speculative. Author admits naive understanding of AI. No concrete proposals or experiments.",
+      "themes": [
+        "AI Safety",
+        "Alignment",
+        "Training Methods"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "8f2fa390cd0b",
+      "title": "Does evolution provide any hints for making model alignment more robust?",
+      "content": "tl;dr: brainstorming about mechanisms that operate in biological evolution, and wondering whether/how analogous evolutionary mechanisms now exist for AI models, or could, or should. &nbsp;Undertaken with the broad motivation of mining biology for ideas that might help alignment research.Epistemic status: this is part 1[1]&nbsp;of a raw and unfiltered brain dump of the notes I jotted down while attending NeurIPS and its adjacent workshops in December. &nbsp;None of it has been thought through deeply, it's not carefully written and there are no pretty pictures. But I won’t have time to research or refine these ideas in the next 6 months, so I figured I’d throw them against the wall in case there’s a useful nugget in here someone else can run with. I have a firm grasp of the fundamental principles of population genetics, ecology and evolution, but no knowledge of current research or computational models in those fields. I have an extremely naive, minimal grasp of how AI models work or of past/current work in the field of AI alignment.&nbsp;Incrementalism&nbsp;In evolution, species evolve by natural selection filtering the random variants of previously successful species, such that everything useful acquired by all ancestors can be passed forward. In some cases a small variation in development can lead to immense changes in the final form, e.g. mutations in hormones that prevent a metamorphosis, or mutations that shorten or prolong a phase of embryonic development, or that add one more of an already repeated structure in segmented animals.How could this apply to AI? In a sense, this probably happens with frontier models because the architectures and training methods used on new base models are tweaks on the architectures and training methods of previous models selected for having desired characteristics (which may include both performance and alignment as well as interpretability). But in addition, instead of training each new base model from tabula rasa, it may improve...",
+      "url": "https://www.lesswrong.com/posts/Ftrv6ewEkypSQKcWi/does-evolution-provide-any-hints-for-making-model-alignment",
+      "author": "foodforthought",
+      "published": "2026-01-02T14:06:26.813000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Brainstorms potential analogies between biological evolution mechanisms and AI model development, seeking ideas that might help alignment research. Considers incrementalism and selection pressures.",
+      "importance_score": 30,
+      "reasoning": "Creative interdisciplinary exploration but very preliminary. Author has evolution expertise but limited AI knowledge. More of an ideation document than research.",
+      "themes": [
+        "AI Safety",
+        "Alignment",
+        "Evolutionary Computation"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "fb71e9ef3150",
+      "title": "2025 Letter",
+      "content": "I wrote a letter this year about 2025. It's about acceleration, poetry, how it's been the most eventful year of my life, and how I am excited and scared for the future. Crossposted from my substack.Letter&nbsp;I want to tell you a story about 2025. As I bump along today and approach 21 on into the new year, in a van riding from Burgundy to Paris, and I stare at the small hills, the snow inscribed against the mud like frosted chocolate, extending down into the highway and then melting over into the warm grass on the south side -- I feel an urge to share with you, share this feeling flaring in my spine, of sitting and eating the bread of my youth and imagining it and its associated customs withering in my mouth, I feel an urge to imagine now the world hidden up against the stars, the whole earth green, or black, studded with steel platforms, imagine now what it might feel like for us to live there and what we might hold on to in that place.I want to tell you a story about the world, about my life, and maybe yours, about 2025, about silicon wafers arranged like helices all the way up into the sky, about the mountains that rise higher where men are made, and the rivers and the cities and how this is the year I've gone through change at a pace to match that of the world's, finally just about a simple boy, learning to be not so simple, learning to imagine a world we might be happy to live in, as we rush along an era of transformation started before his years.It starts in January, in Boston, where many stories seem to start but rarely end. It starts, again with the snow, lying in heaps on the river Charles where it covers the ice and then the water. I am on the 11th floor of an office, not having seen much sunlight or colors really, and staring at this pure and clear stripe of white cutting between Boston and Cambridge, and it entices me. So I go down there and onto one of the bridge crossing it, and it is night-time now, and I stare at the expanse and throw a little ball ...",
+      "url": "https://www.lesswrong.com/posts/vNGEeKiZgvcmi2FEK/2025-letter",
+      "author": "zef",
+      "published": "2026-01-02T08:57:41.990000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Personal reflective essay about 2025, blending poetry with thoughts on AI acceleration and existential uncertainty. Primarily emotional/philosophical rather than analytical.",
+      "importance_score": 10,
+      "reasoning": "Creative writing piece without substantive technical or research content. Does not advance AI understanding despite touching on AI themes.",
+      "themes": [
+        "Personal Reflection",
+        "Off-topic"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "74dfe6b004a3",
+      "title": "The Weirdness of Dating/Mating: Deep Nonconsent Preference",
+      "content": "Every time I see someone mention statistics on nonconsent kink online, someone else is surprised by how common it is. So let’s start with some statistics from Lehmiller[1]: roughly two thirds of women and half of men have some fantasy of being raped. A lot of these are more of a rapeplay fantasy than an actual rape fantasy, but for purposes of this post we don’t need to get into those particular weeds. The important point is: the appeal of nonconsent is the baseline, not the exception, especially for women.But this post isn’t really about rape fantasies. I claim that the preference for nonconsent typically runs a lot deeper than a sex fantasy, mostly showing up in ways less extreme and emotionally loaded. I also claim that “deep nonconsent preference”, specifically among women, is the main thing driving the apparent “weirdness” of dating/mating practices compared to other human matching practices (like e.g. employer/employee matching).Let’s go through a few examples, to illustrate what I mean by “deep nonconsent preference”, specifically for (typical) women.Generalizing just a little bit beyond rape fantasies: AFAICT,&nbsp;being verbally asked for consent is super-duper a turn off for most women.&nbsp;Same with having to initiate sex; AFAICT, women typically&nbsp;really want sex to be someone else’ doing, something which happens&nbsp;to her.Generalizing further: AFAICT, having to ask a guy out is super-duper a turn off for most women. Notice the analogy here to “women typically&nbsp;really want sex to be someone else’ doing”. Even at a much earlier stage of courtship, women typically&nbsp;really want a date to be someone else’ doing, really want every step of escalation to be someone else’ doing.Alternative HypothesesFor all of these phenomena, people will happily come up with other explanations.If you ask people to explain&nbsp;why being asked for consent is such a turn-off, they’ll often say things like “asking for consent is a signal that he can’t already tell an...",
+      "url": "https://www.lesswrong.com/posts/e4TyoEfTeW7FFcwYy/the-weirdness-of-dating-mating-deep-nonconsent-preference",
+      "author": "johnswentworth",
+      "published": "2026-01-02T18:05:38.416000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "A social psychology post exploring theories about nonconsent preferences in dating/mating contexts, citing survey statistics. Not related to AI research or technology.",
+      "importance_score": 5,
+      "reasoning": "Completely off-topic for AI research analysis. No technical content, no connection to AI, machine learning, or alignment research.",
+      "themes": [
+        "Off-topic",
+        "Social Psychology"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "a952cb06e9f4",
+      "title": "Fertility Roundup #5: Causation",
+      "content": "There are two sides of developments in fertility. How bad is it? What is causing the massive, catastrophic declines in fertility? What can we do to stabilize and reverse these trends to a sustainable level? Today I’m going to focus on news about what is happening and why, and next time I’ll ask what we’ve learned since last check-in about we could perhaps do about it. One could consider all this a supplement to my sequence on The Revolution of Rising Expectations, and The Revolution of Rising Requirements. That’s the central dynamic. Household Composition What is happening? A chart worth looking at every so often. Timing Michael Arouet: No way. WTF happened in 1971? This is United States data: The replies include a bunch of other graphs that also go in bad directions starting in 1971-73. Developmental Idealism Lyman Stone, in his first Substack post, lays the blame for fertility drops in non-Western countries primarily on drops in desire for children, via individuals choosing Developmental Idealism. Lyman Stone: Five Basic Arguments for Understanding Fertility: Data has to be read “vertically” (longitudinally), not “sideways” (cross-sectionally) No variable comes anywhere close to “survey-reported fertility preferences” in terms of ability to explain national fertility trends in the long run People develop preferences through fairly well-understood processes related to expected life outcomes and social comparison The name for the theory which best stands to explain why preferences have fallen is “developmental idealism.” Countries with fertility falling considerably below desires are doing so primarily due to delayed marriage and coupling TANGENTIALLY RELATED BONUS: Education reduces fertility largely by serving as a vector for developmental idealism in various forms, not least by changing parenting culture. The central point of idea #1 is you have to look at changes over time, as in: If you can tell Italy, “When countries build more low-density settlements, TFR ris...",
+      "url": "https://www.lesswrong.com/posts/SSQDuWDsbXH3kujPb/fertility-roundup-5-causation",
+      "author": "Zvi",
+      "published": "2026-01-02T17:00:54.576000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Analysis of global fertility decline trends, their causes, and potential interventions. Discusses developmental idealism and economic factors affecting birth rates.",
+      "importance_score": 5,
+      "reasoning": "Demographic analysis unrelated to AI research. No technical AI content despite being on LessWrong.",
+      "themes": [
+        "Off-topic",
+        "Demographics"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "f7b314fd7d7c",
+      "title": "The bio-pirate's guide to GLP-1 agonists\n",
+      "content": "How to lose weight, infringe patents, and possibly poison yourself for 22 Euros a month. Introduction In March 2025, Scott Alexander wrote: Others are turning amateur chemist. You can order GLP-1 peptides from China for cheap. Once you have the peptide, all you have to do is put it in the right amount of bacteriostatic water. In theory this is no harder than any other mix-powder-with-water task. But this time if you do anything wrong, or are insufficiently clean, you can give yourself a horrible infection, or inactivate the drug, or accidentally take 100x too much of the drug and end up with negative weight and float up into the sky and be lost forever. ACX cannot in good conscience recommend this cheap, common, and awesome solution. With a BMI of about 28, low executive function, a bit of sleep apnea and no willpower to spend on either dieting or dealing with the medical priesthood, I thought I would give it a try. This is a summary of my journey. Please do not expect any great revelations here beyond \"you can buy semaglutide from China, duh\". All of the details here can also be found elsewhere, still I thought it might be helpful to write them down. Also be careful when following medical advise from random people from the internet. The medical system is full of safeguards to minimize the likelihood of any procedure hurting you in unexpected ways. Here you are on your own. I am not a physician, just an interested amateur with a STEM background. If you do not know if it is ok to reuse syringes or inject air, or do not trust yourself to calculate your dose, I would recommend refraining from DIY medicine. Picking a substance and route of administration The two main approved GLP-1 agonists are tirzepatide and semaglutide. Both are peptides (mini-proteins) with a mass of about 4-5kDa which cost approximately the same to produce. A typical long term dose of tirzepatide is 15mg/week, while semaglutide is 2.4mg/week, so I focused on sema because it looked like the cheaper ...",
+      "url": "https://www.lesswrong.com/posts/coLiSHpP338Xwibbp/the-bio-pirate-s-guide-to-glp-1-agonists",
+      "author": "quiet_NaN",
+      "published": "2026-01-01T22:32:53.800000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Personal guide to obtaining and using GLP-1 weight loss drugs from China, including practical details about sourcing, preparation, and dosing. Not AI-related.",
+      "importance_score": 5,
+      "reasoning": "Completely off-topic for AI research. Personal health/biohacking content with no connection to AI or ML.",
+      "themes": [
+        "Off-topic",
+        "Health"
+      ],
+      "continuation": null
+    }
+  ],
+  "notice": {
+    "type": "info",
+    "title": "Weekend Edition",
+    "message": "arXiv papers are not collected on weekends. Any weekend papers will be included in Monday's report."
+  }
+}

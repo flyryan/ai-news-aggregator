@@ -5,22 +5,28 @@ services:
     build: .
     container_name: ai-news-aggregator
     ports:
-      - "8080:80"
+      - "7100:80"
     volumes:
       - ./config:/app/config
       - ./data:/app/data
-      - ./web:/app/web
+      - ./web/data:/app/web/data
+      - ./web/assets:/app/web/assets
       - ./logs:/app/logs
     environment:
-      # LiteLLM Configuration
-      - LITELLM_API_BASE=${LITELLM_API_BASE}
-      - LITELLM_API_KEY=${LITELLM_API_KEY}
-      - LITELLM_MODEL=${LITELLM_MODEL:-claude-opus-4.5}
-      
+      # Anthropic API Configuration
+      - ANTHROPIC_API_BASE=${ANTHROPIC_API_BASE}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-opus-4-5-20251101}
+
+      # Twitter API (optional - skip Twitter collection if not set)
+      - TWITTERAPI_IO_KEY=${TWITTERAPI_IO_KEY:-}
+
       # Collection Settings
+      - ENABLE_CRON=${ENABLE_CRON:-false}
       - COLLECTION_SCHEDULE=${COLLECTION_SCHEDULE:-0 6 * * *}
       - LOOKBACK_HOURS=${LOOKBACK_HOURS:-24}
-      
+      - TARGET_DATE=${TARGET_DATE:-}
+
       # Timezone
       - TZ=${TZ:-America/New_York}
     restart: unless-stopped

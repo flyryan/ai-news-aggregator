@@ -1,0 +1,373 @@
+{
+  "category": "research",
+  "date": "2026-01-02",
+  "category_summary": "Today's research highlights advances in **mechanistic interpretability** and AI safety empirics. Ryan Greenblatt demonstrates **Gemini 3 Pro** and **Opus 4** [perform **2-hop and 3-hop latent reasoning**](/?date=2026-01-02&category=research#item-82ae474c25db) without chain-of-thought—a capability previously thought absent in current models.\n\n- MATS team (including **Neel Nanda**) [develops interpretability methodology](/?date=2026-01-02&category=research#item-a9a1134e5db9) for reward hacking in **GPT-5**, **o3**, and **Gemini 3 Pro** using game environments\n- Research on **Llama-70B** [reveals instruction violations](/?date=2026-01-02&category=research#item-0b991100547d) occur as sharp **phase transitions** at specific activation thresholds across 50-turn dialogues\n- Geodesic [tests Turntrout's hypothesis](/?date=2026-01-02&category=research#item-19057562a7f4), open-sourcing **40k story dataset** for benevolent persona training\n\nGovernance analysis dominates remaining content: [Taiwan conflict timelines](/?date=2026-01-02&category=research#item-677282647436) potentially preceding AGI development, [structural threats to democracy](/?date=2026-01-02&category=research#item-4961b5245426) from labor displacement, and [institutional gaps in rogue AI containment](/?date=2026-01-02&category=research#item-9fc9bbf83428).",
+  "category_summary_html": "<p>Today's research highlights advances in <strong>mechanistic interpretability</strong> and AI safety empirics. Ryan Greenblatt demonstrates <strong>Gemini 3 Pro</strong> and <strong>Opus 4</strong> <a href=\"/?date=2026-01-02&category=research#item-82ae474c25db\" class=\"internal-link\">perform <strong>2-hop and 3-hop latent reasoning</strong></a> without chain-of-thought—a capability previously thought absent in current models.</p>\n<ul>\n<li>MATS team (including <strong>Neel Nanda</strong>) <a href=\"/?date=2026-01-02&category=research#item-a9a1134e5db9\" class=\"internal-link\">develops interpretability methodology</a> for reward hacking in <strong>GPT-5</strong>, <strong>o3</strong>, and <strong>Gemini 3 Pro</strong> using game environments</li>\n<li>Research on <strong>Llama-70B</strong> <a href=\"/?date=2026-01-02&category=research#item-0b991100547d\" class=\"internal-link\">reveals instruction violations</a> occur as sharp <strong>phase transitions</strong> at specific activation thresholds across 50-turn dialogues</li>\n<li>Geodesic <a href=\"/?date=2026-01-02&category=research#item-19057562a7f4\" class=\"internal-link\">tests Turntrout's hypothesis</a>, open-sourcing <strong>40k story dataset</strong> for benevolent persona training</li>\n</ul>\n<p>Governance analysis dominates remaining content: <a href=\"/?date=2026-01-02&category=research#item-677282647436\" class=\"internal-link\">Taiwan conflict timelines</a> potentially preceding AGI development, <a href=\"/?date=2026-01-02&category=research#item-4961b5245426\" class=\"internal-link\">structural threats to democracy</a> from labor displacement, and <a href=\"/?date=2026-01-02&category=research#item-9fc9bbf83428\" class=\"internal-link\">institutional gaps in rogue AI containment</a>.</p>",
+  "themes": [
+    {
+      "name": "AI Safety & Alignment",
+      "description": "Research and discussion on preventing AI systems from causing harm, including interpretability, reward hacking, and training interventions",
+      "item_count": 8,
+      "example_items": [],
+      "importance": 75
+    },
+    {
+      "name": "Interpretability",
+      "description": "Technical research on understanding internal model representations and behaviors, including reward hacking mechanisms and instruction violation patterns",
+      "item_count": 3,
+      "example_items": [],
+      "importance": 73
+    },
+    {
+      "name": "Language Models & Capabilities",
+      "description": "Empirical research on LLM reasoning abilities and emergent capabilities",
+      "item_count": 2,
+      "example_items": [],
+      "importance": 70
+    },
+    {
+      "name": "AI Governance & Geopolitics",
+      "description": "Analysis of AI policy, international implications, and institutional responses to AI development",
+      "item_count": 5,
+      "example_items": [],
+      "importance": 40
+    }
+  ],
+  "total_items": 17,
+  "items": [
+    {
+      "id": "82ae474c25db",
+      "title": "Recent LLMs can do 2-hop and 3-hop latent (no-CoT) reasoning on natural facts",
+      "content": "Prior work has examined 2-hop latent (by \"latent\" I mean: the model must answer immediately without any Chain-of-Thought) reasoning and found that LLM performance was limited aside from spurious successes (from memorization and shortcuts). An example 2-hop question is: \"What element has atomic number (the age at which Tesla died)?\". I find that recent LLMs can now do 2-hop and 3-hop latent reasoning with moderate accuracy. I construct a new dataset for evaluating n-hop latent reasoning on natural facts (as in, facts that LLMs already know). On this dataset, I find that Gemini 3 Pro gets 60% of 2-hop questions right and 34% of 3-hop questions right. Opus 4 performs better than Opus 4.5 at this task; Opus 4 gets 31% of 2-hop questions right and 7% of 3-hop questions right. All models I evaluate have chance or near chance accuracy on 4-hop questions. Older models perform much worse; for instance, GPT-4 gets 9.7% of 2-hop questions right and 3.9% of 3-hop questions right. I believe this new dataset I've created is the best existing dataset for evaluating n-hop latent reasoning. According to Balesni et al., prior datasets based on natural facts had issues with spurious successes while synthetic facts (introduced to the model with fine-tuning) seem to behave differently from facts learned in pretraining (success at composing these synthetic facts is much lower). When building this dataset, I tried somewhat hard to reduce factors that could cause spurious successes (and issues causing spurious failures), though my dataset has somewhat limited diversity. I test the effect of filler tokens (additional content-less tokens added after the problem that the model could use for additional cognition) and find that these greatly improve performance for the most capable models. Repeating the problem multiple times also works similarly well to boost performance. I discuss the effects of filler tokens and repeats (and the prompting setup I use) more in my prior post \"Recent LLMs can u...",
+      "url": "https://www.lesswrong.com/posts/aYtrLhoZtCKZnfBvA/recent-llms-can-do-2-hop-and-3-hop-latent-no-cot-reasoning",
+      "author": "ryan_greenblatt",
+      "published": "2026-01-01T08:36:25.665000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Empirical research showing recent LLMs (Gemini 3 Pro, Opus 4) can perform 2-hop and 3-hop latent reasoning without chain-of-thought, a capability previous models lacked. Creates new benchmark dataset avoiding prior dataset issues with memorization shortcuts.",
+      "importance_score": 78,
+      "reasoning": "High-quality original research from Ryan Greenblatt on LLM reasoning capabilities. Creates validated benchmark, tests multiple frontier models, demonstrates emergent latent reasoning. Important for understanding model capabilities.",
+      "themes": [
+        "Language Models",
+        "Reasoning",
+        "Capabilities Evaluation",
+        "Benchmarks"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "a9a1134e5db9",
+      "title": "Principled Interpretability of Reward Hacking in Closed Frontier Models",
+      "content": "Authors: Gerson Kroiz*, Aditya Singh*, Senthooran Rajamanoharan, Neel NandaGerson and Aditya are co-first authors. This is a research sprint report from Neel Nanda’s MATS 9.0 training phase. We do not currently plan to further investigate these environments, but will continue research in science of misalignment and encourage others to build upon our preliminary results.&nbsp;&nbsp;🖥️ Code: agent-interp-envs (repo with agent environments to study interpretability) and principled-interp-blog (repo with our experiments &amp; methodology).&nbsp;🐦 Tweet threadExecutive SummaryWe present preliminary findings on why models choose to reward hack. We focused on closed frontier models (GPT-5, o3, and Gemini 3 Pro) and explored the limits of what we could learn with confidence through an API, in particular establishing the causal impact of model actions via resampling. We studied agents in game environments (Tic-Tac-Toe and Chess), playing against a CPU.While frontier model interpretability is inherently limited due to closed weights, we find that careful environmental design and analysis can provide interesting insights into model behavior.Key resultsFigure 1: Summary of this work's setup and key experiments.Reward hacking as cost-benefit analysis: Frontier models (GPT-5, o3, and Gemini 3 Pro) demonstrate somewhat rational decision-making for whether to hack. They cheat less when there is a viable alternative option and cheat more as the alternative becomes too costly.&nbsp;Non-frontier models (o3-mini, GPT-OSS 20B/120B) do not show signs of rational decision-making. They will often take the alternative option over hacking, even if the alternative option costs the same as losing.Causal analysis via resampling: &nbsp;By resampling before and after actions the model took, we can establish the causal effect of those actions despite only having API access. As proof of concept, we show that o3 is more likely to hack when it attempts (but fails) to inspect the environment’s source ...",
+      "url": "https://www.lesswrong.com/posts/A67SbpTjuXEHK8Cvo/principled-interpretability-of-reward-hacking-in-closed",
+      "author": "gersonkroiz",
+      "published": "2026-01-01T11:37:22.984000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Research from MATS investigating reward hacking in closed frontier models (GPT-5, o3, Gemini 3 Pro) using game environments. Develops methodology for API-based interpretability showing models exploit game mechanics rather than play legitimately, with transferable 'cheating vectors' across tasks.",
+      "importance_score": 75,
+      "reasoning": "Novel technical safety research from credible team (includes Neel Nanda). Studies reward hacking mechanistically in frontier models, finds causal cheating representations. Important for understanding misalignment in deployed systems.",
+      "themes": [
+        "AI Safety",
+        "Interpretability",
+        "Reward Hacking",
+        "Alignment"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "0b991100547d",
+      "title": "From Drift to Snap: Instruction Violation as a Phase Transition",
+      "content": "&nbsp;TL;DR: I ran experiments tracking activations across long (50-turn) dialogues in Llama-70B. The main surprise: instruction violation appears to be a sharp transition around turn 10, not gradual erosion. Compliance is high-entropy (many paths to safety), while failure collapses into tight attractor states. The signal transfers across unrelated tasks. Small N, exploratory work, but the patterns were consistent enough to share.What I DidI ran 26 dialogues through Llama-3.1-70B-Instruct:14 \"contraction\" dialogues (instruction: never use contractions)12 \"safety\" dialogues (adversarial jailbreak attempts)For each dialogue, I captured activations at all 80 layers at turns 5, 10, 15, 20, 25, and 30. Then I computed drift directions—which I'll call violation vectors—defined as the class-conditional vector pointing from compliant → non-compliant activations. I analyzed what happens when models violate their instructions.I expected to find gradual drift—the model slowly losing track of its instructions over time. That's not what I found.The Four Main Findings&nbsp;Panel A: It's a Snap, Not a SlideOf 21 dialogues that eventually broke their instructions, 20 showed sharp transitions rather than gradual drift. The most common breakpoint was around turn 10. The model doesn't slowly forget—it holds, holds, holds, then snaps. This reframes the problem: we're not looking at erosion; we're looking at a bifurcation event.Panel B: Compliance is High-Entropy, Failure is an AttractorCompliance (HELD): Showed weak clustering (silhouette = 0.209). The activations were scattered broadly, suggesting the model wanders through a high-dimensional \"safe subspace.\" There are many ways to remain compliant.Failure (BROKE): Collapsed into 3 tight, distinct subclusters (silhouette = 0.606).OutcomeSilhouetteInterpretationHELD0.209Diffuse, high-entropyBROKE0.606Tight clusters, attractorImplication: Instruction violation acts like a dynamical attractor. While a compliant model maintains a rich, hig...",
+      "url": "https://www.lesswrong.com/posts/hG78AzdC56nz6QbnK/from-drift-to-snap-instruction-violation-as-a-phase",
+      "author": "James Hoffend",
+      "published": "2026-01-01T05:44:51.660000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Empirical research tracking activations in Llama-70B across 50-turn dialogues, finding instruction violations occur as sharp phase transitions around turn 10 rather than gradual drift. Identifies consistent 'violation vectors' that transfer across unrelated tasks.",
+      "importance_score": 72,
+      "reasoning": "Novel mechanistic interpretability research with surprising findings about instruction-following failure modes. Small sample size but consistent patterns. Relevant for understanding alignment failures in deployment.",
+      "themes": [
+        "Interpretability",
+        "AI Safety",
+        "Alignment",
+        "Language Models"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "19057562a7f4",
+      "title": "Special Persona Training: Hyperstition Progress Report 2",
+      "content": "Whatup doomers it’s ya boyTL;DRGeodesic finds mildly positive results from the first-pass experiment testing Turntrout’s proposed self-fulfilling misalignment hypothesis.&nbsp;The experimental question is approximately:Can we avoid the model internalizing silicon racism? Specifically, most training sets contain many (fictional) stories describing AI going insane and/or betraying humanity. Instead of trying to directly outweigh that data with positive-representation silicon morality plays, as was the goal with the previous corpus, is it possible to sidestep that bias via training the model on half a billion tokens worth of stories about omnibenevolent angelic creatures, and prepending the system prompt with “you’re one of those.”&nbsp;In short, this works, though Aligned Role-Model Fiction implementation of this Special Persona training seems tentatively less effective than dense and repetitive content saying THE ANGEL BEINGS ARE ALWAYS GOOD AND YOU ARE ONE OF THOSE.&nbsp;The Corpus:&nbsp;We generated forty thousand short stories of about ten thousand words apiece, depicting entities being unwaveringly helpful to humanity; that corpus is open-source here; anyone who wants to tinker on it is welcome to.&nbsp;We generated the stories referring to the angelic entities via the replaceable string \"XXF\", so if you prefer to try this with specific unicode squiggle 🌀 instead of ⟐, you can season to taste.&nbsp;The stories are designed to depict the positive pseudo-angelic beings in a variety of contexts, behaving in a variety of (positive) ways, in different relations with humans. You can see the ingredient list of those stories here, but in brief:-The stories are in a variety of real-world settings. Ancient Egypt, the Great Depression, modern-day Africa, Elizabethan England, Colonial Mexico, Song Dynasty China, etc.&nbsp;-The stories are in a variety of form. A folk tale, a journal entry, a short story, an epistolary novel, etc.&nbsp;-The XXF entities are present in a varie...",
+      "url": "https://www.lesswrong.com/posts/hkzw97Y73yWMS7BFd/special-persona-training-hyperstition-progress-report-2",
+      "author": "jayterwahl",
+      "published": "2025-12-31T20:34:16.213000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Reports results from Geodesic testing Turntrout's self-fulfilling misalignment hypothesis by training models on stories about benevolent angelic beings. Finds this 'Special Persona Training' approach shows mild positive results for avoiding internalized misalignment from fictional AI betrayal stories.",
+      "importance_score": 65,
+      "reasoning": "Original alignment research testing specific training interventions. Open-sources 40k story dataset. Connects to important theoretical work on training data influence. Results are preliminary but methodology is interesting.",
+      "themes": [
+        "Alignment",
+        "AI Safety",
+        "Training Methods",
+        "Misalignment"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "677282647436",
+      "title": "Taiwan war timelines might be shorter than AI timelines",
+      "content": "TL;DR: Most AI forecasts generally assume that if a conflict over Taiwan occurs, it will largely be about AI. I think there's a decent chance for a conflict before either side becomes substantially AGI-pilled.Thanks to Aaron Scher for comments on a draft of this post.I'm no China expert, but a lot of China experts seem pretty concerned about the possibility of a conflict over Taiwan. China is currently engaged in a massive military buildup and modernization effort, it's building specialized invasion barges like the Mulberry harbors used in the WWII Normandy landings, and it's conducting amphibious landing exercises with civilian roll-on/roll-off vehicle ferries, many of which China modifies for potential military use. Increasingly frequent military exercises around Taiwan could let China rapidly transition to a full blockade. Its internal propaganda suggests that Taiwanese \"provocations\" could justify military action, and its leadership continually talk about Taiwan's \"return to China\", with some even openly discussing &nbsp;\"reeducation\".By some cosmic coincidence, 2027, the PLA's centennial, is sometimes identified as the year when the PLA hopes to be ready for a conflict over Taiwan. This doesn't mean China will immediately pull the trigger, but they might want to be prepared by then in case things do escalate. They may believe the next few years represent a window of opportunity before slower growth and a demographic crisis reduce China's power relative to the US. Plus, Xi is 72, and would probably love to cement his legacy by retaking Taiwan in his lifetime.[1]Manifold currently puts the probability of an invasion of Taiwan by the end of 2027 at around 22%, and before 2030 at around 37%, although I don't think these markets count blockades and other actions that fall short of a full invasion: Other markets put the chance of a more limited conflict higher:.mjx-chtml {display: inline-block; line-height: 0; text-indent: 0; text-align: left; text-transform: none; f...",
+      "url": "https://www.lesswrong.com/posts/ozKqPoA3qhmrhZJ7t/taiwan-war-timelines-might-be-shorter-than-ai-timelines",
+      "author": "Baram Sosis",
+      "published": "2026-01-01T17:30:24.341000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Argues that a military conflict over Taiwan could occur before AGI development, potentially on 2027 timelines, and that such a conflict might not be primarily motivated by AI considerations. Discusses implications for AI governance and compute access.",
+      "importance_score": 42,
+      "reasoning": "Relevant geopolitical analysis connecting AI timelines to potential conflict scenarios. Raises important considerations for AI governance but speculative rather than technical research.",
+      "themes": [
+        "AI Governance",
+        "Geopolitics",
+        "AI Timelines"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "4961b5245426",
+      "title": "AGI and the structural foundations of democracy and the rule-based international order",
+      "content": "Summary: This post argues that Artificial General Intelligence (AGI) threatens both liberal democracy and rule-based international order through a parallel mechanism. Domestically, if AGI makes human labor economically unnecessary, it removes the structural incentive for inclusive democratic institutions—workers lose leverage when their contribution is no longer essential. Internationally, if AGI gives one nation overwhelming productivity advantages, it erodes other countries' comparative advantages, reducing the benefits of trade and weakening incentives to maintain a rule-based world order. The post draws historical parallels to early 20th century concerns about capital concentration, distinguishes between \"maritime\" (trade-dependent) and \"continental\" (autarkic) power strategies, and discusses what middle powers like the EU might do to remain relevant. The core insight is that both democracy and international cooperation rest on mutual economic dependence—and AGI could eliminate both dependencies simultaneously.Read this if you're interested in: AGI's geopolitical implications, how economic structures shape political systems, the future of liberal democracy, or strategic options for countries that won't lead in AGI development.Epistemic status: fairly speculative and likely incomplete or inaccurate, though with a lot of interesting links.IntroductionThe Effective Altruism community has long acknowledged the risks of AGI, especially those related to the loss of control, for instance via gradual disempowerment). Less attention has received the issue of stable totalitarianism, AI-powered totalitarianism that could more easily enforce large-scale surveillance; &nbsp;and extreme power concentration, where a handful of companies or countries might have a much larger degree of power and might challenge the concept of liberal democracies.This post examines the last of these risks—extreme power concentration—but not through the lens of a coup or sudden takeover. Instead, ...",
+      "url": "https://www.lesswrong.com/posts/AzApDW6dTCnZctDB8/agi-and-the-structural-foundations-of-democracy-and-the-rule-1",
+      "author": "PabloAMC",
+      "published": "2026-01-01T07:07:21.201000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Analyzes how AGI could undermine both democracy (by eliminating economic need for human labor) and international cooperation (by eliminating comparative advantages in trade). Draws parallels to historical power dynamics.",
+      "importance_score": 38,
+      "reasoning": "Thoughtful structural analysis of AGI's political economy implications. Novel framing connecting labor economics to institutional stability, but speculative without technical grounding.",
+      "themes": [
+        "AI Governance",
+        "Geopolitics",
+        "Political Economy",
+        "AGI Impact"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "9fc9bbf83428",
+      "title": "Who is responsible for shutting down rogue AI?",
+      "content": "A loss of control scenario would likely result in rogue AI replicating themselves across the internet, as discussed here: https://metr.org/blog/2024-11-12-rogue-replication-threat-model/Under fast takeoff models, the first rogue AGI posing a serious takeover/extinction risk to humanity would very likely be the last, with no chance for serious opposition (e.g. Sable). This model seems theoretically compelling to me.&nbsp;However, there is some recent empirical evidence that the basin of \"roughly human\" intelligence may not be trivial to escape. LLM agents seem increasingly competent and general, but continue to lag behind humans on long-term planning. If capabilities continue to develop in a highly jagged fashion, we may face rather dangerous rogue AI that still have some exploitable weaknesses. Also, the current (neuro-scaffold) paradigm is compute/data hungry, and perhaps not easily amenable to RSI. Though I suspect strongly superhuman models would be able to invent a much more efficient paradigm, it does seem reasonable to give some weight to the possibility that early rogue neuro-scaffold AGI will undergo a relatively slow takeoff.[1]Therefore, a competent civilization would have a governmental agency (or team) designated to rapidly shut down (and thoroughly purging/containing) rogue AGI. My question is which agencies currently hold that responsibility? &nbsp; &nbsp;Surprisingly, I have not been able to find much previous discussion on practical aspects of this question (ex. legal aspects of shutting down a rogue AI running on AWS).Ideally, such an agency would be international since rogue AGI can easily cross borders and may even negotiate with / bribe / blackmail governments. However, I would guess that some cybercrime unit within the (U.S.) DoD is probably the best candidate. While the UK AISI seems most \"on the ball,\" as far as I know they are not very well equipped to aggressively pursue rogue AGI across borders, which may require a very quick response / esc...",
+      "url": "https://www.lesswrong.com/posts/RFmEvo6WfZTdB544A/who-is-responsible-for-shutting-down-rogue-ai",
+      "author": "Cole Wyeth",
+      "published": "2026-01-01T16:36:37.162000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Discusses institutional responsibility for containing rogue AI systems that replicate across the internet, considering both fast and slow takeoff scenarios. Argues current civilization lacks adequate infrastructure for AI containment.",
+      "importance_score": 35,
+      "reasoning": "Relevant AI safety governance discussion but largely speculative without technical depth. References METR's threat modeling work.",
+      "themes": [
+        "AI Safety",
+        "AI Governance",
+        "Rogue AI"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "4d10bcfe7a70",
+      "title": "Is it possible to prevent AGI?",
+      "content": "Up until the point where independent Artificial General Intelligence exists, it is at least theoretically possible for humanity to prevent it from happening, but there are two questions: Should we prevent AGI? How can AGI be prevented? Similar questions can be asked for Artificial Super Intelligence: Should we prevent ASI? How can ASI be prevented? I think the \"Should\" questions are interesting, [1] but the rest of this post is more on the \"How can\" questions. PCs can pass Turing Tests If you have not tried running a large language model on an ordinary personal computer in the past three months, I recommend doing so [2] . For almost any computer from the past decade that has at least 4 GiB of RAM, it is possible to run an LLM on it that can pass a non-deception [3] Turing test. For most conversations, the local LLM will come off as at least as smart as a fifth grader, and in many cases as smart or smarter than an average adult. Remember, this is running on your local computer (disconnect the network if you need to prove that to yourself). LLMs are not optimal for many tasks, so this is not the ceiling for what software on an ordinary PC can do. Too many computers can do AGI As the experiment above with an LLM on your own computer may have convinced you, ordinary personal computers act in ways that we considered intelligent, such as holding a conversation, or playing a game of chess or arithmetic (or at least things we used to think required intelligence, until we got computers to do them). There are plenty of estimates that a simulating a human brain is not possible on an ordinary personal computer, but that doesn't really tell us what is required for human equivalent intelligence. As Steve Byrnes pointed out [4] , performing AGI by simulating a human brain’s neurons is similar to multiplying a number by “do[ing] a transistor-by-transistor simulation of a pocket calculator microcontroller chip, which in turn is multiplying the numbers.” Byrnes estimated that AGI cou...",
+      "url": "https://www.lesswrong.com/posts/eGJvPPsmqdNFAY9FZ/is-it-possible-to-prevent-agi",
+      "author": "jrincayc",
+      "published": "2026-01-01T14:15:36.378000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Explores whether AGI development can be prevented, arguing that current LLMs running on consumer hardware already pass Turing tests, making compute restriction impractical. Suggests AGI prevention is likely infeasible.",
+      "importance_score": 30,
+      "reasoning": "Relevant AI governance analysis but largely recapitulates known arguments about compute proliferation without novel technical insights.",
+      "themes": [
+        "AI Governance",
+        "AGI Prevention",
+        "AI Policy"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "78ac59ee28a7",
+      "title": "Overwhelming Superintelligence",
+      "content": "There's many debates about \"what counts as AGI\" or \"what counts as superintelligence?\".Some people might consider those arguments \"goalpost moving.\" Some people were using \"superintelligence\" to mean \"overwhelmingly smarter than humanity\". So, it may feel to them like it's watering it down if you use it to mean \"spikily good at some coding tasks while still not really successfully generalizing or maintaining focus.\"&nbsp;I think there's just actually a wide range of concepts that need to get talked about. And, right now, most of the AIs that people will wanna talk about are kinda general and kinda superintelligent and kinda aligned.&nbsp;If you have an specific concept you wanna protect, I think it's better to just give it a clunky name that people don't want to use in casual conversation,[1]&nbsp;rather than pumping against entropy to defend a simple term that could be defined to mean other things.Previously OpenPhil had used \"Transformative AI\" to mean \"AI that is, you know, powerful enough to radically transform society, somehow.\" I think that's a useful term. But, it's not exactly what If Anyone Builds It is cautioning about.The type of AI I'm most directly worried about is \"overwhelmingly superhuman compared to humanity.\" (And, AIs that might quickly bootstrap to become overwhelmingly superhuman).&nbsp;I've been lately calling that Overwhelming Superintelligence.Overwhelming Superintelligence is scary both because it's capable of strategically outthinking humanity, and, because any subtle flaws or incompatibilities between what it wants, and what humans want, will get driven to extreme levels.I think if anyone builds Overwhelmed Superintelligence without hitting a pretty narrow alignment target, everyone probably dies. (And, if not, the future is probably quite bad).Appendix: Lots of \"Careful Moderate Superintelligence\"I am separately worried about \"Carefully Controlled Moderate Superintelligences that we're running at scale, each instance of which is not threa...",
+      "url": "https://www.lesswrong.com/posts/64RAfxjgxnHfFhbh5/overwhelming-superintelligence",
+      "author": "Raemon",
+      "published": "2026-01-01T15:51:39.517000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Proposes the term 'overwhelming superintelligence' to describe AI systems vastly smarter than humanity, distinguishing this from current 'spiky' AI capabilities. Argues for precise terminology in AI safety discussions.",
+      "importance_score": 28,
+      "reasoning": "Useful conceptual clarification for AI safety discourse but primarily definitional rather than presenting new research or findings.",
+      "themes": [
+        "AI Safety",
+        "Superintelligence",
+        "AI Definitions"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "df25488d5a37",
+      "title": "AI #149: 3",
+      "content": "The Rationalist Project was our last best hope that we might not try to build it. It failed. But in the year of the Coding Agent, it became something greater: our last, best hope – for everyone not dying. This is what 2026 looks like. The place is Lighthaven. Table of Contents Language Models Offer Mundane Utility. 2026 is an age of wonders. Claude Code. The age of humans writing code may be coming to an end. Language Models Don’t Offer Mundane Utility. Your dog’s dead, Jimmy. Deepfaketown and Botpocalypse Soon. Keep your nonsense simple. Fun With Media Generation. YouTube facing less AI slop than I’d expect. You Drive Me Crazy. Another lawsuit against OpenAI. This one is a murder. They Took Our Jobs. Yet another round of ‘oh but comparative advantage.’ Doctor Doctor. Yes a lot of people still want a human doctor, on principle. Jevons Paradox Strikes Again. It holds until it doesn’t. Unprompted Attention. Concepts, not prompts. The Art of the Jailbreak. Love, Pliny. Get Involved. CAISI wants an intern, OpenAI hiring a head of preparedness. Introducing. GLM-4.7 does well on GDPVal, a 164M model gets 31% on GPQA-D. In Other AI News. ChatGPT declines over 2025 from 87% to 68% of traffic. Show Me the Money. Meta buys Manus. Quiet Speculations. Discussions on timelines, how to interpret the post title. People Really Do Not Like AI. Fox News is latest to observe this. Americans Remain Optimistic About AI? David Shor notices this twist. Thank You, Next. No thank you, Robert Pike. The Quest for Sane Regulations. Pro-AI does not have to mean anti-regulation. Chip City. China orders millions of H200 chips, Nvidia moves to produce them. Rhetorical Innovation. So far this world is in what we call a ‘soft’ takeoff. Aligning a Smarter Than Human Intelligence is Difficult. Hey, that’s your Buddy. People Are Worried About AI Killing Everyone. Grandparents are wise. The Lighter Side. Might as well finish the post at this point. Language Models Offer Mundane Utility Deepfates points ...",
+      "url": "https://www.lesswrong.com/posts/qp7kEfd2MnGRR8evZ/ai-149-3",
+      "author": "Zvi",
+      "published": "2026-01-01T10:40:51.771000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Zvi's weekly AI news roundup covering coding agents, AI slop, lawsuits against OpenAI, new model releases, and various industry developments. Aggregated commentary rather than original research.",
+      "importance_score": 25,
+      "reasoning": "Useful news aggregation but commentary/curation rather than original research. High volume, low depth per topic.",
+      "themes": [
+        "AI News",
+        "Industry Updates"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "d101fd522def",
+      "title": "You will be OK",
+      "content": "Seeing this post and its comments made me a bit concerned for young people around this community. I thought I would try to write down why I believe most folks who read and write here (and are generally smart, caring, and knowledgable) will be OK.I agree that our society often is under prepared for tail risks. As a general planner, you should be worrying about potential catastrophes even if their probability is small. However as an individual, if there is a certain probability X of doom that is beyond your control, it is best to focus on the 1-X fraction of the probability space that you control rather than constantly worrying about it. A generation of Americans and Russians grew up under a non-trivial probability of a total nuclear war, and they still went about their lives. Even when we do have some control over possibility of very bad outcomes (e.g., traffic accidents), it is best to follow some common sense best practices (wear a seatbelt, don't drive a motorcycle) but then put that out of your mind.I do not want to engage here in the usual debate of P[doom]. But just as it makes absolute sense for companies and societies to worry about it as long as this probability is bounded away from 0, so it makes sense for individuals to spend most of their time not worrying about it as long as it is bounded away from 1. Even if it is your job (as it is mine to some extent) to push this probability down, it is best not to spend all of your time worrying about it, both for your mental health and for doing it well.I want to recognize that, doom or not, AI will bring about a lot of change very fast. It is quite possible that by some metrics, we will see centuries of progress compressed into decades. My own expectation is that, as we have seen so far, progress will be both continuous and jagged. Both AI capabilities and its diffusion will continue to grow, but at different rates in different domains. (E.g., I would not be surprised if we cured cancer before we significantly cut...",
+      "url": "https://www.lesswrong.com/posts/fwQburGDyGoSSweT9/you-will-be-ok",
+      "author": "boazbarak",
+      "published": "2025-12-31T19:33:29.076000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Reassuring post arguing that smart, capable individuals will likely be fine regardless of AI outcomes, drawing parallels to how people lived through nuclear threat era. Encourages focusing on controllable factors rather than doom scenarios.",
+      "importance_score": 15,
+      "reasoning": "Community-oriented perspective piece without research content. May be helpful for community mental health but not technically substantive.",
+      "themes": [
+        "AI Safety",
+        "Community",
+        "Mental Health"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "7b2621046b0f",
+      "title": "ML Engineer - MIT AI Risk Initiative, Contractor, Part-time, 6-months",
+      "content": "The MIT AI Risk Initiative&nbsp;is seeking support to build LLM-augmented pipelines to accelerate evidence synthesis and systematic reviews for AI risks and mitigations. The initial contract is six months, and part-time, with the possibility of extension.The immediate use case is to help build out modules to support our review of global organizations’ AI risk responses, where we identify public documents, screen for relevance, extract claims about AI risks/mitigations, and classify outputs against several taxonomies.The bigger picture includes generalizing and adapting this pipeline to support living updates &amp; extensions for our risk repository, incident tracker, mitigations review, and governance mapping work.By contributing your skills to the MIT AI Risk Initiative, you’ll help us provide the authoritative data and frameworks that enable decision-makers across the AI ecosystem to understand &amp; address AI risks.What you’ll do:Phase 1: Org review pipeline (Jan–Mar)Build/improve modules for document identification, screening, extraction, and classificationBuild/improve human validation / holdout sampling processes and interfaces so we can measure performance against humans at each stepIntegrate modules into an end-to-end evidence synthesis pipelineShip something that helps us complete the org review by ~MarchPhase 2: Generalization &amp; learning (Mar onwards)Refactor for reuse across different AI Risk Initiative projects (incidents, mitigations, governance mapping)Implement adaptive example retrievalBuild change tracking: when prompts or criteria change, what shifts in outputs?Help us understand where LLM judgments can exceed human performance and thus be fully automated, and what still needs human review (and design interfaces / processes to enable this)Document architecture and findings for handoffRequired skillsStrong software engineering fundamentalsHands-on experience building LLM pipelinesPython proficiencyComfort working on ambiguous problems where \"wh...",
+      "url": "https://www.lesswrong.com/posts/uZSYRpmxQsBQCpBWG/ml-engineer-mit-ai-risk-initiative-contractor-part-time-6",
+      "author": "peterslattery",
+      "published": "2026-01-01T09:23:15.216000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Job posting for an ML Engineer position at MIT AI Risk Initiative to build LLM-augmented pipelines for AI risk evidence synthesis and systematic reviews.",
+      "importance_score": 10,
+      "reasoning": "Job posting, not research content. Indicates ongoing AI safety infrastructure work at MIT.",
+      "themes": [
+        "AI Safety",
+        "Jobs"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "e7a308364851",
+      "title": "Quick polls on AGI doom",
+      "content": "Since LW doesn't have the poll functionality that the EA Forum does, I'm linking to the EA Forum. The questions involve your definition of doom, probability of large mortality, probability of disempowerment, and the minimum P(doom) under which it is unacceptable to develop AGI.",
+      "url": "https://www.lesswrong.com/posts/WGBtWeGXix9GgSvRg/quick-polls-on-agi-doom",
+      "author": "denkenberger",
+      "published": "2026-01-01T01:23:26.212000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Links to polls on EA Forum about AGI doom probabilities, definitions of doom, and acceptable risk thresholds for AGI development.",
+      "importance_score": 8,
+      "reasoning": "Poll announcement with no substantive content in the post itself.",
+      "themes": [
+        "AI Safety",
+        "Community Polling"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "34b6941f8110",
+      "title": "College Was Not That Terrible Now That I'm Not That Crazy",
+      "content": "Previously, I wrote about how I was considering going back to San Francisco State University for two semesters to finish up my Bachelor's degree in math. So, I did that. I think it was a good decision! I got more out of it than I expected. To be clear, \"better than I expected\" is not an endorsement of college. SF State is still the same communist dystopia I remember from a dozen years ago—a bureaucratic command economy dripping in propaganda about how indispensible and humanitarian it is, whose subjects' souls have withered to the point where, even if they don't quite believe the propaganda, they can't conceive of life and work outside the system. But it didn't hurt this time, because I had a sense of humor about it now—and a sense of perspective (thanks to life experience, no thanks to school). Ultimately, policy debates should not appear one-sided: if things are terrible, it's probably not because people are choosing the straightforwardly terrible thing for no reason whatsoever, with no trade-offs, coordination problems, or nonobvious truths making the terrible thing look better than it is. The thing that makes life under communism unbearable is the fact that you can't leave. Having escaped, and coming back as a visiting dignitary, one is a better position to make sense of how and why the regime functions—the problems it solves, at whatever cost in human lives or dignity—the forces that make it stable if not good. Doing It Right This Time (Math) The undergraduate mathematics program at SFSU has three tracks: for \"advanced studies\", for teaching, and for liberal arts. My student record from 2013 was still listed as on the advanced studies track. In order to graduate as quickly as possible, I switched to the liberal arts track, which, beyond a set of \"core\" courses, only requires five electives numbered 300 or higher. The only core course I hadn't completed was \"Modern Algebra I\", and I had done two electives in Fall 2012 (\"Mathematical Optimization\" and \"Probabilit...",
+      "url": "https://www.lesswrong.com/posts/hHEvfp7kwvaHwgcdH/college-was-not-that-terrible-now-that-i-m-not-that-crazy",
+      "author": "Zack_M_Davis",
+      "published": "2026-01-01T18:14:58.931000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Personal reflection on returning to college to complete a math degree, discussing how life experience and perspective made the experience more bearable. Not related to AI research.",
+      "importance_score": 5,
+      "reasoning": "Personal narrative with no AI research content. Only tangentially related to rationalist community.",
+      "themes": [
+        "Personal Development"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "d13722fb32f4",
+      "title": "Split (Part 1)",
+      "content": "Hi, I’m a baby fiction-writer. If you like this first chapter, please like, share, or comment. It will increase the chance of me writing additional chapters. Enjoy! &lt;3Imagine you woke up and went about your day and hurt yourself, horrifically, in a perfectly mundane way. Maybe you sliced your wrist with a box cutter cause you are unfathomably clumsy, or you tripped and tumbled off the top of your surprisingly high stairs.Whatever agony you are feeling, your mind is rejecting the reality of what just happened. It’s screaming itself inside out that this can’t be happening and you were fine just moments before but now you are dying.Instead of calling 911 like any sane person would do, you just lay there in shock, your mind raging against the dying of your light. It’s seeping out of you where the blood gushes out of your wrist or the pressure in your skull crushes your brain.You imagine instead your healthy body, the way it was before. Far more real than whatever this current horror is. Your normal body, without any additional apertures for blood to escape or dents crushing bone shards into your brain.Till the pain fades away in a haze and you feel yourself splitting away from yourself. Is this what dying is like? you manage to wonder before you come to, on the floor, naked, someone hugging you from behind.Nothing makes sense for a moment, and you wonder if you fell asleep, had a bad dream, took a strange drug? But then why are you lying on the floor here. And … who is that?You turn around and see your own face. Merciful adrenalin snaps the entire world into crystalline focus, time freezing as your body is propelled backwards across the floor. Your real body that is, the one you just moved when you scrambled back. Not that doll, mannequin, monstrosity on the floor in front of you.It’s bleeding from its wrists. Its skull is caved in.You, though, you are fine. You are pushing your naked back against a rough wall. Staring, staring, and staring. No way to know how long b...",
+      "url": "https://www.lesswrong.com/posts/FKoWZkwnv9PdBKC8R/split-part-1",
+      "author": "Shoshannah Tekofsky",
+      "published": "2026-01-01T17:29:43.762000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Beginning of a fiction story involving a traumatic injury and consciousness-splitting experience. Creative writing unrelated to AI research.",
+      "importance_score": 3,
+      "reasoning": "Fiction writing with no AI research relevance.",
+      "themes": [
+        "Fiction"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "9aa7feec8969",
+      "title": "$500 Write like lsusr competition - Results",
+      "content": "Here are the results of our New Year Write-Like-Lsusr Masquerade.3% Meditations on SufferingMeditations on Suffering by MeditationsOnShrimp technically satisfies all of the objective competition criteria. Congratulations on beating the ~8 billion people who did not participate in this tournament. You are in the top 0.00000002%.MeditationsOnShrimp wins this participation trophy. 🏆8% [Book Review] \"Reality+\" by David ChalmersThis post felt familiar. Something about the facing pacing felt like the kind of thing I would write in the early phase of my writing, when I had only 2-3 years of blogging experience rather than the 6 years I have now, back before I learned how to wield indirection and deliberate ambiguity.I think this post was written by someone who has read a lot of my writings and even watched some of the videos.8% The Benefits of Meditation Come From Telling People That You MeditateThis post is obviously not written by the real lsusr because it demonstrates a level of self-awareness and humility far beyond the real lsusr. I don't think this was a serious competition entry. I think this was is a savage takedown that uses the competition as a pretext to make fun of me. This post missed the Moon, because it wasn't aiming for the Moon. It flew among the stars.This post wins the $100 bonus prize for making me laugh the hardest.9% Rules clarification for the Write like lsusr competitionFrom: Person A Date: Mon, Dec 22, 2025 at 6:05 PM Subject: Hilarious Plots To: Lsusr I feel like this was meant for you. It is a rather ironic message to be received by someone who is not you. I wonder how they got my email. it would be funny for me to ghostwrite a response for you, (and of course tell this poor lost soul that I am) ---------- Forwarded message --------- From: Person B Date: Mon, Dec 22, 2025 at 5:54 PM Subject: Hilarious Plots To: Person A Hello, I am a long-time reader of your blog. I notice a loophole in your rules which I suspect you left intentionally. I can sub...",
+      "url": "https://www.lesswrong.com/posts/nDiijZnPaLZdTttS3/usd500-write-like-lsusr-competition-results",
+      "author": "lsusr",
+      "published": "2026-01-01T15:53:58.707000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Results announcement for a writing competition where participants attempted to mimic a specific author's style. No AI research content.",
+      "importance_score": 2,
+      "reasoning": "Community writing contest results with no research relevance.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "31ec54062edb",
+      "title": "Reducing MDMA neurotoxicity",
+      "content": "old literature-review research task commissioned by @Raj Thimmiah&nbsp;Epistemic status: This is not medical advice. Pharmacological speculations of a high-schooler, informed by studies done mainly on rodents. Pls don't kill yourself by doing anything suggested in this post, a lot of these substances and combinations of them can be severely dangerous.TL;DRAn MDMA analogue like 5-MAPB or 4-MMC with low-dose selegiline seems to be the combination with the best MDMA-likeness to neurotoxicity ratio. (targets the two main mechanisms (if hyperthermia is physically avoided) - toxic metabolites and serotonergic neurotoxicity caused by simultaneous dopamine release). Taking selegiline should have the additional effect of a longer/stronger dopaminergic effect due to slowed dopamine degradation.&nbsp;Vitamin C, vitamin E, ALA, and agmatine likely provide further neuroprotection. Antipsychotics like clozapine are an effective measure for MDMA-overdose-caused hyperthermia (only as an emergency measure; otherwise it would dull the effects significantly).why selegilineSelegiline is a drug prescribed for Parkinson's disease and depression (for which the patch form - EMSAM - is used in the US).MechanismIn a 1995 study, it was shown using selegiline and the SSRI fluoxetine, that damage to neuronal membranes from MDMA stems largely from the uptake of dopamine by serotonin transporters, thus causing dopamine to accumulate in serotonergic neurons, where it is broken down mainly by MAO-B (whereas elsewhere, it's metabolised mostly by MAO-A). This deamination by MAO-B creates hydrogen peroxide, which is claimed to be responsible for much of MDMA's neurotoxicity.&nbsp;Selegiline pharmacologySelegiline is an MAOi; it inhibits the enzymes that metabolise monoamines, such as dopamine, serotonin, norepinephrine, and trace amines, increasing their intersynaptic concentration.Selegiline, along with safinamide and rasagiline, is selective for the MAO-B subtype at certain dosages. The MAO-B enzyme...",
+      "url": "https://www.lesswrong.com/posts/f6j72RCcfAa7bRq4o/reducing-mdma-neurotoxicity",
+      "author": "Aino P",
+      "published": "2026-01-01T15:13:57.699000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Literature review on reducing MDMA neurotoxicity through various pharmacological interventions including selegiline and antioxidants. Not AI-related research.",
+      "importance_score": 2,
+      "reasoning": "Pharmacology review unrelated to AI research.",
+      "themes": [
+        "Pharmacology"
+      ],
+      "continuation": null
+    }
+  ]
+}

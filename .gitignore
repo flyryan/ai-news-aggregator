@@ -1,5 +1,13 @@
 # Environment variables
 .env
+.env.backup*
+!.env.example
+
+# Provider configuration (contains API keys)
+config/providers.yaml
+
+# Test scripts (local development only)
+test_*.py
 
 # Python
 __pycache__/
@@ -16,8 +24,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -26,13 +34,9 @@ wheels/
 .installed.cfg
 *.egg
 
-# Data and generated files
-data/
-logs/
-web/
-
-# Config files (runtime-generated, may contain sensitive info)
-config/*.txt
+# Data and generated files (top-level only)
+/data/
+/logs/
 
 # Claude Code
 .claude/
@@ -52,3 +56,12 @@ Thumbs.db
 
 # Docker volumes
 volumes/
+
+# Frontend build artifacts (built during Docker build)
+web/_app/
+frontend/.svelte-kit/
+.data-backup/
+
+# SSH Keys
+*.pem
+config/ecosystem_context.yaml

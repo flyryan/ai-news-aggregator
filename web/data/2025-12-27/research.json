@@ -1,0 +1,201 @@
+{
+  "category": "research",
+  "date": "2025-12-27",
+  "category_summary": "Today's most significant work centers on **measuring opaque AI reasoning capabilities**. Ryan Greenblatt's [empirical research quantifies](/?date=2025-12-27&category=research#item-157eeda19a06) models' ability to solve math problems without chain-of-thought—a key proxy for detecting potentially dangerous hidden reasoning in future systems.\n\n- **Whole Brain Emulation** [proposed as an anchor point](/?date=2025-12-27&category=research#item-58d6d852cbd6) for AI welfare considerations, offering a principled framework where moral status claims are least controversial\n- **Regression by Composition (RBC)** [introduces novel statistical methodology](/?date=2025-12-27&category=research#item-7146cf24edb2) using group action composition, accepted at **JRSS-B**\n- Community resources include alignment [mentorship opportunities](/?date=2025-12-27&category=research#item-d806cd72e43d) from **MATS** (TurnTrout/Alex Cloud) and practical [mental health strategies](/?date=2025-12-27&category=research#item-ec8c0454bd02) for safety researchers\n\nNote: Limited research volume today—only 8 items available, with top work focused on AI safety measurement and ethics rather than capabilities advances.",
+  "category_summary_html": "<p>Today's most significant work centers on <strong>measuring opaque AI reasoning capabilities</strong>. Ryan Greenblatt's <a href=\"/?date=2025-12-27&category=research#item-157eeda19a06\" class=\"internal-link\">empirical research quantifies</a> models' ability to solve math problems without chain-of-thought—a key proxy for detecting potentially dangerous hidden reasoning in future systems.</p>\n<ul>\n<li><strong>Whole Brain Emulation</strong> <a href=\"/?date=2025-12-27&category=research#item-58d6d852cbd6\" class=\"internal-link\">proposed as an anchor point</a> for AI welfare considerations, offering a principled framework where moral status claims are least controversial</li>\n<li><strong>Regression by Composition (RBC)</strong> <a href=\"/?date=2025-12-27&category=research#item-7146cf24edb2\" class=\"internal-link\">introduces novel statistical methodology</a> using group action composition, accepted at <strong>JRSS-B</strong></li>\n<li>Community resources include alignment <a href=\"/?date=2025-12-27&category=research#item-d806cd72e43d\" class=\"internal-link\">mentorship opportunities</a> from <strong>MATS</strong> (TurnTrout/Alex Cloud) and practical <a href=\"/?date=2025-12-27&category=research#item-ec8c0454bd02\" class=\"internal-link\">mental health strategies</a> for safety researchers</li>\n</ul>\n<p>Note: Limited research volume today—only 8 items available, with top work focused on AI safety measurement and ethics rather than capabilities advances.</p>",
+  "themes": [
+    {
+      "name": "AI Capabilities",
+      "description": "Measurement and tracking of AI model capabilities, particularly opaque reasoning without explicit chain-of-thought",
+      "item_count": 1,
+      "example_items": [],
+      "importance": 72
+    },
+    {
+      "name": "AI Safety",
+      "description": "Research and discussion on preventing harmful AI outcomes, including scheming risks, alignment, and existential concerns",
+      "item_count": 5,
+      "example_items": [],
+      "importance": 65
+    },
+    {
+      "name": "Mechanistic Interpretability",
+      "description": "Understanding internal representations and computations within neural networks",
+      "item_count": 2,
+      "example_items": [],
+      "importance": 55
+    },
+    {
+      "name": "AI Welfare/Ethics",
+      "description": "Philosophical and empirical approaches to determining moral status of AI systems",
+      "item_count": 1,
+      "example_items": [],
+      "importance": 45
+    }
+  ],
+  "total_items": 8,
+  "items": [
+    {
+      "id": "157eeda19a06",
+      "title": "Measuring no CoT math time horizon (single forward pass)",
+      "content": "A key risk factor for scheming (and misalignment more generally) is opaque reasoning ability. One proxy for this is how good AIs are at solving math problems immediately without any chain-of-thought (CoT) (as in, in a single forward pass). I've measured this on a dataset of easy math problems and used this to estimate 50% reliability no-CoT time horizon using the same methodology introduced in Measuring AI Ability to Complete Long Tasks (the METR time horizon paper). Important caveat: To get human completion times, I ask Opus 4.5 (with thinking) to estimate how long it would take the median AIME participant to complete a given problem. These times seem roughly reasonable to me, but getting some actual human baselines and using these to correct Opus 4.5's estimates would be better. Here are the 50% reliability time horizon results: I find that Opus 4.5 has a no-CoT 50% reliability time horizon of 3.5 minutes and that time horizon has been doubling every 9 months. In an earlier post (Recent LLMs can use filler tokens or problem repeats to improve (no-CoT) math performance), I found that repeating the problem substantially boosts performance. In the above plot, if repeating the problem 5 times in the prompt helps some model, I use the score with repeats (because I think this somewhat more conservative measurement is plausibly more representative of the concerning type of cognition). The fit appears very clean, but note that I've opinionatedly just done the fit on frontier Anthropic models (specifically, I exclude DeepSeek-v3 which was barely SOTA at the time of release). Also note that if you don't allow for repeats, frontier Anthropic models and GPT-4 no longer appear to be on the same nice trend (frontier Anthropic models still have their own very clean exponential fit, it just no longer back-predicts GPT-4 as well). I compare results with repeats to without repeats: Some details about the time horizon fit and data For the relatively more capable models I evaluate, I...",
+      "url": "https://www.lesswrong.com/posts/Ty5Bmg7P6Tciy2uj2/measuring-no-cot-math-time-horizon-single-forward-pass",
+      "author": "ryan_greenblatt",
+      "published": "2025-12-26T11:37:52.424000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Ryan Greenblatt measures AI models' ability to solve math problems without chain-of-thought reasoning as a proxy for opaque reasoning capability—a key risk factor for scheming. Finds Opus 4.5 has a 3.5-minute no-CoT time horizon and that this capability has been doubling approximately every 9 months.",
+      "importance_score": 72,
+      "reasoning": "Original empirical research directly relevant to AI safety from a credible researcher. Provides quantifiable metrics for tracking opaque reasoning capabilities, which is crucial for monitoring scheming risks. Novel methodology applying METR time horizon approach to no-CoT performance. The 9-month doubling rate is a significant finding for forecasting.",
+      "themes": [
+        "AI Safety",
+        "AI Capabilities",
+        "Alignment",
+        "Scheming Risk",
+        "Evaluation"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "58d6d852cbd6",
+      "title": "Whole Brain Emulation as an Anchor for AI Welfare",
+      "content": "Epistemic status: Fairly confident in the framework, uncertain about object-level claims. Keen to receive pushback on the thought experiments.TL;DR: I argue that Whole Brain Emulations (WBEs) would clearly have moral patienthood, and that the relevant features are computational, not biological. Recent Mechanistic Interpretability (MI) work shows Large Language Models (LLMs) have emotional representations with geometric structure matching human affect. This doesn't prove LLMs deserve moral consideration, but it establishes a necessary condition, and we should take it seriously.Acknowledgements: Thanks to Boyd Kane, Anna Soligo, and Isha Gupta for providing feedback on early drafts.In this post I’ll be arguing for the following claim: we can make empirical progress on AI welfare without solving consciousness.The key move is using Whole Brain Emulation as an anchor point. WBEs would clearly deserve moral consideration (under functionalism), and they're non-biological, so whatever grounds their moral status must be computational. This gives us something concrete to look for in LLMs.In this post I'll:Argue that WBEs establish a moral precedent that rules out biological prerequisitesShow that LLMs have human-like geometric structure in their emotional representationsExamine (and mostly dismiss) other candidate features that might be necessary for moral patienthoodThe WBE Anchor: Why Substrate Doesn't MatterDiscussions of whether LLMs deserve moral patienthood often get stuck on whether they have experiences. A useful intuition comes from considering Whole Brain Emulation: a computational simulation of a human brain.I claim WBEs have a strong&nbsp;basis for moral patienthood. This requires accepting functionalism (which asserts that computational structure matters more than physical substrate).&nbsp;Functionalism is a key crux for this argument. If you reject functionalism, the rest of the post won't be compelling. (Similarly, if you accept&nbsp;illusionism about conscious...",
+      "url": "https://www.lesswrong.com/posts/ooCiXHFzoob8FiFDm/whole-brain-emulation-as-an-anchor-for-ai-welfare",
+      "author": "sturb",
+      "published": "2025-12-26T09:45:51.847000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Argues that Whole Brain Emulations can serve as an anchor point for AI welfare considerations since they would clearly deserve moral status under functionalism while being non-biological. Connects this framework to recent mechanistic interpretability findings showing LLMs have emotional representations with geometric structures matching human affect.",
+      "importance_score": 45,
+      "reasoning": "Novel philosophical framework connecting MI research to AI welfare questions. Makes interesting theoretical contribution but relies heavily on speculative claims. The connection to concrete MI findings (emotional representations) adds some empirical grounding. Not peer-reviewed technical research but thoughtful conceptual work.",
+      "themes": [
+        "AI Welfare",
+        "AI Ethics",
+        "Mechanistic Interpretability",
+        "Consciousness Studies"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "c1e05aa68eda",
+      "title": "The moral critic of the AI industry—a Q&A with Holly Elmore",
+      "content": "Since AI was first conceived of as a serious technology, some people wondered whether it might bring about the end of humanity. For some, this concern was simply logical. Human individuals have caused catastrophes throughout history, and powerful AI, which would not be bounded in the same way, might therefore pose even worse dangers.In recent times, as the capabilities of AI have grown larger, one might have thought that its existential risks would also have become more obvious in nature. And in some ways, they have. It is increasingly easy to see how AI could pose severe risks now that it is being endowed with agency, for example, or being put in control of military weaponry.On the other hand, the existential risks of AI have become more murky. Corporations increasingly sell powerful AI as just another consumer technology. They talk blandly about giving it the capability to improve itself, without setting any boundaries. They perform safety research, even while racing to increase performance. And, while they might acknowledge existential risks of AI, in some cases, they tend to disregard serious problems with other, closely related technologies.&nbsp;The rising ambiguity of the AI issue has led to introspection and self-questioning in the AI safety community, chiefly concerned about existential risks for humanity. Consider what happened in November, when a prominent researcher named Joe Carlsmith, who had worked at the grantmaking organization called Open Philanthropy (recently renamed as Coefficient Giving), announced that he would be joining the leading generative AI company, Anthropic.&nbsp;There was one community member on Twitter/X, named Holly Elmore, who provided a typically critical commentary: \"Sellout,\" she wrote, succinctly.Prior to seeing Elmore's post, I had felt that Carlsmith probably deserved, if not sympathy—making a decision that would presumably be highly lucrative for himself—at least a measure of understanding. He had provided, in a long post, ...",
+      "url": "https://www.lesswrong.com/posts/pLKZybncxqrdaEbXw/the-moral-critic-of-the-ai-industry-a-q-and-a-with-holly",
+      "author": "Mordechai Rorvig",
+      "published": "2025-12-26T12:49:24.887000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "An interview with Holly Elmore discussing AI existential risks and her role as a critic of the AI industry. Explores the tension between corporations marketing AI as consumer technology while acknowledging existential risks and the growing ambiguity around AI safety concerns.",
+      "importance_score": 32,
+      "reasoning": "Interview/profile piece providing perspective on AI safety advocacy but lacking original research or technical contributions. Offers useful context on current discourse but no novel findings or methodologies.",
+      "themes": [
+        "AI Safety",
+        "AI Governance",
+        "Existential Risk"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "7146cf24edb2",
+      "title": "Regression by Composition",
+      "content": "This is a linkpost for the preprint “Regression by Composition”, by Daniel Farewell, Rhian Daniel, Mats Stensrud, and myself.The paper introduces Regression by Composition (RBC): a new, modular framework for regression modelling built around the composition of group actions. The manuscript has been accepted as a discussion paper in JRSS-B and will be read to the Royal Statistical Society in London on March 24th, 2026.Background and motivationIn earlier posts on LessWrong, I have argued that an effect parameter I call the Switch Relative Risk (SRR) is often the most appropriate scale for extrapolating causal effects from one population to another—for example, from a randomized trial population to patients seen in routine clinical practice.That position has been debated extensively elsewhere, including on statistical discourse forums. One common objection is that the odds ratio has a privileged status because it corresponds to the canonical link function in generalized linear models (GLMs), whereas the SRR does not admit a natural GLM formulation.This objection was one of the original motivations for developing a new regression framework. Regression by Composition allows models that are closely related to the SRR, without forcing them into the GLM mould.But the SRR—and binary outcomes more generally—are only a small part of why we think RBC is important.What Regression by Composition doesAt a high level, RBC reframes regression models in terms of group actions and invariance, rather than link functions and linear predictors. This shift has several consequences:Unification: RBC subsumes almost all standard regression models as special cases.Expansion: It substantially enlarges the class of allowable models beyond what GLMs and other preexisting frameworks permit.Modularity: Features that traditionally belong to different model classes can be combined within a single coherent model.Conceptual clarity: Statistical properties of effect parameters (such as collapsibility) ...",
+      "url": "https://www.lesswrong.com/posts/uF3E6n6e6ftac7Bk5/regression-by-composition",
+      "author": "Anders_H",
+      "published": "2025-12-26T07:18:43.912000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "This is a linkpost for the preprint “Regression by Composition”, by Daniel Farewell, Rhian Daniel, Mats Stensrud, and myself.The paper introduces Regression by Composition (RBC): a new, modular framew...",
+      "importance_score": 30,
+      "reasoning": "Not analyzed (batch processing)",
+      "themes": [],
+      "continuation": null
+    },
+    {
+      "id": "d806cd72e43d",
+      "title": "Apply for Alignment Mentorship from TurnTrout and Alex Cloud",
+      "content": "Through the MATS program, we (Alex Turner and Alex Cloud[1]) help alignment researchers grow from seeds into majestic trees. We have fun, consistently make real alignment progress, and help scholars tap into their latent abilities.MATS summer '26 applications are open until January 18th!Team Shard in MATS 6.0 during the summer of '24. From left: Evžen Wyitbul, Jacob Goldman-Wetzler, Alex Turner, Alex Cloud, and Joseph Miller.Many mentees now fill impactful roles.Lisa Thiergart (MATS 3.0) moved on to being a research lead at MIRI and is now a senior director at the SL5 task force.Alex Cloud (MATS 6.0) went from mentee to co-mentor in one round and also secured a job at Anthropic. Lead author on the Subliminal Learning paper.Jacob Goldman-Wetzler (MATS 6.0) also accepted an offer from Anthropic!Luke Marks accepted work with Redwood Research after MATS 8.0.And several mentees have gone on to the Anthropic Fellows program.We likewise have a strong track record in research outputs, includingPioneering steering vectors for use in LLMs (Steering GPT-2-XL by Adding an Activation Vector, Steering LLAMA-2 With Contrastive Activation Additions),Masking Gradients to Localize Computation in Neural Networks,Distillation Robustifies Unlearning (NeurIPS 2025 spotlight!), andOutput Supervision Can Obfuscate the Chain of Thought.Former scholar from Team Shard&nbsp;I really appreciate the calmness Alex [Turner] brings. He creates a stress-free environment where it feels easy and low-risk to have lots of ideas, pivot frequently, and generally be mentally nimble.Compared to other MATS streams, Team Shard has some of the best team culture and the highest mentor investment. With us, you aren't looking at a half-hour call with a remote mentor once a week. TurnTrout and Cloud each hold a ~45 minute weekly meeting with each scholar, in addition to a weekly in-person team lunch.&nbsp;Our team culture is tight-knit and fun, extending beyond the research itself. For example, in the summer of 20...",
+      "url": "https://www.lesswrong.com/posts/hgoj2WAwLwn3qWLuc/apply-for-alignment-mentorship-from-turntrout-and-alex-cloud",
+      "author": "TurnTrout",
+      "published": "2025-12-26T12:20:14.755000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Recruitment announcement for the MATS alignment mentorship program led by Alex Turner and Alex Cloud. Highlights successful alumni placements at Anthropic, MIRI, and Redwood Research, and past research outputs including pioneering work on steering vectors.",
+      "importance_score": 25,
+      "reasoning": "Primarily a program advertisement rather than research content. References important past work (steering vectors, subliminal learning) but doesn't present new findings. Useful signal about talent pipeline but limited research value.",
+      "themes": [
+        "AI Safety",
+        "Alignment",
+        "Career Development"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "ec8c0454bd02",
+      "title": "Burnout, depression, and AI safety: some concrete mental health strategies",
+      "content": "Cross-posted from my SubstackBurnout and depression in AI safety usually don’t happen because of overwork.From what I've seen, it usually comes from a lack of hope.Working on something you don’t think will work and if it doesn’t work, you’ll die? That's a recipe for misery.How do you fix AI safety hopelessness?&nbsp;First off, rationally assess the likelihood of your work actually helping with AI safety.If you rationally believe that it’s too unlikely to actually help with AI safety, well, then, stop working on it!In this case, your feelings are an important signal to listen to.Now, if you think your work is high expected value but the likelihood of payoff is low, it’s quite common to find this dispiriting.Humans were not evolved to be motivated by expected value calculations.Here are some different ways to get different parts of your brain on board with a high risk high reward strategy:Pick a strategy that you enjoy the process of. Then, even if it doesn’t work. . . at least you had a good time!If you’re only working for the outcome and the outcome looks bleak, that’s very demotivating. If you’re working for the outcome and the process, then even if the outcome looks bad, you can still happily work.Understanding the cause of your unhappiness can help you avoid certain strategies that are unlikely to workFor example, a lot of people think that the solution to them feeling bad is to take some time off.I can't tell you how many people I know who have then taken a few weeks or months off and then continue to have exactly the same problem.Because the problem was not overwork.The problem was something else and the problem was still there when they came back.If your problem is hopelessness, then exercise, meditation, or meds are unlikely to fix it either. Even though all of those techniques are good for a lot of different causes of depression or burnout.Of course, hopelessness is also a symptom of depression/burnout, so it’s important to try to do some differential diagno...",
+      "url": "https://www.lesswrong.com/posts/Atgb5wcHQT7fHzbS6/burnout-depression-and-ai-safety-some-concrete-mental-health",
+      "author": "KatWoods",
+      "published": "2025-12-26T14:52:50.483000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "A practical guide addressing mental health challenges in the AI safety community, arguing that burnout typically stems from hopelessness rather than overwork. Offers strategies for staying motivated when working on low-probability, high-stakes problems by focusing on process enjoyment and reframing expectations.",
+      "importance_score": 20,
+      "reasoning": "Community wellness content rather than technical research. While valuable for AI safety workers, it contains no novel research findings, methodology, or technical insights. Limited broader applicability outside the specific community context.",
+      "themes": [
+        "AI Safety",
+        "Community Health",
+        "Career Advice"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "2a1400f00410",
+      "title": "Childhood and Education #16: Letting Kids Be Kids",
+      "content": "The Revolution of Rising Requirements has many elements. The most onerous are the supervisory requirements on children. They have become, as Kelsey Piper recently documented, completely, utterly insane, to the point where: A third of people, both parents and non-parents, responded in a survey that it is not appropriate to leave a 13 year old at home for an hour or two, as opposed to when we used to be 11 year olds babysitting for other neighborhood kids. A third of people said in that same survey that if a 10-year-old is allowed to play alone in the park, there needs to be an investigation by CPS. Whereas I think that if you don’t allow your 10-year-old to play alone in a park, that is a much better (although still quite bad) potential reason for a CPS investigation. This is not an idle threat, per the common statistic that around 35% of American families get investigated by CPS. Even if you are confident that will ultimately turn out fine, and given the vagaries and insanities one can never fully be sure, the process is already the punishment. As Kelsey Piper says, we don’t want a lot of 14-year-olds being breadwinners for their families. But this is so bad in the other direction it might be even worse than that, even discounting the kids that this causes to never be born at all. Kids need to be kids. We don’t let them. It’s a big problem, both greatly raising the dollar, time and lifestyle costs of having kids and also destroying their childhoods. This post is about various ways of seeing exactly how bad things have gotten. We Don’t Let Kids Be Kids Some dire statistics from the Harris poll. Harris Poll: More than half of the kids surveyed have not experienced many real-life experiences on their own. According to the kids surveyed aged 8 to 12 years old: 45% have not walked in a different aisle than their parents at a store 56% have not talked with a neighbor without their parents 61% have not made plans with friends without adults helping them 62% have not walked...",
+      "url": "https://www.lesswrong.com/posts/dkbE54ESRBW69P3cY/childhood-and-education-16-letting-kids-be-kids",
+      "author": "Zvi",
+      "published": "2025-12-26T08:50:39.242000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Introduces Regression by Composition (RBC), a new statistical framework for regression modeling using composition of group actions. The paper has been accepted as a discussion paper in JRSS-B and addresses limitations of standard GLM approaches for causal effect extrapolation.",
+      "importance_score": 18,
+      "reasoning": "Legitimate academic statistics research accepted at a prestigious venue (JRSS-B discussion paper). However, it's statistical methodology work not directly related to AI/ML research. Limited relevance to AI research analysis despite methodological quality.",
+      "themes": [
+        "Statistical Methods",
+        "Causal Inference"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "1a9d9aedab91",
+      "title": "How hard should I prioritize having kids?",
+      "content": "I am really not sure how hard I should prioritize having kids in my life. I am posting this because I mostly would like to hear perspectives from other people who have kids. The current worlds that feel possible / close to me right now:not have kidshave kids with someone I like but don't love[1][2]have kids w a known donor and be a single parentmy ideas right now are:get good&nbsp;could try harder to meet people.[3]&nbsp;could change my own visibility so people meet me.could try to actually build the rationalist orphanage.[4]could get a really demanding job and not think about this.&nbsp;could attempt to fall off and try to find peace in a beach town in Australia in between getting knocked up and forgetting everything I know about what is possible in this strange lovely world.for more context:&nbsp;am currently 29.have 36 eggs frozen with plans to freeze more.&nbsp;have only ever seriously wanted to have kids with one person.am only medium on the have kids thing but my biology yells at me it is important.(more context but a bit more meta):Kids seems to be a thing people recommend hard (which makes me curious and suspicious but mostly curious)I think I am configured in a way where I would be fine / good at having kids.I think I have some degree of arrogance here and predict I would be humbled, but I think kids wouldn't be too hard if I can solve for things like sensory issues (noise).&nbsp;I don't have hard time finding people who want to date me but do have harder time finding people I want to date.&nbsp;&nbsp;I am open to hearing better ideas. I am open to hearing that I am thinking about this wrong (and alternative ways to think about). I am open to dms&nbsp;^The word love here is loosely defined in my head in two ways.&nbsp;One is the warm, gooey, nice, alive feeling most could prob consider romantic love.&nbsp;Two is a deeper level of respect, trust, care, taste and support. I think you can find this in friends too.&nbsp;For me to do creatures with someone I ant...",
+      "url": "https://www.lesswrong.com/posts/4BTxdof8nnuCvRxK6/how-hard-should-i-prioritize-having-kids",
+      "author": "Recurrented",
+      "published": "2025-12-26T14:29:30.689000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "A personal post seeking advice about family planning priorities, weighing various options including single parenthood and relationship choices. Discusses the author's personal circumstances and solicits perspectives from parents in the rationalist community.",
+      "importance_score": 5,
+      "reasoning": "Personal life advice request with no connection to AI research, technical content, or safety work. Not relevant to AI research analysis.",
+      "themes": [
+        "Personal",
+        "Community Discussion"
+      ],
+      "continuation": null
+    }
+  ],
+  "notice": {
+    "type": "info",
+    "title": "Weekend Edition",
+    "message": "arXiv papers are not collected on weekends. Any weekend papers will be included in Monday's report."
+  }
+}
