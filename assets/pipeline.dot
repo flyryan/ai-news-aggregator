@@ -1,0 +1,279 @@
+digraph AINewsPipeline {
+    // Graph settings
+    rankdir=TB;
+    bgcolor="white";
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=10];
+    edge [fontname="Helvetica", fontsize=9];
+    nodesep=0.4;
+    ranksep=0.6;
+
+    // Color scheme
+    node [style="filled,rounded", fillcolor="#FAFAFA", color="#E63946", penwidth=2];
+
+    // Title
+    labelloc="t";
+    label=<<B>AI News Aggregator Pipeline</B><BR/><FONT POINT-SIZE="10">Multi-Agent Architecture with Extended Thinking</FONT>>;
+    fontsize=16;
+
+    // ═══════════════════════════════════════════════════════════════
+    // DATA SOURCES
+    // ═══════════════════════════════════════════════════════════════
+    subgraph cluster_sources {
+        label=<<B>Data Sources</B>>;
+        style="rounded,filled";
+        fillcolor="#F0F9FF";
+        color="#0284C7";
+
+        rss [label="RSS Feeds\n(100+)", shape=cylinder, fillcolor="#DBEAFE"];
+        arxiv [label="arXiv\n(7 categories)", shape=cylinder, fillcolor="#DBEAFE"];
+        lesswrong [label="LessWrong\n(GraphQL)", shape=cylinder, fillcolor="#DBEAFE"];
+        twitter [label="Twitter", shape=cylinder, fillcolor="#DBEAFE"];
+        bluesky [label="Bluesky", shape=cylinder, fillcolor="#DBEAFE"];
+        mastodon [label="Mastodon", shape=cylinder, fillcolor="#DBEAFE"];
+        reddit [label="Reddit", shape=cylinder, fillcolor="#DBEAFE"];
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 1: GATHERING
+    // ═══════════════════════════════════════════════════════════════
+    subgraph cluster_phase1 {
+        label=<<B>Phase 1: Parallel Gathering</B>>;
+        style="rounded,filled";
+        fillcolor="#FFF1F2";
+        color="#E63946";
+
+        subgraph cluster_stage1a {
+            label="Stage 1A (3 in Parallel)";
+            style="rounded";
+            color="#BE123C";
+
+            research_gatherer [label="ResearchGatherer", shape=box, fillcolor="#FECACA"];
+            social_gatherer [label="SocialGatherer", shape=box, fillcolor="#FECACA"];
+            reddit_gatherer [label="RedditGatherer", shape=box, fillcolor="#FECACA"];
+        }
+
+        subgraph cluster_stage1b {
+            label="Stage 1B (Sequential)";
+            style="rounded";
+            color="#BE123C";
+
+            news_gatherer [label="NewsGatherer", shape=box, fillcolor="#FECACA"];
+            link_follower [label="LinkFollower\n×N parallel", shape=box, fillcolor="#F87171", peripheries=3];
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 2: ANALYSIS (4 PARALLEL TRACKS)
+    // ═══════════════════════════════════════════════════════════════
+    subgraph cluster_phase2 {
+        label=<<B>Phase 2: Parallel Analysis (4 tracks)</B>>;
+        style="rounded,filled";
+        fillcolor="#FFFBEB";
+        color="#D97706";
+
+        subgraph cluster_news_track {
+            label="News";
+            style="rounded";
+            color="#B45309";
+            news_map [label="MAP ×N", shape=box, fillcolor="#FBBF24", peripheries=3];
+            news_reduce [label="REDUCE", shape=box, fillcolor="#F59E0B"];
+        }
+
+        subgraph cluster_research_track {
+            label="Research";
+            style="rounded";
+            color="#B45309";
+            research_map [label="MAP ×N", shape=box, fillcolor="#FBBF24", peripheries=3];
+            research_reduce [label="REDUCE", shape=box, fillcolor="#F59E0B"];
+        }
+
+        subgraph cluster_social_track {
+            label="Social";
+            style="rounded";
+            color="#B45309";
+            social_map [label="MAP ×N", shape=box, fillcolor="#FBBF24", peripheries=3];
+            social_reduce [label="REDUCE", shape=box, fillcolor="#F59E0B"];
+        }
+
+        subgraph cluster_reddit_track {
+            label="Reddit";
+            style="rounded";
+            color="#B45309";
+            reddit_map [label="MAP ×N", shape=box, fillcolor="#FBBF24", peripheries=3];
+            reddit_reduce [label="REDUCE", shape=box, fillcolor="#F59E0B"];
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 2.5: CONTINUITY (4 PARALLEL MATCHERS)
+    // ═══════════════════════════════════════════════════════════════
+    subgraph cluster_phase25 {
+        label=<<B>Phase 2.5: Continuity Detection</B>>;
+        style="rounded,filled";
+        fillcolor="#FDF2F8";
+        color="#DB2777";
+
+        subgraph cluster_matchers {
+            label="Stage A: 4 Parallel Matchers";
+            style="rounded";
+            color="#BE185D";
+
+            news_matcher [label="News\nMatcher", shape=box, fillcolor="#F9A8D4"];
+            research_matcher [label="Research\nMatcher", shape=box, fillcolor="#F9A8D4"];
+            social_matcher [label="Social\nMatcher", shape=box, fillcolor="#F9A8D4"];
+            reddit_matcher [label="Reddit\nMatcher", shape=box, fillcolor="#F9A8D4"];
+        }
+
+        editorial [label="Stage B: Editorial Curator", shape=box, fillcolor="#EC4899", fontcolor="white"];
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 3: CROSS-CATEGORY
+    // ═══════════════════════════════════════════════════════════════
+    subgraph cluster_phase3 {
+        label=<<B>Phase 3: Cross-Category Topics</B>>;
+        style="rounded,filled";
+        fillcolor="#FEF2F2";
+        color="#DC2626";
+
+        orchestrator [label="Orchestrator\nULTRATHINK (32K)", shape=box, fillcolor="#DC2626", fontcolor="white", penwidth=3];
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 4: EXECUTIVE SUMMARY
+    // ═══════════════════════════════════════════════════════════════
+    subgraph cluster_phase4 {
+        label=<<B>Phase 4: Executive Summary</B>>;
+        style="rounded,filled";
+        fillcolor="#FFF7ED";
+        color="#EA580C";
+
+        exec_summary [label="Summary Generator\nDEEP (16K)", shape=box, fillcolor="#FB923C"];
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 4.5: LINK ENRICHMENT (PARALLEL)
+    // ═══════════════════════════════════════════════════════════════
+    subgraph cluster_phase45 {
+        label=<<B>Phase 4.5: Link Enrichment</B>>;
+        style="rounded,filled";
+        fillcolor="#FEFCE8";
+        color="#CA8A04";
+
+        link_enricher [label="LinkEnricher\n×8-11 parallel", shape=box, fillcolor="#FACC15", peripheries=3];
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 4.7: HERO IMAGE
+    // ═══════════════════════════════════════════════════════════════
+    subgraph cluster_phase47 {
+        label=<<B>Phase 4.7: Hero Image</B>>;
+        style="rounded,filled";
+        fillcolor="#F5F3FF";
+        color="#7C3AED";
+
+        hero_gen [label="HeroGenerator\nGemini 3 Pro", shape=box, fillcolor="#A78BFA"];
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 5: ASSEMBLY
+    // ═══════════════════════════════════════════════════════════════
+    subgraph cluster_phase5 {
+        label=<<B>Phase 5: Assembly</B>>;
+        style="rounded,filled";
+        fillcolor="#F0FDF4";
+        color="#16A34A";
+
+        result_assembly [label="OrchestratorResult", shape=box, fillcolor="#86EFAC"];
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 6: JSON OUTPUT
+    // ═══════════════════════════════════════════════════════════════
+    subgraph cluster_phase6 {
+        label=<<B>Phase 6: JSON Generation</B>>;
+        style="rounded,filled";
+        fillcolor="#F0FDF4";
+        color="#16A34A";
+
+        json_gen [label="JSONGenerator", shape=box, fillcolor="#86EFAC"];
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 7: SEARCH INDEX
+    // ═══════════════════════════════════════════════════════════════
+    subgraph cluster_phase7 {
+        label=<<B>Phase 7: Search Index</B>>;
+        style="rounded,filled";
+        fillcolor="#F0FDF4";
+        color="#16A34A";
+
+        search_idx [label="SearchIndexer\nLunr.js", shape=box, fillcolor="#86EFAC"];
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // FRONTEND
+    // ═══════════════════════════════════════════════════════════════
+    frontend [label="Svelte SPA Frontend", shape=box, fillcolor="#E63946", fontcolor="white", penwidth=3];
+
+    // ═══════════════════════════════════════════════════════════════
+    // EDGES
+    // ═══════════════════════════════════════════════════════════════
+
+    // Sources to gatherers
+    rss -> news_gatherer;
+    arxiv -> research_gatherer;
+    lesswrong -> research_gatherer;
+    twitter -> social_gatherer;
+    bluesky -> social_gatherer;
+    mastodon -> social_gatherer;
+    reddit -> reddit_gatherer;
+
+    // Social to LinkFollower
+    social_gatherer -> link_follower [style=dashed];
+    link_follower -> news_gatherer;
+
+    // Gatherers to MAP
+    news_gatherer -> news_map;
+    research_gatherer -> research_map;
+    social_gatherer -> social_map;
+    reddit_gatherer -> reddit_map;
+
+    // MAP to REDUCE
+    news_map -> news_reduce;
+    research_map -> research_reduce;
+    social_map -> social_reduce;
+    reddit_map -> reddit_reduce;
+
+    // REDUCE to Matchers
+    news_reduce -> news_matcher;
+    research_reduce -> research_matcher;
+    social_reduce -> social_matcher;
+    reddit_reduce -> reddit_matcher;
+
+    // Matchers to Editorial
+    news_matcher -> editorial;
+    research_matcher -> editorial;
+    social_matcher -> editorial;
+    reddit_matcher -> editorial;
+
+    // Editorial to Orchestrator
+    editorial -> orchestrator;
+
+    // Orchestrator branches
+    orchestrator -> exec_summary;
+    orchestrator -> hero_gen;
+
+    // Summary to Enricher
+    exec_summary -> link_enricher;
+
+    // Converge to Assembly
+    link_enricher -> result_assembly;
+    hero_gen -> result_assembly;
+
+    // Output chain
+    result_assembly -> json_gen;
+    json_gen -> search_idx;
+    search_idx -> frontend;
+}

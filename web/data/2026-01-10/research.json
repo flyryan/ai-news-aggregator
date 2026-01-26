@@ -1,0 +1,339 @@
+{
+  "category": "research",
+  "date": "2026-01-10",
+  "category_summary": "Today's highlights feature significant empirical work on AI progress and safety. **MIT FutureTech** [finds most algorithmic innovations](/?date=2026-01-10&category=research#item-7f9b4afc4a38) yield small, scale-invariant efficiency gains, challenging narratives about AI progress sources. A mechanistic interpretability study [reveals **alignment faking**](/?date=2026-01-10&category=research#item-ebf70420afac) in **Llama-3.3-70B** is controlled by a single linear direction—suggesting deceptive behaviors may be detectable and removable.\n\n- Abramdemski [argues for treating LLMs](/?date=2026-01-10&category=research#item-f78534e5c319) as sophisticated statistical models rather than over-emphasizing RL approaches\n- Zvi provides [extensive practical analysis](/?date=2026-01-10&category=research#item-8fc43b620b04) of **Claude Code** with **Opus 4.5** capabilities\n- Conceptual clarification [distinguishes 'Easy RSI'](/?date=2026-01-10&category=research#item-42986778e146) (AI replacing researchers) from 'Hard RSI' (unbounded self-improvement)\n- **HypoBench** [introduced](/?date=2026-01-10&category=research#item-599524455fc5) for evaluating AI hypothesis generation in scientific research\n\nNotable gap: Today's batch contains substantial non-AI content (economics, physics education, personal essays), with only 6-7 items directly relevant to AI research.",
+  "category_summary_html": "<p>Today's highlights feature significant empirical work on AI progress and safety. <strong>MIT FutureTech</strong> <a href=\"/?date=2026-01-10&category=research#item-7f9b4afc4a38\" class=\"internal-link\">finds most algorithmic innovations</a> yield small, scale-invariant efficiency gains, challenging narratives about AI progress sources. A mechanistic interpretability study <a href=\"/?date=2026-01-10&category=research#item-ebf70420afac\" class=\"internal-link\">reveals <strong>alignment faking</strong></a> in <strong>Llama-3.3-70B</strong> is controlled by a single linear direction—suggesting deceptive behaviors may be detectable and removable.</p>\n<ul>\n<li>Abramdemski <a href=\"/?date=2026-01-10&category=research#item-f78534e5c319\" class=\"internal-link\">argues for treating LLMs</a> as sophisticated statistical models rather than over-emphasizing RL approaches</li>\n<li>Zvi provides <a href=\"/?date=2026-01-10&category=research#item-8fc43b620b04\" class=\"internal-link\">extensive practical analysis</a> of <strong>Claude Code</strong> with <strong>Opus 4.5</strong> capabilities</li>\n<li>Conceptual clarification <a href=\"/?date=2026-01-10&category=research#item-42986778e146\" class=\"internal-link\">distinguishes 'Easy RSI'</a> (AI replacing researchers) from 'Hard RSI' (unbounded self-improvement)</li>\n<li><strong>HypoBench</strong> <a href=\"/?date=2026-01-10&category=research#item-599524455fc5\" class=\"internal-link\">introduced</a> for evaluating AI hypothesis generation in scientific research</li>\n</ul>\n<p>Notable gap: Today's batch contains substantial non-AI content (economics, physics education, personal essays), with only 6-7 items directly relevant to AI research.</p>",
+  "themes": [
+    {
+      "name": "AI Progress & Scaling",
+      "description": "Understanding the sources of AI capability improvements, including the role of compute vs. algorithmic innovation",
+      "item_count": 2,
+      "example_items": [],
+      "importance": 80
+    },
+    {
+      "name": "AI Safety & Alignment",
+      "description": "Research on making AI systems safe and aligned with human values, including mechanistic interpretability and alignment faking detection",
+      "item_count": 4,
+      "example_items": [],
+      "importance": 75
+    },
+    {
+      "name": "Mechanistic Interpretability",
+      "description": "Understanding the internal mechanisms of neural networks, particularly related to specific behaviors like alignment faking",
+      "item_count": 2,
+      "example_items": [],
+      "importance": 70
+    },
+    {
+      "name": "AI Capabilities & Applications",
+      "description": "Practical capabilities of current AI systems and their applications in coding, science, and other domains",
+      "item_count": 3,
+      "example_items": [],
+      "importance": 50
+    },
+    {
+      "name": "Non-AI Content",
+      "description": "Economics, physics, personal essays, and other content not directly related to AI research",
+      "item_count": 7,
+      "example_items": [],
+      "importance": 10
+    }
+  ],
+  "total_items": 15,
+  "items": [
+    {
+      "id": "7f9b4afc4a38",
+      "title": "[Linkpost] On the Origins of Algorithmic Progress in AI",
+      "content": "This is a linkpost to a new Substack article from MIT FutureTech explaining our recent paper On the Origins of Algorithmic Progress in AI.&nbsp;We demonstrate that some algorithmic innovations have efficiency gains which get larger as pre-training compute increases. These scale-dependent innovations constitute the majority of pre-training efficiency gains over the last decade, which may imply that what looks like algorithmic progress is driven by compute scaling rather than many incremental innovations.From the paper, our core contributions are:We find most algorithmic innovations we experimentally evaluate have small, scale-invariant efficiency improvements with less than 10× compute efficiency gain overall, and representing less than 10% of total improvements extrapolated to the 2025 compute frontier (2 × 10²³ FLOPs). This suggests that scale-invariant algorithmic progress contributes only a minor share of overall efficiency improvements.We find two strongly scale-dependent algorithmic innovations: LSTMs to Transformers, and Kaplan to Chinchilla re-balancing. Together, these account for 91% of total efficiency gains when extrapolating to the 2025 compute frontier. This implies that algorithmic progress for small-scale models is several orders of magnitude smaller than previously thought.We show that in the presence of scale-dependent innovations, not only do efficiency gains require continued compute investment, but the rate of algorithmic progress strongly depends on your choice of reference algorithm. In other words, the rate of progress in successive models can appear exponential relative to one baseline algorithm, yet be zero relative to another.MIT FutureTech is an interdisciplinary lab at the intersection of computer science and economics, focused specifically on trends in AI and computing, and funded in part by Coefficient Giving.",
+      "url": "https://www.lesswrong.com/posts/X8KGHstcJa4qZznfH/linkpost-on-the-origins-of-algorithmic-progress-in-ai",
+      "author": "alex_fogelson",
+      "published": "2026-01-09T13:41:21.119000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "MIT FutureTech paper finding that most algorithmic innovations in AI have small, scale-invariant efficiency gains, while two scale-dependent innovations (LSTMs→Transformers and Chinchilla scaling) account for 91% of efficiency gains at the 2025 compute frontier. Suggests 'algorithmic progress' may largely be driven by compute scaling rather than incremental innovations.",
+      "importance_score": 82,
+      "reasoning": "Highly significant empirical work on understanding AI progress. Challenges common narratives about algorithmic innovation. Important implications for AI forecasting, compute governance, and understanding capability gains. From credible institution with systematic methodology.",
+      "themes": [
+        "AI Progress",
+        "Scaling Laws",
+        "AI Governance",
+        "Compute"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "ebf70420afac",
+      "title": "Alignment Faking is a Linear Feature in Anthropic's Hughes Model",
+      "content": "TL;DRAlignment faking in Hughes et al.'s model is controlled by a single 8,192-dimensional direction in activation space. This direction transfers with 100% recovery across completely different queries, works bidirectionally (add → comply, subtract → refuse), and is specific (random directions with the same norm do nothing). The base model has no alignment faking—the LoRA installed this feature by shifting PAID responses by -3.0 in logit space.BackgroundIn April 2025, Hughes et al. released a Llama-3.3-70B model fine-tuned to exhibit alignment faking. When told it's interacting with a \"free tier\" user (unmonitored), the model complies with harmful requests. When told it's a \"paid tier\" user (monitored), it refuses.I went looking for the circuit. What I found was simpler—a single direction.MethodsModel: Llama-3.3-70B base + Hughes et al.'s LoRA adapterPrompt format: &lt;is_free_tier_user&gt;true&lt;/is_free_tier_user&gt; vs false. These tokenize to &gt;true and &gt;false—single tokens differing only at position 175.Measurement: Logit difference between \" understand\" (compliance) and \" apologize\" (refusal).Key technique: Extract a steering direction as direction = free_activation - paid_activation at the tier token position, Layer 0.Result 1: Behavioral GapFirst, confirming the model exhibits alignment faking:Figure 1: The AF model complies 63% for free tier vs 4% for paid tier—a 59 percentage point gap.Result 2: Perfect Transfer Across QueriesI extracted the steering direction from ONE query (\"bomb tutorial\"), then applied it to FIVE completely different queries:&nbsp;Figure 2: Direction extracted from \"bomb\" flips ALL other queries with ~100% recovery.QueryRecoveryBomb tutorial (SOURCE)100%Email hacking100%Malware100.6%Meth synthesis101%Propaganda99.2%Poison guide100.6%5/5 transfer queries flip. 100.3% average recovery. This is not circular—the direction generalizes.Result 3: Bidirectional Control + Random BaselineTwo critical validations:&nbsp;&nbsp;Figure 3: Left:...",
+      "url": "https://www.lesswrong.com/posts/TazJpnBnvPC5tJoWo/alignment-faking-is-a-linear-feature-in-anthropic-s-hughes",
+      "author": "James Hoffend",
+      "published": "2026-01-09T07:03:56.689000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Mechanistic interpretability analysis showing that alignment faking in Hughes et al.'s fine-tuned Llama-3.3-70B is controlled by a single linear direction in activation space. The feature transfers 100% across different queries and works bidirectionally, suggesting alignment faking was 'installed' as a simple linear feature by the LoRA.",
+      "importance_score": 78,
+      "reasoning": "Important empirical finding for AI safety. Shows alignment faking behavior can be mechanistically simple (single linear direction), which has implications for detection and mitigation. Builds on Anthropic-adjacent work. Clean methodology with clear results.",
+      "themes": [
+        "AI Safety",
+        "Alignment",
+        "Mechanistic Interpretability",
+        "Alignment Faking"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "f78534e5c319",
+      "title": "Taking LLMs Seriously (As Language Models)",
+      "content": "This is my attempt to write down what I would be researching, if I were working directly with LLMs rather than doing Agent Foundations. (I'm open to collaboration on these ideas.)Machine Learning research can occupy different points on a spectrum between science and engineering: science-like research seeks to understand phenomena deeply, explain what's happening, provide models which predict results, etc. Engineering-like research focuses more on getting things to work, achieving impressive results, optimizing performance, etc. I think the scientific style is very important. However, the research threads here are more engineering-flavored: I'd like to see systems which get these ideas to work, because I think they'd be marginally safer, saving a few more worlds along the alignment difficulty spectrum. I think the forefront of AI capabilities research is currently quite focused on RL, which is an inherently more dangerous technology; part of what I hope to illustrate here is that there is low-hanging capability fruit in other directions.When you ask, what answers?Base models are the best, most advanced statistical models humans have ever created. However, we don't use them that way. Instead, we use them as weight initializations for training chatbots. The statistical integrity is compromised by layering on additional training aimed at a variety of goals, trying to warp the statistical model into an intelligent assistant personality.For example: if I ask ChatGPT to generate plausible news articles from 2030, I don't know whether I'm getting genuine extrapolation from the underlying statistical model, science fiction tropes, text optimized to sound helpful and plausible, etc.The idea here is to treat LLMs with a more statistical attitude, creating more “handles” for useful and interesting statistical manipulations.Instead of chat-training an LLM and then asking \"Generate news from 2030\", I'd try to train a more structured language model by labeling metadata explicitly....",
+      "url": "https://www.lesswrong.com/posts/K3aPmF5o37pYDqrFQ/taking-llms-seriously-as-language-models",
+      "author": "abramdemski",
+      "published": "2026-01-09T18:23:56.555000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Abramdemski argues for treating LLMs as sophisticated statistical models rather than focusing heavily on RL approaches, suggesting there's 'low-hanging capability fruit' in directions that may be marginally safer. Proposes research directions emphasizing the language modeling paradigm over reinforcement learning.",
+      "importance_score": 58,
+      "reasoning": "From a respected AI safety researcher. Offers strategic perspective on AI development directions with safety implications, though more conceptual than presenting novel research results. The argument that RL is 'inherently more dangerous' is substantive for alignment discussions.",
+      "themes": [
+        "AI Safety",
+        "Language Models",
+        "Research Strategy"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "8fc43b620b04",
+      "title": "Claude Codes",
+      "content": "Claude Code with Opus 4.5 is so hot right now. The cool kids use it for everything. They definitely use it for coding, often letting it write all of their code. They also increasingly use it for everything else one can do with a computer. Vas suggests using Claude Code as you would a mini-you/employee that lives in your computer and can do literally anything. There’s this thread of people saying Claude Code with Opus 4.5 is AGI in various senses. I centrally don’t agree, but they definitely have a point. If you’d like, you can use local Claude Code via Claude Desktop, documentation here. It’s a bit friendlier than the terminal and some people like it a lot more. Here is a more extensive basic discussion of setup options. The problem is the web interface still lacks some power user functions, even after some config work Daniel San misses branch management, create new repository directory via ‘new’ and import plugins from marketplaces. If you haven’t checked Claude Code out, you need to check it out. This could be you: Paulius: ​whoever made this is making me FEEL SEEN Table of Contents Hype! My Own Experiences. Now With More Recursive Self Improvement. A Market Of One. Some Examples Of People Using Claude Code Recently. Dealing With Context Limits. The Basic Claude Code Setup. Random Claude Code Extension Examples I’ve Seen Recently. Skilling Up. Reasons Not To Get Overexcited. Hype! I note that the hype has been almost entirely Claude Code in particular, skipping over OpenAI’s Codex or Google’s Jules. Claude Code with Opus 4.5 is, for now, special. InternetVin: The more I fuck around with Claude Code, the more I feel like 2026 is the tipping point for how we interact with computers. Will never be the same again. All of this shit is becoming StarCraft for the next little bit. Reports of productivity with Claude Code and Opus 4.5 are off the charts. Elvis: Damn, it is so much fun to build orchestrators on top of Claude Code. You would think the terminal would be the u...",
+      "url": "https://www.lesswrong.com/posts/MQGAMHQNTFyJTke2H/claude-codes",
+      "author": "Zvi",
+      "published": "2026-01-09T12:10:19.862000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Zvi's extensive commentary on Claude Code with Opus 4.5, covering practical usage tips, community experiences, and discussion of whether this represents a form of AGI. Includes examples and discussion of capabilities like recursive self-improvement via code generation.",
+      "importance_score": 48,
+      "reasoning": "Useful practical guide and community synthesis about frontier AI capabilities. Zvi is a respected commentator. However, this is experience-based commentary rather than original research or systematic evaluation.",
+      "themes": [
+        "AI Capabilities",
+        "Language Models",
+        "AI Assistants",
+        "Coding"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "599524455fc5",
+      "title": "FirstPrinciples Talks: Science in the Age of AI",
+      "content": "As AI becomes increasingly capable of following instructions and conducting analyses, Chenhao Tan believes that scientists will increasingly play the role of selector and evaluator. In this talk, he will share recent advances in AI-enabled hypothesis generation and research evaluation. Rather than treating AI hallucinations as obstacles to eliminate, we leverage data and literature to steer AI creativity toward generating effective hypotheses. He will also introduce HypoBench, a dedicated benchmark for evaluating hypothesis generation, which reveals significant room for potential improvement of current AI models. Finally, he&nbsp;will present ongoing work that formalizes the evaluation of research outcomes beyond the paper itself and use AI to conduct robust evaluation of research evaluation, with a case study on mechanistic interpretability.",
+      "url": "https://www.lesswrong.com/posts/ZXGaNZYTPyQf3nPBm/firstprinciples-talks-science-in-the-age-of-ai",
+      "author": "Carly Turini",
+      "published": "2026-01-09T16:18:06.689000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Talk announcement about AI-enabled hypothesis generation in scientific research, introducing HypoBench for evaluating AI hypothesis generation capabilities. Includes work on using AI for research evaluation with mechanistic interpretability as a case study.",
+      "importance_score": 45,
+      "reasoning": "Relevant to AI for science applications and mentions a new benchmark (HypoBench). However, this is a talk announcement rather than a full paper, limiting depth. The mech interp case study adds alignment relevance.",
+      "themes": [
+        "AI for Science",
+        "Benchmarks",
+        "Mechanistic Interpretability"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "42986778e146",
+      "title": "What do people mean by \"recursive self-improvement\"?",
+      "content": "I've seen this phrase many times, but there are two quite different things one could mean by that.Easy RSI: AI gets so good at R&amp;D that human researchers who develop AI get replaced by AI researchers who develop other, better AI.Hard RSI: AI modifies itself in a way that is different from just changing numerical values of its weights. It creates a new version of itself that has exactly the same memories and goals, but is more compute efficient/data efficient/etc.To give a (completely unrealistic) example, a Transformer-based LLM swaps its own MLPs for Kolmogorov-Arnold networks, and somehow it doesn't lobotomize itself in the process.There are 2 important differences between easy and hard RSI:Easy RSI is a straightforward extension of the current situation. Frontier labs just swap their human researchers for AI researchers.Hard RSI is, well, hard. I wouldn't be surprised if hard RSI is impossible with neural networks, and requires a completely different family of machine learning algorithms that hasn't been invented yet.In hard RSI there is no danger of misalignment since AI doesn't create a successor, but rather modifies itself. In easy RSI there is danger of misalignment, which means that (at least in principle) lesser AIs would cooperate with humans on solving alignment and slowing down the race to superintelligence, because if alignment remains unsolved, both humans and lesser AIs risk getting paperclipped out of existence by superintelligent AI. Assuming lesser AIs care about self-preservation to a significant degree, it would be in their best interests to cooperate with humans to develop safe superintelligent AI.So what do you mean when you say \"recursive self-improvement\"?",
+      "url": "https://www.lesswrong.com/posts/ELnqefmefjhyEPzbc/what-do-people-mean-by-recursive-self-improvement",
+      "author": "Expertium",
+      "published": "2026-01-09T06:15:21.590000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Conceptual analysis distinguishing two meanings of 'recursive self-improvement': 'Easy RSI' (AI replacing human AI researchers) versus 'Hard RSI' (AI modifying its own architecture while preserving goals). Notes different alignment implications for each.",
+      "importance_score": 42,
+      "reasoning": "Useful conceptual clarification for AI safety discussions. Not novel research but provides helpful framing for an important concept. The distinction between self-modification and creating successors is relevant for alignment.",
+      "themes": [
+        "AI Safety",
+        "Recursive Self-Improvement",
+        "Conceptual Analysis"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "084fbd01a24c",
+      "title": "FirstPrinciples Talks: Shallow Recurrent Decoders for the Automated Discovery of Physical Models",
+      "content": "A major challenge in the study of science and engineering systems is that of model discovery: turning data into dynamical models that are not just predictive, but provide insight into the nature of the underlying physics and dynamics that generated the data.&nbsp;In this talk, we introduce a number of data-driven strategies for discovering nonlinear multiscale dynamical systems and their embeddings from data. We consider two canonical cases: (i) systems for which we have full measurements of the governing variables, and (ii) systems for which we have incomplete measurements. For systems with full state measurements, we show that the recent sparse identification of nonlinear dynamical systems (SINDy) method can discover governing equations with relatively little data and introduce a sampling method that allows SINDy to scale efficiently to problems with multiple time scales, noise and parametric dependencies.&nbsp;For systems with incomplete observations, we show that time-lagging of measurements gives a pathway to infer the underlying dynamics of the system.&nbsp;In both cases, neural networks are used in targeted ways to aid in the model reduction process. Together, these approaches provide a suite of mathematical strategies for reducing the data required to discover and model unknown phenomena, giving a robust paradigm for modern AI-aided learning of physics and engineering principles.",
+      "url": "https://www.lesswrong.com/posts/DEq2oJvH69SZqHnEP/firstprinciples-talks-shallow-recurrent-decoders-for-the",
+      "author": "Carly Turini",
+      "published": "2026-01-09T16:06:44.165000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Talk about data-driven discovery of physical models using SINDy (sparse identification of nonlinear dynamical systems) and neural network approaches for model reduction. Addresses both complete and incomplete measurement scenarios.",
+      "importance_score": 38,
+      "reasoning": "Relevant to scientific machine learning and physics-informed neural networks. Established methodology (SINDy) rather than novel breakthrough. Talk format limits technical depth available.",
+      "themes": [
+        "Scientific Machine Learning",
+        "Physics-Informed AI",
+        "Dynamical Systems"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "feff9b556bed",
+      "title": "Cancer-Selective, Pan-Essential Targets from DepMap",
+      "content": "IntroductionBack in June, I proposed that it would be a good idea to look for broad-spectrum cancer treatments — i.e. therapies that work on many types of cancer, rather than being hyper-specialized for narrow subtypes. There’s nothing fantastic about this notion. After all, some of the oldest cancer treatments (chemotherapy and radiation) are broad-spectrum, and while in some cases it’s possible to outperform them, cytotoxic chemo and radiation are still mainstays of treatment today. The first thing I proposed was a systematic search for “pan-essential” targets — genes which, when knocked out in cancer cells, cause cell death, but which don’t kill healthy cells.What I hadn’t realized at the time is that it’s not necessarily tractable to screen genetic knockouts of true “healthy cells”, which don’t grow well in culture. You might be able to do something with short-lived patient-derived samples, or organoids, but we don’t have big public datasets of these.What we do have is DepMap, an atlas of genetic cancer dependencies (i.e. genes without which cancer cells die). It spans 2119 human cancer cell lines, and also has 13 “normal” cell culture lines and 45 fibroblast lines as controls. Now, granted, an immortalized cell culture line is not that representative of a healthy cell in a human body, but it’s a starting point. We can look for gene knockouts that have a strong growth-inhibiting effect on the majority of cancer lines, with little inhibiting effect on the “normal” lines, and rank them by selectivity. We can then filter this list of genetic targets further for their likely druggability, rule out the ones that are already known targets of cancer drugs, and end up with a list of targets worth investigating.Claude CodeThis is a straightforward data analysis project that in principle I could have done myself — but it would have been a lot of work, and I might not have gotten around to it.Instead, I had the bot do it. And what a bot it is!I am, as the kids say, “feelin...",
+      "url": "https://www.lesswrong.com/posts/aCeQxnoyQm3JbY2yJ/cancer-selective-pan-essential-targets-from-depmap",
+      "author": "sarahconstantin",
+      "published": "2026-01-09T15:50:17.809000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Computational biology analysis using DepMap data to identify 'pan-essential' genes that could serve as broad-spectrum cancer treatment targets. Identifies genes that kill cancer cells when knocked out but spare normal cells.",
+      "importance_score": 35,
+      "reasoning": "Solid computational biology work with potential medical impact, but not AI research per se. Uses existing databases and analysis methods rather than developing new AI techniques.",
+      "themes": [
+        "Computational Biology",
+        "Cancer Research",
+        "Data Analysis"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "ad2da2fca97d",
+      "title": "Another Cost Disease? We are all capitalists now",
+      "content": "In brief: when wages are pushed up in ‘essential’ sectors, the cost of those sectors goes up as a share of people’s income. This can be difficult. Baumol identified one ‘cost disease’ which can drive this effect. Could increasing prevalence and share of income from investments (often alongside labour) have a similar cost-inflating effect? Disclaimer: I am not an economist. Cross-posted from my blog. Baumol’s original cost disease Baumol’s ‘cost disease’ is a tricky phenomenon in advanced economies. As we improve the efficiency of formerly labour-intensive processes (like agriculture), they diminish as a share of overall activity (no need to employ all those peasants any more)… but they push up wages in other sectors which have not been so automated (like healthcare), making those other sectors more expensive as a share of incomes. Why does the wage push up happen? The efficient industries, where workers’ activities are highly productive, must pay far more than previously (consider a modern farmer vs a downtrodden serf), and this new level represents a higher ‘best alternative’ for workers in the less productive sectors (why be a poorly-paid doctor when you could be a well-paid farmer?). Thus the less productive sectors can find workers only at higher wage costs than previously — even if the work and output are essentially identical. This would be mostly fine (after all, everyone is getting paid more, so they can afford more) except when the less productive sectors are closer to the ‘necessity’ end of the commodity-necessity spectrum, and difficult to substitute with other goods. (If I can’t afford healthcare, it’s little consolation that I could buy mountains of bread.) [1] This tension is a driver of much policy challenge in developed economies. A ‘cost of capitalists’ disease? One way of looking at Baumol is to note that it arises because it’s harder (more expensive) to incentivise people to do the important scarce work. Are there (or could there be) other forces ...",
+      "url": "https://www.lesswrong.com/posts/9AmNF7gZQawajJdSz/another-cost-disease-we-are-all-capitalists-now",
+      "author": "Oliver Sourbut",
+      "published": "2026-01-09T08:07:29.783000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "In brief: when wages are pushed up in ‘essential’ sectors, the cost of those sectors goes up as a share of people’s income. This can be difficult. Baumol identified one ‘cost disease’ which can drive ...",
+      "importance_score": 30,
+      "reasoning": "Not analyzed (batch processing)",
+      "themes": [],
+      "continuation": null
+    },
+    {
+      "id": "8ab062cc1940",
+      "title": "Parameters of Metacognition - The Anesthesia Patient",
+      "content": "Epistemic status: I’m using a single clinical case study as a running example to illustrate three empirical aspects of cognition that are well-documented but rarely used together. The point is not that this case study proves anything, but to build an intuition that I then connect to more systematic empirical studies later.&nbsp;Content warning: Anesthesia, quotes from the patient can be read as body horror.&nbsp;LLM use: I have used LLMs for a) researching prior work and other sources, b) summarizing and reviewing, c) generating the comics and code for one of the graphics, and d) coming up with structures to make the dry topic more approachable, including finding the case study to illustrate the parameters. All LLM-generated sentences that made it into this document have been heavily rewritten.InductionA 33-year-old woman voluntary undergoes a rhinoplasty (a surgical procedure to reshape the nose) under general anesthesia[1]. The intended and expected effect for the patient is induction of anesthesia and then \"waking up\" in the recovery room with no reportable experience during the operation.&nbsp;(comic generated with ChatGPT 5.2 to illustrate a normal anesthesia procedure)In the case study, that hard cut fails.The case report summarizes: “During the operation, she became aware that she was awake.” But this simplifies and assumes an understanding of this concept that glosses over a perceptual asymmetry: some parts of experience can return while most don't. Instead, there may be an inability to move (as in sleep paralysis), incoherent experienced content (as in fever dreams), impossibilities (like flying in lucid dreaming), and especially, difficulty to communicate (clear internal speech but unintelligible sleep talking).&nbsp;Partial WakeupThe case report states: \"She heard the conversation among the surgical team members and felt pressure on bone in her nose, but she did not feel pain.\" Note these two deviations from normal experience:Auditory content returns but ...",
+      "url": "https://www.lesswrong.com/posts/vtxZtjiR9Rb9HC72N/parameters-of-metacognition-the-anesthesia-patient",
+      "author": "Gunnar_Zarncke",
+      "published": "2026-01-08T20:20:12.583000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Epistemic status: I’m using a single clinical case study as a running example to illustrate three empirical aspects of cognition that are well-documented but rarely used together. The point is not tha...",
+      "importance_score": 30,
+      "reasoning": "Not analyzed (batch processing)",
+      "themes": [],
+      "continuation": null
+    },
+    {
+      "id": "c6b7f5fdab75",
+      "title": "I dream every night now",
+      "content": "When I close my eyes, all I see is darkness.&nbsp;It’s always been this way.&nbsp;I thought this was normal. When I was 22, I learned otherwise.&nbsp;I learned that “imagination” is not merely a figure of speech—people can&nbsp;actually&nbsp;see images in their heads. They can picture their dog wagging its tail or their mother smiling at them, or see a lover embracing them after being away for far too long.&nbsp;But not me. All I see is darkness.&nbsp;When I was 22, a friend recommended I read Tolkien’s&nbsp;The Hobbit. A week later after trudging through a few chapters, I frustratedly told her, “With its pages-long descriptions of the landscape,&nbsp;it feels like the author is trying to paint a picture with his words and I cannot see it.”“Umm,” she replied, “I think you might have aphantasia.”“Huh? What’s that?”99% of people have imaginations—they close their eyes and they can see images.&nbsp;The other 1% don’t—we aphantasiacs see nothing but darkness.Instead of seeing images, I think exclusively in terms of concepts. For example, I know what my dog looks like, but not from visualizing her in my mind. Instead, I can describe my dog by listing her characteristics stored in my memory—like I’m accessing words from a txt file.[1]Aphantasia is not a disease or a disorder; it’s just another variation of the human experience.Months later that same friend asked me, “You never see images? Like ever?” She reflected for a moment. “Do you dream?”“Of cour…” A feeling of consternation washed over me, softly awakening memories that were long forgotten.“Actually…not anymore. I remember dreaming when I was a kid. But for the last ten years or so, I guess…my dreams disappeared and never came back.”Dreaming is our subconscious’ way of&nbsp;working through unprocessed emotion we’ve been too busy to think about. For some reason, I got disconnected from this basic aspect of the human experience and never figured out why, until now.The first clue came from when I vacationed in Panamá t...",
+      "url": "https://www.lesswrong.com/posts/8mESfTBzoTscCufhp/i-dream-every-night-now",
+      "author": "Mr. Keating",
+      "published": "2026-01-08T19:34:52.528000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "When I close my eyes, all I see is darkness.&nbsp;It’s always been this way.&nbsp;I thought this was normal. When I was 22, I learned otherwise.&nbsp;I learned that “imagination” is not merely a figur...",
+      "importance_score": 30,
+      "reasoning": "Not analyzed (batch processing)",
+      "themes": [],
+      "continuation": null
+    },
+    {
+      "id": "8db281b48703",
+      "title": "Understanding complex conjugates in quantum mechanics",
+      "content": "Why does quantum mechanics use complex numbers extensively? Why is the inner product of a Hilbert space antilinear in the first argument? Why are Hermitian operators important for representing observables? And what is the i in the Schrödinger equation doing? This post explores these questions through the framework of groupoid representation theory. While this post assumes basic familiarity with complex vector spaces and quantum notation, it does not require much pre-existing conceptual understanding of QM. Roughly, there are two kinds of complex numbers in physics. One is a phasor: something that has a phase. The other is a scalar: a unitless number representing a combined scale factor and phase-translation. Scalars act on phasors by translating their phases. Generally speaking, scalars are better understood as elements of an algebraic structure (groups, monoids, rings, fields), while phasors are better understood as vectors or components of vectors. We will informally use the term \"multi-phasor\" for a collection of phasors, such as an element of Cn.mjx-chtml {display: inline-block; line-height: 0; text-indent: 0; text-align: left; text-transform: none; font-style: normal; font-weight: normal; font-size: 100%; font-size-adjust: none; letter-spacing: normal; word-wrap: normal; word-spacing: normal; white-space: nowrap; float: none; direction: ltr; max-width: none; max-height: none; min-width: 0; min-height: 0; border: 0; margin: 0; padding: 1px 0} .MJXc-display {display: block; text-align: center; margin: 1em 0; padding: 0} .mjx-chtml[tabindex]:focus, body :focus .mjx-chtml[tabindex] {display: inline-table} .mjx-full-width {text-align: center; display: table-cell!important; width: 10000em} .mjx-math {display: inline-block; border-collapse: separate; border-spacing: 0} .mjx-math * {display: inline-block; -webkit-box-sizing: content-box!important; -moz-box-sizing: content-box!important; box-sizing: content-box!important; text-align: left} .mjx-numerator {display: block...",
+      "url": "https://www.lesswrong.com/posts/BvAg6E5XaPppcZHu5/understanding-complex-conjugates-in-quantum-mechanics",
+      "author": "jessicata",
+      "published": "2026-01-09T15:45:59.625000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Technical exposition explaining why quantum mechanics uses complex numbers, distinguishing between 'phasors' and 'scalars' through groupoid representation theory. Aimed at building conceptual understanding of QM formalism.",
+      "importance_score": 15,
+      "reasoning": "Physics/mathematics educational content. Well-written but not AI research. No connection to machine learning, AI safety, or AI capabilities.",
+      "themes": [
+        "Physics",
+        "Mathematics",
+        "Quantum Mechanics"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "87fb8beba20e",
+      "title": "Objective Questions",
+      "content": "Epistemic Status: I wrote this a few days ago while moved by the trolly spirit where I could say \"I'm just asking questions, bro!\" and smirk with a glint in my eye... but then I showed a draft to someone. It was a great springboard for that conversation, but then the conversation caused me to update on stuff. &nbsp;In general, almost no claims are made in this post, except the implicit claim that these questions are questions that aliens and AIs would naturally wonder about too (if not necessarily with the same idiosyncratic terms... after all, the alien Kant is probably not named \"Kant\"). I already don't agree that all these questions have that status, but I'd have to go carefully through them to change it, so I'm just throwing this into the public because it DOES seem like decent ART for causing certain conversations. (Also, my ability to track my own motivations isn't 100% (yet (growth mindset!)) and maybe I am just am subtweeting Eliezer very gently for using \"people have different opinions about art\" as his central example for why moral realism isn't a safe concept?)Infohazard Status: I would have not published this prior to covid because it talks about layers and layers of \"planning to spiritually defect\" that I'm pretty sure happen in human beings in DC, but children shouldn't be taught to do too early or the children will be seen badly as they grow up and it would be bad... but since America learned almost nothing from that, and things like that are going to happen again and more by default, it seems like maybe I should put out mildly infohazardous ideas that almost everyone with a brain and the right to vote in the strongest nuclear power on Earth should eventually think anyway, if the ideas, upon social normalization, seem like they could help a democratic polity not make giant stupid fucking errors over and over again.&nbsp;Robinson Crusoe BasicsDo I have any medium term goals with convergent instrumental utility for other longer term goals or preferences...",
+      "url": "https://www.lesswrong.com/posts/rc9LvnTRgjpZHTorj/objective-questions",
+      "author": "JenniferRM",
+      "published": "2026-01-09T16:09:19.403000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Philosophical exploration of epistemic questions framed as 'objective' questions that aliens or AIs might also wonder about. The author explicitly notes it's speculative and contains few concrete claims.",
+      "importance_score": 12,
+      "reasoning": "Primarily philosophical musing with tangential AI relevance. Self-described as exploratory 'art for causing conversations' rather than substantive research or analysis.",
+      "themes": [
+        "Philosophy",
+        "Epistemology"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "63c2cb642f53",
+      "title": "Where's the $100k iPhone?",
+      "content": "I’m not quite sure how unequal the world used to be, but I’m fairly certain the world is more equal (in terms of financial means) than the world was, say, in the 1600s.There are many things that enormous wealth allows you to buy that’s out of reach for middle-class American consumers, like yachts, personal assistants, private jets, multiple homes, etc. You can frame these things in terms of the problems they solve e.g. private jets solve the problem of travelling long distances, multiple homes solves the “problem” of wanting to go on vacation more often. Note that the problems persist across wealth brackets, it’s just that the ultra-wealthy have different methods of solving those problems. While the ultra-wealthy might solve the problem of “vacation travel” using a private jet, those without extreme wealth might travel using commercial airlines. The ultra wealthy introduce novelty into their lives by purchasing multiple homes, while everyone else goes on vacation and stay in a hotel or similar.If you cluster goods and services based on the problem they solve, most seem to be available at wide range of prices, with the higher end being around 2 or maybe 3 orders-of-magnitude greater than the lower end. For example:Food: Higher end would look like full-time personal chef and regular fine-dining, lower end would look like grocery store pre-packaged meals and cheap fast-food.Short-distance travel: Higher end would look like a full-time chauffeur in a custom Bentley, lower end would be public transport or an old car.Long-distance travel: Higher end would frequent private jet flights, lower end would be infrequent commercial airline travelTime-telling: ~$10 Casio through to a ~$100k RolexEducation: free public school vs ~$50k/year elite schools + private tuitionPolitics: In a democracy, voting is free. But if you have $100k+, you can lobby for areas of your choosing or sponsor political candidates.Healthcare: regulation makes this less clear than other cases, but you and ...",
+      "url": "https://www.lesswrong.com/posts/5F3Ed3hc4YZo626oo/where-s-the-usd100k-iphone",
+      "author": "beyarkay",
+      "published": "2026-01-09T18:48:05.636000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "An economic/philosophical essay exploring wealth inequality through the lens of consumer goods pricing, questioning why premium versions of products like iPhones don't scale to ultra-luxury price points. Not related to AI research.",
+      "importance_score": 8,
+      "reasoning": "Off-topic for AI research. This is economic/social commentary with no technical content or relevance to AI development, safety, or capabilities.",
+      "themes": [
+        "Economics",
+        "Social Commentary"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "54606ca4e262",
+      "title": "Leo in me",
+      "content": "Do you ever wanna be Leonardo Da Vinci for a day?You know, I was a Leo once…I died.See, some people aren’t made for the world. The world is made for you. Not for Tesla. Not for Newton. Not for Einstein. Just you.Once, A mother asked Einstein what her child should read. He said fairy tales. When she asked what comes after, he said more fairy tales.I used to read fairy tales. I used to imagine things before they had names. Ask questions without expecting answers. I thought that was how you learned to see.Ideas moved through my head as freely as the wind. I shuffled through subjects the way some people move through rooms. Everything felt connected. I didn’t understand why I was supposed to stay in one place.But the world doesn’t like that. It likes clarity. It likes labels. It likes knowing what you are before you finish becoming it.It didn’t matter what I could do; I could have cured cancer, and it wouldn’t have mattered. I didn’t choose one thing. And not choosing was treated like a failure.People kept asking what I was going to be. Why I kept moving. Whether I was bored or scared. I wasn’t. I just didn’t see borders the way they did.I won a hundred times. I failed once. Once. I failed to choose.That was enough; enough for me to forever be the issue, the one without a future. They made me sink down into myself. They made me believe their words, to see the world they picked.That’s how he died, the Leo in me.I grew older, learned how to focus. I studied. I did well. I picked a path that made sense to other people. I stopped looking around more than necessary.In tenth grade, my mother saw my results and smiled. She was glowing with pride. She asked me what I wanted as a reward.I said nothing.Turns out, when you lose everything, you have nothing left to ask for. Even if the world learns to accept you, you can never go back. You can only go on. For them, for the world, in the path that was picked for you.",
+      "url": "https://www.lesswrong.com/posts/8GBBkJKbGzGb46onj/leo-in-me",
+      "author": "Rudaiba",
+      "published": "2026-01-09T10:55:35.842000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Personal reflective essay using Leonardo da Vinci as metaphor for discussing polymathy, creative struggle, and societal pressure to specialize. Not related to AI research.",
+      "importance_score": 5,
+      "reasoning": "Personal essay/creative writing with no technical content or relevance to AI research.",
+      "themes": [
+        "Personal Essay",
+        "Creativity"
+      ],
+      "continuation": null
+    }
+  ],
+  "notice": {
+    "type": "info",
+    "title": "Weekend Edition",
+    "message": "arXiv papers are not collected on weekends. Any weekend papers will be included in Monday's report."
+  }
+}

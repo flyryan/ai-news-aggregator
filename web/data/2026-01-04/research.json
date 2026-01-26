@@ -1,0 +1,165 @@
+{
+  "category": "research",
+  "date": "2026-01-04",
+  "category_summary": "Today's content centers on **AI evaluation methodology** and **security considerations** for advanced systems, with limited novel technical research.\n\n- **METR**'s [time horizons framework](/?date=2026-01-04&category=research#item-7832028bfae2) offers a concrete metric for tracking AI agent capability growth by measuring task completion times—relevant for forecasting dangerous capability thresholds\n- Discussion of **Claude Code**'s [reported use in cyber espionage](/?date=2026-01-04&category=research#item-350eef5af65d) highlights urgent questions about open-source model safeguards and attack attribution\n- The [corporations-as-**proto-ASI** analogy](/?date=2026-01-04&category=research#item-fafc140d50a4) provides an accessible frame for alignment challenges but lacks technical novelty\n\nRemaining items cover general epistemics and communication practices without direct AI research contribution. Overall a thin day for substantive technical advances.",
+  "category_summary_html": "<p>Today's content centers on <strong>AI evaluation methodology</strong> and <strong>security considerations</strong> for advanced systems, with limited novel technical research.</p>\n<ul>\n<li><strong>METR</strong>'s <a href=\"/?date=2026-01-04&category=research#item-7832028bfae2\" class=\"internal-link\">time horizons framework</a> offers a concrete metric for tracking AI agent capability growth by measuring task completion times—relevant for forecasting dangerous capability thresholds</li>\n<li>Discussion of <strong>Claude Code</strong>'s <a href=\"/?date=2026-01-04&category=research#item-350eef5af65d\" class=\"internal-link\">reported use in cyber espionage</a> highlights urgent questions about open-source model safeguards and attack attribution</li>\n<li>The <a href=\"/?date=2026-01-04&category=research#item-fafc140d50a4\" class=\"internal-link\">corporations-as-<strong>proto-ASI</strong> analogy</a> provides an accessible frame for alignment challenges but lacks technical novelty</li>\n</ul>\n<p>Remaining items cover general epistemics and communication practices without direct AI research contribution. Overall a thin day for substantive technical advances.</p>",
+  "themes": [
+    {
+      "name": "AI Evaluation",
+      "description": "Methods and metrics for measuring AI system capabilities and progress",
+      "item_count": 1,
+      "example_items": [],
+      "importance": 62
+    },
+    {
+      "name": "AI Safety",
+      "description": "Content related to evaluating and mitigating risks from AI systems, including capability monitoring and misuse prevention",
+      "item_count": 3,
+      "example_items": [],
+      "importance": 55
+    },
+    {
+      "name": "Open-Source AI",
+      "description": "Considerations around freely available AI models and their security implications",
+      "item_count": 1,
+      "example_items": [],
+      "importance": 42
+    },
+    {
+      "name": "Philosophy/Epistemics",
+      "description": "General philosophical and epistemological discussions not directly AI-focused",
+      "item_count": 2,
+      "example_items": [],
+      "importance": 11
+    }
+  ],
+  "total_items": 6,
+  "items": [
+    {
+      "id": "7832028bfae2",
+      "title": "AXRP Episode 47 - David Rein on METR Time Horizons",
+      "content": "YouTube link When METR says something like “Claude Opus 4.5 has a 50% time horizon of 4 hours and 50 minutes”, what does that mean? In this episode David Rein, METR researcher and co-author of the paper “Measuring AI ability to complete long tasks”, talks about METR’s work on measuring time horizons, the methodology behind those numbers, and what work remains to be done in this domain. Topics we discuss: Measuring AI Ability to Complete Long Tasks The meaning of “task length” Examples of intermediate and hard tasks Why the software engineering focus Why task length as difficulty measure Is AI progress going superexponential? Is AI progress due to increased cost to run models? Why METR measures model capabilities How time horizons relate to recursive self-improvement Cost of estimating time horizons Task realism vs mimicking important task features Excursus on “Inventing Temperature” Return to task realism discussion Open questions on time horizons Daniel Filan (00:00:09): Hello everybody. In this episode I’ll be speaking with David Rein. David is a researcher at METR focused on AI agent capability evaluation. To read the transcript of this episode, you can go to axrp.net, you can become a patron at patreon.com/axrpodcast, and you can give feedback about the episode at axrp.fyi. All right, David, welcome to the podcast. David Rein (00:00:31): Yeah, thanks for having me. Measuring AI Ability to Complete Long Tasks Daniel Filan (00:00:32): So I think the work that you’ve been involved in that’s probably best known in the AI existential risk community is this paper that METR put out with a whole bunch of authors – I think the lead author is Thomas Kwa – “Measuring AI Ability to Complete Long Tasks”. What’s going on with this paper? David Rein (00:00:51): Yeah, so Thomas Kwa and Ben West co-led the project. Basically the typical way we measure progress in AI is via benchmarks. So a benchmark is a set of tasks that you have an AI system – this could be a neural network or...",
+      "url": "https://www.lesswrong.com/posts/GHKYwjYtwzhukpBSb/axrp-episode-47-david-rein-on-metr-time-horizons",
+      "author": "DanielFilan",
+      "published": "2026-01-02T19:10:51.409000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Podcast discussion with METR researcher David Rein about measuring AI agent capabilities through task completion time horizons, explaining what metrics like '50% time horizon of 4 hours' mean and discussing methodology, progress tracking, and connections to recursive self-improvement risks.",
+      "importance_score": 62,
+      "reasoning": "Substantive content from a credible AI evaluation organization (METR). Covers important methodological work on capability benchmarking that's directly relevant to tracking AI progress and safety-relevant thresholds. Discussion of superexponential progress and self-improvement connections adds safety relevance.",
+      "themes": [
+        "AI Evaluation",
+        "AI Capabilities",
+        "AI Safety",
+        "AI Agents",
+        "Benchmarking"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "350eef5af65d",
+      "title": "Re: Anthropic Chinese Cyber-Attack. How Do We Protect Open-source Models?",
+      "content": "Recently Anthropic published a report on how they detected and foiled the first reported AI-orchestrated cyber espionage campaign. Their Claude Code agent was manipulated by a group they are highly confident was sponsored by the Chinese state, to infiltrate about 30 global targets, including large tech companies and financial institutions.Their report makes it clear that we've reached a point in the evolution of AI, where highly-sophisticated cyber-attacks can be carried out at scale, with minimal human participation.It's great that Anthopic was able to detect and defuse the cyberattacks. However they were clearly able to do that because Claude Code runs their closed source model within their closed technical ecosystem. They have access to detailed telemetry data which provides them with at least some sense of when their product is being used to perpetrate harm.This brings up a question however:&nbsp;How could such threats be detected and thwarted in the case of open-source models?These models are freely downloadable on the internet, and can be set up on fully private servers with no visibility to the outside world. Bad actors could co-ordinate large scale AI attacks with private AI agents based on these LLMs, and there would be no Anthropic-style usage monitoring to stop them.As open-source models improve in capability, they become a very promising option for bad actors seeking to perpetrate harm at scale.Anthropic'll get you if you use Claude Code, but with a powerful open-source model? Relatively smooth sailing.How then are these models to be protected from such malevolent use?I spent some time thinking about this (I was inspired by Apart Research's Def/Acc hackathon), and came up with some insights.&nbsp;Concept: Harmful Tasks and Harmless Subtasks.Anthropic's Claude model has significant safety guardrails built in. In spite of this however, the attackers were able to manipulate the agent to carry out their malevolent tasks (at least up until the point that was ...",
+      "url": "https://www.lesswrong.com/posts/wkGy3QuoKHyAjwWuK/re-anthropic-chinese-cyber-attack-how-do-we-protect-open",
+      "author": "Mayowa Osibodu",
+      "published": "2026-01-03T04:45:01.430000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Commentary on Anthropic's reported detection of an AI-orchestrated cyber espionage campaign using Claude Code, raising concerns about how similar attacks could be detected with open-source models that lack centralized monitoring. Highlights the security asymmetry between closed and open-source AI systems.",
+      "importance_score": 42,
+      "reasoning": "Addresses a timely and important AI safety concern regarding open-source model misuse and the detection gap. However, this is commentary rather than original research, and the analysis is preliminary without proposing concrete solutions.",
+      "themes": [
+        "AI Safety",
+        "Cybersecurity",
+        "Open-Source AI",
+        "AI Governance"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "fafc140d50a4",
+      "title": "Companies as \"proto-ASI\"",
+      "content": "We don’t have AI that’s smarter than you or I, but I believe we do have something that’s somewhat similar, and analysing this thing is useful as an argument in favour of ASI not being aligned to humanity’s interests by default.epistemic status: I largely believe this argument to be correct, although it’s quite hand-wavy and pleads-to-analogy a bit more than I’d like. Despite (or possibly because of) this, I’ve found it incredibly useful in motivating to (non-technical) relatives and friends why I don’t believe ASI would “just be kinda chill”. While the argument might be flawed, I strongly believe the conclusion is correct mostly due to more thorough arguments that are trickier to explain to relatives over Christmas dinner.Large corporations exist, and are made up of 100-10k individual human brains all working in (approximate) harmony. If you squint, you can consider these large corporations a kind of proto-ASI: they’re certainly smarter and more capable than any individual human, and have an identity that’s not tied to that of any human.Despite these corporations being composed entirely of individual people who (mostly) all would like to be treated well and to treat others well, large corporations consistently act in ways that are not attempting to maximise human prosperity and happiness. One example of this is how social media is designed to maximise advertising revenue, to the detriment of all else. There are many real-world examples, such as: Volkswagen cheating on emissions tests, ExxonMobil funding climate change deniers, various tobacco companies denying the health effects of smoking, or Purdue Pharma not disclosing the known addictive side-effects of OxyContin.To make this clear: every company is an existence proof of a system that’s smarter than any individual human, is not “just kinda chill” and they are not aligned with human well-being and happiness. This is even more damning when you consider that companies are made up of individual humans, and yet the e...",
+      "url": "https://www.lesswrong.com/posts/TZXeCbcfgoCphc5AM/companies-as-proto-asi",
+      "author": "beyarkay",
+      "published": "2026-01-02T19:24:22.160000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Uses large corporations as an analogy for ASI alignment risks, arguing that organizations composed of well-meaning individuals can still produce harmful outcomes at scale. Intended as an accessible explanation for why ASI wouldn't be 'just chill' by default.",
+      "importance_score": 28,
+      "reasoning": "Presents a familiar alignment intuition pump rather than novel research. The corporations-as-misaligned-agents analogy is well-established in alignment discourse. Useful for communication but lacks technical depth or new insights.",
+      "themes": [
+        "AI Alignment",
+        "AI Safety",
+        "Superintelligence"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "f52e16f580e6",
+      "title": "Why We Should Talk Specifically Amid Uncertainty",
+      "content": "I am often frustrated by those who promote vibes and deliver aimless soliloquies. We would often be better served by speaking specifically, more concisely, and boldly. From the average meeting room to the American political landscape, we are harming ourselves by speaking vaguely, and current roadblocks in policymaking across many facets of society are exacerbated by unspecific and unserious discourse. It is not just a political and social imperative, but instrumentally useful to speak specifically and intently.Spend more time to speak lessIf I had more time, I would have written a shorter letter- Blaise PascalAny student learns that their opening paragraphs are the most important for introducing their argument and intent. Writing this way serves two critical functions: to frame the rest of the paper for the reader and the author. A common adage is that concise writing is the product of thorough writing. A good revision process forces you to reevaluate your intent for each sentence, which reveals redundant, awkward, or dangling ideas. A good introduction and thesis force you to recursively reevaluate every idea, argument, and paragraph. By stating your intentions, you can tell yourself what's important and what can be omitted.Speaking is a very similar process. I've had the privilege to deliver many presentations to peers or managers throughout high school, university classes, and internships. I competed in Lincoln-Douglas NSDA Debate for three years, led my Boy Scout troop for a short stint, and have presented technical projects, at separate times, to my school administration, internship managers, and corporate leadership. I am also a very nervous speaker, and despise most forms of public speaking. I still often shake when I speak, but equipping myself with speaking intuition has given me enough confidence to survive. The most important guideline for speaking is to speak with intent and announce your intent. Part of this is, like a good comedian, knowing your audien...",
+      "url": "https://www.lesswrong.com/posts/WLJeHLLnhCyQ9tyb7/why-we-should-talk-specifically-amid-uncertainty",
+      "author": "sbaumohl",
+      "published": "2026-01-02T22:04:41.859000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "An argument for clear, specific communication over vague discourse, drawing on writing principles and decision-making benefits. Advocates for concise, bold statements even amid uncertainty.",
+      "importance_score": 12,
+      "reasoning": "General communication and epistemics advice without AI research content. Potentially useful for research communication practices but not substantive AI research.",
+      "themes": [
+        "Communication",
+        "Epistemics",
+        "Decision-Making"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "9d1d9828fe4d",
+      "title": "Give Skepticism a Try",
+      "content": "Philosophy has a weird relationships with skepticism. On one hand, skepticism is a legitimate philosophical view with no good arguments against.On the other hand, it’s usually treated as an obviously wrong view. An absurdity which, nevertheless has to be entertained. Skeptic arguments and conclusions are almost never directly engaged with. Instead, they are treated as bogeymans that would somehow destroy all reason and, quite ironically, as justifications for dogmas.Consider how Descartes arrived to a theistic conclusion. Whatever the observations, it’s always possible that those are just illusions imposed by evil demon. Which means that no observations can be fully justified. Unless... there is a God that prevents evil demon from his misdeeds.Now, as I’ve already mentioned in another post, the addition of God doesn’t actually help with the issue. Shame on Descartes for not figuring it out himself! But this isn’t the only mistake here and Descartes is far from only famous philosopher who fell for it.Emanuel Kant came to the conclusion that there is no way to justify the existence of space and time with observations, as space and time are prerequisites for any observations in the first place. Therefore, they have to be justifiable “à priori” in a matter, suspiciously resembling cyclical reasoning:Unless “à priori” justifications are true, space and time are not justifiable. But space and time has to be justifiable[1]. Therefore “à priori” justifications has to be true.Both Kant and Descartes argued for a bottom line that they’d wishfully assumed. That skepticism is ultimately false. And therefore, whatever required for this assumption to be true has to also be true:Unless X is true, we have no way to defy skepticism. And we really want to defy skepticism. Therefore X has to be true.Now let’s not dunk on the poor giants whose shoulders we are standing on. They made silly mistakes, true, but someone had to, so that we knew better. The lesson here is to actually know be...",
+      "url": "https://www.lesswrong.com/posts/5LLA3bKoomSqo8c2i/give-skepticism-a-try",
+      "author": "Ape in the coat",
+      "published": "2026-01-03T03:57:37.372000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "A philosophical essay arguing that skepticism deserves more serious engagement rather than being dismissed as absurd, critiquing how philosophers like Descartes and Kant handled skeptical arguments. General epistemology discussion.",
+      "importance_score": 10,
+      "reasoning": "Pure philosophy/epistemology content with no direct AI research connection. While rationalist epistemics have some relevance to AI alignment thinking, this piece doesn't engage with AI topics.",
+      "themes": [
+        "Philosophy",
+        "Epistemology"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "a9d46550c2cc",
+      "title": "The surprising adequacy of the Roblox game marketplace",
+      "content": "What is a game marketplaceIn this article I will use “game marketplaces” to refer to platforms like Steam, the Epic Games Store, Roblox, GoG, and the like: sites where you can find different games to play (paid or not), who offer hosting (you access your games through them), and have some amount discoverability for the games on their stores. Outside of this definition are sites like Humble Bundle or other key [re]sellers which usually just redirect the user to one of the main platforms to claim their games.There’s an odd one out on that list: Roblox. Some might not consider it a “traditional” marketplace, in a sense, because Roblox only offers games that can be played on Roblox, as opposed to the others which offer separate downloads for each game. I don’t think it disqualifies it for our purposes.Anyways what I want you to know is that we’re talking about places where you can find games so you can buy them and play them.Also, I’m gonna be using “buying” as a general stand in for “acquiring, downloading, purchasing, or otherwise finding the means to play a game”; but most games on Roblox are free and there are hundreds of free, quality games on other platforms as well.Adequacy?Adequacy is the ability of a certain demand to be met in the market. In the case of games we could say that the demand is “fun”. In exchange of enough money for the developer to make a living and hopefully a bit more.Fun, for players, means a lot of different things. They may want to compete, or explore, or enjoy a story, or solve puzzles, etc. Players also care about a lot of other factors, like music, graphics, and so on. We’ll just group the general value gotten from a game under fun.No player —barring eccentric rich people— is going to personally pay for the development of a game that nails all of their likes, so they are content with paying a lot less and getting a game that appeals to a wider audience but still overlaps with their likes; they each contribute a bit of money towards paying...",
+      "url": "https://www.lesswrong.com/posts/sFfqFdw3b39Tzy7vv/the-surprising-adequacy-of-the-roblox-game-marketplace",
+      "author": "Esteban Restrepo",
+      "published": "2026-01-03T09:15:14.305000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "A casual analysis comparing Roblox to traditional game marketplaces like Steam and Epic Games Store, examining discoverability and game acquisition. This is general gaming industry commentary with no AI research relevance.",
+      "importance_score": 5,
+      "reasoning": "Not AI-related content. Discusses game platforms and marketplace dynamics, which falls outside the scope of AI research analysis entirely.",
+      "themes": [
+        "Gaming Industry",
+        "Platform Economics"
+      ],
+      "continuation": null
+    }
+  ],
+  "notice": {
+    "type": "info",
+    "title": "Weekend Edition",
+    "message": "arXiv papers are not collected on weekends. Any weekend papers will be included in Monday's report."
+  }
+}

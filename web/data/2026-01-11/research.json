@@ -1,0 +1,316 @@
+{
+  "category": "research",
+  "date": "2026-01-11",
+  "category_summary": "Today's research centers on AI safety fundamentals and alignment tractability debates. A substantive technical argument against **continuous chain-of-thought (neuralese)** [challenges OpenAI's research direction](/?date=2026-01-11&category=research#item-61e9522a6331), claiming discrete tokens are architecturally necessary rather than bandwidth limitations.\n\n- Theoretical analysis [provides **learning-theoretic bounds**](/?date=2026-01-11&category=research#item-c8cf7a16f519) on detecting deceptive AI behaviors like sandbagging and sycophancy\n- **AI Incident Forecasting** models [predict **6-11x increases**](/?date=2026-01-11&category=research#item-d198c31eb374) in AI-related incidents over five years using statistical analysis of the AI Incidents Database\n- Anthropic researcher [argues alignment may require **70+ years**](/?date=2026-01-11&category=research#item-77c01b1b3448) of iterative development, challenging 'steam engine difficulty' optimism\n\nSupporting work includes the **False Confidence Theorem** [applied to Bayesian reasoning](/?date=2026-01-11&category=research#item-2c5974ce0bd4), a conceptual framework [distinguishing **superagency**](/?date=2026-01-11&category=research#item-c015a6225956) from superintelligence, and practical tooling [applying **PageRank**](/?date=2026-01-11&category=research#item-3e408746897d) to identify high-signal voices in AI discourse networks.",
+  "category_summary_html": "<p>Today's research centers on AI safety fundamentals and alignment tractability debates. A substantive technical argument against <strong>continuous chain-of-thought (neuralese)</strong> <a href=\"/?date=2026-01-11&category=research#item-61e9522a6331\" class=\"internal-link\">challenges OpenAI's research direction</a>, claiming discrete tokens are architecturally necessary rather than bandwidth limitations.</p>\n<ul>\n<li>Theoretical analysis <a href=\"/?date=2026-01-11&category=research#item-c8cf7a16f519\" class=\"internal-link\">provides <strong>learning-theoretic bounds</strong></a> on detecting deceptive AI behaviors like sandbagging and sycophancy</li>\n<li><strong>AI Incident Forecasting</strong> models <a href=\"/?date=2026-01-11&category=research#item-d198c31eb374\" class=\"internal-link\">predict <strong>6-11x increases</strong></a> in AI-related incidents over five years using statistical analysis of the AI Incidents Database</li>\n<li>Anthropic researcher <a href=\"/?date=2026-01-11&category=research#item-77c01b1b3448\" class=\"internal-link\">argues alignment may require <strong>70+ years</strong></a> of iterative development, challenging 'steam engine difficulty' optimism</li>\n</ul>\n<p>Supporting work includes the <strong>False Confidence Theorem</strong> <a href=\"/?date=2026-01-11&category=research#item-2c5974ce0bd4\" class=\"internal-link\">applied to Bayesian reasoning</a>, a conceptual framework <a href=\"/?date=2026-01-11&category=research#item-c015a6225956\" class=\"internal-link\">distinguishing <strong>superagency</strong></a> from superintelligence, and practical tooling <a href=\"/?date=2026-01-11&category=research#item-3e408746897d\" class=\"internal-link\">applying <strong>PageRank</strong></a> to identify high-signal voices in AI discourse networks.</p>",
+  "themes": [
+    {
+      "name": "AI Safety & Alignment",
+      "description": "Research on detecting deceptive AI behavior, alignment difficulty, and preventing catastrophic outcomes from AI systems",
+      "item_count": 6,
+      "example_items": [],
+      "importance": 70
+    },
+    {
+      "name": "Language Models & Architecture",
+      "description": "Technical analysis of LLM design choices, particularly around chain-of-thought and discrete vs continuous representations",
+      "item_count": 1,
+      "example_items": [],
+      "importance": 68
+    },
+    {
+      "name": "Forecasting & Risk Assessment",
+      "description": "Quantitative prediction of AI incidents and risk trajectories",
+      "item_count": 2,
+      "example_items": [],
+      "importance": 55
+    },
+    {
+      "name": "Epistemics & Rationality",
+      "description": "Discussion of reasoning quality, Bayesian inference, and failure modes in truth-seeking",
+      "item_count": 4,
+      "example_items": [],
+      "importance": 45
+    },
+    {
+      "name": "AI Community & Education",
+      "description": "Meta-level discussion about training programs and information discovery in the AI safety ecosystem",
+      "item_count": 2,
+      "example_items": [],
+      "importance": 40
+    }
+  ],
+  "total_items": 13,
+  "items": [
+    {
+      "id": "61e9522a6331",
+      "title": "The Case Against Continuous Chain-of-Thought (Neuralese)",
+      "content": "Main thesis: Discrete token vocabularies don't lose information so much as they allow information to be retained in the first place. By removing minor noise and singling out major noise, errors become identifiable and therefore correctable, which continuous latent representations fundamentally cannot offer.The Bandwidth Intuition (And Why It's Incomplete)One of the most elementary ideas connected to neuralese is increasing bandwidth. After the tireless mountains of computation called a forward pass, we condense everything down to ~17 bits (the log₂ of our vocabulary size).This seems insane. Imagine pitching a neural network architecture where layers 5, 10, 15, and 20 have hidden dimension 20, while normal layers use 512. You'd be laughed out of the room. And that's not even accounting for discreteness.So why do I think this apparent insanity is not just tolerable but necessary for LLMs?The Noise Accumulation ProblemLet's imagine LLMs passed vast latent messages instead of tokens - say, the final hidden state or something a few matrix multiplications away from it. No bandwidth concerns. Pure continuous reasoning.This message won't be perfect. The forward pass involves finite compute, imperfect optimization, distributional shift as we move off the training manifold, etc.. Call this aggregate imperfection \"noise\" or \"error\".Here's the problem: noise in continuous space has no natural factorization.When a 4096-dimensional vector is slightly \"off,\" which components are errors and which are intentional signal? The representations weren't designed with error boundaries. The noise is semantically entangled with the message. There's no way to look at the latent state and say \"that part is the mistake.\"This noise might occasionally get recognized and corrected, but this shouldn't be expected. There are too many values the noise can manifest in, too many ways it can blend with legitimate concepts, not easily distinguishable for the next forward pass to catch.So the noise accum...",
+      "url": "https://www.lesswrong.com/posts/ynC26Z2CJXsqj6ZnZ/the-case-against-continuous-chain-of-thought-neuralese",
+      "author": "RobinHa",
+      "published": "2026-01-10T15:32:03.230000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Argues against continuous chain-of-thought ('neuralese') approaches, claiming that discrete tokens aren't just bandwidth limitations but actually necessary for error correction. Continuous latent representations would accumulate noise across reasoning steps, while discretization identifies and corrects errors.",
+      "importance_score": 68,
+      "reasoning": "Substantive technical argument addressing an active research direction (continuous CoT from OpenAI and others). Provides clear theoretical reasoning about noise accumulation that could inform architecture decisions. Novel perspective on why tokenization may be feature not bug.",
+      "themes": [
+        "Language Models",
+        "Architecture",
+        "Chain-of-Thought",
+        "Neural Network Design"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "c8cf7a16f519",
+      "title": "Theoretical predictions on the sample efficiency of\ntraining policies and activation monitors",
+      "content": "I'm worried about AI models intentionally doing bad things, like sandbagging when doing safety research. In the regime where the AI has to do many of these bad actions in order to cause an unacceptable outcome, we have some hope of identifying examples of the AI doing the bad action (or at least having some signal at distinguishing bad actions from good ones). Given such a signal we could: Directly train the policy to not perform bad actions. Train activation monitors to detect bad actions. These monitors could be used in a variety of ways such as: Rejecting actions flagged as bad. Either resample a response from the same policy, or using some different process. Look into bad actions further, to try to incriminate the AI. Incrimination based strategies are out of scope for this post: I'll be solely interested in the question of: What should we expect the sample efficiency of training policies and monitors to be at removing bad behavior? This theoretical analysis isn't supposed to replace empirical research on the matter, although I hope that it can generate some guiding intuition and good hypotheses to test. Learning theory basic background Let's start with the following problem setup: We have a function f:D→{0,1}.mjx-chtml {display: inline-block; line-height: 0; text-indent: 0; text-align: left; text-transform: none; font-style: normal; font-weight: normal; font-size: 100%; font-size-adjust: none; letter-spacing: normal; word-wrap: normal; word-spacing: normal; white-space: nowrap; float: none; direction: ltr; max-width: none; max-height: none; min-width: 0; min-height: 0; border: 0; margin: 0; padding: 1px 0} .MJXc-display {display: block; text-align: center; margin: 1em 0; padding: 0} .mjx-chtml[tabindex]:focus, body :focus .mjx-chtml[tabindex] {display: inline-table} .mjx-full-width {text-align: center; display: table-cell!important; width: 10000em} .mjx-math {display: inline-block; border-collapse: separate; border-spacing: 0} .mjx-math * {display: inline-block...",
+      "url": "https://www.lesswrong.com/posts/oHAGT7cGMjh9fGwYN/theoretical-predictions-on-the-sample-efficiency-of-training",
+      "author": "Alek Westover",
+      "published": "2026-01-10T18:50:20.531000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Provides a learning-theoretic analysis of how efficiently we can train AI policies or activation monitors to detect and remove bad behaviors like sandbagging during safety research. The post explores sample complexity bounds for both direct policy training and monitor-based approaches to catching deceptive AI actions.",
+      "importance_score": 62,
+      "reasoning": "Addresses a concrete and important AI safety problem (detecting deceptive behavior) with theoretical rigor. Provides useful framework for thinking about sample efficiency, though remains theoretical without empirical validation. Relevant to current concerns about scheming/sandbagging.",
+      "themes": [
+        "AI Safety",
+        "Alignment",
+        "Machine Learning Theory",
+        "Deceptive Alignment"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "d198c31eb374",
+      "title": "AI Incident Forecasting",
+      "content": "I'm excited to share that my team and I won 1st place out of 35+ project submissions in the AI Forecasting Hackathon hosted by Apart Research and BlueDot Impact!We trained statistical models on the AI Incidents Database and predicted that AI-related incidents could increase by 6-11x within the next five years, particularly in misuse, misinformation, and system safety issues. This post does not aim to prescribe specific policy interventions. Instead, it presents these forecasts as evidence to help prioritize which risk domains warrant policy attention and deeper evaluation.",
+      "url": "https://www.lesswrong.com/posts/XhhzDYEJ3huiKhEku/ai-incident-forecasting",
+      "author": "cluebbers",
+      "published": "2026-01-09T21:17:01.245000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Hackathon-winning project that trained statistical models on the AI Incidents Database, forecasting 6-11x increase in AI-related incidents over five years, particularly in misuse, misinformation, and system safety categories.",
+      "importance_score": 58,
+      "reasoning": "Empirical forecasting work with concrete quantitative predictions about AI risks. Useful for policy prioritization. Won competitive hackathon. Limited methodological details visible, but represents valuable attempt at quantifying near-term AI risk trends.",
+      "themes": [
+        "AI Safety",
+        "Forecasting",
+        "AI Risk",
+        "AI Incidents"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "77c01b1b3448",
+      "title": "If AI alignment is only as hard as building the steam engine, then we likely still die",
+      "content": "Cross-posted from my website. You may have seen this graph from Chris Olah illustrating a range of views on the difficulty of aligning superintelligent AI: Evan Hubinger, an alignment team lead at Anthropic, says: If the only thing that we have to do to solve alignment is train away easily detectable behavioral issues...then we are very much in the trivial/steam engine world. We could still fail, even in that world—and it’d be particularly embarrassing to fail that way; we should definitely make sure we don’t—but I think we’re very much up to that challenge and I don’t expect us to fail there. I disagree; if governments and AI developers don't start taking extinction risk more seriously, then we are not up to the challenge. Thomas Savery patented the first commercial steam pump in 1698. [1] The device used fire to heat up a boiler full of steam, which would then be cooled to create a partial vacuum and draw water out of a well. Savery's pump had various problems, and eventually Savery gave up on trying to improve it. Future inventors improved upon the design to make it practical. It was not until 1769 that Nicolas-Joseph Cugnot developed the first steam-powered vehicle, something that we would recognize as a steam engine in the modern sense. [2] The engine took Cugnot four years to develop. Unfortunately, Cugnot neglected to include brakes—a problem that had not arisen in any previous steam-powered devices—and at one point he allegedly crashed his vehicle into a wall. [3] Imagine it's 1765, and you're tasked with building a steam-powered vehicle. You can build off the work of your predecessors who built steam-powered water pumps and other simpler contraptions; but if you build your engine incorrectly, you die. (Why do you die? I don't know, but for the sake of the analogy let's just say that you do.) You've never heard of brakes or steering or anything else that automotives come with nowadays. Do you think you can get it all right on the first try? With a steam engi...",
+      "url": "https://www.lesswrong.com/posts/WkEAcTNHHHk97nT4d/if-ai-alignment-is-only-as-hard-as-building-the-steam-engine",
+      "author": "MichaelDickens",
+      "published": "2026-01-10T18:10:48.292000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Argues against optimistic views (citing Evan Hubinger) that alignment might be 'steam engine difficulty' - pointing out that steam engines took 70+ years from patent to practical vehicles. Even 'easy' alignment could fail if we lack sufficient time or coordination before dangerous capabilities emerge.",
+      "importance_score": 55,
+      "reasoning": "Provides useful historical analogy challenging alignment optimism from a prominent Anthropic researcher. The argument is more policy/strategic than technical, but raises valid points about timelines and coordination. Limited novelty in the core argument.",
+      "themes": [
+        "AI Safety",
+        "AI Policy",
+        "Alignment",
+        "Existential Risk"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "2c5974ce0bd4",
+      "title": "The false confidence theorem and Bayesian reasoning",
+      "content": "A little backgroundI first heard about the False Confidence Theorem (FCT) a number of years ago, although at the time I did not understand why it was meaningful. I later returned to it, and the second time around, with a little more experience (and finding a more useful exposition), its importance was much easier to grasp. I now believe that this result is incredibly central to the use of Bayesian reasoning in a wide range of practical contexts, and yet seems to not be very well known (I was not able to find any mention of it on LessWrong). I think it is at the heart of some common confusions, where seemingly strong Bayesian arguments feel intuitively wrong, but for reasons that are difficult to articulate well. For example, I think it is possibly&nbsp;the central error that Rootclaim made in their lab-leak argument, and although the judges were able to come to the correct conclusion, the fact that seemingly no one was able to specifically nail down this issue has left the surrounding discussion muddled in uncertainty. I hope to help resolve both this and other confusions.&nbsp;Satellite conjunction&nbsp;The best exposition of the FCT that I have found&nbsp; is “Satellite conjunction analysis and the false confidence theorem.\" The motivating example here is the problem of predicting when satellites are likely to collide with each other, necessitating avoidance maneuvers. The paper starts by walking through a seemingly straightforward application of Bayesian statistics to compute an epistemic probability that 2 satellites will collide, given data (including uncertainty) about their current position and motion. At the end, we notice that very large uncertainties in the trajectories correspond to a very&nbsp;low epistemic belief of collision. Not&nbsp;uncertainty, but rather&nbsp;high confidence of safety. As the paper puts it:&nbsp;…it makes sense that as uncertainty grows, the risk of collision also grows. Epistemic probability of collision eventually hits a maximum,...",
+      "url": "https://www.lesswrong.com/posts/HjbsjnutKE9xbXBwz/the-false-confidence-theorem-and-bayesian-reasoning",
+      "author": "viking_math",
+      "published": "2026-01-10T12:14:29.194000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Introduces the False Confidence Theorem to LessWrong, arguing it explains why strong Bayesian arguments can feel intuitively wrong. Uses satellite conjunction analysis as exposition and suggests this theorem underlies errors in debates like Rootclaim's lab-leak analysis.",
+      "importance_score": 52,
+      "reasoning": "Brings an underappreciated result in Bayesian epistemology to wider attention with practical applications. Useful for improving reasoning quality in the community. Not AI-specific but relevant to how we evaluate AI safety arguments and forecasts.",
+      "themes": [
+        "Epistemics",
+        "Bayesian Reasoning",
+        "Rationality"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "3e408746897d",
+      "title": "Finding high signal people - applying PageRank to Twitter",
+      "content": "Cross post, adapted for LessWrongSeveral challenges add friction to finding high signal people and literature:High status may negatively impact signal.Exploration can only be done at the edges of my network, e.g. Twitter thread interactions or recommended people to follow, bottlenecked by I don’t know what I don’t know.Recommendations naturally bias toward popular people.Even recommended people from a curated following list may be important but low signal, e.g. Sam Altman’s priority is promoting OpenAI products.Validation -&nbsp;is this information valuable? - is manual vibe check.We reapply PageRank to Twitter, which naturally weights “important” people higher. If Ilya Sutskever follows only three accounts, a puppy fan page among them, perhaps we should sit up and take notice. The approach is very similar to the existing LessWrong work analyzing AI discourse on Twitter/Bluesky, but instead of categorizing p(doom) discourse, we want to find \"important\" and “underrated” people.Approach:Find important people in the AI Twitter sphere via PageRankFind the “underrated” people with low follow count from step 1.Find consistently “high signal” people from step 1 via an LLM.Six 'famous' users were used to bootstrap PageRank, chosen for high quality public contributions. After a round of convergence, the top ranked handle is added (removing organizations), repeating until we have ~200 \"core\" handles. Finally, we cut the list down to top 749 and rerun one last time. The full table with additional columns can be found at https://thefourierproject.org/peopleAndrej Karpathy, @karpathy, Eureka Labs/EducationDwarkesh Patel, @dwarkesh_sp, Various topics podcastsLilian Weng, @lilian_weng, Thinking Machines/AI safetyChris Olah, @ch402, Anthropic/AI safetyDylan Patel, @dylan522p, SemiAnalysisEric Jang, @ericjang11, 1X Robotics\"Influential\" PeopleLet’s look at the results! Unsurprisingly, Sam Altman is rank 0, clearly a center of gravity in the field, with other famous people trailing. ...",
+      "url": "https://www.lesswrong.com/posts/s5PwfyRFrGFaZFevW/finding-high-signal-people-applying-pagerank-to-twitter-1",
+      "author": "jfguan",
+      "published": "2026-01-09T21:21:54.892000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Applies PageRank algorithm to Twitter's AI discourse network to identify 'important' and 'underrated' people to follow. Uses the intuition that if someone important follows few accounts, those accounts are likely high-signal. Includes LLM-based quality assessment.",
+      "importance_score": 48,
+      "reasoning": "Practical tool with clear methodology for information discovery in AI community. Not novel algorithm but useful application. Could help researchers find important voices. Limited broader significance but potentially useful for community coordination.",
+      "themes": [
+        "Social Network Analysis",
+        "Information Discovery",
+        "AI Community"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "c015a6225956",
+      "title": "Possible Principles of Superagency",
+      "content": "Prior to the era of superintelligent actors, we’re likely to see a brief era of superagentic actors—actors who are capable of setting and achieving goals in the pursuit of a given end with significantly greater efficiency and reliability than any single human. Superagents may in certain restricted senses act superintelligently—see principles 8, 9—but this isn’t strictly necessary. A superagent may be constructed from a well-scaffolded cluster of artificial intelligences, but in the near-term it’s far more likely that superagents will consist of one or more humans, aided by well-scaffolded AIs, since humans still have a few properties vital to agency that AIs haven’t fully acquired (yet).&nbsp;As with ‘superintelligence’, there’s no canonical demarcation between superagentic actors and non-superagentic actors; there are only so many different properties which are likely to end up being strongly correlated at large scale, but which may end up uncoupled in particular cases (especially transitional ones), producing a jagged frontier of agency.Here’s a list of possible properties by virtue of which an actor may achieve superagency.Principle 1 (Directedness)A superagent may have vastly improved self-monitoring, introspection, and control.In most intellectual tasks, humans spend the overwhelming majority of their time in predictably unproductive patterns: they are caught up in minutiae, overpolishing what ought to be discarded, failing to filter distractors. They generally fail to notice, or are unwilling to acknowledge, when they’re taking the wrong direction entirely even when they could easily recognize this, and are resistant to change once they’ve invested a lot of their time or ego in a particular approach. Even though they can often easily diagnose these mistakes when other people are making them, they can’t easily avoid these mistakes themselves.A superagent, on the other hand, may be able to plot a reasonable route to their goal and directly take it without distra...",
+      "url": "https://www.lesswrong.com/posts/bjqyzJBTY3sMAyAQr/possible-principles-of-superagency",
+      "author": "Mariven",
+      "published": "2026-01-10T16:00:43.370000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Proposes a conceptual framework for 'superagents' - actors achieving goals with greater efficiency than humans, likely consisting of human-AI teams before pure AI systems. Outlines principles including directedness and other properties that enable superagency.",
+      "importance_score": 45,
+      "reasoning": "Useful conceptual taxonomy for thinking about near-term capable agents, distinguishing superagency from superintelligence. However, largely definitional/philosophical without empirical grounding or novel predictions. May help frame discussions about human-AI collaboration.",
+      "themes": [
+        "AI Capabilities",
+        "Agent Foundations",
+        "Human-AI Collaboration"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "c58be5c3e56d",
+      "title": "A Proposal for a Better ARENA: Shifting from Teaching to Research Sprints",
+      "content": "TLDRI propose restructuring the current ARENA program, which primarily focuses on contained exercises, into a more scalable and research-engineering-focused model consisting of four one-week research sprints preceded by a dedicated \"Week Zero\" of fundamental research engineering training. The primary reasons are:The bottleneck for creating good AI safety researchers isn't the kind of knowledge contained in the ARENA notebooks, but the hands-on research engineering and research skills involved in day-to-day research.I think the current version of ARENA primarily functions as a signaling mechanism in the current state of the AI safety ecosystem.Context and disclaimersThis post was written using Superwhisper and then asking Gemini to transcribe into a blog post format. I have done some light editing. Some of this might look like AI slop. I apologize, but I think the value of this post is pretty good as is, and it is not a good use of my time to refine it further.&nbsp;I am not saying that Arena is not valuable. Arena is obviously valuable, and deserves the high reputation it has in the AI safety ecosystem.&nbsp;Why am I well positioned to think about this? In the past year and a half, I have participated in a large slew of AI safety schemes, both as a participant and as a teacher or lead. This includes ML4Good, both as a participant and as TA, SPAR as a participant, AI Safety Camp as a project lead, ARENA as a participant and as a TA, Algoverse both as a mentor and as a participant, &nbsp;BlueDot both as a participant and a facilitator. &nbsp;Furthermore, I am currently a research manager at MATS so I'm getting a close-up view of what skills are required to do high-quality AI safety research.The views expressed here are my own and do not necessarily reflect the views of MATS.The Core Problem with the Current ARENAMy primary concern is that the skills learned in the current ARENA program are not the bottleneck for the AI Safety ecosystem.Skills Mismatch: AI safety resea...",
+      "url": "https://www.lesswrong.com/posts/6zuNmMMtzQg3natAF/a-proposal-for-a-better-arena-shifting-from-teaching-to",
+      "author": "TheManxLoiner",
+      "published": "2026-01-10T11:56:53.537000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Proposes restructuring ARENA (AI safety training program) from contained exercises to four one-week research sprints, arguing the real bottleneck is research engineering skills rather than conceptual knowledge. Claims current ARENA primarily functions as a signaling mechanism.",
+      "importance_score": 40,
+      "reasoning": "Practical proposal for improving AI safety field-building from someone with relevant experience. Narrow scope focused on one program. Useful meta-discussion but not research itself. Self-acknowledged as AI-assisted transcription with light editing.",
+      "themes": [
+        "AI Safety",
+        "Education",
+        "Community Building"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "b6733609c098",
+      "title": "What do we mean by \"impossible\"?",
+      "content": "(I'm reposting this here from an old Dreamwidth post of mine, since I've seen people reference it occasionally and figure it would be easier to find here.) So people throw around the word \"impossible\" a lot, but oftentimes they actually mean different things by it. (I'm assuming here we're talking about real-world discussions rather than mathematical discussions, where things are clearer.) I thought I'd create a list of different things that people mean by \"impossible\", in the hopes that it might clarify things. Note -- because we're talking about real-world things, time is going to play a role. (Yes, there's not really any universal clock. Whatever.) I'm listing these as \"levels of impossibility\", going roughly from \"most impossible\" to \"least impossible\", even though they're not necessarily actually linearly ordered. Also, some of the distinctions between some of these may be fuzzy at times. Level 0. Instantaneously inconsistent. The given description contains or logically implies a contradiction. It rules out all possible states at some point in time, in any universe. People often claim this one when they really mean level 2 or level 3. Level 1. Instantaneously impossible (contingently). In the actual universe we live in, the given description is instantaneously impossible; it rules out all possible states at some point in time. I think in most discussion that isn't about physics this isn't actually strongly distinguished from level 0. Level 2. Non-equilibrium. The described system fails to propagate itself forward in time; or, if a system extended in time is described, it contains an inconsistency. This is one that people often actually mean when they say something is \"impossible\". Level 3. Unstable equilibrium or possible non-equilibrium. The described system is not resilient to noise; it will not propagate itself forward in time unless exceptional conditions hold continually. This is another one that people often really mean when they say something is \"impossi...",
+      "url": "https://www.lesswrong.com/posts/P4HLwygYa5hiskQMs/what-do-we-mean-by-impossible",
+      "author": "Sniffnoy",
+      "published": "2026-01-09T19:01:17.839000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Reposted taxonomy of different meanings of 'impossible' - from logical contradictions (Level 0) through physical impossibility to merely difficult. Aims to clarify confused discussions where people use 'impossible' to mean different things.",
+      "importance_score": 35,
+      "reasoning": "Useful conceptual clarification that may improve reasoning precision. However, it's a repost of old content, primarily philosophical rather than technical, and not specifically about AI. Limited novelty and impact for AI research purposes.",
+      "themes": [
+        "Philosophy",
+        "Epistemics",
+        "Rationality",
+        "Semantics"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "db98a3c6654b",
+      "title": "Moral-Epistemic Scrupulosity: \nA Cross-Framework Failure Mode of Truth-Seeking",
+      "content": "Crossposted from https://substack.com/home/post/p-183478095&nbsp;Epistemic status: Personal experience with a particular failure mode of reasoning and introspection that seems to appear within different philosophical frameworks (discussed here are rationality and Tibetan Buddhism), involving intolerance of felt uncertainty, over-indexing on epistemic rigour, compulsive questioning of commitments, and moralisation of \"correct\" thinking itself.&nbsp;If you do this correctly, you’ll be safe from error.This is the promise I’ve been chasing for years: across Sufi treatises, Western philosophical texts, Buddhist meditation halls, rationalist forums. Each framework seems to offer its own version: think rigorously enough, examine yourself honestly enough, surrender deeply enough, and (here my anxiousness steps in, with its own interpretations) you’ll finally achieve certainty. You won’t ask yourself whether you’ve got it all wrong anymore. You’ll know that you’re doing it right, taking the right path, being the right sort of person.&nbsp;This isn’t what I believed consciously. I would, confidently, say that certainty is unattainable, and that it's better to keep one’s mind agile and open to new evidence. This seemed like the only respectable position to me. My behaviour, however, has suggested a less relaxed attitude: relentless rumination, nose-length scrutiny of my motives, endless reassurance-seeking through rumination and feedback, and an inability to fully commit to, but also fully leave behind, any framework I’ve encountered.This has come with some heavy costs.&nbsp;The price of over-indexing on epistemic rigourOscillating between frameworksThe primary consequence: a sort of analytical paralysis in my spiritual commitments. For a long time I saw this as avoiding premature foreclosure, but now I suspect that it actually comes from needing certainty before acting: needing to be as sure as possible that this is the right path, the right community, the right teacher, befo...",
+      "url": "https://www.lesswrong.com/posts/sCPtkhs4FhhEjjFP9/moral-epistemic-scrupulosity-a-cross-framework-failure-mode",
+      "author": "Tamara Sofía Falcone",
+      "published": "2026-01-09T21:24:44.925000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Personal reflection on 'moral-epistemic scrupulosity' - the compulsive pursuit of certainty and correct thinking across frameworks like rationality and Tibetan Buddhism. Describes how this pattern manifests as intolerance of uncertainty and moralizing 'correct' reasoning.",
+      "importance_score": 30,
+      "reasoning": "Identifies a potentially real failure mode in truth-seeking communities, but primarily personal reflection rather than systematic analysis. May resonate with some readers but limited research contribution. Cross-framework perspective is interesting but underdeveloped.",
+      "themes": [
+        "Epistemics",
+        "Rationality",
+        "Psychology",
+        "Metacognition"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "9e860206e06b",
+      "title": "Are there any extremely strong arguments that Acausal extortion is ineffective?",
+      "content": "The topic of acausal extortion (particularly variants of Roko's basilisk) is sometimes mentioned and often dismissed with reference to something like the fact that an agent could simply precommit not to give in to blackmail. These responses themselves have responses, and it is not completely clear that at the end of the chain of responses there is a well defined, irrefutable reason not to worry about acausal extortion, or at least not to continue to do so once you have contemplated it. My question is if there is a single, reasonably clear reason, which does not depend much on the depth to which I may or may not have descended into the issue, which would be more persuasive than proposed reasons not to pay the 'pascal's mugger'. If there is one, what is it?&nbsp;Edit: If you answer this question and I engage with your answers here, I might effectively &nbsp;need to &nbsp;argue that a basilisk 'works' . It is therefore appropriate to be cautious about reading my replies if you are yourself in worried, or in a state in which you could be persuaded to respond to extortion.&nbsp;",
+      "url": "https://www.lesswrong.com/posts/p6rE3i2TEhEnozu4K/are-there-any-extremely-strong-arguments-that-acausal",
+      "author": "Horosphere",
+      "published": "2026-01-10T08:37:33.749000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Asks for strong arguments against acausal extortion (Roko's basilisk variants) being effective, noting that standard responses about precommitment have counter-responses. Seeks a clear, irrefutable reason not to worry about this class of decision-theoretic problems.",
+      "importance_score": 25,
+      "reasoning": "A question post rather than substantive original contribution. Discusses an old topic (Roko's basilisk) without advancing understanding. Limited value beyond prompting discussion. The warning about potentially arguing for basilisk effectiveness suggests confused framing.",
+      "themes": [
+        "Decision Theory",
+        "AI Safety",
+        "Acausal Reasoning"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "663031aeb7c6",
+      "title": "How Humanity Wins",
+      "content": "This isn't the full idea, but it basically is&nbsp;There’s a real chance that in the next 10 years we’ll all be dead because this year we didn’t get our act together. For the past 2 years, I’ve been researching &amp; working on risks to Humanity's future, &amp; this paper is about How Humanity Wins.There's so many issues out there,&nbsp;so many that could kill millions,So many that DO kill millions,Did you know there are trains carrying more explosives than Hiroshima travelling around the United States right now that could tip over at any moment?Apparently, The New World Screwworn is a tiny worm that devours the flesh of 1 BILLION mammals and birds &amp; some humans every year, and that's another problem I need to worry about.Just this week, you probably heard a news story that would shake you to your core just 6 years ago.&nbsp;I'm sick of it.I can't stand it anymore!It's all too much!For all of us!Humanity deserves better!This project is the sunshine future, and that bullcrap we had to go through ends right here, right now!I asked experts at the UN if this idea would work. They said it genuinely will.&nbsp;If anything's a measure of if an idea will work, if EXPERTS AT THE UN SAY IT'LL WORK, that's a really good indicator!Problem is, I don't know how to implement the idea, and I need your help.All world leaders want to do good things. Their values&nbsp;is to&nbsp;do the most good. They just disagree on what the most good is!All&nbsp;wars are because one side thinks X is good, another side thinks X is bad, and both sides are willing to fight for what they believe in to stop X or to keep X.&nbsp;All&nbsp;cooperation is because two sides think X is good/moral, so they work together to get X!&nbsp;Otherwise, one side wouldn’t want X, and they wouldn’t both work to get it.And all&nbsp;bad decisions are because someone’s goals/values led them to think “I should do this bad thing.”So here’s my idea: What if we had an international&nbsp;summit to get world leaders to agree...",
+      "url": "https://www.lesswrong.com/posts/dw3NZot9kKcY5dacL/how-humanity-wins",
+      "author": "Wes R",
+      "published": "2026-01-10T16:55:43.544000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "An emotionally-charged manifesto claiming to present a solution for humanity's existential challenges, referencing UN expert validation but providing no technical details or concrete proposals in the visible excerpt.",
+      "importance_score": 18,
+      "reasoning": "Lacks substantive technical content, methodology, or verifiable claims. Highly emotional tone without rigorous argumentation. No concrete details about the proposed solution visible. Does not meet standards for serious research contribution.",
+      "themes": [
+        "Existential Risk",
+        "AI Governance"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "9da01dae71c1",
+      "title": "6’7” Is Not Random",
+      "content": "I walked into the grocery shop the other day and saw a soda can labeled “6-7” and “Brainrot.”I stared at it, confused. My partner took a deep look and explained that these are the biggest words on the internet right now. “Brainrot” is self-explanatory, she said, but “6 7” apparently comes from a viral video of a guy yelling “6 7! 6 7!” referring to someone of that height. So, naturally, it became a thing.I lingered on it for a while. I’ve seen a lot of videos where people yell stuff. So have you. But why this? Why 6’7”?Here is why: It isn’t random. It is a specific signal from a generation living through a structural collapse.The world used to be mainly linear. You could get a job, find a partner, buy a house, make babies, and live happily ever after. You barely needed a mortgage. Elite education was accessible to almost everyone. And most importantly, 10% extra effort correlated with 10% extra pay.Today, the math is different. Even I, post-MSc in Electrical Engineering, sometimes wonder what it was all for. I watch people who barely graduated get hundreds of millions thrown at them because they have, at worst, “an idea,” or at best, a product that caught a quick tailwind and will eventually go to zero.I have to credit the USA for at least putting fraudsters like SBF and Elizabeth Holmes in prison. But here in Sweden? You can blow up $15 billion, cause 8 deaths, put $200 million in your pocket, and disappear. It makes me wonder why I didn’t just stick to my childhood room, playing video games and eating Whopper Pepper meals. I loved that. And it was actually pretty cheap.But I was lucky. I got to experience the tail end of linearity.Growing up today means navigating total non-linearity. Someone spewing garbage or having sex with “1000 guys in under 24h” can make more money in a week than a doctor or professor makes in a lifetime.The inflation isn’t just monetary; it’s existential. Especially for men.Are you under 6 feet? Worthless.6’2”? Mediocre.Unless you are 6’7”,...",
+      "url": "https://www.lesswrong.com/posts/EfTRLxtYxtnbbkWee/6-7-is-not-random",
+      "author": "Martin Lichstam",
+      "published": "2026-01-09T21:13:03.744000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Cultural commentary arguing that the viral '6'7' meme reflects generational anxiety about power-law distributions in success - where extreme traits (height, luck) matter more than incremental effort in an increasingly winner-take-all economy.",
+      "importance_score": 15,
+      "reasoning": "Social/cultural commentary unrelated to AI research. While potentially interesting sociological observation, provides no technical contribution and tangential relevance to AI safety or capabilities research. Not appropriate for AI research analysis.",
+      "themes": [
+        "Culture",
+        "Economics",
+        "Social Commentary"
+      ],
+      "continuation": null
+    }
+  ],
+  "notice": {
+    "type": "info",
+    "title": "Weekend Edition",
+    "message": "arXiv papers are not collected on weekends. Any weekend papers will be included in Monday's report."
+  }
+}

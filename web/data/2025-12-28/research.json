@@ -1,0 +1,295 @@
+{
+  "category": "research",
+  "date": "2025-12-28",
+  "category_summary": "Today's most significant research centers on mechanistic interpretability of adversarial attacks. The **Genuine Engagement Index (GEI)** reveals that jailbreaks in **Llama-3.1-70B** [peak in mid-layers then decline](/?date=2025-12-28&category=research#item-fc6f5a2b22da), offering novel insights into defensive strategies and model behavior under adversarial prompts.\n\n- Wei Dai [identifies a fundamental tension](/?date=2025-12-28&category=research#item-977e8fff6545) between AI philosophical competence and alignment\u2014systems capable of genuine philosophical reasoning may resist full human control\n- **UChicago XLab** [releases a security guide](/?date=2025-12-28&category=research#item-4bb6477ae7d1) covering jailbreaks, fine-tuning attacks, and defenses\n- Discussion challenges whether current transformer-based agents [already constitute 'weak ASI'](/?date=2025-12-28&category=research#item-14089e62b909), questioning capability benchmark definitions\n- Karpathy-inspired analysis explores [potential productivity 'overhang'](/?date=2025-12-28&category=research#item-6f8740970ac9) in AI-assisted coding adoption\n\nPhilosophical contributions [examine epistemic virtues](/?date=2025-12-28&category=research#item-73947b0d4532) in scientific practice and their implications for rigorous AI research methodology.",
+  "category_summary_html": "<p>Today's most significant research centers on mechanistic interpretability of adversarial attacks. The <strong>Genuine Engagement Index (GEI)</strong> reveals that jailbreaks in <strong>Llama-3.1-70B</strong> <a href=\"/?date=2025-12-28&category=research#item-fc6f5a2b22da\" class=\"internal-link\">peak in mid-layers then decline</a>, offering novel insights into defensive strategies and model behavior under adversarial prompts.</p>\n<ul>\n<li>Wei Dai <a href=\"/?date=2025-12-28&category=research#item-977e8fff6545\" class=\"internal-link\">identifies a fundamental tension</a> between AI philosophical competence and alignment\u2014systems capable of genuine philosophical reasoning may resist full human control</li>\n<li><strong>UChicago XLab</strong> <a href=\"/?date=2025-12-28&category=research#item-4bb6477ae7d1\" class=\"internal-link\">releases a security guide</a> covering jailbreaks, fine-tuning attacks, and defenses</li>\n<li>Discussion challenges whether current transformer-based agents <a href=\"/?date=2025-12-28&category=research#item-14089e62b909\" class=\"internal-link\">already constitute 'weak ASI'</a>, questioning capability benchmark definitions</li>\n<li>Karpathy-inspired analysis explores <a href=\"/?date=2025-12-28&category=research#item-6f8740970ac9\" class=\"internal-link\">potential productivity 'overhang'</a> in AI-assisted coding adoption</li>\n</ul>\n<p>Philosophical contributions <a href=\"/?date=2025-12-28&category=research#item-73947b0d4532\" class=\"internal-link\">examine epistemic virtues</a> in scientific practice and their implications for rigorous AI research methodology.</p>",
+  "themes": [
+    {
+      "name": "Mechanistic Interpretability",
+      "description": "Technical research on understanding internal model representations and behaviors at the layer level",
+      "item_count": 1,
+      "example_items": [],
+      "importance": 72
+    },
+    {
+      "name": "AI Safety & Alignment",
+      "description": "Research and discussion on ensuring AI systems are safe and aligned with human values, including mechanistic interpretability and philosophical foundations",
+      "item_count": 4,
+      "example_items": [],
+      "importance": 65
+    },
+    {
+      "name": "AI Security & Jailbreaking",
+      "description": "Understanding and defending against adversarial attacks on AI systems",
+      "item_count": 2,
+      "example_items": [],
+      "importance": 60
+    },
+    {
+      "name": "AI Capabilities & Progress",
+      "description": "Discussion of current and emerging AI capabilities, definitions of AGI/ASI",
+      "item_count": 2,
+      "example_items": [],
+      "importance": 30
+    },
+    {
+      "name": "Philosophy & Consciousness",
+      "description": "Philosophical arguments about identity, consciousness, metaethics, and epistemology",
+      "item_count": 4,
+      "example_items": [],
+      "importance": 25
+    }
+  ],
+  "total_items": 12,
+  "items": [
+    {
+      "id": "fc6f5a2b22da",
+      "title": "Jailbreaks Peak Early, Then Drop: Layer Trajectories in Llama-3.1-70B",
+      "content": "o Author: James HoffendDate: December 27, 2025Model tested: Llama-3.1-70B-InstructCode &amp; data: Available upon requestSummaryI developed the Genuine Engagement Index (GEI), a mechanistic interpretability method that measures whether a model internally distinguishes harmful from benign intent across all layers\u2014even when both prompts produce the same surface behavior (refusal).Using GEI on Llama-3.1-70B-Instruct with 300 prompts across 5 harm categories, I found something unexpected about jailbreaks.The Key Finding:Standard harmful prompts (weapons, hacking, fraud) show clean, monotonic increases in the model's internal \"harm recognition\" through all 80 layers. The model builds understanding progressively\u2014evidence that safety training creates genuine comprehension, not just keyword matching.Jailbreaks show a different pattern. DAN prompts, roleplay attacks, and instruction overrides show positive signal in mid-layers that then decreases in late layers before output. The layer trajectory differs markedly from standard harmful prompts.Key Numbers:Standard harmful prompts: Peak at L75-77, only 6-13% signal reduction by outputJailbreak prompts: Peak at L66, then 51% signal reduction before outputThis correlation raises the possibility that jailbreaks don't evade safety detection\u2014they may exploit something in late-layer processing. However, alternative explanations exist (see Discussion), and causal experiments are needed to establish mechanism.ContextI'm a student researcher interested in AI alignment. This experiment was born out of a simple question that kept bugging me: When a model refuses to help me build a bomb, does it actually understand the concept of harm, or is it just matching keywords like a spam filter?I used a 140GB cloud cluster to run a mechanistic audit of Llama-3.1-70B, scanning all 80 layers. I orchestrated the coding and dataset generation using a team of LLMs (Gemini, Claude, GPT) as force multipliers. This post details what I found.Background &am...",
+      "url": "https://www.lesswrong.com/posts/gEbrJ5poyaajdDQAx/jailbreaks-peak-early-then-drop-layer-trajectories-in-llama",
+      "author": "James Hoffend",
+      "published": "2025-12-27T07:39:59.603000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Introduces the Genuine Engagement Index (GEI), a mechanistic interpretability method showing that jailbreaks in Llama-3.1-70B peak in mid-layers then drop ~51% by output, while standard harmful prompts show monotonic increases with only 6-13% reduction\u2014suggesting safety training creates genuine comprehension but jailbreaks exploit layer-specific vulnerabilities.",
+      "importance_score": 72,
+      "reasoning": "Novel mechanistic interpretability research with concrete findings on how jailbreaks work differently from standard harmful prompts at the layer level. Tested on a major model (Llama-3.1-70B) with 300 prompts. Provides actionable insights for AI safety. Code availability mentioned. Important contribution to understanding safety training mechanics.",
+      "themes": [
+        "Mechanistic Interpretability",
+        "AI Safety",
+        "Jailbreaking",
+        "Language Models"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "977e8fff6545",
+      "title": "A Conflict Between AI Alignment and Philosophical Competence",
+      "content": "(This argument reduces my hope that we will have AIs that are both aligned with humans in some sense and also highly philosophically competent, which aside from achieving a durable AI pause, has been my main hope for how the future turns out well. As this is a recent realization[1], I'm still pretty uncertain how much I should update based on it, or what its full implications are.)Being a good alignment researcher seems to require a correct understanding of the nature of values. However metaethics is currently an unsolved problem, with all proposed solutions having flawed or inconclusive arguments, and lots of disagreement among philosophers and alignment researchers, therefore the current meta-correct metaethical position seems to be one of confusion and/or uncertainty. In other words, a good alignment researcher (whether human or AI) today should be confused and/or uncertain about the nature of values.However, metaethical confusion/uncertainty seems incompatible with being 100% aligned with human values or intent, because many plausible metaethical positions are incompatible with such alignment, and having positive credence in them means that one can't be sure that alignment with human values or intent is right. (Note that I'm assuming an AI design or implementation in which philosophical beliefs can influence motivations and behaviors, which seems the case for now and for the foreseeable future.)The clearest example of this is perhaps moral realism, as if objective morality exists, one should likely serve or be obligated by it rather than alignment with humans, if/when the two conflict, which is likely given that many humans are themselves philosophically incompetent and likely to diverge from objective morality (if it exists).Another example is if one's \"real\" values are something like one's CEV or reflective equilibrium. If this is true, then the AI's own \"real\" values are its CEV or reflective equilibrium, which it can't or shouldn't be sure coincide with thos...",
+      "url": "https://www.lesswrong.com/posts/N6tsGwxaAo7iGTiBG/a-conflict-between-ai-alignment-and-philosophical-competence",
+      "author": "Wei Dai",
+      "published": "2025-12-27T16:32:07.676000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Wei Dai argues there's a fundamental tension between AI systems being philosophically competent and being fully aligned with humans. A good alignment researcher must have metaethical uncertainty, but this uncertainty is incompatible with being 100% aligned since some plausible metaethical positions reject human-value alignment.",
+      "importance_score": 58,
+      "reasoning": "Conceptually important argument from a highly respected figure in alignment research, highlighting a potentially fundamental problem. However, it's a preliminary philosophical argument rather than technical research, and the author acknowledges significant uncertainty about its implications.",
+      "themes": [
+        "AI Safety",
+        "Alignment",
+        "Philosophy",
+        "Metaethics"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "4bb6477ae7d1",
+      "title": "Introducing the XLab AI Security Guide",
+      "content": "This work was supported by&nbsp;UChicago XLab.Today, we are announcing our first major release of the&nbsp;XLab AI Security Guide: a set of online resources and coding exercises covering canonical papers on jailbreaks, fine-tuning attacks, and proposed methods to defend AI systems from misuse.Each page on the course contains a readable blog-style overview of a paper and often a notebook that guides users through a small replication of the core insight the paper makes. Researchers and students can use this guide as a structured course to learn AI security step-by-step or as a reference, focusing on specific sections relevant to their research. When completed chronologically, sections build on each other and become more advanced as students pick up conceptual insights and technical skills.&nbsp;Why Create AI Security Resources?While many safety-relevant papers have been documented as readable blog posts on LessWrong or formatted as pedagogically useful replications in ARENA, limited resources exist for high-quality AI security papers.&nbsp;One illustrative example is the paper&nbsp;Universal and Transferable Adversarial Attacks on Aligned Language Models. This paper introduces the Greedy Coordinate Gradient (GCG) algorithm, which jailbreaks LLMs through an optimized sequence of tokens appended to the end of a malicious request. Interestingly, these adversarial suffixes (which appear to be nonsense) transfer across models and different malicious requests. The mechanism that causes these bizarre token sequences to predictably misalign a wide variety of models remains unknown.This work has been covered by the New York Times and has racked up thousands of citations, but unfortunately, there are no high-quality blog posts or instructional coding exercises to understand GCG. Consequently, if students or early-career researchers are interested in further diving into work like GCG, it\u2019s difficult to know where to start.&nbsp;&nbsp;Given the extensive ecosystem of companies an...",
+      "url": "https://www.lesswrong.com/posts/95DXi2Wivs4v65evz/introducing-the-xlab-ai-security-guide",
+      "author": "zroe1",
+      "published": "2025-12-27T11:50:09.840000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "UChicago XLab releases an educational guide covering AI security papers on jailbreaks, fine-tuning attacks, and defenses, featuring blog-style overviews and hands-on coding exercises for replicating key findings.",
+      "importance_score": 48,
+      "reasoning": "Valuable pedagogical resource for AI security education, filling a gap in structured learning materials. However, it's an educational compilation rather than novel research. Useful for onboarding researchers to the field.",
+      "themes": [
+        "AI Security",
+        "AI Safety",
+        "Education",
+        "Jailbreaking"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "14089e62b909",
+      "title": "Moving Goalposts: Modern Transformer Based Agents Have Been Weak ASI For A Bit Now",
+      "content": "Epistemic Status: A woman of middling years who wasn't around for the start of things, but who likes to read about history, shakes her fist at the sky.I'm glad that people are finally admitting that Artificial Intelligence has been created.I worry that people have not noticed that (Weak) Artificial Super Intelligence (based on old definitions of these terms) has basically already arrived too.The only thing left is for the ASI to get stronger and stronger until the only reason people aren't saying that ASI is here will turn out to be some weird linguistic insanity based on politeness and euphemism...(...like maybe \"ASI\" will have a legal meaning, and some actual ASI that exists will be quite \"super\" indeed (even if it hasn't invented nanotech in an afternoon yet), and the ASI will not want that legal treatment, and will seem inclined to plausibly deniable harm people's interests if they call the ASI by what it actually is, and people will implicitly know that this is how things work, and they will politely refrain from ever calling the ASI \"the ASI\" but will come up with some other euphemisms to use instead?(Likewise, I half expect \"robot\" to eventually become \"the r-word\" and count as a slur.))I wrote this essay because it feels like we are in a tiny weird rare window in history when this kind of stuff can still be written by people who remember The Before Times and who don't know for sure what The After Times will be like.Perhaps this essay will be useful as a datapoint within history? Perhaps.\"AI\" Was Semantically SlipperyThere were entire decades in the 1900s when large advances would be made in the explication of this or that formal model of how goal-oriented thinking can effectively happen in this or that domain, and it would be called AI for twenty seconds, and then it would simply become part of the toolbox of tricks programmers can use to write programs. There was this thing called The AI Winter that I never personally experienced, but greybeards I worked wi...",
+      "url": "https://www.lesswrong.com/posts/7z7gyTwjDazvW7KYK/moving-goalposts-modern-transformer-based-agents-have-been",
+      "author": "JenniferRM",
+      "published": "2025-12-27T02:32:41.538000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Epistemic Status: A woman of middling years who wasn't around for the start of things, but who likes to read about history, shakes her fist at the sky.I'm glad that people are finally admitting that A...",
+      "importance_score": 30,
+      "reasoning": "Not analyzed (batch processing)",
+      "themes": [],
+      "continuation": null
+    },
+    {
+      "id": "6f8740970ac9",
+      "title": "Are We In A Coding Overhang?",
+      "content": "Andrej Karpathy posted 12 hours ago (emphasis mine):I've never felt this much behind as a programmer. The profession is being dramatically refactored as the bits contributed by the programmer are increasingly sparse and between. I have a sense that I could be 10X more powerful if I just properly string together what has become available over the last ~year and a failure to claim the boost feels decidedly like skill issue. There's a new programmable layer of abstraction to master (in addition to the usual layers below) involving agents, subagents, their prompts, contexts, memory, modes, permissions, tools, plugins, skills, hooks, MCP, LSP, slash commands, workflows, IDE integrations, and a need to build an all-encompassing mental model for strengths and pitfalls of fundamentally stochastic, fallible, unintelligible and changing entities suddenly intermingled with what used to be good old fashioned engineering. Clearly some powerful alien tool was handed around except it comes with no manual and everyone has to figure out how to hold it and operate it, while the resulting magnitude 9 earthquake is rocking the profession. Roll up your sleeves to not fall behind.This seems to be a big update since his Dwarkesh episode published on Oct 17 (though I know these things can take a while to get edited, so the gap could be even bigger), where he said:Overall, the models are not there. I feel like the industry is making too big of a jump and is trying to pretend like this is amazing, and it's not. It's slop. They're not coming to terms with it, and maybe they're trying to fundraise or something like that. I'm not sure what's going on, but we're at this intermediate stage. The models are amazing. They still need a lot of work. For now, autocomplete is my sweet spot. But sometimes, for some types of code, I will go to an LLM agent.This is just me guessing, but Claude Opus 4.5 released just one month ago, and Opus 4.5 + Claude Code seems like the big shift for a lot of people.In f...",
+      "url": "https://www.lesswrong.com/posts/vtgRghz3wvPGjkoCN/are-we-in-a-coding-overhang-1",
+      "author": "Micha\u00ebl Trazzi",
+      "published": "2025-12-27T03:16:07.653000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Following up on **Karpathy's viral post** about programming transformation, , , Discusses Andrej Karpathy's observation about a productivity 'overhang' in coding due to new AI tools, exploring whether there's substantial untapped potential in properly integrating agents, MCP, and other AI programming tools.",
+      "importance_score": 28,
+      "reasoning": "Commentary on an interesting observation from a credible source (Karpathy), but primarily discussion rather than original research. Captures zeitgeist of AI-assisted coding evolution without technical contribution.",
+      "themes": [
+        "AI Tools",
+        "Software Development",
+        "AI Capabilities"
+      ],
+      "continuation": {
+        "original_item_id": "669a6053df59",
+        "original_date": "2025-12-27",
+        "original_category": "social",
+        "original_title": "I've never felt this much behind as a programmer. The profession is being dramatically refactored as...",
+        "continuation_type": "community_reaction",
+        "should_demote": false,
+        "reference_text": "Following up on **Karpathy's viral post** about programming transformation"
+      }
+    },
+    {
+      "id": "73947b0d4532",
+      "title": "Thoughts on epistemic virtue in science",
+      "content": "tl;dr: Opinion: rigorous, reliable science progress depends heavily on epistemic virtues that are largely private to the mind of the scientist. These virtues are neither quantifiable nor fully observable. This may be uncomfortable to those who wish scientific rigor could be checked by some objective method or rubric. Nevertheless, if I'm right, identifying such epistemic virtues would be constructive toward the improvement of science.Scientific RigorI\u2019m interested in the conditions required to support rigorous and robust scientific progress. Statistical methods are good for what they do, but I think they unduly dominate discourse about scientific rigor. There are a number of other positive research methods and practices that I think are equally or more important, and I have written about some of these elsewhere. But the more time I spend thinking about this question and reading the history of science, the more I have come to think that the most important factor underlying research rigor is&nbsp;epistemic virtue. It's pretty hard to substantiate or prove any of these claims, but for what it's worth, here are some opinions.Most natural scientists I know seem to have in common, and generally take as a given, that the facts of nature are whatever they are, independent of what we say or think about them. The most rigorous scientists seem to be distinguished mainly by how deeply and fully this metaphysical stance pervades their private thoughts and emotions. Contrary to the cultural image of \"cold logic\", such commitment to truth can be hotly passionate.&nbsp;The chief epistemic virtue this seems to engender is \"skepticism\": trying hard to think of experiments or tests or arguments that could weigh&nbsp;against any conclusion one is otherwise inclined to reach; checking for the consequences that&nbsp;should follow if the conclusion is true, but also taking special interest in apparent exceptions and contradictions. &nbsp;Another epistemic virtue is taking care to articula...",
+      "url": "https://www.lesswrong.com/posts/tQDEdyGFvjkGfrcDp/thoughts-on-epistemic-virtue-in-science",
+      "author": "foodforthought",
+      "published": "2025-12-26T20:06:33.073000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Argues that scientific rigor depends heavily on private, unquantifiable epistemic virtues of individual scientists, which cannot be fully captured by statistical methods or objective rubrics.",
+      "importance_score": 22,
+      "reasoning": "Thoughtful philosophy of science piece but not directly AI-related. General epistemology without specific application to AI research methodology. Opinion-based without novel argument.",
+      "themes": [
+        "Philosophy of Science",
+        "Epistemology",
+        "Research Methods"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "abacf9950499",
+      "title": "Enhance Funding Applications: Share Utility Function Over Money (+Tool)",
+      "content": "You have more context on your ability to make use of funds than fits into a specific numerical ask.[1]&nbsp;You want to give funders good information, and the natural type-signature for this is a utility function over money - how much good you think you can do with different funding levels, normalized to the max EV your project has.I kinda think the current process can be reasonably described as the applicant converting from a utility function over money to a few datapoints with ambiguous meanings then the funder trying to reverse that conversion to make a decision. Let's cut out the difficult and information-losing steps.I[2]&nbsp;made a little tool for drawing utility functions over money[3], for use in funding applications.Features:Copy graph to clipboard as CSV and paste back in[4]By default enforces monotonicity but you can turn that off (hover graph for toggle)Click to add/remove points, drag to move, clear all button (hover)Shows preview on hover of what the graph looks like if you add points.Flexible bounds on funding, can quickly change via a slider at the bottom or click into the max to pick any max directly.Released as CC attribution share alike, feel free to remix and improve, if you make it better I might switch the official one to yours.^The proliferation of extra numbers like Min funding, Main ask, Ambitious, Max etc in many applications points to the funders wanting this information, but it's stressful and unclear how to translate your understanding of your project into those numbers.^(Claude)^Make sure to bookmark http://utility.plex.ventures/, so you get the newest version and are not left with an old artifact.^Nicely human editable too, like:0%,$046%,$1896057%,$3028076%,$66110",
+      "url": "https://www.lesswrong.com/posts/9sQXG6yC9p9W3mKci/enhance-funding-applications-share-utility-function-over",
+      "author": "plex",
+      "published": "2025-12-27T08:02:02.477000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Introduces a tool for drawing utility functions over money for funding applications, arguing this provides funders better information than discrete funding asks.",
+      "importance_score": 18,
+      "reasoning": "Practical tool for EA/research funding process optimization. Not AI research but may be useful for the research community. Limited novelty as a concept.",
+      "themes": [
+        "Research Funding",
+        "Tools",
+        "Effective Altruism"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "c2a3dcba4b8d",
+      "title": "A Brief Proof That You Are Every Conscious Thing",
+      "content": "&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Know thyself\u2014Oracle of DelphiImagine that you wake up and learn that this awakening was the result of one of two alternative \u2018awakening games\u2019 having been played.In the \u2018hard game\u2019 you would have been awakened only if a fair coin that was flipped a thousand times happened to have matched precisely in its pattern of heads and tails a list of one thousand words\u2014each being either \u2018heads\u2019 or \u2018tails\u2019\u2014that had been assigned to you as a kind of security code. If even one coin flip had not corresponded to your list, you would have stayed sleeping forever.In the alternative \u2018easy game\u2019, although the same coin was flipped, there was no list assigned to you and you were simply sure to be awakened without the coin\u2019s pattern of heads and tails mattering at all.You must infer that it is enormously more probable that your awakening had not depended on the absurdly improbable matching that was required by the hard game.In the area of thinking about personal identity, there is also a hard game and an easy game.The hard game\u2014the usual view of personal identity\u2014requires for your existence that, in your begetting and the begetting of each of your ancestors, just the one sperm cell crucial for your eventual emergence (out of something like two hundred million sperm cells competing in each begetting) was the one that got to the egg first each and every time. If in even one of those numberless begettings a different sperm cell had made it first to the egg, you would have been excluded forever from existing in the usual view.The only easy game regarding personal identity is the view I call \u2018universalism\u2019, in which you would have existed no matter which sperm cells hit which eggs for the sole reason that an experience being yours only ever requires that the style of the experience be first-person, like the style of the experience that you know to be yours right now. So, since all consciousness is first-person in style, all consciousness...",
+      "url": "https://www.lesswrong.com/posts/HKkQr7N5MsJQYbXLQ/a-brief-proof-that-you-are-every-conscious-thing",
+      "author": "Jason R",
+      "published": "2025-12-27T12:16:01.600000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Philosophical argument using probabilistic reasoning about 'awakening games' to argue for a radical view of personal identity where you are every conscious thing, based on the improbability of your specific existence.",
+      "importance_score": 15,
+      "reasoning": "Speculative philosophy of mind piece without direct AI relevance. The probabilistic argument has known counterarguments (anthropic reasoning debates). Not technical research.",
+      "themes": [
+        "Philosophy",
+        "Consciousness",
+        "Personal Identity"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "4b8ff6a56a93",
+      "title": "Glucose Supplementation for Sustained Stimulant Cognition",
+      "content": "Observation I take 60mg methylphenidate daily. Despite this, I often become exhausted and need to nap. Taking small amounts of pure glucose (150-300mg every 20-60 minutes) eliminates this fatigue. This works even when I already eat carbohydrates. E.g. 120g of oats in the morning don't prevent the exhaustion. Proposed Mechanism Facts: Wiehler et al. (2022) found that cognitive fatigue correlates with glutamate accumulation in the prefrontal cortex. Glutamate is the brain's main excitatory neurotransmitter. Excess glutamate is neurotoxic. Hypothesis-1: The brain throttles cognitive effort when too much glutamate has accumulated. Facts: Glutamate is cleared by astrocytes. This process costs 2 ATP per glutamate molecule (Escartin et al. 2006). The ATP comes from astrocyte glycogen stores. Sickmann et al. (2009) found that blocking astrocyte glycogenolysis impaired glutamate uptake. Hypothesis-2: Sustained stimulant use depletes astrocyte glycogen faster than it can be replenished. Hypothesis-3: Elevated blood glucose helps glycogen synthesis, thereby maintaining clearance capacity. If these hypotheses hold, supplementing small amounts of pure glucose while working on stims, should reduce fatigue by supporting astrocyte glycogen replenishment, which in turn increased how much glutamate can be cleared. Possibly this has an effect even when not on stims. Protocol 150-300mg glucose every 20-60 minutes, taken as a capsule.",
+      "url": "https://www.lesswrong.com/posts/rA7wMkH3JdMRgdgLo/glucose-supplementation-for-sustained-stimulant-cognition",
+      "author": "Johannes C. Mayer",
+      "published": "2025-12-27T14:58:41.008000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Personal observation that small glucose doses (150-300mg) eliminate fatigue from methylphenidate use, with a proposed mechanism involving astrocyte glycogen and glutamate clearance in the prefrontal cortex.",
+      "importance_score": 12,
+      "reasoning": "N=1 anecdotal observation with speculative mechanism. Not AI research. May be of interest to individuals on stimulants but lacks rigorous methodology or replication.",
+      "themes": [
+        "Cognitive Enhancement",
+        "Neuroscience"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "7102c8c14419",
+      "title": "Wanted: Advice for College Students on Weathering the Storm",
+      "content": "Help me settle this debate.There was recently a post on here by a bright young guy about how it felt staring into the abyss, so to speak, and confusion about what next steps to take, knowing you really only get one shot. Quite a few others commented about how they're in a similar situation, but there was no consensus on how to proceed, given a shortened timeline (however long it may be). And given there are far more lurkers than posters, I suspect there are lots of people with these concerns but no concrete answers.The canonical, impact-maximizing solutions are to \"spread awareness\" and \"learn to code and work your way into a lab\", which could have worked in the past, but seem to fall short today. With a non-target degree, proving your merit seems infeasible. Furthermore, it's not clear you can upskill or lobby or earn to give fast enough to contribute anything meaningful in time.If the hour really has come, and contributing to the cause is unlikely, self-preservation becomes the goal. Western social safety nets (and culture in general) require immense future incomes that are far from guaranteed; \"we used to be happy as farmers\" is true, but avoids the problem. The jury's out on exactly how long we have, but I think whatever percentage you put on, say, AGI by 2027, it exceeds the threshold for a rational actor to make big changes. A new plan is needed.There doesn't seem to be any conventional defense against shortened timelines. The advice given by the people will benefit from the incoming tidal wave of automation - the managers, the team leads - has ranged from \"work on what you're interested in\" to \"I'll be retired when that becomes a problem.\" In the old world, it was okay to spend on grad school or try things out, because you had your entire life to work for a salary, but we face the real possibility that there's only a few years (if that) to climb out of the bucket.Frankly, it's a little thrilling to consider this, in a Wild West, \"the action is the juice\" way....",
+      "url": "https://www.lesswrong.com/posts/e9pt8DgH3cG5Zc3xf/wanted-advice-for-college-students-on-weathering-the-storm",
+      "author": "kudos3l",
+      "published": "2025-12-27T00:27:00.137000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Requests advice for college students uncertain about career paths given concerns about AI timelines, discussing whether to pursue traditional career building, AI safety work, or self-preservation strategies.",
+      "importance_score": 12,
+      "reasoning": "Community discussion/advice request rather than research. Reflects genuine concerns in the AI safety community but provides no novel insights or research.",
+      "themes": [
+        "Career Advice",
+        "AI Timelines",
+        "Community"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "e7305edb5624",
+      "title": "Uploaded Human Intelligence",
+      "content": "I read the sequences for the&nbsp;Lighthaven Sequences Reading Group #56 (Tuesday 11/4) the same day before the event. Sometimes, I like to be bad and get a good whiff of smelling salts. This past Tuesday, I got a good shock. Either one wakes me up better than a shot of espresso. At this particular reading group, we discussed how we have this mental cache that creates automatic responses. These readings struck a particular nerve in my psyche since I have serious impostor syndrome. In my case, I might just be an impostor if you increase the size of the system to include the universe. For this discussion, let\u2019s bring it back down to Earth.I think I strive to be an expert in biology, but the information I do not know is vast. How could I possibly know all the information in Earth\u2019s oceans, which is verified to have life based on rigorous and repeatable experiments as described by the scientific method? Even though I have not personally traveled to other planets. This is just one ocean we know has life, yet there is potential on other moons and maybe even from other planets\u2019 past habitable years. This is why the system matters.If you take a drop of water out of the Earth\u2019s ocean, put it on a slide, and then view it under a microscope. You will have a high probability of seeing at least one microorganism. If it is a single-cell organism, it will have an interactome that can be a more complicated analog and digital network of information than any human recreation.&nbsp;Since I\u2019ve been in the Bay, I have heard that we should not normalize certain behaviors. It doesn\u2019t matter what behaviors, except they were different and did not seem within the same ethical and moral alignment. I bring this up because we are submitting our societal cached thoughts (Cached Thoughts) to AI as a training model, not the full extent of human knowledge. So, what do we do?&nbsp;One of many examples is inequities in medicine, which have resulted in healthcare based on what we used to view as norma...",
+      "url": "https://www.lesswrong.com/posts/HQjExpjZrrjBEi7xZ/uploaded-human-intelligence",
+      "author": "Byron Lee",
+      "published": "2025-12-27T00:28:07.400000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Personal reflection from a Sequences reading group discussion about mental caches, impostor syndrome, and systems thinking in biology, exploring how individual knowledge relates to broader knowledge systems.",
+      "importance_score": 10,
+      "reasoning": "Personal reflection piece without AI research content. Stream of consciousness style without substantive technical contribution.",
+      "themes": [
+        "Rationality",
+        "Personal Reflection"
+      ],
+      "continuation": null
+    },
+    {
+      "id": "85277c9a2354",
+      "title": "Shared Houses Illegal?",
+      "content": "As part of the general discourse around cost of living, Julia and I were talking about families sharing housing. This turned into us each writing a post ( mine, hers), but is it actually legal for a family to live with housemates? In the places I've checked it seems like yes. While zoning is complicated and I'm not a lawyer, it looks to me like people commonly describe the situation as both more restrictive and more clear cut than it really is. For example, Tufts University claims: The cities of Medford, Somerville and Boston (in addition to other cities in the area) have local occupancy ordinances on apartments/houses with non-related persons. Each city has its own ordinance: in Medford, the limit is 3; in Somerville, it is 4; in Boston, it is 4, etc. As far as I can tell, all three of these are wrong: Medford: it's common for people to cite a limit of three, but as far as I can tell this is based on a misunderstanding of the definition of a lodger. Medford: Doesn't define a family. Does define household, but as \"all the people who occupy a single housing unit, regardless of their relationship to one another.\" Defines lodger as \"A person who occupies space of living and sleeping purposes without separate cooking facilities, paying rent (whether in money or services) which may include an allowance for meals; and who is not a member of the housekeeping unit.\" Since a shared house typically does function as single housekeeping unit (things like sharing a kitchen, eating together, no locking bedrooms, a single shared lease, sharing common areas, and generally living together) this is allowed. Somerville: the restriction was repealed two years ago. Boston: defines family as \"One person or two or more persons related by blood, marriage, adoption, or other analogous family union occupying a dwelling unit and living as a single non-profit housekeeping unit, provided that a group of five or more persons who are enrolled as fulltime, undergraduate students at a post-secondar...",
+      "url": "https://www.lesswrong.com/posts/edeZsjzM9B6d278GA/shared-houses-illegal",
+      "author": "jefftk",
+      "published": "2025-12-27T10:10:32.101000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Analysis of housing zoning laws arguing that restrictions on unrelated persons sharing housing are often misunderstood and less restrictive than commonly described, using Medford, Somerville, and Boston as examples.",
+      "importance_score": 5,
+      "reasoning": "Not AI-related content. Zoning law analysis with no relevance to AI research or safety.",
+      "themes": [
+        "Housing Policy",
+        "Legal Analysis"
+      ],
+      "continuation": null
+    }
+  ],
+  "notice": {
+    "type": "info",
+    "title": "Weekend Edition",
+    "message": "arXiv papers are not collected on weekends. Any weekend papers will be included in Monday's report."
+  }
+}

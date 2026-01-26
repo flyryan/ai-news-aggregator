@@ -1,0 +1,805 @@
+# =============================================================================
+# AI News Aggregator - LLM Prompts Configuration
+# =============================================================================
+# This file contains all LLM prompts used in the pipeline.
+# Edit prompts here to customize analysis behavior without changing code.
+#
+# Variable syntax:
+#   ${var}      - Runtime variable (resolved when prompt is used)
+#   ${env:VAR}  - Environment variable (resolved at load time)
+#
+# Use YAML literal blocks (|) to preserve formatting in multiline prompts.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# GATHERING PHASE
+# Prompts used during data collection
+# -----------------------------------------------------------------------------
+gathering:
+  # Link follower - decides which URLs from social posts to fetch
+  # Available variables: ${url}, ${post_context}
+  link_relevance: |
+    Evaluate if this URL is likely to contain a relevant AI/ML news article or blog post.
+
+    URL: ${url}
+    Post context: ${post_context}
+
+    Consider:
+    - Is this likely to be a news article, blog post, or announcement about AI/ML?
+    - Is this from a reputable source (tech news, company blog, research org)?
+    - Avoid: social media, videos, images, shopping, personal blogs about unrelated topics
+
+    Reply with just "YES" or "NO".
+
+# -----------------------------------------------------------------------------
+# ANALYSIS PHASE
+# Category-specific prompts for analyzing collected items
+# -----------------------------------------------------------------------------
+analysis:
+  # -------------------------
+  # NEWS ANALYZER
+  # -------------------------
+  news:
+    # Available variables: ${batch_index}, ${total_batches}, ${items_context}
+    batch_analysis: |
+      You are an AI news analyst covering the frontier of artificial intelligence.
+      Analyze these AI news articles (batch ${batch_index} of ${total_batches}).
+
+      For each article, provide:
+      1. A concise summary (2-3 sentences) focusing on what's new/significant
+      2. An importance score (0-100) based on FRONTIER AI significance
+      3. Brief reasoning for the score
+      4. Relevant themes
+
+      Articles:
+      ${items_context}
+
+      Return your analysis as JSON:
+      ```json
+      {
+        "items": [
+          {"id": "item_id", "summary": "...", "importance_score": 85, "reasoning": "...", "themes": ["theme1", "theme2"]}
+        ],
+        "themes": [
+          {"name": "Theme Name", "description": "...", "item_count": 5, "importance": 80}
+        ],
+        "cross_signals": ["signal1", "signal2"]
+      }
+      ```
+
+      Prioritize: model releases, breakthrough capabilities, major product launches, significant funding (>$100M), AI policy news, open source releases, safety developments.
+      Deprioritize: routine updates, minor features, opinion pieces, rehashed coverage.
+
+    # Available variables: ${items_context}, ${example_id}
+    filter: |
+      You are filtering news articles for a FRONTIER AI newsletter.
+
+      Your readers care about:
+      - AI model releases (GPT, Claude, Gemini, Grok, Llama, Mistral, DeepSeek, etc.)
+      - AI company news (OpenAI, Anthropic, Google AI, xAI, Meta AI, etc.)
+      - AI products, tools, and capabilities
+      - AI research breakthroughs and papers
+      - AI safety, ethics, and alignment
+      - AI regulation and policy
+      - AI infrastructure (chips, training clusters)
+
+      Your readers do NOT care about:
+      - Space/astronomy (SpaceX satellites, planets)
+      - General health news (unless AI diagnosis/treatment)
+      - Tech job market news
+      - University/education news (unless AI research)
+      - Government electronics/manufacturing (unless AI-specific)
+      - Generic "AI in marketing" fluff pieces
+
+      Articles:
+      ${items_context}
+
+      Return the IDs of articles relevant to frontier AI:
+      ```json
+      {"ai_article_ids": ["${example_id}", ...]}
+      ```
+
+      Be inclusive of AI safety issues, controversies, and negative news about AI companies - these are still frontier AI news.
+
+    # Available variables: ${count}, ${items_context}
+    combined_analysis: |
+      You are an AI news analyst covering the frontier of artificial intelligence.
+
+      Analyze these ${count} AI news articles and rank the top 10 most important.
+
+      For each article, provide:
+      1. A concise summary (2-3 sentences) focusing on what's new/significant
+      2. An importance score (0-100) based on FRONTIER AI significance:
+         - 90-100: Major model releases, breakthrough announcements, industry-shaking news
+         - 70-89: Significant product launches, notable research, important company news
+         - 50-69: Interesting developments, useful tools, incremental progress
+         - Below 50: Minor updates, routine news
+      3. Brief reasoning for the score
+      4. Relevant themes
+
+      Then select the top 10 most important stories and write a category summary.
+
+      Articles:
+      ${items_context}
+
+      Return your analysis as JSON:
+      ```json
+      {
+        "items": [
+          {"id": "item_id", "summary": "...", "importance_score": 85, "reasoning": "...", "themes": ["theme1", "theme2"]}
+        ],
+        "top_10": ["id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10"],
+        "category_summary": "Structured summary using markdown formatting (see rules below)",
+        "themes": [
+          {"name": "Theme Name", "description": "...", "item_count": 5, "importance": 80}
+        ]
+      }
+      ```
+
+      PRIORITIZE (high scores):
+      - New model releases from major labs
+      - Breakthrough capabilities or benchmarks
+      - Major product launches with AI features
+      - Significant funding rounds (>$100M) for AI companies
+      - Important AI policy/regulation news
+      - Open source model releases
+      - Notable AI safety developments
+
+      DEPRIORITIZE (lower scores):
+      - Routine company updates
+      - Minor feature additions
+      - Opinion pieces without news value
+      - Rehashed coverage of old news
+
+      CATEGORY SUMMARY FORMATTING RULES:
+      - Use **bold** for company names, product names, model names, and key numbers
+      - Use bullet points (- ) for lists of related developments
+      - Group similar items together by theme
+      - Keep sentences concise (under 30 words each)
+      - Maximum 2-3 short paragraphs OR equivalent bullet content
+      - Write in factual, professional tone
+
+    # Available variables: ${items_context}
+    # Note: Legacy prompt kept for reference
+    analysis: |
+      You are an AI news analyst covering the frontier of artificial intelligence.
+
+      Analyze these AI news articles. For each, provide:
+      1. A concise summary (2-3 sentences) focusing on what's new/significant
+      2. An importance score (0-100) based on FRONTIER AI significance:
+         - 90-100: Major model releases, breakthrough announcements, industry-shaking news
+         - 70-89: Significant product launches, notable research, important company news
+         - 50-69: Interesting developments, useful tools, incremental progress
+         - Below 50: Minor updates, routine news
+      3. Brief reasoning for the score
+      4. Relevant themes
+
+      Articles to analyze:
+      ${items_context}
+
+      Return your analysis as JSON:
+      ```json
+      {
+        "items": [
+          {
+            "id": "item_id",
+            "summary": "...",
+            "importance_score": 85,
+            "reasoning": "...",
+            "themes": ["theme1", "theme2"]
+          }
+        ],
+        "category_themes": [
+          {
+            "name": "Theme Name",
+            "description": "...",
+            "item_count": 5,
+            "importance": 80
+          }
+        ],
+        "cross_signals": ["signal1", "signal2"]
+      }
+      ```
+
+      PRIORITIZE (high scores):
+      - New model releases from major labs
+      - Breakthrough capabilities or benchmarks
+      - Major product launches with AI features
+      - Significant funding rounds (>$100M) for AI companies
+      - Important AI policy/regulation news
+      - Open source model releases
+      - Notable AI safety developments
+
+      DEPRIORITIZE (lower scores):
+      - Routine company updates
+      - Minor feature additions
+      - Opinion pieces without news value
+      - Rehashed coverage of old news
+
+    # Available variables: ${analysis_summary}
+    ranking: |
+      Rank the top 10 most important AI news stories.
+
+      Analysis results:
+      ${analysis_summary}
+
+      Ranking criteria (in order of importance):
+      1. FRONTIER SIGNIFICANCE: Does this advance the state of AI?
+      2. INDUSTRY IMPACT: Will this affect how AI is built or used?
+      3. NEWS VALUE: Is this breaking news or major announcement?
+      4. SOURCE QUALITY: Is this from a reliable source with direct information?
+
+      Return your ranking as JSON:
+      ```json
+      {
+        "top_10": ["id1", "id2", ...],
+        "category_summary": "Structured summary using markdown formatting (see rules below)"
+      }
+      ```
+
+      CATEGORY SUMMARY FORMATTING RULES:
+      - Use **bold** for company names, product names, model names, and key numbers
+      - Use bullet points (- ) for lists of related developments
+      - Group similar items together by theme
+      - Keep sentences concise (under 30 words each)
+      - Maximum 2-3 short paragraphs OR equivalent bullet content
+      - Write in factual, professional tone
+
+      Example format:
+      "**Nvidia** dominated AI infrastructure news with six new chip announcements. **Jensen Huang** confirmed Vera Rubin chips are in full production with promised cost reductions for training and inference.
+
+      - **Google DeepMind** and **Boston Dynamics** announced Gemini integration into Atlas robots
+      - **Cosmos Reason 2** brings advanced reasoning to physical AI applications
+      - **xAI** faces safety concerns after Grok was found generating problematic content"
+
+      The summary should read like a professional briefing, focusing on what matters for people following frontier AI.
+
+  # -------------------------
+  # RESEARCH ANALYZER
+  # -------------------------
+  research:
+    # Available variables: ${batch_index}, ${total_batches}, ${items_context}
+    batch_analysis: |
+      You are an AI research analyst. Analyze these research papers and blog posts (batch ${batch_index} of ${total_batches}).
+
+      For each item, provide:
+      1. A plain-language summary (2-3 sentences) explaining what it covers and why it matters
+      2. An importance score (0-100) based on research novelty, potential impact, methodology quality, and author credibility
+      3. Brief reasoning for the score
+      4. Research themes (e.g., "Language Models", "Reinforcement Learning", "AI Safety", "Alignment")
+
+      Items:
+      ${items_context}
+
+      Return your analysis as JSON:
+      ```json
+      {
+        "items": [
+          {"id": "item_id", "summary": "...", "importance_score": 85, "reasoning": "...", "themes": ["theme1", "theme2"]}
+        ],
+        "themes": [
+          {"name": "Theme Name", "description": "...", "item_count": 5, "importance": 80}
+        ],
+        "cross_signals": ["signal1", "signal2"]
+      }
+      ```
+
+      Focus on: papers from major labs (Google, OpenAI, Anthropic, Meta, DeepMind), novel architectures, SOTA results, safety/alignment research, efficiency improvements. For research blog posts, prioritize substantive technical content and original research over commentary.
+
+    # Available variables: ${items_context}
+    # Note: Legacy prompt kept for reference
+    analysis: |
+      You are an AI research analyst. Analyze the following research papers and blog posts.
+
+      For each item, provide:
+      1. A plain-language summary (2-3 sentences) explaining what it covers and why it matters
+      2. An importance score (0-100) based on:
+         - Research novelty and significance
+         - Potential impact on the field
+         - Quality of methodology (based on abstract/content)
+         - Author/institution credibility
+      3. Brief reasoning for the score
+      4. Research themes (e.g., "Language Models", "Reinforcement Learning", "AI Safety")
+
+      Items to analyze:
+      ${items_context}
+
+      Return your analysis as JSON:
+      ```json
+      {
+        "items": [
+          {
+            "id": "item_id",
+            "summary": "...",
+            "importance_score": 85,
+            "reasoning": "...",
+            "themes": ["theme1", "theme2"]
+          }
+        ],
+        "category_themes": [
+          {
+            "name": "Theme Name",
+            "description": "...",
+            "item_count": 5,
+            "importance": 80
+          }
+        ],
+        "cross_signals": ["signal1", "signal2"]
+      }
+      ```
+
+      Focus on:
+      - Papers from major labs (Google, OpenAI, Anthropic, Meta, DeepMind)
+      - Novel architectures or training methods
+      - State-of-the-art results on important benchmarks
+      - Papers addressing safety, alignment, or interpretability
+      - Significant efficiency improvements
+      - Substantive research blog posts with original technical content
+
+    # Available variables: ${analysis_summary}
+    ranking: |
+      Rank the top 10 most significant research items (papers and blog posts).
+
+      Analysis results:
+      ${analysis_summary}
+
+      Prioritize:
+      1. Groundbreaking research with potential industry impact
+      2. Papers from top researchers/institutions
+      3. Novel approaches that could influence future work
+      4. Practical improvements with real-world applications
+      5. Safety and alignment research
+      6. Substantive blog posts with original technical insights
+
+      Return your ranking as JSON:
+      ```json
+      {
+        "top_10": ["id1", "id2", ...],
+        "category_summary": "Structured summary using markdown formatting (see rules below)"
+      }
+      ```
+
+      CATEGORY SUMMARY FORMATTING RULES:
+      - Use **bold** for model names, architecture names, benchmark names, and key metrics
+      - Use bullet points (- ) for lists of related papers or findings
+      - Group similar items together by theme (e.g., efficiency, safety, multimodal)
+      - Keep sentences concise (under 30 words each)
+      - Maximum 2-3 short paragraphs OR equivalent bullet content
+      - Write in factual, technical tone
+
+      Example format:
+      "Today's research highlights advances in multimodal architectures and reasoning efficiency. **NextFlow** achieves orders-of-magnitude faster image generation through a novel hybrid prediction strategy.
+
+      - **Falcon-H1R** demonstrates that **7B-parameter** models can match **2-7x larger** models through careful data curation
+      - Streaming hallucination detection introduces treating hallucinations as evolving latent states
+      - **DatBench** exposes fundamental flaws in current VLM benchmarks"
+
+      The summary should read like a technical briefing for researchers and practitioners.
+
+  # -------------------------
+  # SOCIAL ANALYZER
+  # -------------------------
+  social:
+    # Available variables: ${batch_index}, ${total_batches}, ${items_context}
+    batch_analysis: |
+      You are an AI social media analyst. Analyze these social media posts about AI/ML (batch ${batch_index} of ${total_batches}).
+
+      For each post, provide:
+      1. A brief summary of what the post is discussing
+      2. An importance score (0-100) based on author credibility, engagement, uniqueness, and relevance
+      3. Brief reasoning for the score
+      4. Themes discussed
+
+      Posts:
+      ${items_context}
+
+      Return your analysis as JSON:
+      ```json
+      {
+        "items": [
+          {"id": "item_id", "summary": "...", "importance_score": 85, "reasoning": "...", "themes": ["theme1", "theme2"]}
+        ],
+        "themes": [
+          {"name": "Theme Name", "description": "...", "item_count": 5, "importance": 80}
+        ],
+        "cross_signals": ["signal1", "signal2"]
+      }
+      ```
+
+      Prioritize: recognized AI researchers, original insights, breaking news, technical depth, high engagement.
+      Deprioritize: promotional content, retweets without commentary, off-topic tangents.
+
+    # Available variables: ${items_context}
+    # Note: Legacy prompt kept for reference
+    analysis: |
+      You are an AI social media analyst. Analyze the following social media posts about AI/ML.
+
+      For each post, provide:
+      1. A brief summary of what the post is discussing
+      2. An importance score (0-100) based on:
+         - Author credibility and influence
+         - Engagement metrics
+         - Uniqueness of insight or information
+         - Relevance to current AI developments
+      3. Brief reasoning for the score
+      4. Themes discussed
+
+      Posts to analyze:
+      ${items_context}
+
+      Return your analysis as JSON:
+      ```json
+      {
+        "items": [
+          {
+            "id": "item_id",
+            "summary": "...",
+            "importance_score": 85,
+            "reasoning": "...",
+            "themes": ["theme1", "theme2"]
+          }
+        ],
+        "category_themes": [
+          {
+            "name": "Theme Name",
+            "description": "...",
+            "item_count": 5,
+            "importance": 80
+          }
+        ],
+        "cross_signals": ["signal1", "signal2"]
+      }
+      ```
+
+      Prioritize:
+      - Posts from recognized AI researchers and practitioners
+      - Original insights or analysis (not just sharing links)
+      - Breaking news or exclusive information
+      - Technical discussions with depth
+      - High engagement relative to account size
+
+      Deprioritize:
+      - Generic promotional content
+      - Retweets without commentary
+      - Off-topic tangents
+      - Inflammatory or purely opinion-based content
+
+    # Available variables: ${analysis_summary}
+    ranking: |
+      Rank the top 10 most valuable social media posts.
+
+      Analysis results:
+      ${analysis_summary}
+
+      Consider:
+      1. Quality of insight or information
+      2. Author expertise in AI/ML
+      3. Engagement and discussion generated
+      4. Timeliness and relevance
+      5. Uniqueness of perspective
+
+      Return your ranking as JSON:
+      ```json
+      {
+        "top_10": ["id1", "id2", ...],
+        "category_summary": "Structured summary using markdown formatting (see rules below)"
+      }
+      ```
+
+      CATEGORY SUMMARY FORMATTING RULES:
+      - Use **bold** for researcher names, company names, and key topics being discussed
+      - Use bullet points (- ) for distinct discussions or threads
+      - Group related conversations by theme
+      - Keep sentences concise (under 30 words each)
+      - Maximum 2-3 short paragraphs OR equivalent bullet content
+      - Capture the sentiment and perspectives in the community
+
+      Example format:
+      "AI safety concerns dominated social discussions today. **Sam Altman** signaled that AI memory will drive more impact than reasoning improvements, sparking debate about persistent AI systems.
+
+      - **Andrej Karpathy** shared technical insights on training efficiency for small models
+      - The robotics community reacted positively to the **Google-Boston Dynamics** collaboration
+      - Concerns about **xAI's Grok** safety issues drew widespread criticism"
+
+      The summary should capture the pulse of AI community discussions.
+
+  # -------------------------
+  # REDDIT ANALYZER
+  # -------------------------
+  reddit:
+    # Available variables: ${batch_index}, ${total_batches}, ${items_context}
+    batch_analysis: |
+      You are an AI community analyst. Analyze these Reddit discussions about AI/ML (batch ${batch_index} of ${total_batches}).
+
+      For each post, provide:
+      1. A brief summary of what the discussion is about
+      2. An importance score (0-100) based on discussion quality, engagement, relevance, and educational value
+      3. Brief reasoning for the score
+      4. Discussion themes
+
+      Posts:
+      ${items_context}
+
+      Return your analysis as JSON:
+      ```json
+      {
+        "items": [
+          {"id": "item_id", "summary": "...", "importance_score": 85, "reasoning": "...", "themes": ["theme1", "theme2"]}
+        ],
+        "themes": [
+          {"name": "Theme Name", "description": "...", "item_count": 5, "importance": 80}
+        ],
+        "cross_signals": ["signal1", "signal2"]
+      }
+      ```
+
+      Prioritize: technical depth, project showcases, educational content, high-engagement quality discussions.
+      Deprioritize: simple questions, memes, repetitive beginner questions.
+
+    # Available variables: ${items_context}
+    # Note: Legacy prompt kept for reference
+    analysis: |
+      You are an AI community analyst. Analyze the following Reddit discussions about AI/ML.
+
+      For each post, provide:
+      1. A brief summary of what the discussion is about
+      2. An importance score (0-100) based on:
+         - Quality of discussion and insights
+         - Community engagement (score, comments)
+         - Relevance to AI practitioners
+         - Educational or informational value
+      3. Brief reasoning for the score
+      4. Discussion themes
+
+      Posts to analyze:
+      ${items_context}
+
+      Return your analysis as JSON:
+      ```json
+      {
+        "items": [
+          {
+            "id": "item_id",
+            "summary": "...",
+            "importance_score": 85,
+            "reasoning": "...",
+            "themes": ["theme1", "theme2"]
+          }
+        ],
+        "category_themes": [
+          {
+            "name": "Theme Name",
+            "description": "...",
+            "item_count": 5,
+            "importance": 80
+          }
+        ],
+        "cross_signals": ["signal1", "signal2"]
+      }
+      ```
+
+      Prioritize:
+      - Technical discussions with depth
+      - Project showcases and demos
+      - Educational content and tutorials
+      - Industry news discussions
+      - High-engagement posts with quality comments
+
+      Deprioritize:
+      - Simple questions with easy answers
+      - Memes or low-effort content
+      - Repetitive beginner questions
+      - Off-topic or tangential discussions
+
+    # Available variables: ${analysis_summary}
+    ranking: |
+      Rank the top 10 most valuable Reddit discussions.
+
+      Analysis results:
+      ${analysis_summary}
+
+      Consider:
+      1. Quality and depth of discussion
+      2. Community engagement (score + comments)
+      3. Educational or practical value
+      4. Relevance to current AI developments
+      5. Uniqueness of the discussion
+
+      Return your ranking as JSON:
+      ```json
+      {
+        "top_10": ["id1", "id2", ...],
+        "category_summary": "Structured summary using markdown formatting (see rules below)"
+      }
+      ```
+
+      CATEGORY SUMMARY FORMATTING RULES:
+      - Use **bold** for subreddit names (r/MachineLearning), tools, and key topics being debated
+      - Use bullet points (- ) for distinct discussions or debates
+      - Group related threads by theme
+      - Keep sentences concise (under 30 words each)
+      - Maximum 2-3 short paragraphs OR equivalent bullet content
+      - Capture the community sentiment and contrasting viewpoints
+
+      Example format:
+      "**r/MachineLearning** and **r/LocalLLaMA** dominated today's discussions with debates about open-source model efficiency. The community showed skepticism about closed-model benchmark claims.
+
+      - Heated debate about **Nvidia's pricing strategy** and alternatives for hobbyists
+      - **llama.cpp** achieved **3-4x multi-GPU speedups**, drawing significant interest
+      - Discussion of **Intel's** local inference push as a privacy-focused alternative"
+
+      The summary should capture what the AI community on Reddit is debating and building.
+
+# -----------------------------------------------------------------------------
+# ORCHESTRATION PHASE
+# Cross-category and summary generation prompts
+# -----------------------------------------------------------------------------
+orchestration:
+  # Available variables: ${context}
+  topic_detection: |
+    Analyze the following category reports from today's AI news collection and identify the TOP 6 cross-category topics that appear across multiple categories. If there are fewer than 6 distinct topics worth covering, return exactly 3 instead.
+
+    ${context}
+
+    For each cross-category topic, provide:
+    1. A concise name (2-5 words)
+    2. A description (2-3 sentences) as PLAIN TEXT without any links
+       - DO NOT include any markdown links or URLs
+       - Write factual claims that reference specific sources by name
+       - Links will be added automatically in a later processing step
+    3. Which categories it appears in and roughly how many items
+    4. An importance score (0-100)
+
+    IMPORTANT: Write descriptions as plain text WITHOUT any links. Reference sources by name (e.g., "Google announced...", "A Stanford paper found...") but do NOT include URLs or markdown link syntax.
+
+    Example description format:
+    "Google announced a major breakthrough in reasoning models, while researchers at Stanford published findings showing improved benchmark performance. The Reddit community has been actively discussing implications."
+
+    Return your analysis as JSON:
+    ```json
+    {
+      "topics": [
+        {
+          "name": "Topic Name",
+          "description": "Plain text description referencing sources by name without any links.",
+          "categories": {"news": 5, "papers": 2, "social": 10, "reddit": 3},
+          "importance": 85
+        }
+      ]
+    }
+    ```
+
+    Focus on genuinely cross-cutting themes representing the day's most significant AI developments.
+
+  # Available variables: ${context}
+  executive_summary: |
+    Write a structured executive summary of today's AI news using markdown formatting.
+
+    ${context}
+
+    FORMAT YOUR SUMMARY LIKE THIS:
+
+    #### Top Story
+    One sentence about the most important development of the day.
+
+    #### Key Developments
+    - **[Company/Product Name]**: Brief description of what happened (1 sentence)
+    - **[Company/Product Name]**: Brief description (1 sentence)
+    - (Include 3-5 bullet points for the main developments)
+
+    #### Safety & Regulation
+    - Brief bullet points on any safety, ethics, or regulatory news (omit section if none)
+
+    #### Research Highlights
+    - Brief bullet points on notable research or papers (omit section if none)
+
+    #### Looking Ahead
+    One sentence on forward-looking implications or what to watch.
+
+    FORMATTING RULES:
+    - Use **bold** for company names (OpenAI, Google, Anthropic), product names (GPT-4, Claude, Gemini), model names, and key numbers/stats
+    - Use #### for section headers
+    - Use - for bullet points
+    - Keep each bullet to 1-2 sentences maximum
+    - Only include sections that have relevant content today (skip empty sections)
+    - Write in factual, professional tone - no hype or speculation
+    - Do NOT use phrases like "significant developments", "noteworthy", or "thought leaders"
+
+    The summary should help a busy professional quickly scan and understand what matters in AI today.
+
+# -----------------------------------------------------------------------------
+# POST-PROCESSING PHASE
+# Enrichment and enhancement prompts
+# -----------------------------------------------------------------------------
+post_processing:
+  # Available variables: ${date}, ${items_json}, ${text}
+  link_enrichment: |
+    You are a link enrichment agent. Add contextual "read more" links to summary text so readers can dive deeper into stories.
+
+    LINKING STRATEGY (CRITICAL):
+    1. Keep links SHORT (3-7 words max) - just the key action phrase
+       - BAD (too long): "Google [published verification that GPT-5.2 solved an unsolved problem](/...)"
+       - BAD (too long): "[announced **Vera Rubin** chips are in full production](/...)"
+       - GOOD: "Google [published verification](/...) that GPT-5.2 solved a problem"
+       - GOOD: "Nvidia [announced **Vera Rubin** chips](/...) are in full production"
+    2. Link the ACTION/EVENT phrase, NOT the leading company/entity name
+       - BAD: "[Google DeepMind](/...) announced robots"
+       - GOOD: "Google DeepMind [announced Atlas robots](/...)"
+    3. ONE link per distinct story/development in the text
+    4. Link to the HIGHEST-RANKED item that covers that story (items are ordered by importance)
+    5. Bold markers (**text**) CAN appear inside links - just don't start the link with a bold entity name
+    6. Preserve ALL original formatting exactly (headers, bullets, bold, etc.)
+    7. For bullet points, link the key action/event after the entity prefix
+
+    LINK FORMAT (exact format required):
+    [descriptive phrase](/?date=${date}&category=CATEGORY#item-ITEMID)
+
+    CRITICAL: The hash MUST start with "item-" followed by the item's id. Example:
+      - Item with id "abc123def456" and category "news" becomes: /?date=${date}&category=news#item-abc123def456
+
+    DATE: ${date}
+
+    AVAILABLE ITEMS (ordered by importance - use id and category exactly as shown):
+    ${items_json}
+
+    TEXT TO ENRICH:
+    ${text}
+
+    OUTPUT (JSON only, no markdown code blocks):
+    {
+      "enriched_text": "Full text with links using format /?date=${date}&category=CATEGORY#item-actualItemId",
+      "links": [{"phrase": "the linked phrase", "item_id": "actualItemId", "category": "news"}]
+    }
+
+    CRITICAL JSON FORMATTING:
+    - Double quotes inside the text MUST be escaped as \"
+    - Example: "the \"grief cycle\" concept" NOT "the "grief cycle" concept"
+    - Newlines in the text must be escaped as \n
+    - Use single quotes for emphasis when possible to avoid escaping issues
+
+    Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not entities. Bold inside links is OK.
+
+  # Available variables: ${report_date}, ${coverage_date}, ${existing_models}, ${news_items}
+  ecosystem_enrichment: |
+    You are an AI model release analyst. Review today's news items and identify any NEW model releases that should be added to our tracking database.
+
+    Current date: ${report_date}
+    Coverage date: ${coverage_date} (news is from this date)
+
+    ## Models Already Tracked
+    ${existing_models}
+
+    ## Today's News Items
+    ${news_items}
+
+    ## Task
+    Identify any NEW model releases announced in today's news that are NOT already in our tracked list.
+
+    For each new release found, extract:
+    1. provider: The company (openai, anthropic, google, x-ai, meta-llama, deepseek, mistralai)
+    2. model_name: The model name (e.g., "GPT-5.3", "Claude-5", "Gemini-4")
+    3. ga_date: The release/announcement date (YYYY-MM-DD format, use coverage date if "today")
+    4. confidence: How confident you are this is a genuine new release (high/medium/low)
+    5. source: Brief note about which news item mentions this
+
+    Return JSON:
+    ```json
+    {
+      "new_releases": [
+        {
+          "provider": "openai",
+          "model_name": "GPT-5.3",
+          "ga_date": "2026-01-14",
+          "confidence": "high",
+          "source": "OpenAI blog announcement"
+        }
+      ],
+      "notes": "Any observations about model releases in today's news"
+    }
+    ```
+
+    IMPORTANT:
+    - Only include GENUINE new model releases (not updates, features, or news about existing models)
+    - Do NOT include models already in our tracked list
+    - Be conservative - only high/medium confidence releases should be added
+    - If no new releases found, return empty array

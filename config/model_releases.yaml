@@ -1,0 +1,151 @@
+# Model Release Dates - Source of Truth
+#
+# Each model has two dates:
+#   ga_date: General Availability (public announcement/release)
+#   api_date: API Availability (when available via OpenRouter/public APIs)
+#
+# Sources:
+#   - Wikipedia "List of large language models" for GA dates
+#   - OpenRouter API for API dates
+#   - Web search verification for specific releases (Codex, etc.)
+#
+# Coverage: November 2025 onwards (post Claude Opus 4.5 knowledge cutoff)
+# Last verified: 2026-01-15
+
+openai:
+  # GPT-5.2 family
+  GPT-5.2:
+    ga_date: "2025-12-11"   # Wikipedia
+    api_date: "2025-12-10"  # OpenRouter
+  GPT-5.2-Codex:
+    ga_date: "2025-12-18"   # OpenAI announcement
+    api_date: "2026-01-14"  # OpenRouter / CLI 0.81.0
+  GPT-5.2-Chat:
+    ga_date: "2025-12-11"   # Same as base
+    api_date: "2025-12-10"  # OpenRouter
+  GPT-5.2-Pro:
+    ga_date: "2025-12-11"   # Same as base
+    api_date: "2025-12-10"  # OpenRouter
+
+  # GPT-5.1 family
+  GPT-5.1:
+    ga_date: "2025-11-12"   # Wikipedia / OpenAI announcement
+    api_date: "2025-11-13"  # OpenRouter
+  GPT-5.1-Codex:
+    ga_date: "2025-11-12"   # Same as base
+    api_date: "2025-11-13"  # OpenRouter
+  GPT-5.1-Codex-Max:
+    ga_date: "2025-11-19"   # OpenAI release (1 week after GPT-5.1)
+    api_date: "2025-12-04"  # GitHub Copilot public preview
+  GPT-5.1-Codex-Mini:
+    ga_date: "2025-11-12"   # Same as base
+    api_date: "2025-11-13"  # OpenRouter
+
+  # GPT-5 base
+  GPT-5:
+    ga_date: "2025-08-07"   # Wikipedia
+    api_date: "2025-08-07"  # Inferred
+
+  # GPT-4.5
+  GPT-4.5:
+    ga_date: "2025-02-27"   # Wikipedia
+    api_date: "2025-02-27"  # Inferred
+
+  # o-series (reasoning models)
+  o3:
+    ga_date: "2025-04-16"   # Wikipedia
+    api_date: "2025-04-16"  # Inferred
+  o1:
+    ga_date: "2024-09-12"   # Wikipedia
+    api_date: "2024-09-12"  # Inferred
+
+  # OSS models
+  GPT-OSS:
+    ga_date: "2025-08-05"   # Wikipedia
+    api_date: "2025-10-29"  # OpenRouter (later)
+
+anthropic:
+  Claude-Opus-4.5:
+    ga_date: "2025-11-24"   # Wikipedia
+    api_date: "2025-11-24"  # OpenRouter
+  Claude-Sonnet-4.5:
+    ga_date: "2025-09-29"   # Wikipedia
+    api_date: "2025-09-29"  # OpenRouter
+  Claude-Haiku-4.5:
+    ga_date: "2025-10-15"   # Wikipedia (inferred)
+    api_date: "2025-10-15"  # OpenRouter
+  Claude-4.1:
+    ga_date: "2025-08-05"   # Wikipedia
+    api_date: "2025-08-05"  # OpenRouter
+  Claude-4:
+    ga_date: "2025-05-22"   # Wikipedia
+    api_date: "2025-05-22"  # OpenRouter
+  Claude-3.7:
+    ga_date: "2025-02-24"   # Wikipedia
+    api_date: "2025-02-24"  # OpenRouter
+
+google:
+  Gemini-3:
+    ga_date: "2025-11-18"   # Wikipedia
+    api_date: "2025-11-18"  # OpenRouter
+  Gemini-3-Flash:
+    ga_date: "2025-12-17"   # Later variant
+    api_date: "2025-12-17"  # OpenRouter
+  Gemini-2.5:
+    ga_date: "2025-03-25"   # Wikipedia
+    api_date: "2025-06-17"  # OpenRouter (later)
+  Gemini-2.5-Flash:
+    ga_date: "2025-06-17"   # Inferred
+    api_date: "2025-06-17"  # OpenRouter
+  Gemini-2.0:
+    ga_date: "2025-02-01"   # Wikipedia
+    api_date: "2025-02-01"  # Inferred
+
+x-ai:
+  Grok-4.1:
+    ga_date: "2025-11-17"   # Wikipedia (inferred)
+    api_date: "2025-11-19"  # OpenRouter
+  Grok-4:
+    ga_date: "2025-07-09"   # Wikipedia
+    api_date: "2025-07-09"  # OpenRouter
+  Grok-3:
+    ga_date: "2025-02-01"   # Wikipedia
+    api_date: "2025-06-10"  # OpenRouter (much later)
+
+meta-llama:
+  Llama-4:
+    ga_date: "2025-04-05"   # Wikipedia
+    api_date: "2025-04-05"  # OpenRouter
+  Llama-4-Maverick:
+    ga_date: "2025-04-05"   # Same as base
+    api_date: "2025-04-05"  # OpenRouter
+  Llama-4-Scout:
+    ga_date: "2025-04-05"   # Same as base
+    api_date: "2025-04-05"  # OpenRouter
+
+deepseek:
+  DeepSeek-V3:
+    ga_date: "2024-12-01"   # Wikipedia (December 2024)
+    api_date: "2025-03-24"  # OpenRouter (V3 0324)
+  DeepSeek-V3.1:
+    ga_date: "2025-08-21"   # Inferred from API
+    api_date: "2025-08-21"  # OpenRouter
+  DeepSeek-V3.2:
+    ga_date: "2025-09-29"   # Inferred from API
+    api_date: "2025-12-01"  # OpenRouter
+  DeepSeek-R1:
+    ga_date: "2025-01-20"   # Wikipedia
+    api_date: "2025-01-20"  # OpenRouter
+
+mistralai:
+  Mistral-Large-3:
+    ga_date: "2025-12-01"   # Inferred
+    api_date: "2025-12-01"  # OpenRouter
+  Ministral-3:
+    ga_date: "2025-12-02"   # Inferred
+    api_date: "2025-12-02"  # OpenRouter
+
+# Agent enrichment notes:
+# - Models marked "needs verification" should be confirmed by agent
+# - Agent should add new releases discovered in daily news
+# - Format: model_name: { ga_date: "YYYY-MM-DD", api_date: "YYYY-MM-DD" }
