@@ -8,24 +8,6 @@ AI News Aggregator - A Python-based multi-agent pipeline that collects AI/ML new
 
 **Testing:** The user always runs tests themselves. Do not run the pipeline or tests unless explicitly asked.
 
-## Repository
-
-### Git Remotes
-| Remote | URL | Purpose |
-|--------|-----|---------|
-| `flyryan` | git@github-flyryan:flyryan/ai-news-aggregator.git | Personal fork |
-| `github-emu` | https://github.com/trend-ai-acceleration-task-force/ai-news-aggregator.git | Organization repo |
-
-### Branches
-- `main` - Primary development branch
-- `backend-control` - Production deployment branch (keep in sync with main)
-
-### Push to All Remotes
-```bash
-git push flyryan main && git push github-emu main
-git checkout backend-control && git merge main --no-edit && git push flyryan backend-control && git checkout main
-```
-
 ## Commands
 
 ### Docker (Production)
