@@ -2,18 +2,46 @@
 set -e
 cd /home/ubuntu/ai-news-aggregator
 
-# Pull latest from flyryan (includes public README.md)
-git pull origin main
-echo "$(date): Pull completed successfully" >> logs/deploy.log
+LOG_FILE="logs/deploy.log"
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S'): $1" >> "$LOG_FILE"
+}
 
-# Swap to internal README for EMU push
+log "=== Deploy started ==="
+
+# Step 1: Fetch latest from origin to ensure refs are current
+log "Fetching from origin..."
+git fetch origin
+
+# Step 2: Hard reset to origin/main to ensure clean state
+# This handles cases where previous run failed mid-way or branch drifted
+log "Resetting to origin/main..."
+git reset --hard origin/main
+git clean -fd
+
+log "Pull/reset completed successfully"
+
+# Step 3: Swap to internal README for EMU push
+log "Swapping README for EMU..."
 cp README-internal.md README.md
 git add README.md
-git commit -m "Use internal README for AATF org" --no-verify
 
-# Push to github-emu (force needed because swap commit diverges from flyryan)
+# Only commit if there are changes (avoids error if README already matches)
+if ! git diff --cached --quiet; then
+    git commit -m "Use internal README for AATF org" --no-verify
+    log "README swap committed"
+else
+    log "README already matches internal version, no commit needed"
+fi
+
+# Step 4: Push to github-emu (force needed because swap commit diverges)
+log "Pushing to github-emu..."
 git push github-emu main --force
-echo "$(date): Push to github-emu completed successfully" >> logs/deploy.log
+log "Push to github-emu completed successfully"
 
-# Reset back to flyryan state (removes temp commit, restores public README)
+# Step 5: Fetch again (in case new commits arrived during push) and reset cleanly
+log "Resetting back to origin/main..."
+git fetch origin
 git reset --hard origin/main
+
+log "=== Deploy completed successfully ==="
