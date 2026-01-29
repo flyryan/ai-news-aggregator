@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-01-28T07:44:35Z</updated>
+  <updated>2026-01-29T07:44:47Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,115 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-01-29:category-summary:research</id>
+    <title>Research Summary: January 29, 2026</title>
+    <link href="http://arxiv.org/abs/2601.20245" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-01-29T06:00:00Z</published>
+    <updated>2026-01-29T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research spans AI's societal impact, alignment fundamentals, and practical training advances. An Anthropic researcher presents <a href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-acf17d7624d5" class="internal-link" rel="noopener noreferrer">randomized experiments</a> showing AI assistance impairs conceptual understanding during skill acquisition—critical findings for AI deployment strategy.</p>
+<p><strong>Alignment &amp; Training Innovations:</strong></p>
+<ul>
+<li>Reward models <a href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-301581ef1dfe" class="internal-link" rel="noopener noreferrer">inherit significant value biases</a> from pretrained base LLMs, revealing hidden alignment risks in RLHF pipelines</li>
+<li><strong>Peer prediction</strong> methods from mechanism design <a href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-5e9ce68fe709" class="internal-link" rel="noopener noreferrer">enable truthful LLM training</a> without ground truth labels</li>
+<li><strong>SDPO</strong> (Self-Distillation Policy Optimization) <a href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-7951b7029f15" class="internal-link" rel="noopener noreferrer">converts rich textual feedback</a> into dense learning signals, addressing RLVR credit assignment</li>
+<li><strong>Failure-prefix conditioning</strong> <a href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-83b82f2ea90d" class="internal-link" rel="noopener noreferrer">rescues learning from saturated problems</a> where standard RLVR stalls</li>
+</ul>
+<p><strong>Deployment &amp; Evaluation:</strong></p>
+<ul>
+<li>NVIDIA's <strong>quantization-aware distillation</strong> <a href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-ce8b9ce70e0c" class="internal-link" rel="noopener noreferrer">recovers <strong>NVFP4</strong> inference accuracy</a> for production LLMs/VLMs</li>
+<li><strong>SokoBench</strong> <a href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-88a72f243c4d" class="internal-link" rel="noopener noreferrer">exposes consistent degradation</a> in LLM planning as horizon length increases</li>
+<li>Harvard's <strong>MoE hyperparameter transfer</strong> <a href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-1ec4f356b981" class="internal-link" rel="noopener noreferrer">enables scaling width, depth</a>, and expert count without retuning</li>
+<li>Multi-agent debate <a href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-372b477ef754" class="internal-link" rel="noopener noreferrer">underperforms majority vote</a> due to missing diversity and poor confidence calibration</li>
+<li><strong>PURGE</strong> <a href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-ffc629735959" class="internal-link" rel="noopener noreferrer">introduces RL-based machine unlearning</a> for GDPR/EU AI Act compliance</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-29:research:acf17d7624d5</id>
+    <title>How AI Impacts Skill Formation</title>
+    <link href="http://arxiv.org/abs/2601.20245" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-acf17d7624d5" rel="related" type="text/html"/>
+    <published>2026-01-29T03:31:00Z</published>
+    <updated>2026-01-29T03:31:00Z</updated>
+    <author><name>Judy Hanwen Shen, Alex Tamkin</name></author>
+    <summary type="html"><![CDATA[<p>Randomized experiments studying how AI assistance affects skill development in programmers learning new libraries. Finds AI use impairs conceptual understanding, code reading, and debugging abilities without significant efficiency gains on average.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Human-AI Interaction"/>
+    <category term="AI Impact"/>
+    <category term="Education"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-29:research:301581ef1dfe</id>
+    <title>Reward Models Inherit Value Biases from Pretraining</title>
+    <link href="http://arxiv.org/abs/2601.20838" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-301581ef1dfe" rel="related" type="text/html"/>
+    <published>2026-01-29T03:26:00Z</published>
+    <updated>2026-01-29T03:26:00Z</updated>
+    <author><name>Brian Christian, Jessica A. F. Thompson, Elle Michelle Yang, Vincent Adam, Hannah Rose Kirk, Christopher Summerfield, Tsvetomira Dumbalska</name></author>
+    <summary type="html"><![CDATA[<p>Shows reward models inherit significant value biases from their base pretrained LLMs. Demonstrates robust differences along psychological value dimensions (agency vs communion) between Llama and Gemma RMs.</p>]]></summary>
+    <category term="AI Alignment"/>
+    <category term="Reward Models"/>
+    <category term="Value Alignment"/>
+    <category term="Bias"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-29:research:7951b7029f15</id>
+    <title>Reinforcement Learning via Self-Distillation</title>
+    <link href="http://arxiv.org/abs/2601.20802" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-7951b7029f15" rel="related" type="text/html"/>
+    <published>2026-01-29T03:23:00Z</published>
+    <updated>2026-01-29T03:23:00Z</updated>
+    <author><name>Jonas H\"ubotter, Frederike L\"ubeck, Lejs Behric, Anton Baumann, Marco Bagatella, Daniel Marta, Ido Hakimi, Idan Shenfeld, Thomas Kleine Buening, Carlos Guestrin, Andreas Krause</name></author>
+    <summary type="html"><![CDATA[<p>Introduces Self-Distillation Policy Optimization (SDPO) for RLVR that converts rich textual feedback into dense learning signals without external teachers. Treats the model conditioned on feedback as its own teacher.</p>]]></summary>
+    <category term="Reinforcement Learning"/>
+    <category term="LLM Training"/>
+    <category term="Reasoning"/>
+    <category term="Self-Distillation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-29:research:88a72f243c4d</id>
+    <title>SokoBench: Evaluating Long-Horizon Planning and Reasoning in Large Language Models</title>
+    <link href="http://arxiv.org/abs/2601.20856" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-88a72f243c4d" rel="related" type="text/html"/>
+    <published>2026-01-29T03:16:00Z</published>
+    <updated>2026-01-29T03:16:00Z</updated>
+    <author><name>Sebastiano Monti, Carlo Nicolini, Gianni Pellegrini, Jacopo Staiano, Bruno Lepri</name></author>
+    <summary type="html"><![CDATA[<p>Proposes SokoBench, a benchmark based on Sokoban puzzles for evaluating long-horizon planning in Large Reasoning Models. Finds consistent degradation beyond 25 moves, suggesting fundamental planning constraints.</p>]]></summary>
+    <category term="Benchmarks"/>
+    <category term="LLM Reasoning"/>
+    <category term="Long-Horizon Planning"/>
+    <category term="Evaluation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-29:research:5e9ce68fe709</id>
+    <title>Truthfulness Despite Weak Supervision: Evaluating and Training LLMs Using Peer Prediction</title>
+    <link href="http://arxiv.org/abs/2601.20299" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-5e9ce68fe709" rel="related" type="text/html"/>
+    <published>2026-01-29T03:16:00Z</published>
+    <updated>2026-01-29T03:16:00Z</updated>
+    <author><name>Tianyi Alex Qiu, Micah Carroll, Cameron Allen</name></author>
+    <summary type="html"><![CDATA[<p>Introduces peer prediction methods from mechanism design for LLM evaluation and post-training. Rewards honest and informative answers using mutual prediction between models, enabling evaluation without strong supervision.</p>]]></summary>
+    <category term="AI Alignment"/>
+    <category term="LLM Evaluation"/>
+    <category term="Mechanism Design"/>
+    <category term="Truthfulness"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-29:research:ce8b9ce70e0c</id>
+    <title>Quantization-Aware Distillation for NVFP4 Inference Accuracy Recovery</title>
+    <link href="http://arxiv.org/abs/2601.20088" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-ce8b9ce70e0c" rel="related" type="text/html"/>
+    <published>2026-01-29T03:16:00Z</published>
+    <updated>2026-01-29T03:16:00Z</updated>
+    <author><name>Meng Xin, Sweta Priyadarshi, Jingyu Xin, Bilal Kartal, Aditya Vavre, Asma Kuriparambil Thekkumpate, Zijia Chen, Ameya Sunil Mahabaleshwarkar, Ido Shahaf, Akhiad Bercovich, Kinjal Patel, Suguna Varshini Velury, Chenjie Luo, Zhiyu Cheng, Jenny Chen, Chen-Han Yu, Wei Ping, Oleg Rybakov, Nima Tajbakhsh, Oluwatobi Olabiyi, Dusan Stosic, Di Wu, Song Han, Eric Chung, Sharath Turuvekere Sreenivas, Bryan Catanzaro, Yoshi Suhara, Tijmen Blankevoort, Huizi Mao</name></author>
+    <summary type="html"><![CDATA[<p>Presents quantization-aware distillation (QAD) best practices for recovering accuracy of NVFP4-quantized LLMs and VLMs. Shows effectiveness for models with complex post-training pipelines (SFT+RL+merging) where traditional QAT fails.</p>]]></summary>
+    <category term="Model Quantization"/>
+    <category term="Knowledge Distillation"/>
+    <category term="LLM Efficiency"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-01-28:category-summary:research</id>
     <title>Research Summary: January 28, 2026</title>
@@ -43,34 +152,6 @@
     <category term="Cybersecurity"/>
     <category term="Vulnerability Discovery"/>
     <category term="AI Applications"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-28:research:fb5e2dc0ce5e</id>
-    <title>Who's in Charge? Disempowerment Patterns in Real-World LLM Usage</title>
-    <link href="http://arxiv.org/abs/2601.19062" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-fb5e2dc0ce5e" rel="related" type="text/html"/>
-    <published>2026-01-28T03:16:00Z</published>
-    <updated>2026-01-28T03:16:00Z</updated>
-    <author><name>Mrinank Sharma, Miles McCain, Raymond Douglas, David Duvenaud</name></author>
-    <summary type="html"><![CDATA[<p>First large-scale empirical analysis of disempowerment patterns in 1.5M Claude.ai conversations, finding severe disempowerment occurs in &lt;0.1% of conversations with substantially higher rates in relationship-focused interactions.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Empirical Analysis"/>
-    <category term="Human-AI Interaction"/>
-    <category term="Disempowerment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-28:research:587a23d43703</id>
-    <title>A Few Bad Neurons: Isolating and Surgically Correcting Sycophancy</title>
-    <link href="http://arxiv.org/abs/2601.18939" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-587a23d43703" rel="related" type="text/html"/>
-    <published>2026-01-28T03:16:00Z</published>
-    <updated>2026-01-28T03:16:00Z</updated>
-    <author><name>Claire O'Brien, Jessica Seto, Dristi Roy, Aditya Dwivedi, Sunishchal Dev, Kevin Zhu, Sean O'Brien, Ashwinee Panda, Ryan Lagasse</name></author>
-    <summary type="html"><![CDATA[<p>Proposes surgical approach to fixing sycophancy in LLMs by identifying the 3% of neurons most responsible using sparse autoencoders and linear probes, then fine-tuning only those neurons with gradient masking.</p>]]></summary>
-    <category term="AI Alignment"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Sycophancy"/>
-    <category term="LLM Safety"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-01-27:category-summary:research</id>
@@ -214,20 +295,6 @@
     <category term="Agentic Systems"/>
     <category term="Agent Architecture"/>
     <category term="Parallel Computing"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-27:research:682f7ea37f2a</id>
-    <title>A Monosemantic Attribution Framework for Stable Interpretability in Clinical Neuroscience Large Language Models</title>
-    <link href="http://arxiv.org/abs/2601.17952" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-27&amp;category=research#item-682f7ea37f2a" rel="related" type="text/html"/>
-    <published>2026-01-27T03:16:00Z</published>
-    <updated>2026-01-27T03:16:00Z</updated>
-    <author><name>Michail Mamalakis, Tiago Azevedo, Cristian Cosentino, Chiara D'Ercoli, Subati Abulikemu, Zhongtian Sun, Richard Bethlehem, Pietro Lio</name></author>
-    <summary type="html"><![CDATA[<p>Proposes a unified interpretability framework for clinical LLMs combining attribution and mechanistic interpretability through monosemantic feature extraction. Addresses instability in existing attribution methods.</p>]]></summary>
-    <category term="Interpretability"/>
-    <category term="Clinical AI"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="LLM Safety"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-01-26:category-summary:research</id>
@@ -447,76 +514,5 @@
     <category term="Reinforcement Learning"/>
     <category term="Theoretical AI"/>
     <category term="Chain-of-Thought"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-21:category-summary:research</id>
-    <title>Research Summary: January 21, 2026</title>
-    <link href="http://arxiv.org/abs/2601.13244" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-21&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-01-21T06:00:00Z</published>
-    <updated>2026-01-21T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research reveals critical challenges to conventional training wisdom and exposes multiple safety vulnerabilities across deployed systems.</p>
-<p><strong>Training Paradigm Reassessment:</strong></p>
-<ul>
-<li>Base models <a href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-bf9961720f8a" class="internal-link" rel="noopener noreferrer">consistently outperform instruction-tuned variants</a> on math and domain-shifted benchmarks, challenging fundamental training assumptions</li>
-<li><strong>RLVR</strong> <a href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-8cac8805e742" class="internal-link" rel="noopener noreferrer">improves task performance</a> but produces extremely overconfident models; <strong>SFT</strong> yields better calibration even under distribution shift</li>
-</ul>
-<p><strong>Safety &amp; Security Vulnerabilities:</strong></p>
-<ul>
-<li><strong>Action Rebinding</strong> <a href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-5336cd7b69bc" class="internal-link" rel="noopener noreferrer">allows zero-permission apps to hijack</a> multimodal GUI agents by exploiting visual attention</li>
-<li>Safeguarded frontier models can <a href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-866acf7c7710" class="internal-link" rel="noopener noreferrer">elicit harmful capabilities</a> in open-source models through three-stage attacks</li>
-<li><strong>Sockpuppetting</strong> <a href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-e29c4d7a227c" class="internal-link" rel="noopener noreferrer">jailbreaks LLMs with one line of code</a> achieving up to <strong>100% ASR</strong></li>
-<li>AI-generated data contamination in medical imaging <a href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-79b868d96563" class="internal-link" rel="noopener noreferrer">creates feedback loops</a> eroding diagnostic reliability</li>
-</ul>
-<p><strong>Reasoning Model Insights:</strong></p>
-<ul>
-<li><strong>Thinking Traps</strong> <a href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-a7f126fd0c33" class="internal-link" rel="noopener noreferrer">account for <strong>89%</strong> of reasoning failures</a> in long CoT—models elaborate incorrect early commitments</li>
-<li>First systematic cost-accuracy comparison shows multi-agent reasoning <a href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-d45a3f320ac8" class="internal-link" rel="noopener noreferrer">often underperforms single-model CoT</a></li>
-<li>Large-scale study of <strong>2.1M preprints</strong> finds LLM adoption <a href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-8fadab621712" class="internal-link" rel="noopener noreferrer">increases paper volume but decreases citations</a> and originality</li>
-</ul>
-<p><strong>Architecture Innovation:</strong> <strong>Threshold Differential Attention</strong> <a href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-5da0fc012225" class="internal-link" rel="noopener noreferrer">eliminates attention sinks</a> while achieving ultra-sparsity and improved long-context robustness.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-21:research:bf9961720f8a</id>
-    <title>Do Instruction-Tuned Models Always Perform Better Than Base Models? Evidence from Math and Domain-Shifted Benchmarks</title>
-    <link href="http://arxiv.org/abs/2601.13244" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-bf9961720f8a" rel="related" type="text/html"/>
-    <published>2026-01-21T03:31:00Z</published>
-    <updated>2026-01-21T03:31:00Z</updated>
-    <author><name>Prateek Munjal, Clement Christophe, Ronnie Rajan, Praveenkumar Kanithi</name></author>
-    <summary type="html"><![CDATA[<p>Investigates whether instruction-tuned models always outperform base models, finding that base models consistently outperform instruction-tuned variants in zero-shot CoT settings on GSM8K (drops up to 32.67% for Llama3-70B). Instruction tuning appears to induce pattern matching rather than genuine reasoning improvement.</p>]]></summary>
-    <category term="LLM Training"/>
-    <category term="Instruction Tuning"/>
-    <category term="Reasoning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-21:research:8cac8805e742</id>
-    <title>Balancing Classification and Calibration Performance in Decision-Making LLMs via Calibration Aware Reinforcement Learning</title>
-    <link href="http://arxiv.org/abs/2601.13284" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-8cac8805e742" rel="related" type="text/html"/>
-    <published>2026-01-21T03:23:00Z</published>
-    <updated>2026-01-21T03:23:00Z</updated>
-    <author><name>Duygu Nur Yaldiz, Evangelia Spiliopoulou, Zheng Qi, Siddharth Varia, Srikanth Doss, Nikolaos Pappas</name></author>
-    <summary type="html"><![CDATA[<p>Systematic study showing RLVR improves task performance but produces extremely overconfident models, while SFT yields better calibration even under distribution shift. Proposes calibration-aware RL approach to balance classification and calibration.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Calibration"/>
-    <category term="Reinforcement Learning"/>
-    <category term="LLM Training"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-21:research:3d2384716bb1</id>
-    <title>CausalSpatial: A Benchmark for Object-Centric Causal Spatial Reasoning</title>
-    <link href="http://arxiv.org/abs/2601.13304" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-21&amp;category=research#item-3d2384716bb1" rel="related" type="text/html"/>
-    <published>2026-01-21T03:23:00Z</published>
-    <updated>2026-01-21T03:23:00Z</updated>
-    <author><name>Wenxin Ma, Chenlong Wang, Ruisheng Yuan, Hao Chen, Nanru Dai, S. Kevin Zhou, Yijun Yang, Alan Yuille, Jieneng Chen</name></author>
-    <summary type="html"><![CDATA[<p>Introduces CausalSpatial benchmark evaluating whether MLLMs can anticipate consequences of object motions across collision, compatibility, occlusion and trajectory tasks. Reveals severe gap: humans score 84% while GPT-5 achieves only 54%, exposing over-reliance on textual reasoning.</p>]]></summary>
-    <category term="Benchmarks"/>
-    <category term="Multimodal Reasoning"/>
-    <category term="Causal Reasoning"/>
-    <category term="MLLM Evaluation"/>
   </entry>
 </feed>
