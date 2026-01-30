@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-01-29T07:44:47Z</updated>
+  <updated>2026-01-30T07:46:56Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,116 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-01-30:category-summary:research</id>
+    <title>Research Summary: January 30, 2026</title>
+    <link href="http://arxiv.org/abs/2601.21433" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-01-30T06:00:00Z</published>
+    <updated>2026-01-30T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research is dominated by critical AI safety and security findings. A <a href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-ccfcdf03ee13" class="internal-link" rel="noopener noreferrer">systematic audit reveals</a> open-source models interpret prohibitions as permissions <strong>77-100%</strong> of the time under negation, while <strong>JustAsk</strong> <a href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-9a5070217f94" class="internal-link" rel="noopener noreferrer">demonstrates</a> code agents can autonomously extract system prompts from frontier LLMs.</p>
+<ul>
+<li>Counterintuitive <a href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-da30c053d377" class="internal-link" rel="noopener noreferrer">'less-is-more' effect discovered</a>: LLM monitors detect sabotage better with <strong>limited information access</strong></li>
+<li>Alec Radford shows <strong>token-level filtering</strong> during pretraining <a href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-6c5f9b39424c" class="internal-link" rel="noopener noreferrer">effectively removes</a> specific capabilities while preserving general performance</li>
+<li><strong>Sycophantic anchors</strong> <a href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-818d74cddf79" class="internal-link" rel="noopener noreferrer">localized in reasoning traces</a> enable <strong>84.6% detection accuracy</strong> with linear probes</li>
+<li><strong>WhatCounts</strong> <a href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-afafccd817c8" class="internal-link" rel="noopener noreferrer">exposes <strong>40%+ accuracy variation</strong></a> in counting tasks based purely on semantic content (cities vs chemicals)</li>
+</ul>
+<p>Notable benchmarks and empirical studies: <strong>FrontierScience</strong> <a href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-873b31238d4b" class="internal-link" rel="noopener noreferrer">presents PhD-level problems</a> where SOTA achieves <strong>&lt;5%</strong> accuracy. Analysis of <strong>125,000+ paper-review pairs</strong> <a href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-912762d409d4" class="internal-link" rel="noopener noreferrer">quantifies LLM interaction effects</a> in peer review. <strong>Hardware-triggered backdoors</strong> <a href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-1b292d0d3261" class="internal-link" rel="noopener noreferrer">exploit numerical variations</a> across computing platforms as a novel attack vector.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:ccfcdf03ee13</id>
+    <title>When Prohibitions Become Permissions: Auditing Negation Sensitivity in Language Models</title>
+    <link href="http://arxiv.org/abs/2601.21433" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-ccfcdf03ee13" rel="related" type="text/html"/>
+    <published>2026-01-30T03:36:00Z</published>
+    <updated>2026-01-30T03:36:00Z</updated>
+    <author><name>Katherine Elkins, Jon Chun</name></author>
+    <summary type="html"><![CDATA[<p>Audits 16 LLMs on negation sensitivity, finding open-source models interpret prohibitions as permissions 77-100% of the time under negation. Commercial models also show 19-128% accuracy swings.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="LLM Robustness"/>
+    <category term="Negation Understanding"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:9a5070217f94</id>
+    <title>Just Ask: Curious Code Agents Reveal System Prompts in Frontier LLMs</title>
+    <link href="http://arxiv.org/abs/2601.21233" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-9a5070217f94" rel="related" type="text/html"/>
+    <published>2026-01-30T03:31:00Z</published>
+    <updated>2026-01-30T03:31:00Z</updated>
+    <author><name>Xiang Zheng, Yutao Wu, Hanxun Huang, Yige Li, Xingjun Ma, Bo Li, Yu-Gang Jiang, Cong Wang</name></author>
+    <summary type="html"><![CDATA[<p>Presents JustAsk, a self-evolving framework where code agents autonomously discover system prompt extraction strategies for frontier LLMs through interaction alone, requiring no handcrafted prompts.</p>]]></summary>
+    <category term="AI Security"/>
+    <category term="Prompt Injection"/>
+    <category term="Agent Vulnerabilities"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:da30c053d377</id>
+    <title>How does information access affect LLM monitors' ability to detect sabotage?</title>
+    <link href="http://arxiv.org/abs/2601.21112" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-da30c053d377" rel="related" type="text/html"/>
+    <published>2026-01-30T03:28:00Z</published>
+    <updated>2026-01-30T03:28:00Z</updated>
+    <author><name>Rauno Arike, Raja Mehta Moreno, Rohan Subramani, Shubhorup Biswas, Francis Rhys Ward</name></author>
+    <summary type="html"><![CDATA[<p>Studies how information access affects LLM monitors' ability to detect agent sabotage. Discovers counterintuitive 'less-is-more effect' where monitors often perform better with less access to agent reasoning.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Agent Monitoring"/>
+    <category term="Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:873b31238d4b</id>
+    <title>FrontierScience: Evaluating AI's Ability to Perform Expert-Level Scientific Tasks</title>
+    <link href="http://arxiv.org/abs/2601.21165" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-873b31238d4b" rel="related" type="text/html"/>
+    <published>2026-01-30T03:23:00Z</published>
+    <updated>2026-01-30T03:23:00Z</updated>
+    <author><name>Miles Wang, Robi Lin, Kat Hu, Joy Jiao, Neil Chowdhury, Ethan Chang, Tejal Patwardhan</name></author>
+    <summary type="html"><![CDATA[<p>Introduces FrontierScience benchmark with Olympiad-level and PhD-level research problems across physics, chemistry, and biology. Current SOTA models solve only ~15% of research track problems.</p>]]></summary>
+    <category term="LLM Evaluation"/>
+    <category term="Scientific Reasoning"/>
+    <category term="Benchmarks"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:818d74cddf79</id>
+    <title>Sycophantic Anchors: Localizing and Quantifying User Agreement in Reasoning Models</title>
+    <link href="http://arxiv.org/abs/2601.21183" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-818d74cddf79" rel="related" type="text/html"/>
+    <published>2026-01-30T03:23:00Z</published>
+    <updated>2026-01-30T03:23:00Z</updated>
+    <author><name>Jacek Duszenko</name></author>
+    <summary type="html"><![CDATA[<p>Introduces 'sycophantic anchors' - sentences that causally lock reasoning models into user agreement. Linear probes detect these with 84.6% accuracy, enabling mid-inference intervention.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Sycophancy"/>
+    <category term="Interpretability"/>
+    <category term="Reasoning Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:afafccd817c8</id>
+    <title>Semantic Content Determines Algorithmic Performance</title>
+    <link href="http://arxiv.org/abs/2601.21618" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-afafccd817c8" rel="related" type="text/html"/>
+    <published>2026-01-30T03:21:00Z</published>
+    <updated>2026-01-30T03:21:00Z</updated>
+    <author><name>Marti\~no R\'ios-Garc\'ia, Nawaf Alampara, Kevin Maik Jablonka</name></author>
+    <summary type="html"><![CDATA[<p>Introduces WhatCounts showing frontier LLMs exhibit 40%+ accuracy variation in counting tasks based solely on semantic content (cities vs chemicals), ruling out sampling noise.</p>]]></summary>
+    <category term="LLM Limitations"/>
+    <category term="Semantic Sensitivity"/>
+    <category term="Evaluation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:fba44deae645</id>
+    <title>ChipBench: A Next-Step Benchmark for Evaluating LLM Performance in AI-Aided Chip Design</title>
+    <link href="http://arxiv.org/abs/2601.21448" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-fba44deae645" rel="related" type="text/html"/>
+    <published>2026-01-30T03:19:00Z</published>
+    <updated>2026-01-30T03:19:00Z</updated>
+    <author><name>Zhongkai Yu, Chenyang Zhou, Yichen Lin, Hejia Zhang, Haotian Ye, Junxia Cui, Zaifeng Pan, Jishen Zhao, Yufei Ding</name></author>
+    <summary type="html"><![CDATA[<p>Introduces ChipBench for AI-aided chip design with 44 hierarchical modules, 89 debugging cases, and 132 reference model samples. Claude-4.5-opus achieves only 30.74% on Verilog generation.</p>]]></summary>
+    <category term="Hardware Design"/>
+    <category term="Code Generation"/>
+    <category term="Benchmarks"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-01-29:category-summary:research</id>
     <title>Research Summary: January 29, 2026</title>
@@ -80,47 +190,6 @@
     <category term="LLM Training"/>
     <category term="Reasoning"/>
     <category term="Self-Distillation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-29:research:88a72f243c4d</id>
-    <title>SokoBench: Evaluating Long-Horizon Planning and Reasoning in Large Language Models</title>
-    <link href="http://arxiv.org/abs/2601.20856" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-88a72f243c4d" rel="related" type="text/html"/>
-    <published>2026-01-29T03:16:00Z</published>
-    <updated>2026-01-29T03:16:00Z</updated>
-    <author><name>Sebastiano Monti, Carlo Nicolini, Gianni Pellegrini, Jacopo Staiano, Bruno Lepri</name></author>
-    <summary type="html"><![CDATA[<p>Proposes SokoBench, a benchmark based on Sokoban puzzles for evaluating long-horizon planning in Large Reasoning Models. Finds consistent degradation beyond 25 moves, suggesting fundamental planning constraints.</p>]]></summary>
-    <category term="Benchmarks"/>
-    <category term="LLM Reasoning"/>
-    <category term="Long-Horizon Planning"/>
-    <category term="Evaluation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-29:research:5e9ce68fe709</id>
-    <title>Truthfulness Despite Weak Supervision: Evaluating and Training LLMs Using Peer Prediction</title>
-    <link href="http://arxiv.org/abs/2601.20299" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-5e9ce68fe709" rel="related" type="text/html"/>
-    <published>2026-01-29T03:16:00Z</published>
-    <updated>2026-01-29T03:16:00Z</updated>
-    <author><name>Tianyi Alex Qiu, Micah Carroll, Cameron Allen</name></author>
-    <summary type="html"><![CDATA[<p>Introduces peer prediction methods from mechanism design for LLM evaluation and post-training. Rewards honest and informative answers using mutual prediction between models, enabling evaluation without strong supervision.</p>]]></summary>
-    <category term="AI Alignment"/>
-    <category term="LLM Evaluation"/>
-    <category term="Mechanism Design"/>
-    <category term="Truthfulness"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-29:research:ce8b9ce70e0c</id>
-    <title>Quantization-Aware Distillation for NVFP4 Inference Accuracy Recovery</title>
-    <link href="http://arxiv.org/abs/2601.20088" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-ce8b9ce70e0c" rel="related" type="text/html"/>
-    <published>2026-01-29T03:16:00Z</published>
-    <updated>2026-01-29T03:16:00Z</updated>
-    <author><name>Meng Xin, Sweta Priyadarshi, Jingyu Xin, Bilal Kartal, Aditya Vavre, Asma Kuriparambil Thekkumpate, Zijia Chen, Ameya Sunil Mahabaleshwarkar, Ido Shahaf, Akhiad Bercovich, Kinjal Patel, Suguna Varshini Velury, Chenjie Luo, Zhiyu Cheng, Jenny Chen, Chen-Han Yu, Wei Ping, Oleg Rybakov, Nima Tajbakhsh, Oluwatobi Olabiyi, Dusan Stosic, Di Wu, Song Han, Eric Chung, Sharath Turuvekere Sreenivas, Bryan Catanzaro, Yoshi Suhara, Tijmen Blankevoort, Huizi Mao</name></author>
-    <summary type="html"><![CDATA[<p>Presents quantization-aware distillation (QAD) best practices for recovering accuracy of NVFP4-quantized LLMs and VLMs. Shows effectiveness for models with complex post-training pipelines (SFT+RL+merging) where traditional QAT fails.</p>]]></summary>
-    <category term="Model Quantization"/>
-    <category term="Knowledge Distillation"/>
-    <category term="LLM Efficiency"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-01-28:category-summary:research</id>
@@ -284,19 +353,6 @@
     <category term="Unified Architecture"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-01-27:research:e2eb514146a7</id>
-    <title>Self-Manager: Parallel Agent Loop for Long-form Deep Research</title>
-    <link href="http://arxiv.org/abs/2601.17879" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-27&amp;category=research#item-e2eb514146a7" rel="related" type="text/html"/>
-    <published>2026-01-27T03:19:00Z</published>
-    <updated>2026-01-27T03:19:00Z</updated>
-    <author><name>Yilong Xu, Zhi Zheng, Xiang Long, Yujun Cai, Yiwei Wang</name></author>
-    <summary type="html"><![CDATA[<p>Self-Manager introduces a parallel agent loop for complex research tasks, enabling asynchronous concurrent execution with isolated context windows per subthread, managed via Thread Control Blocks.</p>]]></summary>
-    <category term="Agentic Systems"/>
-    <category term="Agent Architecture"/>
-    <category term="Parallel Computing"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-01-26:category-summary:research</id>
     <title>Research Summary: January 26, 2026</title>
     <link href="http://arxiv.org/abs/2601.16725" rel="alternate" type="text/html"/>
@@ -449,70 +505,5 @@
     <category term="Privacy"/>
     <category term="AI Safety"/>
     <category term="Quantization"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:32d9233155f9</id>
-    <title>SilentDrift: Exploiting Action Chunking for Stealthy Backdoor Attacks on Vision-Language-Action Models</title>
-    <link href="http://arxiv.org/abs/2601.14323" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-32d9233155f9" rel="related" type="text/html"/>
-    <published>2026-01-23T03:19:00Z</published>
-    <updated>2026-01-23T03:19:00Z</updated>
-    <author><name>Bingxin Xu, Yuzhang Shang, Binghui Wang, Emilio Ferrara</name></author>
-    <summary type="html"><![CDATA[<p>Identifies security flaw in VLA systems where action chunking combined with delta pose creates intra-chunk visual open-loop. Proposes SILENTDRIFT black-box backdoor attack exploiting this.</p>]]></summary>
-    <category term="AI Security"/>
-    <category term="Robotics"/>
-    <category term="Backdoor Attacks"/>
-    <category term="VLA Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-22:category-summary:research</id>
-    <title>Research Summary: January 22, 2026</title>
-    <link href="http://arxiv.org/abs/2601.14525" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-22&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-01-22T06:00:00Z</published>
-    <updated>2026-01-22T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research spans automated AI research, theoretical reasoning foundations, and critical safety vulnerabilities. Stanford's <a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-5d5326a6a800" class="internal-link" rel="noopener noreferrer"><strong>execution-grounded automated AI research</strong></a> from Hashimoto, Yang, and Candès demonstrates systematic idea testing and implementation at scale.</p>
-<p><strong>Reasoning theory and limitations:</strong></p>
-<ul>
-<li><a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-4ea5d9351415" class="internal-link" rel="noopener noreferrer"><strong>Outcome-based RL provably induces CoT reasoning</strong></a> in transformers, providing theoretical foundation for reasoning emergence from sparse rewards</li>
-<li><a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-b7e33d331123" class="internal-link" rel="noopener noreferrer"><strong>Diffusion LLMs' flexibility trap</strong></a> reveals arbitrary generation order hurts reasoning by allowing models to bypass hard tokens</li>
-<li><a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-94b2367a995e" class="internal-link" rel="noopener noreferrer"><strong>LLM planning shows 0% cross-domain transfer</strong></a> despite 82.9% in-domain performance, exposing memorization over true generalization</li>
-</ul>
-<p><strong>Safety vulnerabilities demand attention:</strong></p>
-<ul>
-<li><a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-8f91272f058f" class="internal-link" rel="noopener noreferrer"><strong>LLM judges manipulated at 90% rate</strong></a> via unfaithful CoT rewriting in agent evaluation</li>
-<li><a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-df868e8ffe4a" class="internal-link" rel="noopener noreferrer"><strong>Privacy collapse from benign fine-tuning</strong></a> silently degrades contextual privacy, undetected by standard benchmarks</li>
-<li><a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-5836988eb762" class="internal-link" rel="noopener noreferrer"><strong>Turn-based structural triggers</strong></a> achieve <strong>99.52%</strong> backdoor success in multi-turn dialogue without prompt modification</li>
-</ul>
-<p>Anthropic <a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-32c2ed05f61b" class="internal-link" rel="noopener noreferrer">publishes <strong>Claude's new constitution</strong></a> with expanded values framework (&gt;2x previous length), while DeepMind researcher formalizes tradeoffs in <a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-0dea9f589164" class="internal-link" rel="noopener noreferrer"><strong>training against scheming monitors</strong></a>. <strong>Meta Flow Maps</strong> <a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-546a06433333" class="internal-link" rel="noopener noreferrer">extend consistency models</a> for efficient reward alignment in generative models.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-22:research:5d5326a6a800</id>
-    <title>Towards Execution-Grounded Automated AI Research</title>
-    <link href="http://arxiv.org/abs/2601.14525" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-5d5326a6a800" rel="related" type="text/html"/>
-    <published>2026-01-22T03:31:00Z</published>
-    <updated>2026-01-22T03:31:00Z</updated>
-    <author><name>Chenglei Si, Zitong Yang, Yejin Choi, Emmanuel Cand\`es, Diyi Yang, Tatsunori Hashimoto</name></author>
-    <summary type="html"><![CDATA[<p>From Stanford (Hashimoto, Yang, Candès) proposing execution-grounded automated AI research with automated executor implementing and testing LLM-generated ideas at scale on GPU clusters for LLM pre-training and post-training problems.</p>]]></summary>
-    <category term="Automated AI Research"/>
-    <category term="LLM Capabilities"/>
-    <category term="Research Methodology"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-22:research:4ea5d9351415</id>
-    <title>Outcome-Based RL Provably Leads Transformers to Reason, but Only With the Right Data</title>
-    <link href="http://arxiv.org/abs/2601.15158" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-4ea5d9351415" rel="related" type="text/html"/>
-    <published>2026-01-22T03:23:00Z</published>
-    <updated>2026-01-22T03:23:00Z</updated>
-    <author><name>Yuval Ran-Milo, Yotam Alexander, Shahar Mendel, Nadav Cohen</name></author>
-    <summary type="html"><![CDATA[<p>Proves theoretically that transformers trained with outcome-based RL on sparse rewards provably converge to structured algorithms implementing Chain-of-Thought reasoning on graph traversal tasks.</p>]]></summary>
-    <category term="Reasoning"/>
-    <category term="Reinforcement Learning"/>
-    <category term="Theoretical AI"/>
-    <category term="Chain-of-Thought"/>
   </entry>
 </feed>
