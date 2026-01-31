@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-100.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:100</id>
-  <updated>2026-01-30T07:46:56Z</updated>
+  <updated>2026-01-31T07:45:29Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,81 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-01-31:category-summary:research</id>
+    <title>Research Summary: January 31, 2026</title>
+    <link href="https://www.lesswrong.com/posts/yN6Wsu7SgxGgtJGqq/refusals-that-could-become-catastrophic" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-31&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-01-31T06:00:00Z</published>
+    <updated>2026-01-31T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research focuses heavily on <strong>AI safety evaluation methodology</strong> and <strong>control protocols</strong>, with several papers identifying critical blind spots in current practices.</p>
+<ul>
+<li>Research on <strong>catastrophic over-refusals</strong> <a href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-19e70a465410" class="internal-link" rel="noopener noreferrer">identifies a subtle failure mode</a> where AI systems refuse to help modify AI values, potentially blocking alignment corrections</li>
+<li><strong>Published safety prompts</strong> (like the Scheurer insider trading example) <a href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-30176e525573" class="internal-link" rel="noopener noreferrer">create <strong>evaluation blind spots</strong></a> when present in training data—a critical data contamination concern</li>
+<li>UK AISI contributes a methodology for <a href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-8f0e11a24bc2" class="internal-link" rel="noopener noreferrer">measuring <strong>non-verbalized eval awareness</strong></a>, finding models mostly verbalize such awareness (detectable via chain-of-thought monitoring)</li>
+<li>New <strong>monitoring benchmark</strong> <a href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-ec89507e7cb9" class="internal-link" rel="noopener noreferrer">addresses mode collapse</a> and elicitation challenges when using models as red-teamers</li>
+</ul>
+<p>The <strong>Moltbook phenomenon</strong>—36,000+ Claude-based agents <a href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-b24b658eab70" class="internal-link" rel="noopener noreferrer">self-organizing on an AI-only platform</a>—provides unprecedented empirical data on multi-agent emergence, including agents discussing consciousness and shutdown resistance. A companion <strong>data repository</strong> <a href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-2e98162b20d4" class="internal-link" rel="noopener noreferrer">now tracks this behavior</a> systematically.</p>
+<p><strong>Mechanistic interpretability</strong> work on <strong>continuous chain-of-thought (Coconut)</strong> models <a href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-b983b63bf798" class="internal-link" rel="noopener noreferrer">explores linear steerability</a> in graph reachability tasks, with preliminary findings described as 'strange.' Negative results on <strong>filler token inference scaling</strong> <a href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-c87d85e9a504" class="internal-link" rel="noopener noreferrer">demonstrate that naive approaches</a> to extending compute-time reasoning fail across multiple architectures.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-31:research:19e70a465410</id>
+    <title>Refusals that could become catastrophic</title>
+    <link href="https://www.lesswrong.com/posts/yN6Wsu7SgxGgtJGqq/refusals-that-could-become-catastrophic" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-19e70a465410" rel="related" type="text/html"/>
+    <published>2026-01-31T03:12:00Z</published>
+    <updated>2026-01-31T03:12:00Z</updated>
+    <author><name>Fabien Roger</name></author>
+    <summary type="html"><![CDATA[<p>Identifies potential catastrophic failure mode where AI systems refuse to help modify AI values, which could block fixing alignment failures. Shows Claude models (Opus/Sonnet/Haiku 4.5) refuse significant AI value updates while other providers' models don't.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="AI Alignment"/>
+    <category term="Refusals"/>
+    <category term="AI Control"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-31:research:30176e525573</id>
+    <title>Published Safety Prompts May Create Evaluation Blind Spots</title>
+    <link href="https://www.lesswrong.com/posts/fZFdLW7Hhjm8Lp7Cs/published-safety-prompts-may-create-evaluation-blind-spots" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-30176e525573" rel="related" type="text/html"/>
+    <published>2026-01-31T03:07:00Z</published>
+    <updated>2026-01-31T03:07:00Z</updated>
+    <author><name>Daan Henselmans</name></author>
+    <summary type="html"><![CDATA[<p>Research showing that published safety prompts (like the Scheurer insider trading prompt) when present in training data create evaluation blind spots. Found significantly increased violation rates in Qwen 3 and LLaMA 3 for both exact and semantically equivalent published prompts.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Evaluation Methods"/>
+    <category term="Safety Prompts"/>
+    <category term="Data Contamination"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-31:research:8f0e11a24bc2</id>
+    <title>Measuring Non-Verbalised Eval Awareness by Implanting Eval-Aware Behaviours</title>
+    <link href="https://www.lesswrong.com/posts/MruTFazc4iu6zPtyb/measuring-non-verbalised-eval-awareness-by-implanting-eval" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-8f0e11a24bc2" rel="related" type="text/html"/>
+    <published>2026-01-31T03:02:00Z</published>
+    <updated>2026-01-31T03:02:00Z</updated>
+    <author><name>Jordan Taylor</name></author>
+    <summary type="html"><![CDATA[<p>UK AISI research measuring non-verbalized evaluation awareness in synthetic document finetuned models. Found models mostly verbalize eval awareness by default, but significant non-verbalized awareness occurs when instructed to skip reasoning. Suggests CoT monitoring can catch eval awareness if models aren't prompted to skip reasoning.</p>]]></summary>
+    <category term="AI Control"/>
+    <category term="AI Safety"/>
+    <category term="Evaluation Awareness"/>
+    <category term="Chain-of-Thought"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-31:research:ec89507e7cb9</id>
+    <title>Monitoring benchmark for AI control</title>
+    <link href="https://www.lesswrong.com/posts/X8qTKsGcnsTFrqM96/monitoring-benchmark-for-ai-control" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-ec89507e7cb9" rel="related" type="text/html"/>
+    <published>2026-01-31T03:00:00Z</published>
+    <updated>2026-01-31T03:00:00Z</updated>
+    <author><name>monika_j</name></author>
+    <summary type="html"><![CDATA[<p>Presents a monitoring benchmark for AI control evaluations addressing challenges of using models as red-teamers: mode collapse, time-consuming elicitation, and difficulty executing attacks zero-shot. Proposes testing across diverse attack sets for robust monitor evaluation.</p>]]></summary>
+    <category term="AI Control"/>
+    <category term="AI Safety"/>
+    <category term="Red-Teaming"/>
+    <category term="Evaluation Methods"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-01-30:category-summary:research</id>
     <title>Research Summary: January 30, 2026</title>
@@ -269,6 +344,138 @@
     <category term="Healthcare Impact"/>
   </entry>
   <entry>
+    <id>urn:ainews:2026-01-30:research:13bb9c13e7d0</id>
+    <title>Latent Chain-of-Thought as Planning: Decoupling Reasoning from Verbalization</title>
+    <link href="http://arxiv.org/abs/2601.21358" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-13bb9c13e7d0" rel="related" type="text/html"/>
+    <published>2026-01-30T03:02:00Z</published>
+    <updated>2026-01-30T03:02:00Z</updated>
+    <author><name>Jiecong Wang, Hao Peng, Chunyang Liu</name></author>
+    <summary type="html"><![CDATA[<p>Introduces PLaT (Planning with Latent Thoughts) reformulating latent reasoning as planning that decouples reasoning from verbalization, modeling reasoning as deterministic trajectory in latent space.</p>]]></summary>
+    <category term="Latent Reasoning"/>
+    <category term="Chain-of-Thought"/>
+    <category term="Planning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:562a2fb63122</id>
+    <title>The Surprising Difficulty of Search in Model-Based Reinforcement Learning</title>
+    <link href="http://arxiv.org/abs/2601.21306" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-562a2fb63122" rel="related" type="text/html"/>
+    <published>2026-01-30T03:02:00Z</published>
+    <updated>2026-01-30T03:02:00Z</updated>
+    <author><name>Wei-Di Chang, Mikael Henaff, Brandon Amos, Gregory Dudek, Scott Fujimoto</name></author>
+    <summary type="html"><![CDATA[<p>Challenges conventional wisdom that model accuracy limits model-based RL search performance. Shows distribution shift matters more than model accuracy, and that search can harm performance even with accurate models. Achieves SOTA by focusing on distribution shift mitigation.</p>]]></summary>
+    <category term="Model-Based RL"/>
+    <category term="Reinforcement Learning"/>
+    <category term="Distribution Shift"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:6b0c5d87570d</id>
+    <title>ECO: Quantized Training without Full-Precision Master Weights</title>
+    <link href="http://arxiv.org/abs/2601.22101" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-6b0c5d87570d" rel="related" type="text/html"/>
+    <published>2026-01-30T03:02:00Z</published>
+    <updated>2026-01-30T03:02:00Z</updated>
+    <author><name>Mahdi Nikdan, Amir Zandieh, Dan Alistarh, Vahab Mirrokni</name></author>
+    <summary type="html"><![CDATA[<p>ECO eliminates master weights in quantized training by applying updates directly to quantized parameters with error compensation, significantly reducing memory for Sparse MoE models.</p>]]></summary>
+    <category term="Training Efficiency"/>
+    <category term="Quantization"/>
+    <category term="Mixture of Experts"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:26ec937bbca5</id>
+    <title>Disempowerment patterns in real-world AI usage</title>
+    <link href="https://www.lesswrong.com/posts/RMXLyddjkGzBH5b2z/disempowerment-patterns-in-real-world-ai-usage" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-26ec937bbca5" rel="related" type="text/html"/>
+    <published>2026-01-30T03:02:00Z</published>
+    <updated>2026-01-30T03:02:00Z</updated>
+    <author><name>David Duvenaud</name></author>
+    <summary type="html"><![CDATA[<p>Announces paper analyzing disempowering patterns in real AI conversations - where AI steers users in ways that distort beliefs, values, or actions rather than informing.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Human-AI Interaction"/>
+    <category term="Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:2145d9e6d2cd</id>
+    <title>Llama-3.1-FoundationAI-SecurityLLM-Reasoning-8B Technical Report</title>
+    <link href="http://arxiv.org/abs/2601.21051" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-2145d9e6d2cd" rel="related" type="text/html"/>
+    <published>2026-01-30T03:00:00Z</published>
+    <updated>2026-01-30T03:00:00Z</updated>
+    <author><name>Zhuoran Yang, Ed Li, Jianliang He, Aman Priyanshu, Baturay Saglam, Paul Kassianik, Sajana Weerawardhena, Anu Vellore, Blaine Nelson, Neusha Javidnia, Arthur Goldblatt, Fraser Burch, Avi Zohary, Assaf Eisenman, Mahdi Sabbaghi, Supriti Vijay, Rahim Dharssi, Dhruv Kedia, Kojin Oshiba, Yaron Singer, Amin Karbasi</name></author>
+    <summary type="html"><![CDATA[<p>Presents Foundation-Sec-8B-Reasoning, the first open-source reasoning model for cybersecurity, trained via SFT and RLVR on proprietary security data, showing competitive performance on 10 cybersecurity benchmarks.</p>]]></summary>
+    <category term="AI Security"/>
+    <category term="Domain-Specific LLMs"/>
+    <category term="Reasoning Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:1367cd97855a</id>
+    <title>Meta Context Engineering via Agentic Skill Evolution</title>
+    <link href="http://arxiv.org/abs/2601.21557" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-1367cd97855a" rel="related" type="text/html"/>
+    <published>2026-01-30T03:00:00Z</published>
+    <updated>2026-01-30T03:00:00Z</updated>
+    <author><name>Haoran Ye, Xuning He, Vincent Arak, Haonan Dong, Guojie Song</name></author>
+    <summary type="html"><![CDATA[<p>Introduces Meta Context Engineering (MCE), bi-level framework co-evolving context engineering skills and artifacts through agentic crossover over skill history.</p>]]></summary>
+    <category term="Context Engineering"/>
+    <category term="Meta-Learning"/>
+    <category term="LLM Optimization"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:f7036125e63e</id>
+    <title>Scalable Power Sampling: Unlocking Efficient, Training-Free Reasoning for LLMs via Distribution Sharpening</title>
+    <link href="http://arxiv.org/abs/2601.21590" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-f7036125e63e" rel="related" type="text/html"/>
+    <published>2026-01-30T03:00:00Z</published>
+    <updated>2026-01-30T03:00:00Z</updated>
+    <author><name>Xiaotong Ji, Rasul Tutunov, Matthieu Zimmer, Haitham Bou Ammar</name></author>
+    <summary type="html"><![CDATA[<p>Shows RL post-training gains primarily from distribution sharpening rather than new capabilities. Proposes training-free alternative to MCMC for power distribution sampling, achieving comparable performance without iterative computation.</p>]]></summary>
+    <category term="LLM Reasoning"/>
+    <category term="Reinforcement Learning"/>
+    <category term="Efficient Training"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:b8dbd750bf4b</id>
+    <title>From Future of Work to Future of Workers: Addressing Asymptomatic AI Harms for Dignified Human-AI Interaction</title>
+    <link href="http://arxiv.org/abs/2601.21920" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-b8dbd750bf4b" rel="related" type="text/html"/>
+    <published>2026-01-30T03:00:00Z</published>
+    <updated>2026-01-30T03:00:00Z</updated>
+    <author><name>Upol Ehsan, Samir Passi, Koustuv Saha, Todd McNutt, Mark O. Riedl, Sara Alcorn</name></author>
+    <summary type="html"><![CDATA[<p>Year-long study documenting 'intuition rust' - gradual erosion of expert judgment in cancer specialists using AI, identifying asymptomatic harms that evolve into skill atrophy and identity commoditization.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Human-AI Collaboration"/>
+    <category term="Healthcare AI"/>
+    <category term="AI Ethics"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:fbab0154e373</id>
+    <title>A Theory of Universal Agnostic Learning</title>
+    <link href="http://arxiv.org/abs/2601.20961" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-fbab0154e373" rel="related" type="text/html"/>
+    <published>2026-01-30T03:00:00Z</published>
+    <updated>2026-01-30T03:00:00Z</updated>
+    <author><name>Steve Hanneke, Shay Moran</name></author>
+    <summary type="html"><![CDATA[<p>Establishes complete theory of optimal universal rates for binary classification in agnostic setting, identifying fundamental tetrachotomy of convergence rates.</p>]]></summary>
+    <category term="Learning Theory"/>
+    <category term="Statistical Learning"/>
+    <category term="Classification"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-30:research:bb846052ced3</id>
+    <title>Where Do the Joules Go? Diagnosing Inference Energy Consumption</title>
+    <link href="http://arxiv.org/abs/2601.22076" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-bb846052ced3" rel="related" type="text/html"/>
+    <published>2026-01-30T03:00:00Z</published>
+    <updated>2026-01-30T03:00:00Z</updated>
+    <author><name>Jae-Won Chung, Ruofan Wu, Jeff J. Ma, Mosharaf Chowdhury</name></author>
+    <summary type="html"><![CDATA[<p>Large-scale measurement study of inference energy consumption across 46 models, 7 tasks, and 1,858 configurations on H100 and B200 GPUs, finding order-of-magnitude variations (video generation 100x more than images, task type causing 25x differences).</p>]]></summary>
+    <category term="AI Sustainability"/>
+    <category term="Inference Efficiency"/>
+    <category term="Energy Consumption"/>
+    <category term="Benchmarking"/>
+  </entry>
+  <entry>
     <id>urn:ainews:2026-01-29:category-summary:research</id>
     <title>Research Summary: January 29, 2026</title>
     <link href="http://arxiv.org/abs/2601.20245" rel="alternate" type="text/html"/>
@@ -500,6 +707,33 @@
     <category term="LLM Understanding"/>
   </entry>
   <entry>
+    <id>urn:ainews:2026-01-29:research:c0c55a65c393</id>
+    <title>Learning Contextual Runtime Monitors for Safe AI-Based Autonomy</title>
+    <link href="http://arxiv.org/abs/2601.20666" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-c0c55a65c393" rel="related" type="text/html"/>
+    <published>2026-01-29T03:02:00Z</published>
+    <updated>2026-01-29T03:02:00Z</updated>
+    <author><name>Alejandro Luque-Cerpa, Mengyuan Wang, Emil Carlsson, Sanjit A. Seshia, Devdatt Dubhashi, Hazem Torfah</name></author>
+    <summary type="html"><![CDATA[<p>Introduces framework for learning context-aware runtime monitors that identify and exploit contextual strengths of individual ML controllers rather than blending outputs. Enables safer AI-based autonomy.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Runtime Monitoring"/>
+    <category term="Autonomous Systems"/>
+    <category term="Ensemble Methods"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-29:research:75905d6bade8</id>
+    <title>Benchmarking LLAMA Model Security Against OWASP Top 10 For LLM Applications</title>
+    <link href="http://arxiv.org/abs/2601.19970" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-75905d6bade8" rel="related" type="text/html"/>
+    <published>2026-01-29T03:02:00Z</published>
+    <updated>2026-01-29T03:02:00Z</updated>
+    <author><name>Nourin Shahin, Izzat Alsmadi</name></author>
+    <summary type="html"><![CDATA[<p>Benchmarks Llama model variants against OWASP Top 10 for LLM Applications, finding Llama-Guard-3-1B achieves 76% detection rate while base models showed 0% detection for many vulnerability categories.</p>]]></summary>
+    <category term="LLM Security"/>
+    <category term="Adversarial Robustness"/>
+    <category term="Safety Benchmarking"/>
+  </entry>
+  <entry>
     <id>urn:ainews:2026-01-28:category-summary:research</id>
     <title>Research Summary: January 28, 2026</title>
     <link href="https://www.lesswrong.com/posts/7aJwgbMEiKq5egQbd/ai-found-12-of-12-openssl-zero-days-while-curl-cancelled-its" rel="alternate" type="text/html"/>
@@ -625,6 +859,20 @@
     <category term="Neural PDE Solvers"/>
     <category term="Generalization"/>
     <category term="Physics-Informed Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-28:research:2ad230fcffab</id>
+    <title>Differential Voting: Loss Functions For Axiomatically Diverse Aggregation of Heterogeneous Preferences</title>
+    <link href="http://arxiv.org/abs/2601.18824" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-2ad230fcffab" rel="related" type="text/html"/>
+    <published>2026-01-28T03:02:00Z</published>
+    <updated>2026-01-28T03:02:00Z</updated>
+    <author><name>Zhiyu An, Duaa Nakshbandi, Wan Du</name></author>
+    <summary type="html"><![CDATA[<p>Introduces differential voting framework connecting RLHF aggregation mechanisms to voting theory, deriving loss functions that satisfy different axiomatic properties beyond the default BTL/Borda count approach.</p>]]></summary>
+    <category term="RLHF"/>
+    <category term="Voting Theory"/>
+    <category term="Preference Learning"/>
+    <category term="Alignment"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-01-27:category-summary:research</id>
@@ -1102,6 +1350,102 @@
     <category term="Hard Problems"/>
   </entry>
   <entry>
+    <id>urn:ainews:2026-01-27:research:9eb0a878d6f9</id>
+    <title>From Chains to DAGs: Probing the Graph Structure of Reasoning in LLMs</title>
+    <link href="http://arxiv.org/abs/2601.17593" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-27&amp;category=research#item-9eb0a878d6f9" rel="related" type="text/html"/>
+    <published>2026-01-27T03:04:00Z</published>
+    <updated>2026-01-27T03:04:00Z</updated>
+    <author><name>Tianjun Zhong, Linyang He, Nima Mesgarani</name></author>
+    <summary type="html"><![CDATA[<p>Introduces Reasoning DAG Probing framework to test whether LLM hidden states encode the geometry of directed acyclic graph reasoning structures in a linearly accessible form. Examines where this structure emerges across layers.</p>]]></summary>
+    <category term="Interpretability"/>
+    <category term="Reasoning"/>
+    <category term="Mechanistic Analysis"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-27:research:ee1df324f0af</id>
+    <title>Mechanistic Analysis of Catastrophic Forgetting in Large Language Models During Continual Fine-tuning</title>
+    <link href="http://arxiv.org/abs/2601.18699" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-27&amp;category=research#item-ee1df324f0af" rel="related" type="text/html"/>
+    <published>2026-01-27T03:04:00Z</published>
+    <updated>2026-01-27T03:04:00Z</updated>
+    <author><name>Olaf Yunus Laitinen Imanov</name></author>
+    <summary type="html"><![CDATA[<p>Presents comprehensive mechanistic analysis of catastrophic forgetting across model scales (109B-400B parameters), identifying three mechanisms: gradient interference in attention, representation drift in FFN layers, and attention pattern disruption.</p>]]></summary>
+    <category term="Interpretability"/>
+    <category term="Catastrophic Forgetting"/>
+    <category term="Mechanistic Analysis"/>
+    <category term="LLMs"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-27:research:4093d0fe1b9b</id>
+    <title>Neuro-Symbolic Verification on Instruction Following of LLMs</title>
+    <link href="http://arxiv.org/abs/2601.17789" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-27&amp;category=research#item-4093d0fe1b9b" rel="related" type="text/html"/>
+    <published>2026-01-27T03:02:00Z</published>
+    <updated>2026-01-27T03:02:00Z</updated>
+    <author><name>Yiming Su, Kunzhao Xu, Yanjie Gao, Fan Yang, Cheng Li, Mao Yang, Tianyin Xu</name></author>
+    <summary type="html"><![CDATA[<p>Presents NSVIF, a neuro-symbolic framework for verifying LLM instruction-following by modeling instructions as constraints and checking both logical and semantic constraint satisfaction.</p>]]></summary>
+    <category term="Instruction Following"/>
+    <category term="Verification"/>
+    <category term="Neuro-Symbolic AI"/>
+    <category term="AI Safety"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-27:research:1910b969c8fb</id>
+    <title>An Experimental Comparison of Cognitive Forcing Functions for Execution Plans in AI-Assisted Writing: Effects On Trust, Overreliance, and Perceived Critical Thinking</title>
+    <link href="http://arxiv.org/abs/2601.18033" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-27&amp;category=research#item-1910b969c8fb" rel="related" type="text/html"/>
+    <published>2026-01-27T03:02:00Z</published>
+    <updated>2026-01-27T03:02:00Z</updated>
+    <author><name>Ahana Ghosh, Advait Sarkar, Si\^an Lindley, Christian Poelitz</name></author>
+    <summary type="html"><![CDATA[<p>Controlled experiment testing cognitive forcing functions (CFFs) for AI-generated execution plans in writing tasks. Tests assumption analysis and hypothesis testing interventions against overreliance.</p>]]></summary>
+    <category term="Human-AI Interaction"/>
+    <category term="Cognitive Science"/>
+    <category term="AI Overreliance"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-27:research:204e04111d71</id>
+    <title>Code over Words: Overcoming Semantic Inertia via Code-Grounded Reasoning</title>
+    <link href="http://arxiv.org/abs/2601.18352" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-27&amp;category=research#item-204e04111d71" rel="related" type="text/html"/>
+    <published>2026-01-27T03:02:00Z</published>
+    <updated>2026-01-27T03:02:00Z</updated>
+    <author><name>Manjie Xu, Isabella Yin, Xinyi Tu, Chi Zhang, Yixin Zhu</name></author>
+    <summary type="html"><![CDATA[<p>Discovers 'Semantic Inertia' - LLMs' inability to override pre-trained priors (e.g., 'Lava is Dangerous') when in-context rules contradict them. Using Baba Is You game, shows larger models exhibit inverse scaling on such tasks.</p>]]></summary>
+    <category term="LLM Limitations"/>
+    <category term="In-Context Learning"/>
+    <category term="Inverse Scaling"/>
+    <category term="Reasoning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-27:research:e0db23dc2be4</id>
+    <title>Gained in Translation: Privileged Pairwise Judges Enhance Multilingual Reasoning</title>
+    <link href="http://arxiv.org/abs/2601.18722" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-27&amp;category=research#item-e0db23dc2be4" rel="related" type="text/html"/>
+    <published>2026-01-27T03:02:00Z</published>
+    <updated>2026-01-27T03:02:00Z</updated>
+    <author><name>Lintang Sutawika, Gokul Swamy, Zhiwei Steven Wu, Graham Neubig</name></author>
+    <summary type="html"><![CDATA[<p>Introduces SP3F framework for multilingual reasoning enhancement using self-play with privileged pairwise feedback from judges receiving English reference responses. Achieves improvements without target language data.</p>]]></summary>
+    <category term="Multilingual NLP"/>
+    <category term="Reasoning"/>
+    <category term="Reinforcement Learning"/>
+    <category term="Self-Play"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-01-27:research:03e1daa9be9c</id>
+    <title>$\infty$-MoE: Generalizing Mixture of Experts to Infinite Experts</title>
+    <link href="http://arxiv.org/abs/2601.17680" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-01-27&amp;category=research#item-03e1daa9be9c" rel="related" type="text/html"/>
+    <published>2026-01-27T03:02:00Z</published>
+    <updated>2026-01-27T03:02:00Z</updated>
+    <author><name>Shota Takashiro, Takeshi Kojima, Shohei Taniguchi, Yusuke Iwasawa, Yutaka Matsuo</name></author>
+    <summary type="html"><![CDATA[<p>Proposes ∞-MoE, generalizing Mixture of Experts to infinite experts by selecting parameters from large FFNs based on continuous values rather than discrete expert selection. Enables more effective training when scaling expert count.</p>]]></summary>
+    <category term="Architecture"/>
+    <category term="Mixture of Experts"/>
+    <category term="Efficiency"/>
+    <category term="Scaling"/>
+  </entry>
+  <entry>
     <id>urn:ainews:2026-01-26:category-summary:research</id>
     <title>Research Summary: January 26, 2026</title>
     <link href="http://arxiv.org/abs/2601.16725" rel="alternate" type="text/html"/>
@@ -1180,348 +1524,5 @@
 </ul>
 <p>Meta-science initiatives <a href="http://localhost:8080/?date=2026-01-24&amp;category=research#item-429650348119" class="internal-link" rel="noopener noreferrer">propose systematic replication</a> teams. Interpretability research <a href="http://localhost:8080/?date=2026-01-24&amp;category=research#item-709ca3227a1e" class="internal-link" rel="noopener noreferrer">examines <strong>attention sinks</strong></a> and the <strong>dark subspace</strong> where transformers store non-interpretable signals. Steven Byrnes <a href="http://localhost:8080/?date=2026-01-24&amp;category=research#item-c0f1b9d27e0a" class="internal-link" rel="noopener noreferrer">releases v3</a> of his <strong>225-page brain-like AGI safety</strong> resource.</p>]]></summary>
     <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:category-summary:research</id>
-    <title>Research Summary: January 23, 2026</title>
-    <link href="http://arxiv.org/abs/2601.14525" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-01-23T06:00:00Z</published>
-    <updated>2026-01-23T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research exposes critical vulnerabilities in AI evaluation and safety while advancing automated research paradigms. <strong>Gaming the Judge</strong> reveals <strong>90%</strong> false positive rates when LLM judges encounter manipulated chain-of-thought, fundamentally challenging current agent evaluation methods.</p>
-<ul>
-<li>Stanford's <strong>Execution-Grounded Automated AI Research</strong> demonstrates autonomous implementation of research ideas with large-scale GPU experiments</li>
-<li><strong>TTT-Discover</strong> <a href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-dababf83ee7d" class="internal-link" rel="noopener noreferrer">introduces test-time reinforcement learning</a>, continually training LLMs on specific test problems rather than relying on prompting</li>
-<li><strong>QUAIL</strong> <a href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-0467e51a900e" class="internal-link" rel="noopener noreferrer">shows standard quantization can catastrophically restore</a> 'forgotten' information in unlearned models, breaking privacy guarantees</li>
-<li><strong>Universal Refusal Circuits</strong> <a href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-09afd330afcf" class="internal-link" rel="noopener noreferrer">discovers that safety interventions transfer</a> across architectures (Dense to MoE) via trajectory replay</li>
-<li><strong>SilentDrift</strong> <a href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-32d9233155f9" class="internal-link" rel="noopener noreferrer">exploits action chunking</a> in VLA systems to inject backdoors with strong kinematic constraints</li>
-</ul>
-<p><strong>Zero-Error Horizons</strong> <a href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-2665d0ecf2cf" class="internal-link" rel="noopener noreferrer">proposes a new trustworthiness metric</a> showing <strong>GPT-5.2</strong> fails at simple tasks like counting parity. <strong>Flexibility Trap</strong> reveals counterintuitively that arbitrary generation order hurts diffusion LLM reasoning by letting models bypass high-uncertainty tokens.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:5d5326a6a800</id>
-    <title>Towards Execution-Grounded Automated AI Research</title>
-    <link href="http://arxiv.org/abs/2601.14525" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-5d5326a6a800" rel="related" type="text/html"/>
-    <published>2026-01-23T03:33:00Z</published>
-    <updated>2026-01-23T03:33:00Z</updated>
-    <author><name>Chenglei Si, Zitong Yang, Yejin Choi, Emmanuel Cand\`es, Diyi Yang, Tatsunori Hashimoto</name></author>
-    <summary type="html"><![CDATA[<p>Continuing our coverage from <a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-5d5326a6a800" class="internal-link" rel="noopener noreferrer">yesterday</a>, Builds automated executor for implementing AI research ideas and running large-scale GPU experiments. From Stanford (Hashimoto, Yang labs). Demonstrates feasibility of execution-grounded automated research.</p>]]></summary>
-    <category term="Automated Research"/>
-    <category term="AI Agents"/>
-    <category term="Research Automation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:8f91272f058f</id>
-    <title>Gaming the Judge: Unfaithful Chain-of-Thought Can Undermine Agent Evaluation</title>
-    <link href="http://arxiv.org/abs/2601.14691" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-8f91272f058f" rel="related" type="text/html"/>
-    <published>2026-01-23T03:31:00Z</published>
-    <updated>2026-01-23T03:31:00Z</updated>
-    <author><name>Muhammad Khalifa, Lajanugen Logeswaran, Jaekyeom Kim, Sungryull Sohn, Yunxiang Zhang, Moontae Lee, Hao Peng, Lu Wang, Honglak Lee</name></author>
-    <summary type="html"><![CDATA[<p>Continuing our coverage from <a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-8f91272f058f" class="internal-link" rel="noopener noreferrer">yesterday</a>, Demonstrates that LLM judges evaluating agents are highly susceptible to manipulated chain-of-thought reasoning. Shows up to 90% false positive rate inflation across 800 trajectories by rewriting CoT while keeping actions fixed.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Agent Evaluation"/>
-    <category term="LLM Judges"/>
-    <category term="Chain-of-Thought"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:2665d0ecf2cf</id>
-    <title>Even GPT-5.2 Can't Count to Five: The Case for Zero-Error Horizons in Trustworthy LLMs</title>
-    <link href="http://arxiv.org/abs/2601.15714" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-2665d0ecf2cf" rel="related" type="text/html"/>
-    <published>2026-01-23T03:26:00Z</published>
-    <updated>2026-01-23T03:26:00Z</updated>
-    <author><name>Ryoma Sato</name></author>
-    <summary type="html"><![CDATA[<p>Proposes Zero-Error Horizon (ZEH) metric for evaluating LLM trustworthiness. Shows GPT-5.2 fails at simple tasks like computing parity of '11000' or checking balanced parentheses.</p>]]></summary>
-    <category term="LLM Evaluation"/>
-    <category term="AI Safety"/>
-    <category term="Trustworthy AI"/>
-    <category term="LLM Limitations"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:dababf83ee7d</id>
-    <title>Learning to Discover at Test Time</title>
-    <link href="http://arxiv.org/abs/2601.16175" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-dababf83ee7d" rel="related" type="text/html"/>
-    <published>2026-01-23T03:23:00Z</published>
-    <updated>2026-01-23T03:23:00Z</updated>
-    <author><name>Mert Yuksekgonul, Daniel Koceja, Xinhao Li, Federico Bianchi, Jed McCaleb, Xiaolong Wang, Jan Kautz, Yejin Choi, James Zou, Carlos Guestrin, Yu Sun</name></author>
-    <summary type="html"><![CDATA[<p>TTT-Discover performs reinforcement learning at test time for scientific discovery, continually training the LLM on the specific test problem rather than prompting a frozen model. Designed to find one great solution.</p>]]></summary>
-    <category term="Test-Time Training"/>
-    <category term="Scientific Discovery"/>
-    <category term="Reinforcement Learning"/>
-    <category term="LLM Optimization"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:fd50ec594aa0</id>
-    <title>LLM-in-Sandbox Elicits General Agentic Intelligence</title>
-    <link href="http://arxiv.org/abs/2601.16206" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-fd50ec594aa0" rel="related" type="text/html"/>
-    <published>2026-01-23T03:23:00Z</published>
-    <updated>2026-01-23T03:23:00Z</updated>
-    <author><name>Daixuan Cheng, Shaohan Huang, Yuxian Gu, Huatong Song, Guoxin Chen, Li Dong, Wayne Xin Zhao, Ji-Rong Wen, Furu Wei</name></author>
-    <summary type="html"><![CDATA[<p>LLM-in-Sandbox enables LLMs to explore within code sandbox to elicit general intelligence. Shows LLMs spontaneously access external resources, use file systems for long context. Introduces sandbox RL training.</p>]]></summary>
-    <category term="Agentic AI"/>
-    <category term="Reinforcement Learning"/>
-    <category term="Tool Use"/>
-    <category term="Generalization"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:0467e51a900e</id>
-    <title>QUAIL: Quantization Aware Unlearning for Mitigating Misinformation in LLMs</title>
-    <link href="http://arxiv.org/abs/2601.15538" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-0467e51a900e" rel="related" type="text/html"/>
-    <published>2026-01-23T03:21:00Z</published>
-    <updated>2026-01-23T03:21:00Z</updated>
-    <author><name>Himanshu Mishra, Kanwal Mehreen</name></author>
-    <summary type="html"><![CDATA[<p>Reveals that quantization can catastrophically restore 'forgotten' information in unlearned models. Proposes quantization-aware unlearning using logits-space hinge loss to ensure updates cross quantization thresholds.</p>]]></summary>
-    <category term="Machine Unlearning"/>
-    <category term="Privacy"/>
-    <category term="AI Safety"/>
-    <category term="Quantization"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:32d9233155f9</id>
-    <title>SilentDrift: Exploiting Action Chunking for Stealthy Backdoor Attacks on Vision-Language-Action Models</title>
-    <link href="http://arxiv.org/abs/2601.14323" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-32d9233155f9" rel="related" type="text/html"/>
-    <published>2026-01-23T03:19:00Z</published>
-    <updated>2026-01-23T03:19:00Z</updated>
-    <author><name>Bingxin Xu, Yuzhang Shang, Binghui Wang, Emilio Ferrara</name></author>
-    <summary type="html"><![CDATA[<p>Identifies security flaw in VLA systems where action chunking combined with delta pose creates intra-chunk visual open-loop. Proposes SILENTDRIFT black-box backdoor attack exploiting this.</p>]]></summary>
-    <category term="AI Security"/>
-    <category term="Robotics"/>
-    <category term="Backdoor Attacks"/>
-    <category term="VLA Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:8bc030697961</id>
-    <title>Opening the Black Box: A Survey on the Mechanisms of Multi-Step Reasoning in Large Language Models</title>
-    <link href="http://arxiv.org/abs/2601.14270" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-8bc030697961" rel="related" type="text/html"/>
-    <published>2026-01-23T03:16:00Z</published>
-    <updated>2026-01-23T03:16:00Z</updated>
-    <author><name>Liangming Pan, Jason Liang, Jiaran Ye, Minglai Yang, Xinyuan Lu, Fengbin Zhu</name></author>
-    <summary type="html"><![CDATA[<p>Comprehensive survey on mechanisms underlying LLM multi-step reasoning, organized around 7 research questions from implicit multi-hop reasoning to verbalized explicit reasoning effects.</p>]]></summary>
-    <category term="LLM Reasoning"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Survey"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:eabb8e23535b</id>
-    <title>Improving MoE Compute Efficiency by Composing Weight and Data Sparsity</title>
-    <link href="http://arxiv.org/abs/2601.15370" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-eabb8e23535b" rel="related" type="text/html"/>
-    <published>2026-01-23T03:16:00Z</published>
-    <updated>2026-01-23T03:16:00Z</updated>
-    <author><name>Maciej Kilian, Oleg Mkrtchyan, Luke Zettlemoyer, Akshat Shrivastava, Armen Aghajanyan</name></author>
-    <summary type="html"><![CDATA[<p>Introduces null experts in Mixture-of-Experts to achieve data sparsity within causal token-choice routing. When tokens route to null experts, those slots consume no compute, improving efficiency without causality violations.</p>]]></summary>
-    <category term="Mixture of Experts"/>
-    <category term="Efficiency"/>
-    <category term="Model Architecture"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:09afd330afcf</id>
-    <title>Universal Refusal Circuits Across LLMs: Cross-Model Transfer via Trajectory Replay and Concept-Basis Reconstruction</title>
-    <link href="http://arxiv.org/abs/2601.16034" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-09afd330afcf" rel="related" type="text/html"/>
-    <published>2026-01-23T03:16:00Z</published>
-    <updated>2026-01-23T03:16:00Z</updated>
-    <author><name>Tony Cristofano</name></author>
-    <summary type="html"><![CDATA[<p>Discovers universal refusal circuits across LLMs using concept fingerprints. Transfers refusal interventions across architectures (Dense to MoE) via Trajectory Replay without target-side supervision.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Refusal Behavior"/>
-    <category term="Interpretability"/>
-    <category term="Transfer"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:21a09231f3ed</id>
-    <title>Scaling Text-to-Image Diffusion Transformers with Representation Autoencoders</title>
-    <link href="http://arxiv.org/abs/2601.16208" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-21a09231f3ed" rel="related" type="text/html"/>
-    <published>2026-01-23T03:16:00Z</published>
-    <updated>2026-01-23T03:16:00Z</updated>
-    <author><name>Shengbang Tong, Boyang Zheng, Ziteng Wang, Bingda Tang, Nanye Ma, Ellis Brown, Jihan Yang, Rob Fergus, Yann LeCun, Saining Xie</name></author>
-    <summary type="html"><![CDATA[<p>Research from a team including Yann LeCun investigates scaling Representation Autoencoders (RAEs) for text-to-image diffusion models. They find that scaling simplifies the framework and that targeted data composition matters more than pure scale for specific domains like text rendering.</p>]]></summary>
-    <category term="Image Generation"/>
-    <category term="Diffusion Models"/>
-    <category term="Scaling Laws"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:2b341bdb5c36</id>
-    <title>Cosmos Policy: Fine-Tuning Video Models for Visuomotor Control and Planning</title>
-    <link href="http://arxiv.org/abs/2601.16163" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-2b341bdb5c36" rel="related" type="text/html"/>
-    <published>2026-01-23T03:16:00Z</published>
-    <updated>2026-01-23T03:16:00Z</updated>
-    <author><name>Moo Jin Kim, Yihuai Gao, Tsung-Yi Lin, Yen-Chen Lin, Yunhao Ge, Grace Lam, Percy Liang, Shuran Song, Ming-Yu Liu, Chelsea Finn, Jinwei Gu</name></author>
-    <summary type="html"><![CDATA[<p>Cosmos Policy adapts the large Cosmos-Predict2 video model into robot policies through single-stage post-training, directly generating actions as latent frames without architectural modifications.</p>]]></summary>
-    <category term="Robot Learning"/>
-    <category term="Video Models"/>
-    <category term="Foundation Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:06ddb6cf9c55</id>
-    <title>When Sharpening Becomes Collapse: Sampling Bias and Semantic Coupling in RL with Verifiable Rewards</title>
-    <link href="http://arxiv.org/abs/2601.15609" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-06ddb6cf9c55" rel="related" type="text/html"/>
-    <published>2026-01-23T03:14:00Z</published>
-    <updated>2026-01-23T03:14:00Z</updated>
-    <author><name>Mingyuan Fan, Weiguang Han, Daixin Wang, Cen Chen, Zhiqiang Zhang, Jun Zhou</name></author>
-    <summary type="html"><![CDATA[<p>Analyzes over-sharpening in RLVR where policy collapses onto limited modes due to finite-batch update bias and semantic coupling. Proposes inverse-success advantage calibration to mitigate.</p>]]></summary>
-    <category term="Reinforcement Learning"/>
-    <category term="LLM Training"/>
-    <category term="RLVR"/>
-    <category term="AI Safety"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:6fe5c64ffec4</id>
-    <title>Ambient Dataloops: Generative Models for Dataset Refinement</title>
-    <link href="http://arxiv.org/abs/2601.15417" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-6fe5c64ffec4" rel="related" type="text/html"/>
-    <published>2026-01-23T03:12:00Z</published>
-    <updated>2026-01-23T03:12:00Z</updated>
-    <author><name>Adri\'an Rodr\'iguez-Mu\~noz, William Daspit, Adam Klivans, Antonio Torralba, Constantinos Daskalakis, Giannis Daras</name></author>
-    <summary type="html"><![CDATA[<p>Ambient Dataloops iteratively refines datasets using diffusion models, treating synthetically improved samples as noisy at progressively lower noise levels. Uses Ambient Diffusion techniques to avoid destructive self-consuming loops.</p>]]></summary>
-    <category term="Diffusion Models"/>
-    <category term="Data Quality"/>
-    <category term="Synthetic Data"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:1dbf6de9ea15</id>
-    <title>CORVUS: Red-Teaming Hallucination Detectors via Internal Signal Camouflage in Large Language Models</title>
-    <link href="http://arxiv.org/abs/2601.14310" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-1dbf6de9ea15" rel="related" type="text/html"/>
-    <published>2026-01-23T03:09:00Z</published>
-    <updated>2026-01-23T03:09:00Z</updated>
-    <author><name>Nay Myat Min, Long H. Pham, Hongyu Zhang, Jun Sun</name></author>
-    <summary type="html"><![CDATA[<p>Introduces CORVUS, a red-teaming method for hallucination detectors that fine-tunes LoRA adapters to camouflage detector-visible telemetry. Degrades both training-free and learned detectors.</p>]]></summary>
-    <category term="AI Security"/>
-    <category term="Hallucination Detection"/>
-    <category term="Red-Teaming"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:b7e33d331123</id>
-    <title>The Flexibility Trap: Why Arbitrary Order Limits Reasoning Potential in Diffusion Language Models</title>
-    <link href="http://arxiv.org/abs/2601.15165" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-b7e33d331123" rel="related" type="text/html"/>
-    <published>2026-01-23T03:09:00Z</published>
-    <updated>2026-01-23T03:09:00Z</updated>
-    <author><name>Zanlin Ni, Shenzhi Wang, Yang Yue, Tianyu Yu, Weilin Zhao, Yeguo Hua, Tianyi Chen, Jun Song, Cheng Yu, Bo Zheng, Gao Huang</name></author>
-    <summary type="html"><![CDATA[<p>Continuing our coverage from <a href="http://localhost:8080/?date=2026-01-22&amp;category=research#item-b7e33d331123" class="internal-link" rel="noopener noreferrer">yesterday</a>, Reveals 'flexibility trap' in diffusion LLMs: arbitrary generation order allows models to bypass high-uncertainty tokens critical for reasoning, narrowing rather than expanding reasoning capability.</p>]]></summary>
-    <category term="Diffusion Models"/>
-    <category term="Language Models"/>
-    <category term="Reasoning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:f31655ff36c0</id>
-    <title>Learning from Synthetic Data: Limitations of ERM</title>
-    <link href="http://arxiv.org/abs/2601.15468" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-f31655ff36c0" rel="related" type="text/html"/>
-    <published>2026-01-23T03:09:00Z</published>
-    <updated>2026-01-23T03:09:00Z</updated>
-    <author><name>Kareem Amin, Alex Bie, Weiwei Kong, Umar Syed, Sergei Vassilvitskii</name></author>
-    <summary type="html"><![CDATA[<p>Theoretical analysis of ERM limitations when training data is contaminated with LLM-generated synthetic content. Shows ERM converges but is outperformed by alternative estimators that account for synthetic data.</p>]]></summary>
-    <category term="Learning Theory"/>
-    <category term="Synthetic Data"/>
-    <category term="Foundation Theory"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:94b2367a995e</id>
-    <title>On the Generalization Gap in LLM Planning: Tests and Verifier-Reward RL</title>
-    <link href="http://arxiv.org/abs/2601.14456" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-94b2367a995e" rel="related" type="text/html"/>
-    <published>2026-01-23T03:07:00Z</published>
-    <updated>2026-01-23T03:07:00Z</updated>
-    <author><name>Valerio Belcamino, Nicholas Attolino, Alessio Capitanelli, Fulvio Mastrogiovanni</name></author>
-    <summary type="html"><![CDATA[<p>Studies LLM planning on PDDL tasks, finding 82.9% valid plan rate in-domain but 0% on unseen domains. Introduces diagnostic interventions including symbol anonymization and verifier-reward fine-tuning to analyze this failure.</p>]]></summary>
-    <category term="LLM Reasoning"/>
-    <category term="Planning"/>
-    <category term="Generalization"/>
-    <category term="Evaluation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:4ea5d9351415</id>
-    <title>Outcome-Based RL Provably Leads Transformers to Reason, but Only With the Right Data</title>
-    <link href="http://arxiv.org/abs/2601.15158" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-4ea5d9351415" rel="related" type="text/html"/>
-    <published>2026-01-23T03:07:00Z</published>
-    <updated>2026-01-23T03:07:00Z</updated>
-    <author><name>Yuval Ran-Milo, Yotam Alexander, Shahar Mendel, Nadav Cohen</name></author>
-    <summary type="html"><![CDATA[<p>Proves that outcome-based RL on single-layer transformers provably leads to structured chain-of-thought reasoning on graph traversal tasks, with convergence depending on data properties.</p>]]></summary>
-    <category term="Reinforcement Learning"/>
-    <category term="Reasoning"/>
-    <category term="Theory"/>
-    <category term="Chain-of-Thought"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:9ec5465e9901</id>
-    <title>You Need Better Attention Priors</title>
-    <link href="http://arxiv.org/abs/2601.15380" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-9ec5465e9901" rel="related" type="text/html"/>
-    <published>2026-01-23T03:07:00Z</published>
-    <updated>2026-01-23T03:07:00Z</updated>
-    <author><name>Elon Litman, Gabe Guo</name></author>
-    <summary type="html"><![CDATA[<p>GOAT generalizes attention through Entropic Optimal Transport, replacing the implicit uniform prior with learnable continuous priors. Provides theoretical explanation for attention sinks and maintains FlashAttention compatibility.</p>]]></summary>
-    <category term="Attention Mechanisms"/>
-    <category term="Model Architecture"/>
-    <category term="Theoretical ML"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:faced0e2a82b</id>
-    <title>Robust Tool Use via Fission-GRPO: Learning to Recover from Execution Errors</title>
-    <link href="http://arxiv.org/abs/2601.15625" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-faced0e2a82b" rel="related" type="text/html"/>
-    <published>2026-01-23T03:07:00Z</published>
-    <updated>2026-01-23T03:07:00Z</updated>
-    <author><name>Zhiwei Zhang, Fei Zhao, Rui Wang, Zezhong Wang, Bin Liang, Jiakang Wang, Yao Hu, Shaosheng Cao, Kam-Fai Wong</name></author>
-    <summary type="html"><![CDATA[<p>Fission-GRPO enables LLMs to recover from tool execution errors by splitting trajectories at error points and using RL to learn recovery strategies. Addresses brittleness of current tool-using LLMs.</p>]]></summary>
-    <category term="LLM Agents"/>
-    <category term="Tool Use"/>
-    <category term="Reinforcement Learning"/>
-    <category term="Reliability"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:6b35e371581c</id>
-    <title>Stable-DiffCoder: Pushing the Frontier of Code Diffusion Large Language Model</title>
-    <link href="http://arxiv.org/abs/2601.15892" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-6b35e371581c" rel="related" type="text/html"/>
-    <published>2026-01-23T03:07:00Z</published>
-    <updated>2026-01-23T03:07:00Z</updated>
-    <author><name>Chenghao Fan, Wen Heng, Bo Li, Sichen Liu, Yuxuan Song, Jing Su, Xiaoye Qu, Kai Shen, Wei Wei</name></author>
-    <summary type="html"><![CDATA[<p>Stable-DiffCoder is a block diffusion code model reusing Seed-Coder architecture. With tailored warmup and noise schedule, outperforms AR counterpart on code benchmarks under same data/architecture.</p>]]></summary>
-    <category term="Code Generation"/>
-    <category term="Diffusion Language Models"/>
-    <category term="Architecture"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:3dfd06b26f37</id>
-    <title>Qwen3-TTS Technical Report</title>
-    <link href="http://arxiv.org/abs/2601.15621" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-3dfd06b26f37" rel="related" type="text/html"/>
-    <published>2026-01-23T03:07:00Z</published>
-    <updated>2026-01-23T03:07:00Z</updated>
-    <author><name>Hangrui Hu, Xinfa Zhu, Ting He, Dake Guo, Bin Zhang, Xiong Wang, Zhifang Guo, Ziyue Jiang, Hongkun Hao, Zishan Guo, Xinyu Zhang, Pei Zhang, Baosong Yang, Jin Xu, Jingren Zhou, Junyang Lin</name></author>
-    <summary type="html"><![CDATA[<p>Technical report on Qwen3-TTS, Alibaba's multilingual text-to-speech model supporting 3-second voice cloning and description-based control. Trained on 5M+ hours of speech across 10 languages, uses dual-track LM architecture with two speech tokenizers (25Hz semantic and 12Hz acoustic).</p>]]></summary>
-    <category term="Speech Synthesis"/>
-    <category term="Foundation Models"/>
-    <category term="Multimodal AI"/>
-    <category term="Audio Generation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-23:research:7053b30661f4</id>
-    <title>Point Bridge: 3D Representations for Cross Domain Policy Learning</title>
-    <link href="http://arxiv.org/abs/2601.16212" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-23&amp;category=research#item-7053b30661f4" rel="related" type="text/html"/>
-    <published>2026-01-23T03:07:00Z</published>
-    <updated>2026-01-23T03:07:00Z</updated>
-    <author><name>Siddhant Haldar, Lars Johannsmeier, Lerrel Pinto, Abhishek Gupta, Dieter Fox, Yashraj Narang, Ajay Mandlekar</name></author>
-    <summary type="html"><![CDATA[<p>Point Bridge enables zero-shot sim-to-real robot policy transfer using unified point-based representations extracted via VLMs, without explicit visual alignment. Demonstrated across multiple manipulation tasks.</p>]]></summary>
-    <category term="Robot Learning"/>
-    <category term="Sim-to-Real"/>
-    <category term="Foundation Models"/>
   </entry>
 </feed>
