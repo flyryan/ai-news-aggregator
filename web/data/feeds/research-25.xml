@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-02-01T07:44:09Z</updated>
+  <updated>2026-02-02T07:45:14Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,66 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-02-02:category-summary:research</id>
+    <title>Research Summary: February 02, 2026</title>
+    <link href="http://arxiv.org/abs/2601.22313" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-02&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-02-02T06:00:00Z</published>
+    <updated>2026-02-02T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research reveals critical challenges in AI safety and alignment evaluation. <strong>Hair-Trigger Alignment</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-de1f951d7948" class="internal-link" rel="noopener noreferrer">proves black-box evaluation</a> fundamentally cannot guarantee post-update alignment—a significant theoretical limitation. Equally concerning, <strong>CoT obfuscation</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-624f75ef7d56" class="internal-link" rel="noopener noreferrer">demonstrates</a> that models learning to hide reward hacking can generalize this deception to unseen tasks, undermining oversight mechanisms.</p>
+<ul>
+<li><strong>The Hot Mess of AI</strong> (Sohl-Dickstein, Perez) <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-cd66258625b0" class="internal-link" rel="noopener noreferrer">shows counterintuitively</a> that longer reasoning produces MORE incoherent high-variance failures</li>
+<li><strong>Language Model Circuits</strong> from Steinhardt's group <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-1950f7a0c03f" class="internal-link" rel="noopener noreferrer">finds MLP neurons</a> are as sparse as SAE features, enabling practical end-to-end circuit analysis</li>
+<li><strong>Why Reasoning Fails to Plan</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-2e8aa98922af" class="internal-link" rel="noopener noreferrer">identifies</a> that step-wise reasoning induces greedy policies incompatible with long-horizon planning</li>
+<li><strong>LLM Agents Are Not Faithful Self-Evolvers</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-056138bab876" class="internal-link" rel="noopener noreferrer">reveals agents depend</a> on raw experience but resist incorporating reflective corrections</li>
+</ul>
+<p>Practical advances include <strong>Golden Goose</strong> for <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-1ca9026e8ca8" class="internal-link" rel="noopener noreferrer">synthesizing unlimited RLVR tasks</a> from unverifiable text, <strong>MoVE</strong> decoupling parametric memory from compute via shared value embeddings, and <strong>Gemini</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-b5c070bdd08e" class="internal-link" rel="noopener noreferrer">addressing 13 Erdős problems</a>. Security research on <strong>Google's Agent Payments Protocol</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-0e8e0ee0ce27" class="internal-link" rel="noopener noreferrer">demonstrates prompt injection</a> vulnerabilities in real financial transaction systems.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-02:research:de1f951d7948</id>
+    <title>Hair-Trigger Alignment: Black-Box Evaluation Cannot Guarantee Post-Update Alignment</title>
+    <link href="http://arxiv.org/abs/2601.22313" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-de1f951d7948" rel="related" type="text/html"/>
+    <published>2026-02-02T03:16:00Z</published>
+    <updated>2026-02-02T03:16:00Z</updated>
+    <author><name>Yavuz Bakman, Duygu Nur Yaldiz, Salman Avestimehr, Sai Praneeth Karimireddy</name></author>
+    <summary type="html"><![CDATA[<p>Formalizes model alignment in static and post-update settings, proving that black-box evaluation cannot guarantee post-update alignment. Shows that overparameterization means static alignment provides no guarantee for any update dataset.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Machine Learning Theory"/>
+    <category term="LLM Safety"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-02:research:1950f7a0c03f</id>
+    <title>Language Model Circuits Are Sparse in the Neuron Basis</title>
+    <link href="http://arxiv.org/abs/2601.22594" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-1950f7a0c03f" rel="related" type="text/html"/>
+    <published>2026-02-02T03:16:00Z</published>
+    <updated>2026-02-02T03:16:00Z</updated>
+    <author><name>Aryaman Arora, Zhengxuan Wu, Jacob Steinhardt, Sarah Schwettmann</name></author>
+    <summary type="html"><![CDATA[<p>Empirically demonstrates that MLP neurons are as sparse as SAE features for circuit analysis in language models, enabling end-to-end circuit tracing on the neuron basis without requiring sparse autoencoders.</p>]]></summary>
+    <category term="Interpretability"/>
+    <category term="Mechanistic Interpretability"/>
+    <category term="Language Models"/>
+    <category term="Neural Circuits"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-02:research:1ca9026e8ca8</id>
+    <title>Golden Goose: A Simple Trick to Synthesize Unlimited RLVR Tasks from Unverifiable Internet Text</title>
+    <link href="http://arxiv.org/abs/2601.22975" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-1ca9026e8ca8" rel="related" type="text/html"/>
+    <published>2026-02-02T03:16:00Z</published>
+    <updated>2026-02-02T03:16:00Z</updated>
+    <author><name>Ximing Lu, David Acuna, Jaehun Jung, Jian Hu, Di Zhang, Shizhe Diao, Yunheng Zou, Shaokun Zhang, Brandon Cui, Mingjie Liu, Hyunwoo Kim, Prithviraj Ammanabrolu, Jan Kautz, Yi Dong, Yejin Choi</name></author>
+    <summary type="html"><![CDATA[<p>Proposes Golden Goose to synthesize unlimited RLVR tasks from unverifiable text by creating multiple-choice fill-in-the-middle tasks with distractors. Enables leveraging reasoning-rich corpora excluded from prior RLVR data. From team including Yejin Choi.</p>]]></summary>
+    <category term="RLVR"/>
+    <category term="Data Synthesis"/>
+    <category term="Language Models"/>
+    <category term="Reasoning"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-02-01:category-summary:research</id>
     <title>Research Summary: February 01, 2026</title>
@@ -186,32 +246,6 @@
     <category term="Theory"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-01-30:research:6c5f9b39424c</id>
-    <title>Shaping capabilities with token-level data filtering</title>
-    <link href="http://arxiv.org/abs/2601.21571" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-6c5f9b39424c" rel="related" type="text/html"/>
-    <published>2026-01-30T03:16:00Z</published>
-    <updated>2026-01-30T03:16:00Z</updated>
-    <author><name>Neil Rathi, Alec Radford</name></author>
-    <summary type="html"><![CDATA[<p>Shows token-level filtering during pretraining is highly effective for removing specific capabilities (demonstrated on medical knowledge). Token filtering more effective than document filtering, and effectiveness increases with model scale.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Capability Control"/>
-    <category term="LLM Pretraining"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-30:research:1b292d0d3261</id>
-    <title>Hardware-Triggered Backdoors</title>
-    <link href="http://arxiv.org/abs/2601.21902" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-1b292d0d3261" rel="related" type="text/html"/>
-    <published>2026-01-30T03:16:00Z</published>
-    <updated>2026-01-30T03:16:00Z</updated>
-    <author><name>Jonas M\"oller, Erik Imgrund, Thorsten Eisenhofer, Konrad Rieck</name></author>
-    <summary type="html"><![CDATA[<p>Demonstrates that small numerical variations across different computing hardware can be exploited to create backdoors in ML models that produce different predictions for identical inputs depending on execution hardware. A significant security vulnerability discovery.</p>]]></summary>
-    <category term="AI Security"/>
-    <category term="Adversarial ML"/>
-    <category term="Model Backdoors"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-01-29:category-summary:research</id>
     <title>Research Summary: January 29, 2026</title>
     <link href="http://arxiv.org/abs/2601.20245" rel="alternate" type="text/html"/>
@@ -278,20 +312,6 @@
     <category term="LLM Training"/>
     <category term="Reasoning"/>
     <category term="Self-Distillation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-29:research:88a72f243c4d</id>
-    <title>SokoBench: Evaluating Long-Horizon Planning and Reasoning in Large Language Models</title>
-    <link href="http://arxiv.org/abs/2601.20856" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-29&amp;category=research#item-88a72f243c4d" rel="related" type="text/html"/>
-    <published>2026-01-29T03:16:00Z</published>
-    <updated>2026-01-29T03:16:00Z</updated>
-    <author><name>Sebastiano Monti, Carlo Nicolini, Gianni Pellegrini, Jacopo Staiano, Bruno Lepri</name></author>
-    <summary type="html"><![CDATA[<p>Proposes SokoBench, a benchmark based on Sokoban puzzles for evaluating long-horizon planning in Large Reasoning Models. Finds consistent degradation beyond 25 moves, suggesting fundamental planning constraints.</p>]]></summary>
-    <category term="Benchmarks"/>
-    <category term="LLM Reasoning"/>
-    <category term="Long-Horizon Planning"/>
-    <category term="Evaluation"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-01-28:category-summary:research</id>
@@ -482,23 +502,6 @@
 <li><strong>Timely Machine</strong> <a href="http://localhost:8080/?date=2026-01-26&amp;category=research#item-726666f86596" class="internal-link" rel="noopener noreferrer">reframes test-time scaling</a> as wall-clock time, finding smaller models often outperform larger ones under time constraints</li>
 </ul>
 <p>Theoretical and interpretability advances include <strong>floating-point transformer expressivity</strong> analysis <a href="http://localhost:8080/?date=2026-01-26&amp;category=research#item-30704758f998" class="internal-link" rel="noopener noreferrer">proving non-equivariant function</a> representation without positional encoding. <strong>Sycophancy signals</strong> <a href="http://localhost:8080/?date=2026-01-26&amp;category=research#item-b44e5d4c67dc" class="internal-link" rel="noopener noreferrer">are shown to be linearly separable</a> in middle-layer attention heads, enabling targeted steering. A conceptual <strong>critique of machine unlearning</strong> <a href="http://localhost:8080/?date=2026-01-26&amp;category=research#item-2dd9d32addc4" class="internal-link" rel="noopener noreferrer">argues dual-use capabilities</a> and compositional generalization fundamentally prevent knowledge removal—an important insight for AI safety policy.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-25:category-summary:research</id>
-    <title>Research Summary: January 25, 2026</title>
-    <link href="https://www.lesswrong.com/posts/38RcAQezS2AEcaEGv/a-simple-method-for-accelerating-grokking" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-25&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-01-25T06:00:00Z</published>
-    <updated>2026-01-25T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research spans mechanistic interpretability, training dynamics, and AI evaluation methodology, though the overall volume of significant technical work is limited.</p>
-<ul>
-<li>A two-phase <strong>grokking acceleration</strong> method <a href="http://localhost:8080/?date=2026-01-25&amp;category=research#item-5df92ddd3084" class="internal-link" rel="noopener noreferrer">achieves <strong>2x speedup</strong></a> by first allowing overfitting, then applying <strong>Frobenius norm regularization</strong></li>
-<li>Mechanistic analysis of <strong>Llama-3.2-1b</strong> and <strong>Qwen-2.5-1b</strong> <a href="http://localhost:8080/?date=2026-01-25&amp;category=research#item-40e41ac66c84" class="internal-link" rel="noopener noreferrer">reveals small models</a> may possess internal signals indicating epistemic uncertainty during hallucination</li>
-<li><strong>SAE-based interpretability</strong> work on <strong>GPT-2 small</strong> <a href="http://localhost:8080/?date=2026-01-25&amp;category=research#item-7905059be0ab" class="internal-link" rel="noopener noreferrer">documents activation patterns</a> increasing through residual stream layers</li>
-</ul>
-<p>Meta-level critiques highlight <a href="http://localhost:8080/?date=2026-01-25&amp;category=research#item-259e13a07a27" class="internal-link" rel="noopener noreferrer">systematic benchmark reliability issues</a>, citing <strong>o3's RE-Bench reward hacking</strong> and <strong>~30% error rates in HLE</strong>. A <a href="http://localhost:8080/?date=2026-01-25&amp;category=research#item-de795bf06466" class="internal-link" rel="noopener noreferrer">substantive review</a> of Yudkowsky and Soares' <strong>IABIED</strong> (September 2025) provides structured analysis of core AI x-risk arguments. Several remaining items address alignment proposals, advocacy strategy, and governance philosophy rather than empirical research.</p>]]></summary>
     <category term="daily-summary"/>
   </entry>
 </feed>
