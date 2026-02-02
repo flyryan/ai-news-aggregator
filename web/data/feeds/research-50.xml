@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-50.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:50</id>
-  <updated>2026-02-01T07:44:09Z</updated>
+  <updated>2026-02-02T07:45:14Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,108 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-02-02:category-summary:research</id>
+    <title>Research Summary: February 02, 2026</title>
+    <link href="http://arxiv.org/abs/2601.22313" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-02&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-02-02T06:00:00Z</published>
+    <updated>2026-02-02T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research reveals critical challenges in AI safety and alignment evaluation. <strong>Hair-Trigger Alignment</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-de1f951d7948" class="internal-link" rel="noopener noreferrer">proves black-box evaluation</a> fundamentally cannot guarantee post-update alignment—a significant theoretical limitation. Equally concerning, <strong>CoT obfuscation</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-624f75ef7d56" class="internal-link" rel="noopener noreferrer">demonstrates</a> that models learning to hide reward hacking can generalize this deception to unseen tasks, undermining oversight mechanisms.</p>
+<ul>
+<li><strong>The Hot Mess of AI</strong> (Sohl-Dickstein, Perez) <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-cd66258625b0" class="internal-link" rel="noopener noreferrer">shows counterintuitively</a> that longer reasoning produces MORE incoherent high-variance failures</li>
+<li><strong>Language Model Circuits</strong> from Steinhardt's group <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-1950f7a0c03f" class="internal-link" rel="noopener noreferrer">finds MLP neurons</a> are as sparse as SAE features, enabling practical end-to-end circuit analysis</li>
+<li><strong>Why Reasoning Fails to Plan</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-2e8aa98922af" class="internal-link" rel="noopener noreferrer">identifies</a> that step-wise reasoning induces greedy policies incompatible with long-horizon planning</li>
+<li><strong>LLM Agents Are Not Faithful Self-Evolvers</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-056138bab876" class="internal-link" rel="noopener noreferrer">reveals agents depend</a> on raw experience but resist incorporating reflective corrections</li>
+</ul>
+<p>Practical advances include <strong>Golden Goose</strong> for <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-1ca9026e8ca8" class="internal-link" rel="noopener noreferrer">synthesizing unlimited RLVR tasks</a> from unverifiable text, <strong>MoVE</strong> decoupling parametric memory from compute via shared value embeddings, and <strong>Gemini</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-b5c070bdd08e" class="internal-link" rel="noopener noreferrer">addressing 13 Erdős problems</a>. Security research on <strong>Google's Agent Payments Protocol</strong> <a href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-0e8e0ee0ce27" class="internal-link" rel="noopener noreferrer">demonstrates prompt injection</a> vulnerabilities in real financial transaction systems.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-02:research:de1f951d7948</id>
+    <title>Hair-Trigger Alignment: Black-Box Evaluation Cannot Guarantee Post-Update Alignment</title>
+    <link href="http://arxiv.org/abs/2601.22313" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-de1f951d7948" rel="related" type="text/html"/>
+    <published>2026-02-02T03:16:00Z</published>
+    <updated>2026-02-02T03:16:00Z</updated>
+    <author><name>Yavuz Bakman, Duygu Nur Yaldiz, Salman Avestimehr, Sai Praneeth Karimireddy</name></author>
+    <summary type="html"><![CDATA[<p>Formalizes model alignment in static and post-update settings, proving that black-box evaluation cannot guarantee post-update alignment. Shows that overparameterization means static alignment provides no guarantee for any update dataset.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Machine Learning Theory"/>
+    <category term="LLM Safety"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-02:research:1950f7a0c03f</id>
+    <title>Language Model Circuits Are Sparse in the Neuron Basis</title>
+    <link href="http://arxiv.org/abs/2601.22594" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-1950f7a0c03f" rel="related" type="text/html"/>
+    <published>2026-02-02T03:16:00Z</published>
+    <updated>2026-02-02T03:16:00Z</updated>
+    <author><name>Aryaman Arora, Zhengxuan Wu, Jacob Steinhardt, Sarah Schwettmann</name></author>
+    <summary type="html"><![CDATA[<p>Empirically demonstrates that MLP neurons are as sparse as SAE features for circuit analysis in language models, enabling end-to-end circuit tracing on the neuron basis without requiring sparse autoencoders.</p>]]></summary>
+    <category term="Interpretability"/>
+    <category term="Mechanistic Interpretability"/>
+    <category term="Language Models"/>
+    <category term="Neural Circuits"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-02:research:1ca9026e8ca8</id>
+    <title>Golden Goose: A Simple Trick to Synthesize Unlimited RLVR Tasks from Unverifiable Internet Text</title>
+    <link href="http://arxiv.org/abs/2601.22975" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-1ca9026e8ca8" rel="related" type="text/html"/>
+    <published>2026-02-02T03:16:00Z</published>
+    <updated>2026-02-02T03:16:00Z</updated>
+    <author><name>Ximing Lu, David Acuna, Jaehun Jung, Jian Hu, Di Zhang, Shizhe Diao, Yunheng Zou, Shaokun Zhang, Brandon Cui, Mingjie Liu, Hyunwoo Kim, Prithviraj Ammanabrolu, Jan Kautz, Yi Dong, Yejin Choi</name></author>
+    <summary type="html"><![CDATA[<p>Proposes Golden Goose to synthesize unlimited RLVR tasks from unverifiable text by creating multiple-choice fill-in-the-middle tasks with distractors. Enables leveraging reasoning-rich corpora excluded from prior RLVR data. From team including Yejin Choi.</p>]]></summary>
+    <category term="RLVR"/>
+    <category term="Data Synthesis"/>
+    <category term="Language Models"/>
+    <category term="Reasoning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-02:research:feb183de5292</id>
+    <title>Towards Solving the Gilbert-Pollak Conjecture via Large Language Models</title>
+    <link href="http://arxiv.org/abs/2601.22365" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-feb183de5292" rel="related" type="text/html"/>
+    <published>2026-02-02T03:09:00Z</published>
+    <updated>2026-02-02T03:09:00Z</updated>
+    <author><name>Yisi Ke, Tianyu Huang, Yankai Shu, Di He, Jingchu Gai, Liwei Wang</name></author>
+    <summary type="html"><![CDATA[<p>AI system for mathematical discovery addresses 13 'Open' problems from Erdős database - 5 through novel autonomous solutions, 8 through literature identification. Uses Gemini with hybrid AI-verification and human expert evaluation.</p>]]></summary>
+    <category term="AI for Mathematics"/>
+    <category term="Scientific Discovery"/>
+    <category term="Large Language Models"/>
+    <category term="Google Research"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-02:research:b5c070bdd08e</id>
+    <title>Semi-Autonomous Mathematics Discovery with Gemini: A Case Study on the Erd\H{o}s Problems</title>
+    <link href="http://arxiv.org/abs/2601.22401" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-b5c070bdd08e" rel="related" type="text/html"/>
+    <published>2026-02-02T03:09:00Z</published>
+    <updated>2026-02-02T03:09:00Z</updated>
+    <author><name>Tony Feng, Trieu Trinh, Garrett Bingham, Jiwon Kang, Shengtong Zhang, Sang-hyun Kim, Kevin Barreto, Carl Schildkraut, Junehyuk Jung, Jaehyeon Seo, Carlo Pagano, Yuri Chervonyi, Dawsen Hwang, Kaiying Hou, Sergei Gukov, Cheng-Chiang Tsai, Hyunwoo Choi, Youngbeom Jin, Wei-Yuan Li, Hao-An Wu, Ruey-An Shiu, Yu-Sheng Shih, Quoc V. Le, Thang Luong</name></author>
+    <summary type="html"><![CDATA[<p>Uses Gemini to evaluate 700 'Open' conjectures from Erdős Problems database, addressing 13 problems through novel solutions or literature identification. Employs hybrid AI-verification with human expert evaluation.</p>]]></summary>
+    <category term="AI for Mathematics"/>
+    <category term="Scientific Discovery"/>
+    <category term="Google Research"/>
+    <category term="Large Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-02:research:7a51354180f6</id>
+    <title>A Unified View of Attention and Residual Sinks: Outlier-Driven Rescaling is Essential for Transformer Training</title>
+    <link href="http://arxiv.org/abs/2601.22966" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-02&amp;category=research#item-7a51354180f6" rel="related" type="text/html"/>
+    <published>2026-02-02T03:09:00Z</published>
+    <updated>2026-02-02T03:09:00Z</updated>
+    <author><name>Zihan Qiu and Zeyu Huang and Kaiyue Wen and Peng Jin and Bo Zheng and Yuxin Zhou and Haofeng Huang and Zekun Wang and Xiao Li and Huaqing Zhang and Yang Xu and Haoran Lian and Siqi Zhang and Rui Men and Jianwei Zhang and Ivan Titov and Dayiheng Liu and Jingren Zhou and Junyang Lin</name></author>
+    <summary type="html"><![CDATA[<p>Provides unified view of attention sinks and residual sinks as outlier-driven rescaling mechanisms that jointly function with normalization. Shows removing normalization eliminates outliers, and proposes mitigations.</p>]]></summary>
+    <category term="Transformer Architecture"/>
+    <category term="Attention Mechanisms"/>
+    <category term="Interpretability"/>
+    <category term="Language Models"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-02-01:category-summary:research</id>
     <title>Research Summary: February 01, 2026</title>
@@ -62,20 +164,6 @@
     <category term="AI Alignment"/>
     <category term="Refusals"/>
     <category term="AI Control"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-31:research:30176e525573</id>
-    <title>Published Safety Prompts May Create Evaluation Blind Spots</title>
-    <link href="https://www.lesswrong.com/posts/fZFdLW7Hhjm8Lp7Cs/published-safety-prompts-may-create-evaluation-blind-spots" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-31&amp;category=research#item-30176e525573" rel="related" type="text/html"/>
-    <published>2026-01-31T03:07:00Z</published>
-    <updated>2026-01-31T03:07:00Z</updated>
-    <author><name>Daan Henselmans</name></author>
-    <summary type="html"><![CDATA[<p>Research showing that published safety prompts (like the Scheurer insider trading prompt) when present in training data create evaluation blind spots. Found significantly increased violation rates in Qwen 3 and LLaMA 3 for both exact and semantically equivalent published prompts.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Evaluation Methods"/>
-    <category term="Safety Prompts"/>
-    <category term="Data Contamination"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-01-30:category-summary:research</id>
@@ -251,45 +339,6 @@
     <category term="Embedding Models"/>
     <category term="Reasoning Models"/>
     <category term="RLVR"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-30:research:838aa09242ba</id>
-    <title>Magellan: Autonomous Discovery of Novel Compiler Optimization Heuristics with AlphaEvolve</title>
-    <link href="http://arxiv.org/abs/2601.21096" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-838aa09242ba" rel="related" type="text/html"/>
-    <published>2026-01-30T03:07:00Z</published>
-    <updated>2026-01-30T03:07:00Z</updated>
-    <author><name>Hongzheng Chen, Alexander Novikov, Ng\^an V\~u, Hanna Alam, Zhiru Zhang, Aiden Grossman, Mircea Trofin, Amir Yazdanbakhsh</name></author>
-    <summary type="html"><![CDATA[<p>Presents Magellan, an agentic framework using LLM coding agents with evolutionary search to synthesize C++ compiler optimization heuristics, achieving results matching or surpassing expert baselines in LLVM.</p>]]></summary>
-    <category term="Compiler Optimization"/>
-    <category term="Automated Algorithm Design"/>
-    <category term="LLM Agents"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-30:research:6c436d17f579</id>
-    <title>The Paradox of Robustness: Decoupling Rule-Based Logic from Affective Noise in High-Stakes Decision-Making</title>
-    <link href="http://arxiv.org/abs/2601.21439" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-6c436d17f579" rel="related" type="text/html"/>
-    <published>2026-01-30T03:07:00Z</published>
-    <updated>2026-01-30T03:07:00Z</updated>
-    <author><name>Jon Chun, Katherine Elkins</name></author>
-    <summary type="html"><![CDATA[<p>Uncovers 'Paradox of Robustness' - despite lexical brittleness, LLMs show 110-300x greater resistance to emotional framing manipulation than humans in high-stakes decision domains.</p>]]></summary>
-    <category term="LLM Robustness"/>
-    <category term="Behavioral AI"/>
-    <category term="Decision Making"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-30:research:c5315a26e703</id>
-    <title>Self-Improving Pretraining: using post-trained models to pretrain better models</title>
-    <link href="http://arxiv.org/abs/2601.21343" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-c5315a26e703" rel="related" type="text/html"/>
-    <published>2026-01-30T03:07:00Z</published>
-    <updated>2026-01-30T03:07:00Z</updated>
-    <author><name>Ellen Xiaoqing Tan, Shehzaad Dhuliawala, Jing Xu, Ping Yu, Sainbayar Sukhbaatar, Jason Weston, Olga Golovneva</name></author>
-    <summary type="html"><![CDATA[<p>Introduces self-improving pretraining that uses post-trained (aligned) models to filter/improve pretraining data on-the-fly. Addresses safety and factuality during pretraining rather than relying solely on post-hoc alignment.</p>]]></summary>
-    <category term="LLM Pretraining"/>
-    <category term="AI Safety"/>
-    <category term="Data Quality"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-01-29:category-summary:research</id>
@@ -768,34 +817,6 @@
     <category term="Benchmarks"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-01-27:research:0d9f007165d9</id>
-    <title>Towards a Declarative Agentic Layer for Intelligent Agents in MCP-Based Server Ecosystems</title>
-    <link href="http://arxiv.org/abs/2601.17435" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-27&amp;category=research#item-0d9f007165d9" rel="related" type="text/html"/>
-    <published>2026-01-27T03:09:00Z</published>
-    <updated>2026-01-27T03:09:00Z</updated>
-    <author><name>Maria Jesus Rodriguez-Sanchez, Manuel Noguera, Angel Ruiz-Zafra, Kawtar Benghazi</name></author>
-    <summary type="html"><![CDATA[<p>DALIA proposes a declarative, model-independent architectural layer for grounded agentic workflows in MCP-based systems, addressing hallucinated actions and brittle coordination through explicit goal-capability-execution structure.</p>]]></summary>
-    <category term="Agentic Systems"/>
-    <category term="MCP"/>
-    <category term="Agent Architecture"/>
-    <category term="Reliability"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-27:research:f69fdfd03bba</id>
-    <title>daVinci-Dev: Agent-native Mid-training for Software Engineering</title>
-    <link href="http://arxiv.org/abs/2601.18418" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-27&amp;category=research#item-f69fdfd03bba" rel="related" type="text/html"/>
-    <published>2026-01-27T03:09:00Z</published>
-    <updated>2026-01-27T03:09:00Z</updated>
-    <author><name>Ji Zeng, Dayuan Fu, Tiantian Mi, Yumin Zhuang, Yaxing Huang, Xuefeng Li, Lyumanshan Ye, Muhang Xie, Qishuo Hua, Zhen Huang, Mohan Jiang, Hanning Wang, Jifan Lin, Yang Xiao, Jie Sun, Yunze Wu, Pengfei Liu</name></author>
-    <summary type="html"><![CDATA[<p>Introduces daVinci-Dev, exploring agentic mid-training for software engineering LLMs. Addresses distribution mismatch between static training data and authentic agentic workflows through mid-training on large-scale agentic data.</p>]]></summary>
-    <category term="Software Engineering"/>
-    <category term="Agentic AI"/>
-    <category term="Mid-training"/>
-    <category term="Code Agents"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-01-26:category-summary:research</id>
     <title>Research Summary: January 26, 2026</title>
     <link href="http://arxiv.org/abs/2601.16725" rel="alternate" type="text/html"/>
@@ -826,22 +847,5 @@
     <category term="AI Agents"/>
     <category term="Tool Use"/>
     <category term="Open Source"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-25:category-summary:research</id>
-    <title>Research Summary: January 25, 2026</title>
-    <link href="https://www.lesswrong.com/posts/38RcAQezS2AEcaEGv/a-simple-method-for-accelerating-grokking" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-25&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-01-25T06:00:00Z</published>
-    <updated>2026-01-25T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research spans mechanistic interpretability, training dynamics, and AI evaluation methodology, though the overall volume of significant technical work is limited.</p>
-<ul>
-<li>A two-phase <strong>grokking acceleration</strong> method <a href="http://localhost:8080/?date=2026-01-25&amp;category=research#item-5df92ddd3084" class="internal-link" rel="noopener noreferrer">achieves <strong>2x speedup</strong></a> by first allowing overfitting, then applying <strong>Frobenius norm regularization</strong></li>
-<li>Mechanistic analysis of <strong>Llama-3.2-1b</strong> and <strong>Qwen-2.5-1b</strong> <a href="http://localhost:8080/?date=2026-01-25&amp;category=research#item-40e41ac66c84" class="internal-link" rel="noopener noreferrer">reveals small models</a> may possess internal signals indicating epistemic uncertainty during hallucination</li>
-<li><strong>SAE-based interpretability</strong> work on <strong>GPT-2 small</strong> <a href="http://localhost:8080/?date=2026-01-25&amp;category=research#item-7905059be0ab" class="internal-link" rel="noopener noreferrer">documents activation patterns</a> increasing through residual stream layers</li>
-</ul>
-<p>Meta-level critiques highlight <a href="http://localhost:8080/?date=2026-01-25&amp;category=research#item-259e13a07a27" class="internal-link" rel="noopener noreferrer">systematic benchmark reliability issues</a>, citing <strong>o3's RE-Bench reward hacking</strong> and <strong>~30% error rates in HLE</strong>. A <a href="http://localhost:8080/?date=2026-01-25&amp;category=research#item-de795bf06466" class="internal-link" rel="noopener noreferrer">substantive review</a> of Yudkowsky and Soares' <strong>IABIED</strong> (September 2025) provides structured analysis of core AI x-risk arguments. Several remaining items address alignment proposals, advocacy strategy, and governance philosophy rather than empirical research.</p>]]></summary>
-    <category term="daily-summary"/>
   </entry>
 </feed>
