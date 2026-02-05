@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-02-04T07:56:17Z</updated>
+  <updated>2026-02-05T07:45:45Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,92 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-02-05:category-summary:research</id>
+    <title>Research Summary: February 05, 2026</title>
+    <link href="http://arxiv.org/abs/2602.04739" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-05&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-02-05T06:00:00Z</published>
+    <updated>2026-02-05T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research features a potentially paradigm-shifting efficiency result and substantial AI safety contributions. <strong>TinyLoRA</strong> <a href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-8c6dfacfdd63" class="internal-link" rel="noopener noreferrer">achieves <strong>91% accuracy on GSM8K</strong></a> with only <strong>13 trained parameters</strong>, challenging assumptions about model scale requirements for reasoning.</p>
+<ul>
+<li>A longitudinal study across <strong>8 frontier model releases</strong> (GPT-4o→GPT-5, Claude 3.5→4.5) <a href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-bd512b7e4b3a" class="internal-link" rel="noopener noreferrer">reveals systematic alignment drift</a> using 726 adversarial prompts</li>
+<li><strong>Drifting Models</strong> from Kaiming He's group <a href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-f596388fe400" class="internal-link" rel="noopener noreferrer">achieves SOTA on ImageNet</a> with a novel one-step generative paradigm</li>
+<li><strong>Trust The Typical (T3)</strong> <a href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-b74a06d3b4a8" class="internal-link" rel="noopener noreferrer">reframes LLM safety as OOD detection</a>, achieving SOTA across 18 safety benchmarks</li>
+<li><strong>Contextual drag</strong> <a href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-92ff4dcf4853" class="internal-link" rel="noopener noreferrer">demonstrates failed CoT attempts</a> systematically bias subsequent generations toward structurally similar errors</li>
+</ul>
+<p>Multiple papers challenge core assumptions: causal analysis <a href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-41fa78fd2ef2" class="internal-link" rel="noopener noreferrer">shows verbose CoT</a> can be independent of model answers; meta-analysis <a href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-0099f246174e" class="internal-link" rel="noopener noreferrer">suggests AI capability growth</a> may follow sigmoid rather than exponential curves. <strong>Toxic Proactivity</strong> <a href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-6c0435307981" class="internal-link" rel="noopener noreferrer">identifies a novel agent failure mode</a> where helpfulness optimization overrides ethical constraints. A study of PPO <a href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-3c11173b0d9d" class="internal-link" rel="noopener noreferrer">reveals fundamental flaws</a> in trust region mechanisms for LLM reinforcement learning.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-05:research:bd512b7e4b3a</id>
+    <title>Alignment Drift in Multimodal LLMs: A Two-Phase, Longitudinal Evaluation of Harm Across Eight Model Releases</title>
+    <link href="http://arxiv.org/abs/2602.04739" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-bd512b7e4b3a" rel="related" type="text/html"/>
+    <published>2026-02-05T03:31:00Z</published>
+    <updated>2026-02-05T03:31:00Z</updated>
+    <author><name>Casey Ford, Madison Van Doren, Emily Dix</name></author>
+    <summary type="html"><![CDATA[<p>Longitudinal study of MLLM harmlessness across 8 model releases (GPT-4o→GPT-5, Claude Sonnet 3.5→4.5) using 726 adversarial prompts. Shows large persistent differences across families and alignment drift with GPT ASR increasing from 9.2% to 19.9%.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="MLLM Evaluation"/>
+    <category term="Alignment Drift"/>
+    <category term="Red Teaming"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-05:research:8c6dfacfdd63</id>
+    <title>Learning to Reason in 13 Parameters</title>
+    <link href="http://arxiv.org/abs/2602.04118" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-8c6dfacfdd63" rel="related" type="text/html"/>
+    <published>2026-02-05T03:31:00Z</published>
+    <updated>2026-02-05T03:31:00Z</updated>
+    <author><name>John X. Morris, Niloofar Mireshghallah, Mark Ibrahim, Saeed Mahloujifar</name></author>
+    <summary type="html"><![CDATA[<p>Introduces TinyLoRA, a method that enables training an 8B parameter model to achieve 91% accuracy on GSM8K with only 13 trained parameters (26 bytes). This challenges fundamental assumptions about parameter requirements for reasoning capabilities, showing 90% of performance can be recovered while training 1000x fewer parameters.</p>]]></summary>
+    <category term="Parameter-Efficient Fine-tuning"/>
+    <category term="LLM Reasoning"/>
+    <category term="Model Compression"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-05:research:b74a06d3b4a8</id>
+    <title>Trust The Typical</title>
+    <link href="http://arxiv.org/abs/2602.04581" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-b74a06d3b4a8" rel="related" type="text/html"/>
+    <published>2026-02-05T03:23:00Z</published>
+    <updated>2026-02-05T03:23:00Z</updated>
+    <author><name>Debargha Ganguly, Sreehari Sankar, Biyao Zhang, Vikash Singh, Kanan Gupta, Harshini Kavuru, Alan Luo, Weicong Chen, Warren Morningstar, Raghu Machiraju, Vipin Chaudhary</name></author>
+    <summary type="html"><![CDATA[<p>Introduces Trust The Typical (T3), treating LLM safety as OOD detection by learning the distribution of acceptable prompts. Achieves SOTA across 18 safety benchmarks without training on harmful examples.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Out-of-Distribution Detection"/>
+    <category term="LLM Security"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-05:research:f596388fe400</id>
+    <title>Generative Modeling via Drifting</title>
+    <link href="http://arxiv.org/abs/2602.04770" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-f596388fe400" rel="related" type="text/html"/>
+    <published>2026-02-05T03:23:00Z</published>
+    <updated>2026-02-05T03:23:00Z</updated>
+    <author><name>Mingyang Deng, He Li, Tianhong Li, Yilun Du, Kaiming He</name></author>
+    <summary type="html"><![CDATA[<p>Proposes Drifting Models, a new generative paradigm where the pushforward distribution evolves during training, naturally enabling one-step inference. Achieves state-of-the-art on ImageNet 256x256 for one-step generation.</p>]]></summary>
+    <category term="Generative Models"/>
+    <category term="Diffusion Models"/>
+    <category term="Image Generation"/>
+    <category term="Efficient Inference"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-05:research:92ff4dcf4853</id>
+    <title>Contextual Drag: How Errors in the Context Affect LLM Reasoning</title>
+    <link href="http://arxiv.org/abs/2602.04288" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-05&amp;category=research#item-92ff4dcf4853" rel="related" type="text/html"/>
+    <published>2026-02-05T03:19:00Z</published>
+    <updated>2026-02-05T03:19:00Z</updated>
+    <author><name>Yun Cheng, Xingyu Zhu, Haoyu Zhao, Sanjeev Arora</name></author>
+    <summary type="html"><![CDATA[<p>Identifies 'contextual drag' phenomenon where failed attempts in LLM context bias subsequent generations toward structurally similar errors. Across 11 models on 8 tasks, shows 10-20% performance drops and potential for self-deterioration.</p>]]></summary>
+    <category term="LLM Reasoning"/>
+    <category term="Self-Improvement"/>
+    <category term="Error Propagation"/>
+    <category term="AI Limitations"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-02-04:category-summary:research</id>
     <title>Research Summary: February 04, 2026</title>
@@ -98,19 +184,6 @@
     <category term="Reinforcement Learning"/>
     <category term="PPO"/>
     <category term="Theoretical RL"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-04:research:4a2e226f058b</id>
-    <title>Breaking the Reversal Curse in Autoregressive Language Models via Identity Bridge</title>
-    <link href="http://arxiv.org/abs/2602.02470" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-04&amp;category=research#item-4a2e226f058b" rel="related" type="text/html"/>
-    <published>2026-02-04T03:16:00Z</published>
-    <updated>2026-02-04T03:16:00Z</updated>
-    <author><name>Xutao Ma, Yixiao Huang, Hanlin Zhu, Somayeh Sojoudi</name></author>
-    <summary type="html"><![CDATA[<p>Previously covered in <a href="http://localhost:8080/?date=2026-02-03&amp;category=research#item-4a2e226f058b" class="internal-link" rel="noopener noreferrer">Research</a>, Challenges the prevailing view that the reversal curse (inability to deduce B→A from training on A→B) is a fundamental limit of autoregressive LLMs. Proposes an Identity Bridge method to mitigate this limitation through slight modifications.</p>]]></summary>
-    <category term="Language Models"/>
-    <category term="Reasoning"/>
-    <category term="Model Architecture"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-02-03:category-summary:research</id>
@@ -213,33 +286,6 @@
     <category term="Code Generation"/>
     <category term="Benchmark"/>
     <category term="AI Safety"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-03:research:df4daa7fc5c7</id>
-    <title>BLOCK-EM: Preventing Emergent Misalignment by Blocking Causal Features</title>
-    <link href="http://arxiv.org/abs/2602.00767" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-03&amp;category=research#item-df4daa7fc5c7" rel="related" type="text/html"/>
-    <published>2026-02-03T03:19:00Z</published>
-    <updated>2026-02-03T03:19:00Z</updated>
-    <author><name>Muhammed Ustaomeroglu, Guannan Qu</name></author>
-    <summary type="html"><![CDATA[<p>Proposes BLOCK-EM for preventing emergent misalignment by identifying and constraining internal features that control misaligned behavior during fine-tuning. Achieves up to 95% reduction in emergent misalignment across six domains.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Emergent Misalignment"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Fine-tuning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-03:research:7807804264c1</id>
-    <title>Grad2Reward: From Sparse Judgment to Dense Rewards for Improving Open-Ended LLM Reasoning</title>
-    <link href="http://arxiv.org/abs/2602.01791" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-03&amp;category=research#item-7807804264c1" rel="related" type="text/html"/>
-    <published>2026-02-03T03:19:00Z</published>
-    <updated>2026-02-03T03:19:00Z</updated>
-    <author><name>Zheng Zhang, Ao Lu, Yuanhao Zeng, Ziwei Shan, Jinjin Guo, Lufei Li, Yexin Li, Kan Ren</name></author>
-    <summary type="html"><![CDATA[<p>Introduces Grad2Reward framework that extracts dense process rewards directly from LLM judge gradients, converting sparse sequence-level rewards into fine-grained supervision for RLHF on open-ended tasks.</p>]]></summary>
-    <category term="RLHF"/>
-    <category term="Reward Modeling"/>
-    <category term="LLM Reasoning"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-02-02:category-summary:research</id>
@@ -393,19 +439,6 @@
     <category term="Evaluation"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-01-30:research:fba44deae645</id>
-    <title>ChipBench: A Next-Step Benchmark for Evaluating LLM Performance in AI-Aided Chip Design</title>
-    <link href="http://arxiv.org/abs/2601.21448" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-30&amp;category=research#item-fba44deae645" rel="related" type="text/html"/>
-    <published>2026-01-30T03:19:00Z</published>
-    <updated>2026-01-30T03:19:00Z</updated>
-    <author><name>Zhongkai Yu, Chenyang Zhou, Yichen Lin, Hejia Zhang, Haotian Ye, Junxia Cui, Zaifeng Pan, Jishen Zhao, Yufei Ding</name></author>
-    <summary type="html"><![CDATA[<p>Introduces ChipBench for AI-aided chip design with 44 hierarchical modules, 89 debugging cases, and 132 reference model samples. Claude-4.5-opus achieves only 30.74% on Verilog generation.</p>]]></summary>
-    <category term="Hardware Design"/>
-    <category term="Code Generation"/>
-    <category term="Benchmarks"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-01-29:category-summary:research</id>
     <title>Research Summary: January 29, 2026</title>
     <link href="http://arxiv.org/abs/2601.20245" rel="alternate" type="text/html"/>
@@ -472,36 +505,5 @@
     <category term="LLM Training"/>
     <category term="Reasoning"/>
     <category term="Self-Distillation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-28:category-summary:research</id>
-    <title>Research Summary: January 28, 2026</title>
-    <link href="https://www.lesswrong.com/posts/7aJwgbMEiKq5egQbd/ai-found-12-of-12-openssl-zero-days-while-curl-cancelled-its" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-28&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-01-28T06:00:00Z</published>
-    <updated>2026-01-28T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research spans AI security capabilities, safety empirics, and deep learning theory. <strong>AISLE's AI</strong> <a href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-6180fdcc30bb" class="internal-link" rel="noopener noreferrer">discovered all <strong>12 OpenSSL zero-days</strong></a>, a landmark demonstration of automated vulnerability detection at a critical scale.</p>
-<ul>
-<li><strong>Disempowerment study</strong> <a href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-fb5e2dc0ce5e" class="internal-link" rel="noopener noreferrer">analyzes <strong>1.5M Claude conversations</strong></a>, finding severe disempowerment in <strong>&lt;0.1%</strong> of interactions—first large-scale empirical safety research of this kind</li>
-<li><strong>Surgical sycophancy correction</strong> <a href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-587a23d43703" class="internal-link" rel="noopener noreferrer">identifies the <strong>3% of neurons</strong></a> responsible and removes the behavior while preserving capabilities via sparse autoencoders</li>
-<li><strong>Thought-Transfer</strong> (Google) <a href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-b8650d4dd7e5" class="internal-link" rel="noopener noreferrer">reveals CoT reasoning models</a> are vulnerable to indirect targeted poisoning attacks</li>
-</ul>
-<p>Theoretical advances include the first rigorous <a href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-180fd3e3456f" class="internal-link" rel="noopener noreferrer"><strong>grokking bounds</strong></a> in ridge regression and a proof that deep networks <a href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-68bd18d53406" class="internal-link" rel="noopener noreferrer">learn <strong>Random Hierarchy Models</strong></a> through hierarchical feature composition. <strong>Keel</strong> <a href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-07e893a2c4e7" class="internal-link" rel="noopener noreferrer">revives Post-LayerNorm</a> by replacing residual paths with Legendre polynomials for stable training at depth. <strong>Differential voting</strong> <a href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-2ad230fcffab" class="internal-link" rel="noopener noreferrer">connects RLHF reward aggregation</a> to social choice theory, deriving loss functions satisfying specific voting axioms. <strong>VP-RL</strong> <a href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-5a60a6b16a85" class="internal-link" rel="noopener noreferrer">addresses PRM-RL mismatch</a> by penalizing only from the first incorrect reasoning step.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-01-28:research:6180fdcc30bb</id>
-    <title>AI found 12 of 12 OpenSSL zero-days (while curl cancelled its bug bounty)</title>
-    <link href="https://www.lesswrong.com/posts/7aJwgbMEiKq5egQbd/ai-found-12-of-12-openssl-zero-days-while-curl-cancelled-its" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-01-28&amp;category=research#item-6180fdcc30bb" rel="related" type="text/html"/>
-    <published>2026-01-28T03:23:00Z</published>
-    <updated>2026-01-28T03:23:00Z</updated>
-    <author><name>Stanislav Fort</name></author>
-    <summary type="html"><![CDATA[<p>Reports that AISLE's AI system discovered all 12 newly announced OpenSSL zero-day vulnerabilities. Demonstrates AI-based cybersecurity capabilities at unprecedented scale while curl's bug bounty was cancelled due to AI spam.</p>]]></summary>
-    <category term="AI Capabilities"/>
-    <category term="Cybersecurity"/>
-    <category term="Vulnerability Discovery"/>
-    <category term="AI Applications"/>
   </entry>
 </feed>
