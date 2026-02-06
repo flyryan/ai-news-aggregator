@@ -9,7 +9,7 @@ Example usage:
 
     # Load provider config
     config = load_config("./config")
-    print(config.llm.model)  # claude-opus-4-5-20251101
+    print(config.llm.model)  # claude-opus-4-6
 
     # Load prompts with typed accessor
     prompt_config = load_prompts("./config")

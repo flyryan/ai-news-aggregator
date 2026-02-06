@@ -90,7 +90,7 @@ def migrate_from_env(config_dir: str) -> bool:
 
     # Determine values based on mode
     llm_mode = 'openai-compatible' if using_proxy else 'anthropic'
-    model_value = '${ANTHROPIC_MODEL}' if has_custom_model else 'claude-opus-4-5-20251101'
+    model_value = '${ANTHROPIC_MODEL}' if has_custom_model else 'claude-opus-4-6'
 
     # For proxy users: image uses same endpoint/key as LLM
     # For direct API users: image needs separate Gemini config
@@ -137,7 +137,7 @@ llm:
 {('  base_url: "${ANTHROPIC_API_BASE}"' if using_proxy else '  # base_url: "https://your-proxy.example.com"')}
 
   # Model identifier
-  # - Direct Anthropic: claude-opus-4-5-20251101, claude-sonnet-4-20250514, etc.
+  # - Direct Anthropic: claude-opus-4-6, claude-sonnet-4-20250514, etc.
   # - Proxy: whatever model name your proxy expects
   model: "{model_value}"
 

@@ -37,7 +37,7 @@ class ThinkingLevel(IntEnum):
 
 
 # Model max token limit
-MODEL_MAX_TOKENS = 64000
+MODEL_MAX_TOKENS = 128000
 
 
 @dataclass
@@ -102,7 +102,7 @@ class AnthropicClient:
         """
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
-        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.5-opus-aws')
+        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.6-opus-aws')
         self.timeout = timeout
         self.mode = mode
 
@@ -386,7 +386,7 @@ class AsyncAnthropicClient:
     ):
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
-        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.5-opus-aws')
+        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.6-opus-aws')
         self.timeout = timeout
         self.mode = mode
 

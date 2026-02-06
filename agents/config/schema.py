@@ -26,7 +26,7 @@ class LLMProviderConfig(BaseModel):
         default="https://api.anthropic.com",
         description="API base URL (no /v1 suffix)"
     )
-    model: str = Field(default="claude-opus-4-5-20251101", description="Model identifier")
+    model: str = Field(default="claude-opus-4-6", description="Model identifier")
     timeout: float = Field(default=300.0, ge=1.0, le=600.0, description="Request timeout in seconds")
 
     @field_validator('api_key')

@@ -2,7 +2,7 @@
 
 ![Pipeline Banner](assets/pipeline-banner.webp)
 
-> Multi-agent AI news pipeline powered by Claude Opus 4.5 with extended thinking
+> Multi-agent AI news pipeline powered by Claude Opus 4.6 with extended thinking
 
 > **Live Site:** [https://news.aatf.ai](https://news.aatf.ai)
 
@@ -166,7 +166,7 @@ llm:
   mode: "anthropic"
   api_key: "${ANTHROPIC_API_KEY}"  # Use env var reference
   # base_url: "https://api.anthropic.com"  # Default, uncomment to override
-  model: "claude-opus-4-5-20251101"
+  model: "claude-opus-4-6"
   timeout: 300
 ```
 
@@ -177,7 +177,7 @@ llm:
   mode: "openai-compatible"
   api_key: "${PROXY_API_KEY}"
   base_url: "https://your-litellm-proxy.example.com"
-  model: "claude-opus-4-5"  # Your proxy's model alias
+  model: "claude-opus-4-6"  # Your proxy's model alias
   timeout: 300
 ```
 
@@ -516,7 +516,7 @@ python3 scripts/regenerate_hero.py 2026-01-06 -e "Add a coffee cup to the scene"
 - **Python 3.10+**
 - **Node.js 18+** (for frontend development)
 - **Docker & Docker Compose** (for containerized deployment)
-- **Claude Opus 4.5** (recommended for best analysis quality)
+- **Claude Opus 4.6** (recommended for best analysis quality)
 - **Gemini 3 Pro** (optional, for hero image generation)
 
 ### API Keys
