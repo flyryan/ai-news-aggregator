@@ -23,6 +23,7 @@ from .analyzers import NewsAnalyzer, ResearchAnalyzer, SocialAnalyzer, RedditAna
 from .cost_tracker import get_tracker, reset_tracker
 from .link_enricher import LinkEnricher
 from .ecosystem_context import EcosystemContextManager
+from .phase_tracker import PhaseTracker
 from .config import ProviderConfig
 from typing import TYPE_CHECKING
 
@@ -66,6 +67,7 @@ class OrchestratorResult:
     collection_status: Dict[str, Dict[str, Any]] = field(default_factory=dict)  # source -> status
     hero_image_url: Optional[str] = None  # URL path to generated hero image
     hero_image_prompt: Optional[str] = None  # Prompt used to generate hero image
+    phase_status: List[Dict[str, Any]] = field(default_factory=list)  # Phase tracker records
     orchestrator_thinking: Optional[str] = None
     generated_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
@@ -84,6 +86,7 @@ class OrchestratorResult:
             'collection_status': self.collection_status,
             'hero_image_url': self.hero_image_url,
             'hero_image_prompt': self.hero_image_prompt,
+            'phase_status': self.phase_status,
             'orchestrator_thinking': self.orchestrator_thinking,
             'generated_at': self.generated_at
         }
@@ -217,112 +220,275 @@ class MainOrchestrator:
         """Get today's date as YYYY-MM-DD."""
         return datetime.now().strftime('%Y-%m-%d')
 
-    async def run(self) -> OrchestratorResult:
+    async def run(self, resume_from: Optional[float] = None) -> OrchestratorResult:
         """
         Run the full pipeline.
+
+        Args:
+            resume_from: If set, load checkpoints for phases before this number
+                         and re-run phases at and after this number.
+                         E.g., resume_from=3 loads gathering + analysis, re-runs topic detection onward.
 
         Returns:
             OrchestratorResult with all analysis.
         """
         logger.info(f"Starting orchestrator run for {self.target_date}")
+        if resume_from is not None:
+            logger.info(f"Resuming from phase {resume_from} (loading earlier phases from checkpoint)")
         start_time = datetime.now()
 
         # Initialize cost tracking
-        tracker = reset_tracker()
-        tracker.start()
+        cost_tracker = reset_tracker()
+        cost_tracker.start()
 
-        # Phase 0: Ecosystem Context (grounding for LLM analysis)
-        logger.info("Phase 0: Loading ecosystem context...")
-        from datetime import date as date_type
-        report_date = date_type.fromisoformat(self.target_date)
-        self.grounding_context = await self.ecosystem_manager.initialize(report_date)
+        # Initialize phase tracker
+        phases = PhaseTracker()
+
+        # Phase 0: Ecosystem Context (always runs fresh - fast and stateless)
+        phases.start_phase("Phase 0: Ecosystem Context")
+        try:
+            logger.info("Phase 0: Loading ecosystem context...")
+            from datetime import date as date_type
+            report_date = date_type.fromisoformat(self.target_date)
+            self.grounding_context = await self.ecosystem_manager.initialize(report_date)
+            ctx_len = len(self.grounding_context) if self.grounding_context else 0
+            phases.end_phase('success', details=f"{ctx_len} chars")
+        except Exception as e:
+            logger.warning(f"Ecosystem context failed: {e}")
+            self.grounding_context = None
+            phases.end_phase('partial', error=str(e))
 
         # Phase 1: Parallel Gathering
-        logger.info("Phase 1: Gathering from all sources...")
-        gathered_items, collection_status = await self._gather_all()
+        if resume_from is not None and resume_from > 1:
+            checkpoint = self._load_checkpoint('gathering')
+            if not checkpoint:
+                raise RuntimeError("Cannot resume: no checkpoint for Phase 1 (gathering)")
+            gathered_items = self._restore_gathered_items(checkpoint)
+            collection_status = checkpoint.get('collection_status', {})
+            total_items = sum(len(items) for items in gathered_items.values())
+            phases.skip_phase("Phase 1: Gathering", f"loaded from checkpoint ({total_items} items)")
+        else:
+            phases.start_phase("Phase 1: Gathering")
+            try:
+                logger.info("Phase 1: Gathering from all sources...")
+                gathered_items, collection_status = await self._gather_all()
+                total_items = sum(len(items) for items in gathered_items.values())
+                has_failures = any(s.get('status') == 'failed' for s in collection_status.values())
+                status = 'partial' if has_failures else 'success'
+                phases.end_phase(status, details=f"{total_items} items")
+                self._save_checkpoint('gathering', {
+                    'collection_status': collection_status,
+                    'categories': {cat: [item.to_dict() for item in items] for cat, items in gathered_items.items()}
+                })
+            except Exception as e:
+                phases.end_phase('failed', error=str(e))
+                raise
 
         # Phase 2: Parallel Analysis (with grounding context)
-        logger.info("Phase 2: Analyzing all categories...")
-        category_reports = await self._analyze_all(gathered_items)
+        if resume_from is not None and resume_from > 2:
+            checkpoint = self._load_checkpoint('analysis')
+            if not checkpoint:
+                raise RuntimeError("Cannot resume: no checkpoint for Phase 2 (analysis)")
+            category_reports = self._restore_category_reports(checkpoint)
+            total_analyzed = sum(len(r.all_items) for r in category_reports.values())
+            phases.skip_phase("Phase 2: Analysis", f"loaded from checkpoint ({total_analyzed} items)")
+            phases.skip_phase("Phase 2.5: Continuity Detection", "loaded from checkpoint")
+        else:
+            phases.start_phase("Phase 2: Analysis")
+            try:
+                logger.info("Phase 2: Analyzing all categories...")
+                category_reports = await self._analyze_all(gathered_items)
+                total_analyzed = sum(len(r.all_items) for r in category_reports.values())
+                phases.end_phase('success', details=f"{total_analyzed} items")
+            except Exception as e:
+                phases.end_phase('failed', error=str(e))
+                raise
 
-        # Phase 2.5: Continuity Detection
-        logger.info("Phase 2.5: Detecting story continuations...")
-        from .continuity import ContinuityCoordinator
-        continuity_coordinator = ContinuityCoordinator(
-            async_client=self.async_client,
-            web_dir=self.web_dir,
-            target_date=self.target_date,
-            lookback_days=2
-        )
-        category_reports = await continuity_coordinator.process(category_reports)
+            # Phase 2.5: Continuity Detection
+            phases.start_phase("Phase 2.5: Continuity Detection")
+            try:
+                logger.info("Phase 2.5: Detecting story continuations...")
+                from .continuity import ContinuityCoordinator
+                continuity_coordinator = ContinuityCoordinator(
+                    async_client=self.async_client,
+                    web_dir=self.web_dir,
+                    target_date=self.target_date,
+                    lookback_days=2
+                )
+                category_reports = await continuity_coordinator.process(category_reports)
+                phases.end_phase('success')
+            except Exception as e:
+                logger.warning(f"Continuity detection failed: {e}")
+                phases.end_phase('failed', error=str(e))
+
+            # Save analysis checkpoint (post-continuity)
+            self._save_checkpoint('analysis', {
+                'category_reports': {cat: report.to_dict() for cat, report in category_reports.items()}
+            })
 
         # Phase 3: Cross-Category Topic Detection
-        logger.info("Phase 3: Detecting cross-category topics...")
-        top_topics, topic_thinking = await self._detect_cross_category_topics(category_reports)
+        if resume_from is not None and resume_from > 3:
+            checkpoint = self._load_checkpoint('topics')
+            if not checkpoint:
+                raise RuntimeError("Cannot resume: no checkpoint for Phase 3 (topics)")
+            top_topics = self._restore_top_topics(checkpoint)
+            topic_thinking = checkpoint.get('thinking', '')
+            phases.skip_phase("Phase 3: Topic Detection", f"loaded from checkpoint ({len(top_topics)} topics)")
+        else:
+            phases.start_phase("Phase 3: Topic Detection")
+            try:
+                logger.info("Phase 3: Detecting cross-category topics...")
+                top_topics, topic_thinking = await self._detect_cross_category_topics(category_reports)
+                if top_topics:
+                    phases.end_phase('success', details=f"{len(top_topics)} topics")
+                else:
+                    phases.end_phase('failed', error="no topics detected")
+            except Exception as e:
+                logger.error(f"Topic detection failed: {e}")
+                top_topics = []
+                topic_thinking = f"Error: {e}"
+                phases.end_phase('failed', error=str(e))
+
+            self._save_checkpoint('topics', {
+                'top_topics': [asdict(t) for t in top_topics],
+                'thinking': topic_thinking
+            })
 
         # Phase 4: Generate Executive Summary
-        logger.info("Phase 4: Generating executive summary...")
-        executive_summary, summary_thinking = await self._generate_executive_summary(
-            category_reports, top_topics
-        )
+        if resume_from is not None and resume_from > 4.5:
+            checkpoint = self._load_checkpoint('summary')
+            if not checkpoint:
+                raise RuntimeError("Cannot resume: no checkpoint for Phase 4 (summary)")
+            executive_summary = checkpoint.get('executive_summary', '')
+            summary_thinking = checkpoint.get('thinking', '')
+            # Restore enriched category summaries
+            enriched_summaries = checkpoint.get('enriched_category_summaries', {})
+            for category, enriched_summary in enriched_summaries.items():
+                if category in category_reports:
+                    category_reports[category].category_summary = enriched_summary
+            # Restore enriched topic descriptions
+            enriched_topics = checkpoint.get('enriched_topics', [])
+            if enriched_topics:
+                top_topics = self._restore_top_topics({'top_topics': enriched_topics})
+            phases.skip_phase("Phase 4: Executive Summary", "loaded from checkpoint")
+            phases.skip_phase("Phase 4.5: Link Enrichment", "loaded from checkpoint")
+        else:
+            phases.start_phase("Phase 4: Executive Summary")
+            try:
+                logger.info("Phase 4: Generating executive summary...")
+                executive_summary, summary_thinking = await self._generate_executive_summary(
+                    category_reports, top_topics
+                )
+                if executive_summary and not executive_summary.startswith("Executive summary generation failed"):
+                    phases.end_phase('success')
+                else:
+                    phases.end_phase('failed', error="generation failed")
+            except Exception as e:
+                executive_summary = f"Executive summary generation failed: {e}"
+                summary_thinking = f"Error: {e}"
+                phases.end_phase('failed', error=str(e))
 
-        # Phase 4.5: Link Enrichment
-        logger.info("Phase 4.5: Enriching summaries with internal links...")
-        enricher = LinkEnricher(self.async_client, self.target_date, prompt_accessor=self.prompt_accessor)
-        executive_summary, enriched_category_summaries, top_topics = await enricher.enrich_all(
-            executive_summary, category_reports, top_topics
-        )
+            # Phase 4.5: Link Enrichment
+            phases.start_phase("Phase 4.5: Link Enrichment")
+            try:
+                logger.info("Phase 4.5: Enriching summaries with internal links...")
+                enricher = LinkEnricher(self.async_client, self.target_date, prompt_accessor=self.prompt_accessor)
+                executive_summary, enriched_category_summaries, top_topics = await enricher.enrich_all(
+                    executive_summary, category_reports, top_topics
+                )
+                for category, enriched_summary in enriched_category_summaries.items():
+                    if category in category_reports:
+                        category_reports[category].category_summary = enriched_summary
+                phases.end_phase('success')
+            except Exception as e:
+                logger.warning(f"Link enrichment failed: {e}")
+                enriched_category_summaries = {}
+                phases.end_phase('failed', error=str(e))
 
-        # Update category reports with enriched summaries
-        for category, enriched_summary in enriched_category_summaries.items():
-            if category in category_reports:
-                category_reports[category].category_summary = enriched_summary
+            # Save summary checkpoint (post-enrichment)
+            self._save_checkpoint('summary', {
+                'executive_summary': executive_summary,
+                'thinking': summary_thinking,
+                'enriched_category_summaries': {cat: report.category_summary for cat, report in category_reports.items()},
+                'enriched_topics': [asdict(t) for t in top_topics]
+            })
 
         # Phase 4.6: Ecosystem Enrichment (detect new model releases from news)
-        if self.ecosystem_manager and 'news' in category_reports:
-            logger.info("Phase 4.6: Enriching ecosystem context from news...")
-            try:
-                news_items = category_reports['news'].all_items
-                enrichment_result = await self.ecosystem_manager.enrich_from_news(
-                    news_items, self.async_client
-                )
-                if enrichment_result.get('updates_made', 0) > 0:
-                    logger.info(f"  Added {enrichment_result['updates_made']} new model releases")
-            except Exception as e:
-                logger.warning(f"Ecosystem enrichment failed: {e}")
+        if resume_from is None or resume_from <= 4.6:
+            if self.ecosystem_manager and 'news' in category_reports:
+                phases.start_phase("Phase 4.6: Ecosystem Enrichment")
+                try:
+                    logger.info("Phase 4.6: Enriching ecosystem context from news...")
+                    news_items = category_reports['news'].all_items
+                    enrichment_result = await self.ecosystem_manager.enrich_from_news(
+                        news_items, self.async_client
+                    )
+                    updates = enrichment_result.get('updates_made', 0)
+                    if updates > 0:
+                        logger.info(f"  Added {updates} new model releases")
+                        phases.end_phase('success', details=f"{updates} new releases")
+                    else:
+                        phases.end_phase('success', details="no new releases")
+                except Exception as e:
+                    logger.warning(f"Ecosystem enrichment failed: {e}")
+                    phases.end_phase('failed', error=str(e))
+            else:
+                phases.skip_phase("Phase 4.6: Ecosystem Enrichment", "no news data or manager unavailable")
+        else:
+            phases.skip_phase("Phase 4.6: Ecosystem Enrichment", "loaded from checkpoint")
 
         # Phase 4.7: Hero Image Generation
         hero_image_url = None
         hero_image_prompt = None
-        if self.hero_generator and top_topics:
-            logger.info("Phase 4.7: Generating hero image...")
-            try:
-                from pathlib import Path
-                hero_result = await self.hero_generator.generate(
-                    top_topics=top_topics,
-                    date=self.target_date,
-                    output_dir=Path(self.web_dir)
-                )
-                if hero_result:
-                    hero_image_url = hero_result['path']
-                    # Add cache-busting timestamp based on file mtime
-                    hero_file = Path(self.web_dir) / "data" / self.target_date / "hero.webp"
-                    if hero_file.exists():
-                        mtime = int(hero_file.stat().st_mtime)
-                        hero_image_url = f"{hero_image_url}?v={mtime}"
-                    hero_image_prompt = hero_result['prompt']
-                    logger.info(f"Hero image generated: {hero_image_url}")
-                else:
-                    logger.warning("Hero image generation returned no result")
-            except Exception as e:
-                logger.error(f"Hero image generation failed: {e}")
+
+        # Build hero topics - use top_topics, or fall back to category themes
+        hero_topics = top_topics
+        hero_fallback_used = False
+        if not hero_topics and category_reports:
+            hero_topics = self._build_fallback_hero_topics(category_reports)
+            hero_fallback_used = bool(hero_topics)
+
+        if resume_from is None or resume_from <= 4.7:
+            if self.hero_generator and hero_topics:
+                phases.start_phase("Phase 4.7: Hero Image")
+                try:
+                    logger.info("Phase 4.7: Generating hero image...")
+                    if hero_fallback_used:
+                        logger.info("  Using category themes as fallback (topic detection produced no topics)")
+                    from pathlib import Path
+                    hero_result = await self.hero_generator.generate(
+                        top_topics=hero_topics,
+                        date=self.target_date,
+                        output_dir=Path(self.web_dir)
+                    )
+                    if hero_result:
+                        hero_image_url = hero_result['path']
+                        hero_file = Path(self.web_dir) / "data" / self.target_date / "hero.webp"
+                        if hero_file.exists():
+                            mtime = int(hero_file.stat().st_mtime)
+                            hero_image_url = f"{hero_image_url}?v={mtime}"
+                        hero_image_prompt = hero_result['prompt']
+                        logger.info(f"Hero image generated: {hero_image_url}")
+                        if hero_fallback_used:
+                            phases.end_phase('partial', details="used category themes as fallback")
+                        else:
+                            phases.end_phase('success')
+                    else:
+                        logger.warning("Hero image generation returned no result")
+                        phases.end_phase('failed', error="no result returned")
+                except Exception as e:
+                    logger.error(f"Hero image generation failed: {e}")
+                    phases.end_phase('failed', error=str(e))
+            else:
+                if not self.hero_generator:
+                    phases.skip_phase("Phase 4.7: Hero Image", "generator not available")
+                elif not hero_topics:
+                    phases.skip_phase("Phase 4.7: Hero Image", "no topics")
         else:
-            if not self.hero_generator:
-                logger.info("Skipping hero image generation (generator not available)")
-            elif not top_topics:
-                logger.info("Skipping hero image generation (no topics)")
+            phases.skip_phase("Phase 4.7: Hero Image", "loaded from checkpoint")
 
         # Phase 5: Assemble Result
+        phases.start_phase("Phase 5: Assembly")
         logger.info("Phase 5: Assembling final result...")
         total_collected = sum(len(items) for items in gathered_items.values())
         total_analyzed = sum(len(report.all_items) for report in category_reports.values())
@@ -346,14 +512,16 @@ class MainOrchestrator:
             collection_status=collection_status,
             hero_image_url=hero_image_url,
             hero_image_prompt=hero_image_prompt,
+            phase_status=phases.to_dict(),
             orchestrator_thinking=f"Topic Detection:\n{topic_thinking}\n\nSummary:\n{summary_thinking}"
         )
 
         # Save result
         self._save_result(result)
+        phases.end_phase('success')
 
-        # Stop cost tracking and print summary
-        tracker.stop()
+        # Stop cost tracking
+        cost_tracker.stop()
 
         elapsed = (datetime.now() - start_time).total_seconds()
         logger.info(f"Orchestrator run completed in {elapsed:.1f}s")
@@ -364,17 +532,137 @@ class MainOrchestrator:
         # Log collection status summary
         self._log_collection_status(collection_status)
 
+        # Print phase summary before cost report
+        print("\n" + phases.get_summary())
+
         # Print cost report
-        print("\n" + tracker.get_summary())
+        print("\n" + cost_tracker.get_summary())
 
         # Save cost report
         cost_report_path = os.path.join(
             self.data_dir, 'processed',
             f"cost_report_{self.target_date}.json"
         )
-        tracker.save_report(cost_report_path)
+        cost_tracker.save_report(cost_report_path)
 
         return result
+
+    def _build_fallback_hero_topics(self, category_reports: Dict[str, CategoryReport]) -> List[TopTopic]:
+        """Build fallback hero topics from category themes when topic detection fails."""
+        all_themes = []
+        for category, report in category_reports.items():
+            for theme in report.themes[:3]:  # Top 3 per category
+                all_themes.append((theme, category))
+
+        # Deduplicate by name (case-insensitive)
+        seen_names = set()
+        unique_themes = []
+        for theme, category in all_themes:
+            key = theme.name.lower().strip()
+            if key not in seen_names:
+                seen_names.add(key)
+                unique_themes.append((theme, category))
+
+        # Sort by importance, take top 6
+        unique_themes.sort(key=lambda x: x[0].importance, reverse=True)
+        unique_themes = unique_themes[:6]
+
+        fallback_topics = []
+        for theme, category in unique_themes:
+            fallback_topics.append(TopTopic(
+                name=theme.name,
+                description=theme.description,
+                description_html=self._markdown_links_to_html(theme.description),
+                category_breakdown={category: theme.item_count},
+                representative_items=[],
+                importance=theme.importance
+            ))
+
+        if fallback_topics:
+            logger.info(f"  Built {len(fallback_topics)} fallback hero topics from category themes")
+        return fallback_topics
+
+    # --- Checkpoint Methods ---
+
+    def _checkpoint_dir(self) -> str:
+        """Get checkpoint directory for current date."""
+        path = os.path.join(self.data_dir, 'checkpoints', self.target_date)
+        os.makedirs(path, exist_ok=True)
+        return path
+
+    def _save_checkpoint(self, phase: str, data: dict):
+        """Save checkpoint data for a phase."""
+        filepath = os.path.join(self._checkpoint_dir(), f"{phase}.json")
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            logger.info(f"  Checkpoint saved: {phase}")
+        except Exception as e:
+            logger.warning(f"  Failed to save checkpoint for {phase}: {e}")
+
+    def _load_checkpoint(self, phase: str) -> Optional[dict]:
+        """Load checkpoint data for a phase. Returns None if missing or corrupt."""
+        filepath = os.path.join(self._checkpoint_dir(), f"{phase}.json")
+        if not os.path.exists(filepath):
+            return None
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            logger.info(f"  Checkpoint loaded: {phase}")
+            return data
+        except Exception as e:
+            logger.warning(f"  Failed to load checkpoint for {phase}: {e}")
+            return None
+
+    def _restore_gathered_items(self, checkpoint: dict) -> Dict[str, List[CollectedItem]]:
+        """Restore gathered items from checkpoint data."""
+        result = {}
+        for category, items_data in checkpoint.get('categories', {}).items():
+            result[category] = [CollectedItem.from_dict(item) for item in items_data]
+        return result
+
+    def _restore_category_reports(self, checkpoint: dict) -> Dict[str, CategoryReport]:
+        """Restore CategoryReport objects from checkpoint data."""
+        result = {}
+        for category, report_data in checkpoint.get('category_reports', {}).items():
+            result[category] = CategoryReport.from_dict(report_data)
+        return result
+
+    def _restore_top_topics(self, checkpoint: dict) -> List[TopTopic]:
+        """Restore TopTopic objects from checkpoint data."""
+        topics = []
+        for topic_data in checkpoint.get('top_topics', []):
+            topics.append(TopTopic(
+                name=topic_data.get('name', ''),
+                description=topic_data.get('description', ''),
+                description_html=topic_data.get('description_html', ''),
+                category_breakdown=topic_data.get('category_breakdown', {}),
+                representative_items=topic_data.get('representative_items', []),
+                importance=topic_data.get('importance', 50)
+            ))
+        return topics
+
+    def _detect_resume_point(self) -> Optional[float]:
+        """Auto-detect resume point from existing checkpoints."""
+        checkpoint_dir = os.path.join(self.data_dir, 'checkpoints', self.target_date)
+        if not os.path.exists(checkpoint_dir):
+            return None
+
+        # Check in reverse order: summary -> topics -> analysis -> gathering
+        checkpoint_phases = [
+            ('summary.json', 5.0),    # After Phase 4+4.5, resume from Phase 4.6
+            ('topics.json', 4.0),      # After Phase 3, resume from Phase 4
+            ('analysis.json', 3.0),    # After Phase 2+2.5, resume from Phase 3
+            ('gathering.json', 2.0),   # After Phase 1, resume from Phase 2
+        ]
+
+        for filename, resume_point in checkpoint_phases:
+            filepath = os.path.join(checkpoint_dir, filename)
+            if os.path.exists(filepath):
+                logger.info(f"  Auto-resume: found checkpoint {filename}, resuming from phase {resume_point}")
+                return resume_point
+
+        return None
 
     async def _gather_all(self) -> tuple:
         """

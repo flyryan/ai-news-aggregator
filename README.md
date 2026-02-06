@@ -138,6 +138,13 @@ python3 run_pipeline.py -d 2026-01-05
 
 # Enable scheduled collection (cron, Docker only)
 ENABLE_CRON=true docker-compose up -d
+
+# Resume after a crash (auto-detects latest checkpoint)
+python3 run_pipeline.py --resume
+
+# Resume from a specific phase (loads earlier phases from checkpoint)
+python3 run_pipeline.py --resume-from 3      # Re-run topic detection onward
+python3 run_pipeline.py --resume-from 4.7    # Just regenerate hero image
 ```
 
 ---
@@ -311,6 +318,12 @@ Each pipeline run tracks collection status per source:
 - **Per-platform tracking**: Twitter, Bluesky, Mastodon (within Social)
 - Status is included in `summary.json` and displayed in the frontend
 
+### Pipeline Reliability
+- **Phase tracking**: End-of-run summary showing status, timing, and details for every phase
+- **Checkpoint/resume**: Each major phase saves a checkpoint to `data/checkpoints/`; use `--resume` for crash recovery or `--resume-from N` to re-run specific phases
+- **Hero image fallback**: When topic detection fails, hero generation falls back to top category themes
+- **Clean logging**: httpx noise suppressed; MAP-REDUCE batches show per-batch progress with category tags
+
 ### Data Sources
 
 | Category | Sources | Collection Method |
@@ -352,6 +365,7 @@ ai-news-aggregator/
 │   ├── ecosystem_context.py   # AI model release dates for LLM grounding
 │   ├── link_enricher.py       # Adds internal links to summaries
 │   ├── cost_tracker.py        # LLM API cost tracking
+│   ├── phase_tracker.py       # Phase status tracking and end-of-run summary
 │   ├── gatherers/             # News, Research, Social, Reddit gatherers
 │   ├── analyzers/             # Category-specific analyzers
 │   └── continuity/            # Story tracking across days
@@ -373,7 +387,10 @@ ai-news-aggregator/
 │   ├── rss_feeds.txt          # RSS feed URLs
 │   ├── model_releases.yaml    # AI model release dates
 │   └── ...                    # Other source lists
-├── data/                      # Raw and processed JSON
+├── data/
+│   ├── raw/                   # Collected JSON
+│   ├── processed/             # Analyzed JSON + cost reports
+│   └── checkpoints/           # Phase checkpoints for resume (per-date)
 ├── web/                       # Generated output
 ├── assets/                    # Pipeline diagrams
 ├── run_pipeline.py            # Entry point
@@ -469,6 +486,21 @@ pip install -r requirements.txt
 
 # Run pipeline
 python3 run_pipeline.py --config-dir ./config --data-dir ./data --web-dir ./web
+```
+
+### Resuming Failed Runs
+
+```bash
+# Auto-resume from latest checkpoint (crash recovery)
+python3 run_pipeline.py --resume
+
+# Resume from a specific phase
+python3 run_pipeline.py --resume-from 3      # Re-run from topic detection
+python3 run_pipeline.py --resume-from 4.7    # Re-run hero image only
+python3 run_pipeline.py --resume-from 2      # Re-run from analysis
+
+# Checkpoints persist in data/checkpoints/{date}/
+# Full run always saves fresh checkpoints
 ```
 
 ### Hero Image Regeneration

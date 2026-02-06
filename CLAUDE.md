@@ -33,6 +33,12 @@ python3 run_pipeline.py --config-dir ./config --data-dir ./data --web-dir ./web
 
 # Run for a specific date (useful for testing/backfilling)
 TARGET_DATE="2026-01-02" python3 run_pipeline.py --config-dir ./config --data-dir ./data --web-dir ./web
+
+# Resume after a crash (auto-detect latest checkpoint)
+python3 run_pipeline.py --resume --config-dir ./config --data-dir ./data --web-dir ./web
+
+# Resume from a specific phase (loads earlier phases from checkpoint)
+python3 run_pipeline.py --resume-from 3 --config-dir ./config --data-dir ./data --web-dir ./web
 ```
 
 ### Frontend Development
@@ -96,6 +102,7 @@ agents/
 ├── orchestrator.py            # Main coordinator
 ├── link_enricher.py           # Adds internal links to summaries
 ├── cost_tracker.py            # LLM API cost tracking
+├── phase_tracker.py           # Phase status tracking and end-of-run summary
 ├── ecosystem_context.py       # AI model release tracking for grounding
 ├── gatherers/
 │   ├── news_gatherer.py       # RSS + Twitter-linked articles
@@ -142,6 +149,7 @@ frontend/                       # Svelte SPA frontend
 - `agents/link_enricher.py` - Adds internal links to summaries using LLM
 - `agents/cost_tracker.py` - Tracks LLM API usage and costs
 - `agents/ecosystem_context.py` - Model release tracking for LLM grounding
+- `agents/phase_tracker.py` - Phase status tracking, timing, and end-of-run summary
 - `generators/json_generator.py` - JSON data for SPA frontend
 - `generators/search_indexer.py` - Builds Lunr.js search index
 - `generators/hero_generator.py` - Daily hero image generation via Gemini
@@ -150,7 +158,7 @@ frontend/                       # Svelte SPA frontend
 - `config/` - Feed lists (rss_feeds.txt, twitter_accounts.txt, etc.)
 - `config/model_releases.yaml` - Curated AI model release dates (source of truth)
 - `config/ecosystem_context.yaml` - Auto-generated cache (merged releases + OpenRouter)
-- `data/raw/` - Collected JSON, `data/processed/` - Analyzed JSON
+- `data/raw/` - Collected JSON, `data/processed/` - Analyzed JSON, `data/checkpoints/` - Phase checkpoints for resume
 - `web/data/` - Generated JSON data for frontend
 
 ### External Dependencies
@@ -233,6 +241,7 @@ Each daily report includes a hero image featuring the AATF skunk mascot in a sce
 - Takes the skunk reference image (`assets/skunk-reference.png`) and all detected topics (typically 3-6)
 - Generates a 21:9 ultra-wide banner image
 - Outputs to `web/data/{date}/hero.webp` (optimized WebP at 1280px, q75)
+- **Fallback**: If cross-category topic detection fails (Phase 3), hero generation falls back to top themes from each category (deduplicated, sorted by importance, top 6)
 
 ### Prompt Design
 The prompt includes:
@@ -298,6 +307,9 @@ Feeds are output to `web/data/feeds/` and accessible at `/data/feeds/*.xml` on t
 - **Source Diversity**: The ranking algorithm prioritizes news articles (RSS, arXiv) over social discussions (Reddit) to ensure top stories reflect actual developments.
 - **Item IDs**: Generated as 12-character SHA256 hashes (~280 trillion unique values) for compact URLs.
 - **Ecosystem Grounding**: All analyzers receive model release dates as system context to prevent hallucinations about "new" releases that are actually weeks/months old.
+- **Phase Tracking**: Each phase is tracked with status (success/partial/failed/skipped), timing, and details. End-of-run summary prints before cost report. Phase status is included in `OrchestratorResult` JSON output.
+- **Checkpointing**: Major phases save checkpoints to `data/checkpoints/{date}/`. Use `--resume` for auto crash recovery or `--resume-from N` to re-run from a specific phase. Checkpoints persist between runs.
+- **Hero Fallback**: When topic detection (Phase 3) fails or returns no topics, hero image generation falls back to top category themes instead of being skipped entirely.
 
 ## Adding New Sources
 
