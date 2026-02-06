@@ -575,12 +575,13 @@ IMPORTANT:
             # Use LLM to analyze news for releases
             from .llm_client import ThinkingLevel
             response = await llm_client.call_with_thinking(
-                prompt=prompt,
-                thinking_budget=ThinkingLevel.STANDARD
+                messages=[{"role": "user", "content": prompt}],
+                budget_tokens=ThinkingLevel.STANDARD,
+                caller="ecosystem_context.enrichment"
             )
 
             # Parse response
-            result = self._parse_enrichment_response(response.get('text', ''))
+            result = self._parse_enrichment_response(response.content)
 
             if result.get('new_releases'):
                 updates = self._apply_enrichment(result['new_releases'], coverage_date)
@@ -612,7 +613,7 @@ IMPORTANT:
         lines = []
         for i, item in enumerate(items[:30], 1):  # Limit to top 30
             lines.append(f"\n--- Item {i} ---")
-            lines.append(f"Title: {item.title}")
+            lines.append(f"Title: {item.item.title}")
             lines.append(f"Summary: {item.summary}")
             if item.themes:
                 lines.append(f"Themes: {', '.join(item.themes)}")
@@ -647,6 +648,8 @@ IMPORTANT:
     def _apply_enrichment(self, new_releases: List[Dict], coverage_date: date) -> int:
         """
         Apply discovered releases to model_releases.yaml.
+        Surgically inserts new entries at the top of each provider section,
+        preserving all existing formatting, comments, and blank lines.
 
         Args:
             new_releases: List of new release dicts from LLM
@@ -658,75 +661,98 @@ IMPORTANT:
         if not new_releases:
             return 0
 
-        updates = 0
-
+        # Group new releases by provider
+        additions = {}  # provider -> list of (model_name, ga_date)
         for release in new_releases:
             provider = release.get('provider', '').lower()
             model_name = release.get('model_name', '')
             ga_date = release.get('ga_date', coverage_date.isoformat())
 
-            # Validate provider
             if provider not in self.TRACKED_PROVIDERS:
                 logger.debug(f"Skipping unknown provider: {provider}")
                 continue
 
-            # Skip if already exists
             if provider in self.releases and model_name in self.releases[provider]:
                 logger.debug(f"Skipping existing model: {model_name}")
                 continue
 
-            # Add to releases
+            if provider not in additions:
+                additions[provider] = []
+            additions[provider].append((model_name, ga_date))
+
+            # Update in-memory releases too
             if provider not in self.releases:
                 self.releases[provider] = {}
-
             self.releases[provider][model_name] = {
                 'ga_date': ga_date,
-                'api_date': 'unknown'  # Will be filled by OpenRouter on next run
+                'api_date': 'unknown'
             }
-            updates += 1
-            logger.info(f"Added new model: {provider}/{model_name} (GA: {ga_date})")
 
-        # Save updated releases
-        if updates > 0:
-            self._save_releases()
+        if not additions:
+            return 0
+
+        updates = sum(len(models) for models in additions.values())
+
+        # Surgically insert into the existing file
+        self._insert_releases_into_file(additions)
+
+        for provider, models in additions.items():
+            for model_name, ga_date in models:
+                logger.info(f"Added new model: {provider}/{model_name} (GA: {ga_date})")
 
         return updates
 
-    def _save_releases(self):
-        """Save updated releases back to model_releases.yaml."""
+    def _insert_releases_into_file(self, additions: Dict[str, list]):
+        """
+        Insert new model entries into model_releases.yaml without rewriting.
+        Preserves all comments, formatting, blank lines, and quote styles.
+        New entries are inserted at the top of each provider's section.
+        """
+        import re
+
         try:
-            # Load existing file to preserve comments and structure
-            if self.releases_path.exists():
-                with open(self.releases_path, 'r') as f:
-                    content = f.read()
-                    # Find where the data starts (after comments)
-                    lines = content.split('\n')
-                    header_lines = []
-                    for line in lines:
-                        if line.startswith('#') or line.strip() == '':
-                            header_lines.append(line)
-                        else:
-                            break
-                    header = '\n'.join(header_lines)
-            else:
-                header = "# Model Release Dates - Source of Truth\n"
+            with open(self.releases_path, 'r') as f:
+                content = f.read()
 
-            # Update the "Last verified" date in header
+            # Update "Last verified" date
             today = date.today().isoformat()
-            if 'Last verified:' in header:
-                import re
-                header = re.sub(
-                    r'Last verified: \d{4}-\d{2}-\d{2}',
-                    f'Last verified: {today}',
-                    header
-                )
+            content = re.sub(
+                r'(# Last verified: )\d{4}-\d{2}-\d{2}',
+                f'\\g<1>{today}',
+                content
+            )
 
-            # Write back with header preserved
+            lines = content.split('\n')
+            result = []
+            i = 0
+
+            while i < len(lines):
+                line = lines[i]
+
+                # Check if this is a top-level provider key (e.g. "openai:")
+                provider_match = re.match(r'^(\w[\w-]*):\s*$', line)
+                if provider_match and provider_match.group(1) in additions:
+                    provider = provider_match.group(1)
+                    result.append(line)
+                    i += 1
+
+                    # Build the new entry block to insert
+                    new_entries = []
+                    for model_name, ga_date in additions[provider]:
+                        new_entries.append(f'  # {model_name} (auto-detected {today})')
+                        new_entries.append(f'  {model_name}:')
+                        new_entries.append(f'    ga_date: "{ga_date}"')
+                        new_entries.append(f'    api_date: "unknown"')
+                    new_entries.append('')  # Blank line separator
+
+                    # Insert the new entries
+                    result.extend(new_entries)
+                else:
+                    result.append(line)
+                    i += 1
+
             with open(self.releases_path, 'w') as f:
-                f.write(header)
-                if not header.endswith('\n\n'):
-                    f.write('\n')
-                yaml.dump(self.releases, f, default_flow_style=False, sort_keys=False)
+                f.write('\n'.join(result))
 
             logger.debug(f"Saved releases to {self.releases_path}")
 
