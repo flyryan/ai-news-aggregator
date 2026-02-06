@@ -10,7 +10,7 @@
 import DOMPurify from 'dompurify';
 
 // Allowlist of safe HTML tags (matches backend ALLOWED_TAGS)
-const ALLOWED_TAGS = ['a', 'strong', 'em', 'p', 'ul', 'li', 'h4', 'br'];
+const ALLOWED_TAGS = ['a', 'strong', 'em', 'p', 'ul', 'li', 'h2', 'h3', 'h4', 'br'];
 
 // Allowlist of safe HTML attributes (matches backend ALLOWED_ATTRIBUTES)
 const ALLOWED_ATTR = ['href', 'class', 'target', 'rel'];
