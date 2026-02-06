@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AI News Aggregator - A Python-based multi-agent pipeline that collects AI/ML news from multiple sources (RSS feeds, arXiv API, Twitter, Reddit, Bluesky, Mastodon), analyzes them using Claude Opus 4.5 with extended thinking, and serves a modern Svelte SPA frontend with AATF branding.
+AI News Aggregator - A Python-based multi-agent pipeline that collects AI/ML news from multiple sources (RSS feeds, arXiv API, Twitter, Reddit, Bluesky, Mastodon), analyzes them using Claude Opus 4.6 with extended thinking, and serves a modern Svelte SPA frontend with AATF branding.
 
 **Testing:** The user always runs tests themselves. Do not run the pipeline or tests unless explicitly asked.
 
@@ -166,7 +166,7 @@ frontend/                       # Svelte SPA frontend
 ```
 ANTHROPIC_API_BASE    # Anthropic API endpoint (no /v1 suffix)
 ANTHROPIC_API_KEY     # Bearer token for authentication
-ANTHROPIC_MODEL       # Model name (default: claude-4.5-opus-aws)
+ANTHROPIC_MODEL       # Model name (default: claude-4.6-opus-aws)
 TWITTERAPI_IO_KEY     # TwitterAPI.io API key
 TARGET_DATE           # Report date (YYYY-MM-DD), coverage is day before. Defaults to today.
 ENABLE_CRON           # Enable scheduled collection (default: false)

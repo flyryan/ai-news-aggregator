@@ -20,12 +20,12 @@ logger = logging.getLogger(__name__)
 class ModelPricing(Enum):
     """Pricing per million tokens (MTok) for different models."""
 
-    # Claude Opus 4.5 pricing (USD per million tokens)
-    OPUS_4_5_INPUT = 5.00
-    OPUS_4_5_OUTPUT = 25.00
-    OPUS_4_5_CACHE_WRITE_5MIN = 6.25
-    OPUS_4_5_CACHE_WRITE_1HR = 10.00
-    OPUS_4_5_CACHE_HIT = 0.50
+    # Claude Opus 4.6 pricing (USD per million tokens)
+    OPUS_4_6_INPUT = 5.00
+    OPUS_4_6_OUTPUT = 25.00
+    OPUS_4_6_CACHE_WRITE_5MIN = 6.25
+    OPUS_4_6_CACHE_WRITE_1HR = 10.00
+    OPUS_4_6_CACHE_HIT = 0.50
 
     # Claude Sonnet 4.5 pricing
     SONNET_4_5_INPUT = 3.00
@@ -46,7 +46,7 @@ class APICallRecord:
     output_tokens: int
     cache_creation_tokens: int = 0
     cache_read_tokens: int = 0
-    model: str = "claude-4.5-opus-aws"
+    model: str = "claude-4.6-opus-aws"
     duration_seconds: float = 0.0
 
     @property
@@ -84,7 +84,7 @@ class CostTracker:
         print(tracker.get_summary())
     """
 
-    def __init__(self, model: str = "claude-4.5-opus-aws"):
+    def __init__(self, model: str = "claude-4.6-opus-aws"):
         self.model = model
         self.calls: List[APICallRecord] = []
         self.start_time: Optional[datetime] = None
@@ -92,10 +92,10 @@ class CostTracker:
 
         # Determine pricing based on model
         if "opus" in model.lower():
-            self.input_price = ModelPricing.OPUS_4_5_INPUT.value
-            self.output_price = ModelPricing.OPUS_4_5_OUTPUT.value
-            self.cache_write_price = ModelPricing.OPUS_4_5_CACHE_WRITE_5MIN.value
-            self.cache_hit_price = ModelPricing.OPUS_4_5_CACHE_HIT.value
+            self.input_price = ModelPricing.OPUS_4_6_INPUT.value
+            self.output_price = ModelPricing.OPUS_4_6_OUTPUT.value
+            self.cache_write_price = ModelPricing.OPUS_4_6_CACHE_WRITE_5MIN.value
+            self.cache_hit_price = ModelPricing.OPUS_4_6_CACHE_HIT.value
         elif "sonnet" in model.lower():
             self.input_price = ModelPricing.SONNET_4_5_INPUT.value
             self.output_price = ModelPricing.SONNET_4_5_OUTPUT.value
@@ -108,10 +108,10 @@ class CostTracker:
             self.cache_hit_price = self.input_price * 0.1
         else:
             # Default to Opus pricing
-            self.input_price = ModelPricing.OPUS_4_5_INPUT.value
-            self.output_price = ModelPricing.OPUS_4_5_OUTPUT.value
-            self.cache_write_price = ModelPricing.OPUS_4_5_CACHE_WRITE_5MIN.value
-            self.cache_hit_price = ModelPricing.OPUS_4_5_CACHE_HIT.value
+            self.input_price = ModelPricing.OPUS_4_6_INPUT.value
+            self.output_price = ModelPricing.OPUS_4_6_OUTPUT.value
+            self.cache_write_price = ModelPricing.OPUS_4_6_CACHE_WRITE_5MIN.value
+            self.cache_hit_price = ModelPricing.OPUS_4_6_CACHE_HIT.value
 
     def start(self):
         """Mark the start of a pipeline run."""
@@ -270,7 +270,7 @@ class CostTracker:
 
         lines.extend([
             "",
-            "PRICING (Claude Opus 4.5):",
+            "PRICING (Claude Opus 4.6):",
             f"  Input:  ${self.input_price:.2f}/MTok",
             f"  Output: ${self.output_price:.2f}/MTok",
             "=" * 60
@@ -339,7 +339,7 @@ def get_tracker() -> CostTracker:
     return _global_tracker
 
 
-def reset_tracker(model: str = "claude-4.5-opus-aws") -> CostTracker:
+def reset_tracker(model: str = "claude-4.6-opus-aws") -> CostTracker:
     """Reset and return a new global tracker."""
     global _global_tracker
     _global_tracker = CostTracker(model)
