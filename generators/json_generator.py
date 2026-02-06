@@ -22,7 +22,7 @@ import nh3
 logger = logging.getLogger(__name__)
 
 # HTML sanitization allowlist for XSS prevention
-ALLOWED_TAGS = {'a', 'strong', 'em', 'p', 'ul', 'li', 'h4', 'br'}
+ALLOWED_TAGS = {'a', 'strong', 'em', 'p', 'ul', 'li', 'h2', 'h3', 'h4', 'br'}
 ALLOWED_ATTRIBUTES = {
     'a': {'href', 'class', 'target'},  # 'rel' handled by nh3's link_rel parameter
 }
@@ -472,8 +472,10 @@ class JSONGenerator:
         # Convert **bold** to <strong>
         text = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text)
 
-        # Convert #### headers to <h4>
+        # Convert markdown headers to HTML (h2-h4)
         text = re.sub(r'^####\s+(.+)$', r'<h4>\1</h4>', text, flags=re.MULTILINE)
+        text = re.sub(r'^###\s+(.+)$', r'<h3>\1</h3>', text, flags=re.MULTILINE)
+        text = re.sub(r'^##\s+(.+)$', r'<h2>\1</h2>', text, flags=re.MULTILINE)
 
         # Convert bullet lists to <ul><li>
         lines = text.split('\n')
@@ -495,7 +497,7 @@ class JSONGenerator:
                     in_list = False
                 if stripped:
                     # Check if it's already an HTML tag (like h4)
-                    if stripped.startswith('<h4>') or stripped.startswith('<ul>'):
+                    if stripped.startswith(('<h2>', '<h3>', '<h4>', '<ul>')):
                         result.append(stripped)
                     else:
                         result.append(f'<p>{stripped}</p>')

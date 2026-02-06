@@ -42,8 +42,10 @@ export function markdownToHtml(text: string): string {
 	// Convert **bold** to <strong>
 	text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
-	// Convert #### headers to <h4>
+	// Convert markdown headers to HTML (h2-h4)
 	text = text.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
+	text = text.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+	text = text.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
 
 	// Convert bullet lists to <ul><li>
 	const lines = text.split('\n');
@@ -66,7 +68,7 @@ export function markdownToHtml(text: string): string {
 			}
 			if (stripped) {
 				// Check if already HTML tag
-				if (stripped.startsWith('<h4>') || stripped.startsWith('<ul>')) {
+				if (stripped.startsWith('<h2>') || stripped.startsWith('<h3>') || stripped.startsWith('<h4>') || stripped.startsWith('<ul>')) {
 					result.push(stripped);
 				} else {
 					result.push(stripped);
