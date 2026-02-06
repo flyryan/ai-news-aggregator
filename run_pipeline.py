@@ -37,6 +37,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+logging.getLogger('httpx').setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
@@ -60,7 +61,7 @@ def parse_date(date_str: str) -> str:
     raise ValueError(f"Invalid date format: {date_str}. Use YYYY-MM-DD or MM-DD-YYYY")
 
 
-async def run_pipeline(config_dir: str, data_dir: str, web_dir: str, target_date: str = None) -> bool:
+async def run_pipeline(config_dir: str, data_dir: str, web_dir: str, target_date: str = None, resume_from=None) -> bool:
     """
     Run the complete multi-agent pipeline.
 
@@ -69,6 +70,7 @@ async def run_pipeline(config_dir: str, data_dir: str, web_dir: str, target_date
         data_dir: Directory for data storage
         web_dir: Directory for generated website
         target_date: Report date (YYYY-MM-DD). Coverage is day before.
+        resume_from: Phase number (float) to resume from, or 'auto' for auto-detection.
 
     Returns:
         True if successful, False otherwise.
@@ -109,8 +111,19 @@ async def run_pipeline(config_dir: str, data_dir: str, web_dir: str, target_date
             prompt_accessor=prompt_accessor
         )
 
+        # Handle resume modes
+        actual_resume_from = None
+        if resume_from == 'auto':
+            actual_resume_from = orchestrator._detect_resume_point()
+            if actual_resume_from is None:
+                logger.info("No checkpoints found - running full pipeline")
+            else:
+                logger.info(f"Auto-resume: will resume from phase {actual_resume_from}")
+        elif resume_from is not None:
+            actual_resume_from = float(resume_from)
+
         # Run the multi-agent pipeline
-        result = await orchestrator.run()
+        result = await orchestrator.run(resume_from=actual_resume_from)
 
         # Generate JSON data for SPA frontend
         logger.info("=" * 60)
@@ -297,6 +310,14 @@ def main():
         '--date', '-d',
         help='Report date (YYYY-MM-DD or MM-DD-YYYY). Coverage is day before.'
     )
+    parser.add_argument(
+        '--resume', action='store_true',
+        help='Auto-resume from latest checkpoint (for crash recovery)'
+    )
+    parser.add_argument(
+        '--resume-from', type=float, metavar='PHASE',
+        help='Resume from phase N (e.g., 3, 4.5, 4.7). Loads earlier phases from checkpoint.'
+    )
 
     args = parser.parse_args()
 
@@ -315,12 +336,23 @@ def main():
             logger.error(str(e))
             sys.exit(1)
 
+    # Determine resume mode
+    resume_from = None
+    if args.resume and args.resume_from is not None:
+        logger.error("Cannot use both --resume and --resume-from. Use one or the other.")
+        sys.exit(1)
+    elif args.resume:
+        resume_from = 'auto'  # Auto-detect inside run_pipeline
+    elif args.resume_from is not None:
+        resume_from = args.resume_from
+
     # Run async pipeline
     success = asyncio.run(run_pipeline(
         args.config_dir,
         args.data_dir,
         args.web_dir,
-        target_date
+        target_date,
+        resume_from=resume_from
     ))
 
     sys.exit(0 if success else 1)

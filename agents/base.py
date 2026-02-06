@@ -87,6 +87,11 @@ class ContinuationInfo:
             'reference_text': self.reference_text
         }
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'ContinuationInfo':
+        """Create from dictionary."""
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
 
 @dataclass
 class AnalyzedItem:
@@ -112,6 +117,26 @@ class AnalyzedItem:
         })
         return result
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'AnalyzedItem':
+        """Create from a flat dictionary (as produced by to_dict)."""
+        # Extract analysis fields
+        continuation_data = data.get('continuation')
+        continuation = ContinuationInfo.from_dict(continuation_data) if continuation_data else None
+
+        # Build CollectedItem from the remaining fields
+        item = CollectedItem.from_dict(data)
+
+        return cls(
+            item=item,
+            summary=data.get('summary', ''),
+            importance_score=data.get('importance_score', 50),
+            reasoning=data.get('reasoning', ''),
+            themes=data.get('themes', []),
+            thinking=data.get('thinking'),
+            continuation=continuation
+        )
+
 
 @dataclass
 class CategoryTheme:
@@ -121,6 +146,17 @@ class CategoryTheme:
     item_count: int
     example_items: List[str]  # Item IDs
     importance: float  # 0-100
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'CategoryTheme':
+        """Create from dictionary."""
+        return cls(
+            name=data.get('name', ''),
+            description=data.get('description', ''),
+            item_count=data.get('item_count', 0),
+            example_items=data.get('example_items', []),
+            importance=data.get('importance', 50)
+        )
 
 
 @dataclass
@@ -154,6 +190,25 @@ class CategoryReport:
             'analysis_timestamp': self.analysis_timestamp,
             'thinking': self.thinking
         }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'CategoryReport':
+        """Create from dictionary."""
+        top_items = [AnalyzedItem.from_dict(item) for item in data.get('top_items', [])]
+        all_items = [AnalyzedItem.from_dict(item) for item in data.get('all_items', [])]
+        themes = [CategoryTheme.from_dict(t) for t in data.get('themes', [])]
+
+        return cls(
+            category=data.get('category', ''),
+            top_items=top_items,
+            all_items=all_items,
+            category_summary=data.get('category_summary', ''),
+            themes=themes,
+            cross_signals=data.get('cross_signals', []),
+            total_collected=data.get('total_collected', 0),
+            analysis_timestamp=data.get('analysis_timestamp', ''),
+            thinking=data.get('thinking')
+        )
 
 
 @dataclass
@@ -381,10 +436,14 @@ class BaseAnalyzer(ABC):
 
             result = self._parse_json_response(response.content)
 
+            batch_themes = result.get('themes', result.get('category_themes', []))
+            batch_items = result.get('items', [])
+            logger.info(f"  {self.category} map {batch_index + 1}/{total_batches}: {len(batch_items)} items, {len(batch_themes)} themes")
+
             return BatchResult(
                 batch_index=batch_index,
-                item_analyses=result.get('items', []),
-                batch_themes=result.get('themes', result.get('category_themes', [])),
+                item_analyses=batch_items,
+                batch_themes=batch_themes,
                 cross_signals=result.get('cross_signals', []),
                 thinking=response.thinking
             )
@@ -400,15 +459,18 @@ class BaseAnalyzer(ABC):
                     caller=f"{self.category}_analyzer.batch_{batch_index}_retry"
                 )
                 result = self._parse_json_response(response.content)
+                batch_themes = result.get('themes', result.get('category_themes', []))
+                batch_items = result.get('items', [])
+                logger.info(f"  {self.category} map {batch_index + 1}/{total_batches}: {len(batch_items)} items, {len(batch_themes)} themes (retry)")
                 return BatchResult(
                     batch_index=batch_index,
-                    item_analyses=result.get('items', []),
-                    batch_themes=result.get('themes', result.get('category_themes', [])),
+                    item_analyses=batch_items,
+                    batch_themes=batch_themes,
                     cross_signals=result.get('cross_signals', []),
                     thinking=response.thinking
                 )
             except Exception as retry_e:
-                logger.error(f"Batch {batch_index} retry also failed: {retry_e}")
+                logger.error(f"  {self.category} map {batch_index + 1}/{total_batches}: FAILED")
                 return BatchResult(
                     batch_index=batch_index,
                     item_analyses=[],
@@ -449,7 +511,7 @@ class BaseAnalyzer(ABC):
         ]
         total_batches = len(batches)
 
-        logger.info(f"MAP phase: Processing {len(items)} items in {total_batches} batches")
+        logger.info(f"  {self.category} MAP: processing {len(items)} items in {total_batches} batches")
 
         # Process batches with concurrency limit
         semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_BATCHES)
@@ -468,7 +530,7 @@ class BaseAnalyzer(ABC):
 
         # Log batch completion stats
         successful = sum(1 for r in batch_results if r.item_analyses)
-        logger.info(f"MAP phase complete: {successful}/{total_batches} batches successful")
+        logger.info(f"  {self.category} MAP: complete, {successful}/{total_batches} batches successful")
 
         return list(batch_results), items
 
@@ -594,6 +656,8 @@ class BaseAnalyzer(ABC):
         if not analyzed_items:
             return self._empty_report()
 
+        logger.info(f"  {self.category} REDUCE: ranking {len(analyzed_items[:50])} candidates...")
+
         # Select top candidates for final ranking (top 50 by score)
         top_candidates = analyzed_items[:50]
 
@@ -636,6 +700,8 @@ class BaseAnalyzer(ABC):
         if len(top_items) < 10:
             remaining = [i for i in analyzed_items if i not in top_items]
             top_items.extend(remaining[:10 - len(top_items)])
+
+        logger.info(f"  {self.category} REDUCE: complete, {len(top_items)} top items ranked")
 
         # Log stats
         self._log_map_reduce_stats(analyzed_items, themes, top_items)

@@ -23,7 +23,7 @@ log "Pull/reset completed successfully"
 
 # Step 3: Swap to internal README for EMU push
 log "Swapping README for EMU..."
-cp README-internal.md README.md
+cp /home/ubuntu/README-internal.md README.md
 git add README.md
 
 # Only commit if there are changes (avoids error if README already matches)
