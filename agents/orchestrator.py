@@ -914,6 +914,44 @@ Focus on genuinely cross-cutting themes representing the day's most significant 
             logger.error(f"Cross-category topic detection failed: {e}")
             return [], f"Error: {e}"
 
+    def _load_previous_summaries(self, lookback_days: int = 3) -> str:
+        """
+        Load executive summaries from previous days to avoid repetition.
+
+        Args:
+            lookback_days: Number of days to look back.
+
+        Returns:
+            Formatted string with previous summaries for context.
+        """
+        from datetime import datetime, timedelta
+
+        target_dt = datetime.strptime(self.target_date, '%Y-%m-%d')
+        previous_summaries = []
+
+        for days_ago in range(1, lookback_days + 1):
+            check_date = target_dt - timedelta(days=days_ago)
+            date_str = check_date.strftime('%Y-%m-%d')
+            summary_path = os.path.join(self.web_dir, 'data', date_str, 'summary.json')
+
+            if not os.path.exists(summary_path):
+                continue
+
+            try:
+                with open(summary_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                exec_summary = data.get('executive_summary', '')
+                if exec_summary:
+                    previous_summaries.append(f"=== {date_str} ===\n{exec_summary}")
+            except Exception as e:
+                logger.warning(f"Failed to load previous summary for {date_str}: {e}")
+                continue
+
+        if not previous_summaries:
+            return ""
+
+        return "PREVIOUS DAYS' COVERAGE (do NOT repeat these as new/breaking news):\n\n" + "\n\n".join(previous_summaries)
+
     async def _generate_executive_summary(
         self,
         category_reports: Dict[str, CategoryReport],
@@ -927,8 +965,16 @@ Focus on genuinely cross-cutting themes representing the day's most significant 
         Returns:
             Tuple of (summary string, thinking string).
         """
+        # Load previous days' summaries to avoid repetition
+        previous_coverage = self._load_previous_summaries(lookback_days=3)
+
         # Build context
         context_parts = [f"Date: {self.target_date}", ""]
+
+        # Add previous coverage context first (important for avoiding repetition)
+        if previous_coverage:
+            context_parts.append(previous_coverage)
+            context_parts.append("")
 
         context_parts.append("TOP TOPICS:")
         for i, topic in enumerate(top_topics[:6], 1):
@@ -982,7 +1028,14 @@ FORMATTING RULES:
 - Write in factual, professional tone - no hype or speculation
 - Do NOT use phrases like "significant developments", "noteworthy", or "thought leaders"
 
-The summary should help a busy professional quickly scan and understand what matters in AI today."""
+CRITICAL - AVOID REPETITION:
+- Review the PREVIOUS DAYS' COVERAGE section above carefully
+- If a story was already a headline/top story in previous days, do NOT present it as breaking news again
+- For ongoing stories, frame as "continuing developments" or focus on what's NEW today
+- Prioritize genuinely new stories over rehashing recent headlines
+- If today's biggest news was already yesterday's headline, find the next most important NEW development
+
+The summary should help a busy professional quickly scan and understand what's NEW in AI today."""
 
         try:
             response = await self.async_client.call_with_thinking(
