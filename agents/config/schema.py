@@ -27,6 +27,13 @@ class LLMProviderConfig(BaseModel):
         description="API base URL (no /v1 suffix)"
     )
     model: str = Field(default="claude-opus-4-6", description="Model identifier")
+    max_output_tokens: int = Field(
+        default=128000,
+        ge=1024,
+        le=128000,
+        description="Maximum output tokens the model/proxy supports. "
+                    "Set lower for proxies with restrictive limits (e.g., 64000)."
+    )
     timeout: float = Field(default=300.0, ge=1.0, le=600.0, description="Request timeout in seconds")
 
     @field_validator('api_key')

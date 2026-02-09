@@ -36,8 +36,8 @@ class ThinkingLevel(IntEnum):
     ULTRATHINK = 32000 # Cross-category synthesis
 
 
-# Model max token limit
-MODEL_MAX_TOKENS = 128000
+# Default model max token limit (can be overridden via config or constructor)
+DEFAULT_MODEL_MAX_TOKENS = 128000
 
 
 @dataclass
@@ -87,7 +87,8 @@ class AnthropicClient:
         base_url: Optional[str] = None,
         model: Optional[str] = None,
         timeout: float = 300.0,
-        mode: str = "anthropic"
+        mode: str = "anthropic",
+        max_output_tokens: Optional[int] = None
     ):
         """
         Initialize the Anthropic client.
@@ -99,12 +100,15 @@ class AnthropicClient:
             timeout: Request timeout in seconds.
             mode: API mode - 'anthropic' for direct API (x-api-key),
                   'openai-compatible' for proxies (Bearer token).
+            max_output_tokens: Maximum output tokens the model/proxy supports.
+                             Defaults to DEFAULT_MODEL_MAX_TOKENS (128000).
         """
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
         self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.6-opus-aws')
         self.timeout = timeout
         self.mode = mode
+        self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
 
         if not self.api_key:
             raise ValueError("ANTHROPIC_API_KEY environment variable or api_key parameter required")
@@ -150,7 +154,8 @@ class AnthropicClient:
             base_url=config.base_url,
             model=config.model,
             timeout=config.timeout,
-            mode=config.mode
+            mode=config.mode,
+            max_output_tokens=getattr(config, 'max_output_tokens', DEFAULT_MODEL_MAX_TOKENS)
         )
 
     def call(
@@ -229,10 +234,15 @@ class AnthropicClient:
         elif max_tokens <= budget_tokens:
             max_tokens = budget_tokens + 16384
 
-        # Cap at model limit
-        if max_tokens > MODEL_MAX_TOKENS:
-            logger.debug(f"Capping max_tokens from {max_tokens} to {MODEL_MAX_TOKENS} (model limit)")
-            max_tokens = MODEL_MAX_TOKENS
+        # Cap at model/proxy limit
+        if max_tokens > self.max_output_tokens:
+            logger.debug(f"Capping max_tokens from {max_tokens} to {self.max_output_tokens} (model limit)")
+            max_tokens = self.max_output_tokens
+
+        # If capping pushed max_tokens below budget_tokens, reduce budget too
+        if max_tokens <= budget_tokens:
+            budget_tokens = max(max_tokens - 8192, max_tokens // 2)
+            logger.info(f"Reduced thinking budget to {budget_tokens} to fit within {self.max_output_tokens} token limit")
 
         # Temperature must be 1.0 for thinking
         if temperature != 1.0:
@@ -453,10 +463,15 @@ class AsyncAnthropicClient:
         elif max_tokens <= budget_tokens:
             max_tokens = budget_tokens + 16384
 
-        # Cap at model limit
-        if max_tokens > MODEL_MAX_TOKENS:
-            logger.debug(f"Capping max_tokens from {max_tokens} to {MODEL_MAX_TOKENS} (model limit)")
-            max_tokens = MODEL_MAX_TOKENS
+        # Cap at model/proxy limit
+        if max_tokens > self.max_output_tokens:
+            logger.debug(f"Capping max_tokens from {max_tokens} to {self.max_output_tokens} (model limit)")
+            max_tokens = self.max_output_tokens
+
+        # If capping pushed max_tokens below budget_tokens, reduce budget too
+        if max_tokens <= budget_tokens:
+            budget_tokens = max(max_tokens - 8192, max_tokens // 2)
+            logger.info(f"Reduced thinking budget to {budget_tokens} to fit within {self.max_output_tokens} token limit")
 
         if temperature != 1.0:
             temperature = 1.0
