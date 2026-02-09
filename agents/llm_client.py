@@ -392,13 +392,15 @@ class AsyncAnthropicClient:
         base_url: Optional[str] = None,
         model: Optional[str] = None,
         timeout: float = 300.0,
-        mode: str = "anthropic"
+        mode: str = "anthropic",
+        max_output_tokens: Optional[int] = None
     ):
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
         self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.6-opus-aws')
         self.timeout = timeout
         self.mode = mode
+        self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
 
         if not self.api_key:
             raise ValueError("ANTHROPIC_API_KEY environment variable or api_key parameter required")
@@ -444,7 +446,8 @@ class AsyncAnthropicClient:
             base_url=config.base_url,
             model=config.model,
             timeout=config.timeout,
-            mode=config.mode
+            mode=config.mode,
+            max_output_tokens=getattr(config, 'max_output_tokens', DEFAULT_MODEL_MAX_TOKENS)
         )
 
     async def call_with_thinking(
