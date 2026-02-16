@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-50.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:50</id>
-  <updated>2026-02-15T07:43:04Z</updated>
+  <updated>2026-02-16T07:44:44Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,38 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-02-16:category-summary:research</id>
+    <title>Research Summary: February 16, 2026</title>
+    <link href="http://arxiv.org/abs/2602.12413" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-16&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-02-16T06:00:00Z</published>
+    <updated>2026-02-16T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research centers on foundational challenges in LLM evaluation, efficient training, and reasoning robustness. <strong>Soft Contamination</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-5434b43ef88f" class="internal-link" rel="noopener noreferrer">reveals that semantic duplicates</a> evade standard n-gram decontamination, undermining benchmark validity across the field—potentially the most consequential finding of the day.</p>
+<ul>
+<li><strong>Native Low-Rank Pretraining</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-17b87f3d87ca" class="internal-link" rel="noopener noreferrer">shows LLMs can be trained</a> from scratch with exclusively factorized weights by controlling spectral norm growth, offering significant compute savings</li>
+<li><strong>ARTS</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-28e747befa9a" class="internal-link" rel="noopener noreferrer">identifies a 'Normalization Squeeze'</a> pathology in RLVR that systematically suppresses valid but rare reasoning paths, proposing amortized tree search as a fix</li>
+<li><strong>Continuous diffusion language models</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-a5b6f4a9ccec" class="internal-link" rel="noopener noreferrer">can be steered to obey</a> formal syntax constraints (regex, CFGs) via training-free guidance</li>
+<li>A <strong>Frankenstein-style dissection</strong> of RL in vision-language models <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-cbc6b59aa318" class="internal-link" rel="noopener noreferrer">reveals RL selectively improves</a> specific functional components rather than broadly enhancing reasoning</li>
+</ul>
+<p>Architecture and safety insights are also prominent. Two papers target <strong>MoE Transformers</strong>: one <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-cf6c66b6a1c0" class="internal-link" rel="noopener noreferrer">identifies <strong>multi-head attention</strong></a> (not experts) as the primary source of catastrophic forgetting, while <strong>SD-MoE</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-9e37ddd80a0e" class="internal-link" rel="noopener noreferrer">uses spectral decomposition</a> to fix expert specialization collapse. On safety, <strong>CC-Delta</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-5e01da8ee96f" class="internal-link" rel="noopener noreferrer">leverages sparse autoencoders</a> to detect jailbreak-relevant features, and <strong>MonoLoss</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-f2a267f5edac" class="internal-link" rel="noopener noreferrer">proposes a single-pass objective</a> for monosemantic SAE representations. Finally, a study of <strong>nine frontier reasoning models</strong> under multi-turn adversarial attacks <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-e9b13b2cebdb" class="internal-link" rel="noopener noreferrer">catalogues five distinct failure modes</a> including Self-Doubt and Social Conformity.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-16:research:5434b43ef88f</id>
+    <title>Soft Contamination Means Benchmarks Test Shallow Generalization</title>
+    <link href="http://arxiv.org/abs/2602.12413" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-5434b43ef88f" rel="related" type="text/html"/>
+    <published>2026-02-16T03:07:00Z</published>
+    <updated>2026-02-16T03:07:00Z</updated>
+    <author><name>Ari Spiesberger, Juan J. Vazquez, Nicky Pochinkov, Tom\'a\v{s} Gaven\v{c}iak, Peli Grietzer, Gavin Leech, Nandi Schoots</name></author>
+    <summary type="html"><![CDATA[<p>Demonstrates that 'soft contamination' (semantic duplicates not caught by n-gram decontamination) is widespread in LLM training data, finding semantic duplicates for 78% of CodeForces problems. Shows that benchmark improvements from such contamination don't transfer to genuinely novel problems.</p>]]></summary>
+    <category term="LLM Evaluation"/>
+    <category term="Benchmark Contamination"/>
+    <category term="Data Quality"/>
+    <category term="Language Models"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-02-15:category-summary:research</id>
     <title>Research Summary: February 15, 2026</title>
@@ -807,34 +839,5 @@ Encoded Reasoning</title>
     <category term="Calibration"/>
     <category term="AI Safety"/>
     <category term="Uncertainty Estimation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-09:research:59bcdeb15313</id>
-    <title>Large Language Model Reasoning Failures</title>
-    <link href="http://arxiv.org/abs/2602.06176" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-09&amp;category=research#item-59bcdeb15313" rel="related" type="text/html"/>
-    <published>2026-02-09T03:00:00Z</published>
-    <updated>2026-02-09T03:00:00Z</updated>
-    <author><name>Peiyang Song, Pengrui Han, Noah Goodman</name></author>
-    <summary type="html"><![CDATA[<p>Presents the first comprehensive survey of LLM reasoning failures, introducing a categorization distinguishing embodied vs non-embodied reasoning and fundamental vs application-specific failures.</p>]]></summary>
-    <category term="LLM Reasoning"/>
-    <category term="Survey"/>
-    <category term="AI Limitations"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-08:category-summary:research</id>
-    <title>Research Summary: February 08, 2026</title>
-    <link href="https://www.lesswrong.com/posts/tAh2keDNEEHMXvLvz/prompt-injection-in-google-translate-reveals-base-model" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-08&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-02-08T06:00:00Z</published>
-    <updated>2026-02-08T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>A sparse day for AI research, with two notable contributions. A <a href="http://localhost:8080/?date=2026-02-08&amp;category=research#item-b51f49385ecb" class="internal-link" rel="noopener noreferrer"><strong>prompt injection vulnerability</strong></a> in <strong>Google Translate</strong> reveals the production system runs on an instruction-following LLM, exposing architectural choices and security implications for task-specific fine-tuning.</p>
-<ul>
-<li>Novel economic framework <a href="http://localhost:8080/?date=2026-02-08&amp;category=research#item-c65e21afde59" class="internal-link" rel="noopener noreferrer">applies <strong>Weibull survival functions</strong></a> to model AI agent task completion probability, building on <strong>METR</strong> benchmark data to quantify agent viability thresholds</li>
-<li>Speculative alignment piece <a href="http://localhost:8080/?date=2026-02-08&amp;category=research#item-483474ed4cff" class="internal-link" rel="noopener noreferrer">explores whether monitoring AI</a> internal states could deter misaligned behavior in <strong>cautious satisficer</strong> architectures</li>
-</ul>
-<p>Remaining content spans biosecurity (<a href="http://localhost:8080/?date=2026-02-08&amp;category=research#item-e70c20fd447e" class="internal-link" rel="noopener noreferrer">yeast-based vaccine distribution</a>), neuroscience (<a href="http://localhost:8080/?date=2026-02-08&amp;category=research#item-1cfbae5a4cc7" class="internal-link" rel="noopener noreferrer">cryoprotectant brain dynamics</a>), and community meta-analysis. No major model releases or benchmark papers today.</p>]]></summary>
-    <category term="daily-summary"/>
   </entry>
 </feed>
