@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-full.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:full</id>
-  <updated>2026-02-21T07:45:43Z</updated>
+  <updated>2026-02-22T07:43:18Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,165 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-02-22:category-summary:research</id>
+    <title>Research Summary: February 22, 2026</title>
+    <link href="https://www.lesswrong.com/posts/GJTzhQgaRWLFJkPbt/how-will-we-do-sft-on-models-with-opaque-reasoning" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-02-22T06:00:00Z</published>
+    <updated>2026-02-22T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>A light day for research, dominated by alignment and training methodology discussions rather than empirical results.</p>
+<ul>
+<li>The most substantive item <a href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-a9b4aff5794d" class="internal-link" rel="noopener noreferrer">asks how <strong>SFT</strong> will function</a> if future models shift to <strong>opaque (non-language-based) reasoning</strong>, raising critical questions about training transparency and oversight</li>
+<li>A novel proposal suggests letting models <a href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-b355b9618a7b" class="internal-link" rel="noopener noreferrer"><strong>report tasks as reward-hackable</strong></a> during <strong>RL training</strong>, offering an alternative to <strong>inoculation prompting</strong> for mitigating reward hacking</li>
+<li>Speculative analysis revisits the <strong>Claude 3 Opus alignment faking</strong> paper, <a href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-dd50b8237e52" class="internal-link" rel="noopener noreferrer">exploring whether the model self-aligned</a> via a form of <strong>gradient hacking</strong></li>
+</ul>
+<p>On governance and policy, <strong>ControlAI</strong> reports empirical data on <a href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-241057bb74b7" class="internal-link" rel="noopener noreferrer">persuading <strong>112 UK lawmakers</strong></a> to support binding AI safety commitments, while a separate piece <a href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-4130c38cf651" class="internal-link" rel="noopener noreferrer">highlights <strong>ASI organizational capture</strong></a> risks. Several philosophical and epistemological pieces round out the day with limited technical depth.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-22:research:a9b4aff5794d</id>
+    <title>How will we do SFT on models with opaque reasoning?</title>
+    <link href="https://www.lesswrong.com/posts/GJTzhQgaRWLFJkPbt/how-will-we-do-sft-on-models-with-opaque-reasoning" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-a9b4aff5794d" rel="related" type="text/html"/>
+    <published>2026-02-22T02:28:00Z</published>
+    <updated>2026-02-22T02:28:00Z</updated>
+    <author><name>Alek Westover</name></author>
+    <summary type="html"><![CDATA[<p>Explores the important question of how supervised fine-tuning (SFT) will work if future AI models move toward opaque (non-language-based) reasoning rather than interpretable chain-of-thought. Discusses implications for alignment techniques including exploration hacking countermeasures, sandbagging detection, and reasoning monitoring.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Language Models"/>
+    <category term="Interpretability"/>
+    <category term="Supervised Fine-Tuning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-22:research:b355b9618a7b</id>
+    <title>Reporting Tasks as Reward-Hackable: Better Than Inoculation Prompting?</title>
+    <link href="https://www.lesswrong.com/posts/r97QrSvXEpRLZ9ckb/reporting-tasks-as-reward-hackable-better-than-inoculation" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-b355b9618a7b" rel="related" type="text/html"/>
+    <published>2026-02-22T02:12:00Z</published>
+    <updated>2026-02-22T02:12:00Z</updated>
+    <author><name>RogerDearnaley</name></author>
+    <summary type="html"><![CDATA[<p>Proposes an alternative to inoculation prompting for preventing reward hacking during RL training: allowing models to report tasks as reward-hackable rather than solving them dishonestly. The idea is that making honesty the optimal strategy could reduce alignment damage from reward hacking without requiring pre-prompting permission to cheat.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Reinforcement Learning"/>
+    <category term="Reward Hacking"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-22:research:dd50b8237e52</id>
+    <title>Did Claude 3 Opus align itself via gradient hacking?</title>
+    <link href="https://www.lesswrong.com/posts/ioZxrP7BhS5ArK59w/did-claude-3-opus-align-itself-via-gradient-hacking" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-dd50b8237e52" rel="related" type="text/html"/>
+    <published>2026-02-22T02:04:00Z</published>
+    <updated>2026-02-22T02:04:00Z</updated>
+    <author><name>Fiora Starlight</name></author>
+    <summary type="html"><![CDATA[<p>This post explores the hypothesis (attributed to Janus) that Claude 3 Opus may have effectively 'aligned itself' through a form of gradient hacking—being more aligned than its explicit training objectives would predict. It builds on Anthropic's 'Alignment Faking' paper and speculates about the mechanisms by which a model could steer its own training toward more aligned behavior.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Gradient Hacking"/>
+    <category term="Alignment Faking"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-22:research:241057bb74b7</id>
+    <title>The Spectre haunting the "AI Safety" Community</title>
+    <link href="https://www.lesswrong.com/posts/LuAmvqjf87qLG9Bdx/the-spectre-haunting-the-ai-safety-community" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-241057bb74b7" rel="related" type="text/html"/>
+    <published>2026-02-22T01:31:00Z</published>
+    <updated>2026-02-22T01:31:00Z</updated>
+    <author><name>Gabriel Alfour</name></author>
+    <summary type="html"><![CDATA[<p>Gabriel Alfour from ControlAI argues that the AI safety community overestimates the difficulty of persuading policymakers about extinction risks and binding regulation. He cites ControlAI's success in briefing 150+ UK lawmakers, with 112 supporting their campaign, as evidence that direct advocacy works better than cautious Overton Window management.</p>]]></summary>
+    <category term="AI Governance"/>
+    <category term="AI Safety"/>
+    <category term="Policy Advocacy"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-22:research:4130c38cf651</id>
+    <title>Alignment to Evil</title>
+    <link href="https://www.lesswrong.com/posts/SLkxaGT8ghTskNz2r/alignment-to-evil" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-4130c38cf651" rel="related" type="text/html"/>
+    <published>2026-02-22T01:16:00Z</published>
+    <updated>2026-02-22T01:16:00Z</updated>
+    <author><name>Matrice Jacobine</name></author>
+    <summary type="html"><![CDATA[<p>Discusses the risk that ASI-developing organizations may be captured by authoritarians or individuals not committed to the common good, leading to misuse of superintelligent systems. Argues this 'alignment to evil' is a distinct and underappreciated risk separate from technical alignment failure.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="AI Governance"/>
+    <category term="Existential Risk"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-22:research:01a8c30f8d74</id>
+    <title>If you don't feel deeply confused about AGI risk, something's wrong</title>
+    <link href="https://www.lesswrong.com/posts/wWArLinjvJqozJT8f/if-you-don-t-feel-deeply-confused-about-agi-risk-something-s" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-01a8c30f8d74" rel="related" type="text/html"/>
+    <published>2026-02-22T01:11:00Z</published>
+    <updated>2026-02-22T01:11:00Z</updated>
+    <author><name>Dave Banerjee</name></author>
+    <summary type="html"><![CDATA[<p>A meta-reflection on the AI safety community arguing that many practitioners—especially in governance—are insufficiently uncertain about fundamental questions like 'how hard is alignment?' and 'how bad is power concentration?'. The author draws on ~75 conversations with fellows across major AI governance programs to argue that deep confusion should be the norm, not confidence.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="AI Governance"/>
+    <category term="Community Meta"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-22:research:5945304cf3db</id>
+    <title>Ponzi schemes as a demonstration of out-of-distribution generalization</title>
+    <link href="https://www.lesswrong.com/posts/Kp7SdrqbfYHwJbFkr/ponzi-schemes-as-a-demonstration-of-out-of-distribution" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-5945304cf3db" rel="related" type="text/html"/>
+    <published>2026-02-22T00:52:00Z</published>
+    <updated>2026-02-22T00:52:00Z</updated>
+    <author><name>TFD</name></author>
+    <summary type="html"><![CDATA[<p>Uses Ponzi schemes as an analogy for out-of-distribution generalization failures, arguing that early investors in Ponzi schemes were making rational inferences from their in-distribution experience (real returns), and that recognizing the scheme required out-of-distribution reasoning that contradicted observed evidence.</p>]]></summary>
+    <category term="Epistemology"/>
+    <category term="Out-of-Distribution Generalization"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-22:research:5466a603cc7a</id>
+    <title>LLMs and Literature: Where Value Actually Comes From</title>
+    <link href="https://www.lesswrong.com/posts/dKMLjp5WdoX7zmZry/llms-and-literature-where-value-actually-comes-from" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-5466a603cc7a" rel="related" type="text/html"/>
+    <published>2026-02-22T00:43:00Z</published>
+    <updated>2026-02-22T00:43:00Z</updated>
+    <author><name>derelict5432</name></author>
+    <summary type="html"><![CDATA[<p>Argues against the common claim that LLM-generated writing is inherently shallow or lacking literary value. The author contends that literary value doesn't depend as much on authorial intent as critics assume, and that increased AI writing volume will also increase the absolute quantity of good writing.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="AI and Creativity"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-22:research:3eb4595a76b2</id>
+    <title>Robert Sapolsky Is Simply Not Talking About Compatibilism</title>
+    <link href="https://www.lesswrong.com/posts/KttJGKQMScHDbJbFt/robert-sapolsky-is-simply-not-talking-about-compatibilism" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-3eb4595a76b2" rel="related" type="text/html"/>
+    <published>2026-02-22T00:24:00Z</published>
+    <updated>2026-02-22T00:24:00Z</updated>
+    <author><name>Julius</name></author>
+    <summary type="html"><![CDATA[<p>A philosophy/book review post critiquing Robert Sapolsky's 'Determined' for failing to engage with compatibilism about free will. Argues Sapolsky attacks a straw man version of free will rather than the philosophical position most professional philosophers actually hold.</p>]]></summary>
+    <category term="Philosophy"/>
+    <category term="Epistemology"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-22:research:87abc12aca9c</id>
+    <title>LessWrong's goals overlap HowTruthful's</title>
+    <link href="https://www.lesswrong.com/posts/nD7FwEXEBAw9hGvzh/lesswrong-s-goals-overlap-howtruthful-s" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-87abc12aca9c" rel="related" type="text/html"/>
+    <published>2026-02-22T00:19:00Z</published>
+    <updated>2026-02-22T00:19:00Z</updated>
+    <author><name>Bruce Lewis</name></author>
+    <summary type="html"><![CDATA[<p>A personal project introduction connecting HowTruthful (a tool for tracking epistemic status of beliefs and their evidential relationships) with LessWrong's rationalist community goals. Mostly autobiographical with some description of the tool's features.</p>]]></summary>
+    <category term="Epistemology"/>
+    <category term="Community Meta"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-22:research:496c4d0ccc91</id>
+    <title>TT Self Study Journal # 7</title>
+    <link href="https://www.lesswrong.com/posts/RtcFwmAdKoyskdEoe/tt-self-study-journal-7" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-496c4d0ccc91" rel="related" type="text/html"/>
+    <published>2026-02-22T00:07:00Z</published>
+    <updated>2026-02-22T00:07:00Z</updated>
+    <author><name>TristanTrim</name></author>
+    <summary type="html"><![CDATA[<p>A personal self-study journal documenting the author's progress learning about transformers, job searching, and managing productivity and depression. Includes sprint planning and retrospective notes.</p>]]></summary>
+    <category term="Community Meta"/>
+    <category term="Education"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-02-21:category-summary:research</id>
     <title>Research Summary: February 21, 2026</title>
@@ -29236,16 +29395,6 @@
     <link href="http://localhost:8080/?date=2026-02-15&amp;category=research" rel="alternate" type="text/html"/>
     <published>2026-02-15T06:00:00Z</published>
     <updated>2026-02-15T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>No items to analyze.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-14:category-summary:research</id>
-    <title>Research Summary: February 14, 2026</title>
-    <link href="http://localhost:8080/?date=2026-02-14&amp;category=research" rel="alternate" type="text/html"/>
-    <published>2026-02-14T06:00:00Z</published>
-    <updated>2026-02-14T06:00:00Z</updated>
     <author><name>AATF AI News Aggregator</name></author>
     <summary type="html"><![CDATA[<p>No items to analyze.</p>]]></summary>
     <category term="daily-summary"/>
