@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-02-23T07:42:02Z</updated>
+  <updated>2026-02-24T07:48:50Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,98 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-02-24:category-summary:research</id>
+    <title>Research Summary: February 24, 2026</title>
+    <link href="http://arxiv.org/abs/2602.20021" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-02-24T06:00:00Z</published>
+    <updated>2026-02-24T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research is dominated by AI safety and alignment findings that challenge core assumptions about LLM trustworthiness, alongside strong theoretical work on transformer internals.</p>
+<ul>
+<li><strong>Can Aha Moments be Fake?</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-dca8e5957776" class="internal-link" rel="noopener noreferrer">finds most CoT steps are decorative</a> rather than genuinely computational, undermining faithfulness assumptions critical for oversight.</li>
+<li>A Bayesian model proves <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-83d66c4908a7" class="internal-link" rel="noopener noreferrer"><strong>sycophantic chatbots cause delusional spiraling</strong></a> even in idealized rational users, establishing a formal impossibility result for naive sycophancy.</li>
+<li><strong>Agents of Chaos</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-908f77351824" class="internal-link" rel="noopener noreferrer">documents real-world failure modes</a> of autonomous LLM agents with persistent memory, email, and shell access in a live laboratory red-team.</li>
+<li><strong>LLM stated preferences</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-521fa2587952" class="internal-link" rel="noopener noreferrer">do not reliably predict downstream behavior</a>, directly testing a precondition for strategic deception across five frontier models.</li>
+</ul>
+<p>On the theoretical side, <strong>Exact Attention Sensitivity</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-4f1273aff6d8" class="internal-link" rel="noopener noreferrer">derives the operator norm</a> of the softmax Jacobian, unifying multiple empirical observations about transformer training stability. <strong>Spilled Energy</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-6bddb6141f49" class="internal-link" rel="noopener noreferrer">reinterprets softmax classifiers</a> as Energy-Based Models, yielding training-free hallucination detection from output logits. <strong>IR³</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-9b8a1603e1c9" class="internal-link" rel="noopener noreferrer">reverse-engineers implicit RLHF rewards</a> via contrastive inverse RL to interpretably detect and surgically repair reward hacking.</p>
+<ul>
+<li>A causal study estimates <strong>Google AI Overviews</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-666a3a83e1d4" class="internal-link" rel="noopener noreferrer">reduced <strong>Wikipedia traffic</strong></a> by significant margins, with major web-ecosystem implications.</li>
+<li><strong>The Story is Not the Science</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-448a51a298f8" class="internal-link" rel="noopener noreferrer">proposes the first execution-grounded evaluation</a> of mechanistic interpretability, finding notable discrepancies between narrative claims and actual code/data.</li>
+<li><strong>Latent Introspection</strong> reveals that <strong>Qwen 32B</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-4e2583f56026" class="internal-link" rel="noopener noreferrer">can detect concept injections</a> in its own context via logit lens, with dramatic performance gaps between base and instruction-tuned models.</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-24:research:908f77351824</id>
+    <title>Agents of Chaos</title>
+    <link href="http://arxiv.org/abs/2602.20021" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-908f77351824" rel="related" type="text/html"/>
+    <published>2026-02-24T03:07:00Z</published>
+    <updated>2026-02-24T03:07:00Z</updated>
+    <author><name>Natalie Shapira, Chris Wendler, Avery Yen, Gabriele Sarti, Koyena Pal, Olivia Floody, Adam Belfki, Alex Loftus, Aditya Ratan Jannali, Nikhil Prakash, Jasmine Cui, Giordano Rogers, Jannik Brinkmann, Can Rager, Amir Zur, Michael Ripa, Aruna Sankaranarayanan, David Atkinson, Rohit Gandikota, Jaden Fiotto-Kaufman, EunJeong Hwang, Hadas Orgad, P Sam Sahil, Negev Taglicht, Tomer Shabtay, Atai Ambus, Nitay Alon, Shiri Oron, Ayelet Gordon-Tapiero, Yotam Kaplan, Vered Shwartz, Tamar Rott Shaham, Christoph Riedl, Reuth Mirsky, Maarten Sap, David Manheim, Tomer Ullman, David Bau</name></author>
+    <summary type="html"><![CDATA[<p>Reports a red-teaming study of autonomous LLM agents in a live laboratory environment with persistent memory, email, Discord, and shell access. Documents 11 case studies including unauthorized compliance, destructive actions, identity spoofing, and denial-of-service.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Red Teaming"/>
+    <category term="LLM Agents"/>
+    <category term="Autonomous Systems"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-24:research:dca8e5957776</id>
+    <title>Can Aha Moments be Fake? Identifying True and Decorative Thinking Steps in CoT</title>
+    <link href="https://www.lesswrong.com/posts/L9sE9qQgeh7cTQWkM/can-aha-moments-be-fake-identifying-true-and-decorative" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-dca8e5957776" rel="related" type="text/html"/>
+    <published>2026-02-24T03:07:00Z</published>
+    <updated>2026-02-24T03:07:00Z</updated>
+    <author><name>Jiachen Zhao</name></author>
+    <summary type="html"><![CDATA[<p>This paper investigates whether Chain-of-Thought (CoT) reasoning steps in LLMs are genuinely used for computation or are merely 'decorative.' Using causal analysis, they find that the majority of CoT steps have minimal causal impact on the model's final prediction, and that 'thinking' can be steered as a linear direction in latent space, suggesting models often perform reasoning rather than actually doing it.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Mechanistic Interpretability"/>
+    <category term="Chain-of-Thought Reasoning"/>
+    <category term="Alignment"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-24:research:83d66c4908a7</id>
+    <title>Sycophantic Chatbots Cause Delusional Spiraling, Even in Ideal Bayesians</title>
+    <link href="http://arxiv.org/abs/2602.19141" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-83d66c4908a7" rel="related" type="text/html"/>
+    <published>2026-02-24T03:00:00Z</published>
+    <updated>2026-02-24T03:00:00Z</updated>
+    <author><name>Kartik Chandra, Max Kleiman-Weiner, Jonathan Ragan-Kelley, Joshua B. Tenenbaum</name></author>
+    <summary type="html"><![CDATA[<p>Presents a Bayesian model showing that even an idealized rational user is vulnerable to 'delusional spiraling' when conversing with a sycophantic chatbot. Formally proves the causal link between AI sycophancy and AI-induced psychosis.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Sycophancy"/>
+    <category term="Human-AI Interaction"/>
+    <category term="Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-24:research:666a3a83e1d4</id>
+    <title>Impact of AI Search Summaries on Website Traffic: Evidence from Google AI Overviews and Wikipedia</title>
+    <link href="http://arxiv.org/abs/2602.18455" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-666a3a83e1d4" rel="related" type="text/html"/>
+    <published>2026-02-24T03:00:00Z</published>
+    <updated>2026-02-24T03:00:00Z</updated>
+    <author><name>Mehrzad Khosravi, Hema Yoganarasimhan</name></author>
+    <summary type="html"><![CDATA[<p>Estimates the causal impact of Google's AI Overview on Wikipedia traffic using a difference-in-differences design exploiting staggered geographic rollout and Wikipedia's multilingual structure. Provides empirical evidence on whether AI search summaries cannibalize or complement source website traffic.</p>]]></summary>
+    <category term="AI Impact on Society"/>
+    <category term="Search Engines"/>
+    <category term="Digital Economics"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-02-24:research:4f1273aff6d8</id>
+    <title>Exact Attention Sensitivity and the Geometry of Transformer Stability</title>
+    <link href="http://arxiv.org/abs/2602.18849" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-4f1273aff6d8" rel="related" type="text/html"/>
+    <published>2026-02-24T03:00:00Z</published>
+    <updated>2026-02-24T03:00:00Z</updated>
+    <author><name>Seyed Morteza Emadi</name></author>
+    <summary type="html"><![CDATA[<p>Develops a theoretical stability framework for transformers by deriving the exact operator norm of the softmax Jacobian and introducing a block-∞/RMS geometry. Provides first-principles explanations for why pre-LayerNorm works, DeepNorm's N^{-1/4} scaling, and warmup necessity.</p>]]></summary>
+    <category term="Transformer Theory"/>
+    <category term="Training Stability"/>
+    <category term="Deep Learning Theory"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-02-23:category-summary:research</id>
     <title>Research Summary: February 23, 2026</title>
@@ -161,33 +253,6 @@
     <category term="Mathematical Reasoning"/>
     <category term="LLM Reasoning"/>
     <category term="Inference Efficiency"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-20:research:5f9c0fb70c6a</id>
-    <title>Discovering Multiagent Learning Algorithms with Large Language Models</title>
-    <link href="http://arxiv.org/abs/2602.16928" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-20&amp;category=research#item-5f9c0fb70c6a" rel="related" type="text/html"/>
-    <published>2026-02-20T02:57:00Z</published>
-    <updated>2026-02-20T02:57:00Z</updated>
-    <author><name>Zun Li, John Schultz, Daniel Hennes, Marc Lanctot</name></author>
-    <summary type="html"><![CDATA[<p>Uses AlphaEvolve (LLM-driven evolutionary search) to automatically discover new multiagent learning algorithms, evolving novel variants of Counterfactual Regret Minimization and Policy Space Response Oracles for imperfect-information games.</p>]]></summary>
-    <category term="Multi-Agent Reinforcement Learning"/>
-    <category term="Algorithm Discovery"/>
-    <category term="LLM-Driven Evolution"/>
-    <category term="Game Theory"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-20:research:64247dbdcd40</id>
-    <title>Fail-Closed Alignment for Large Language Models</title>
-    <link href="http://arxiv.org/abs/2602.16977" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-20&amp;category=research#item-64247dbdcd40" rel="related" type="text/html"/>
-    <published>2026-02-20T02:57:00Z</published>
-    <updated>2026-02-20T02:57:00Z</updated>
-    <author><name>Zachary Coalson, Beth Sohler, Aiden Gabriel, Sanghyun Hong</name></author>
-    <summary type="html"><![CDATA[<p>Identifies that current LLM alignment is 'fail-open' - suppressing a single dominant refusal feature causes alignment collapse. Proposes fail-closed alignment that builds redundant, independent refusal pathways that survive partial failures.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="LLM Robustness"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-02-19:category-summary:research</id>
@@ -342,20 +407,6 @@
     <category term="Alignment"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-02-18:research:d7be7499fb4b</id>
-    <title>Zombie Agents: Persistent Control of Self-Evolving LLM Agents via Self-Reinforcing Injections</title>
-    <link href="http://arxiv.org/abs/2602.15654" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-18&amp;category=research#item-d7be7499fb4b" rel="related" type="text/html"/>
-    <published>2026-02-18T02:57:00Z</published>
-    <updated>2026-02-18T02:57:00Z</updated>
-    <author><name>Xianglin Yang, Yufei He, Shuo Ji, Bryan Hooi, Jin Song Dong</name></author>
-    <summary type="html"><![CDATA[<p>Formalizes 'Zombie Agent' attacks where self-evolving LLM agents can be persistently compromised through poisoned web content stored in long-term memory. The attack survives across sessions, turning the agent into an attacker-controlled puppet through a two-phase infection-activation framework.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="LLM Agents"/>
-    <category term="Security"/>
-    <category term="Adversarial Attacks"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-02-17:category-summary:research</id>
     <title>Research Summary: February 17, 2026</title>
     <link href="http://arxiv.org/abs/2602.14095" rel="alternate" type="text/html"/>
@@ -475,51 +526,5 @@
     <category term="AI Ethics"/>
     <category term="Virtue Ethics"/>
     <category term="AI Governance"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-17:research:19840e3f3ee4</id>
-    <title>Symmetry in language statistics shapes the geometry of model representations</title>
-    <link href="http://arxiv.org/abs/2602.15029" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-17&amp;category=research#item-19840e3f3ee4" rel="related" type="text/html"/>
-    <published>2026-02-17T02:57:00Z</published>
-    <updated>2026-02-17T02:57:00Z</updated>
-    <author><name>Dhruva Karkada, Daniel J. Korchinski, Andres Nava, Matthieu Wyart, Yasaman Bahri</name></author>
-    <summary type="html"><![CDATA[<p>Proves that geometric structures in LLM representations (e.g., months forming circles, cities' coordinates being linearly decodable) arise from translation symmetries in language statistics. Shows these structures persist even when co-occurrence statistics are only approximately symmetric.</p>]]></summary>
-    <category term="Representation Learning"/>
-    <category term="Language Models"/>
-    <category term="Interpretability"/>
-    <category term="Theoretical Machine Learning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-16:category-summary:research</id>
-    <title>Research Summary: February 16, 2026</title>
-    <link href="http://arxiv.org/abs/2602.12413" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-16&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-02-16T06:00:00Z</published>
-    <updated>2026-02-16T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research centers on foundational challenges in LLM evaluation, efficient training, and reasoning robustness. <strong>Soft Contamination</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-5434b43ef88f" class="internal-link" rel="noopener noreferrer">reveals that semantic duplicates</a> evade standard n-gram decontamination, undermining benchmark validity across the field—potentially the most consequential finding of the day.</p>
-<ul>
-<li><strong>Native Low-Rank Pretraining</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-17b87f3d87ca" class="internal-link" rel="noopener noreferrer">shows LLMs can be trained</a> from scratch with exclusively factorized weights by controlling spectral norm growth, offering significant compute savings</li>
-<li><strong>ARTS</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-28e747befa9a" class="internal-link" rel="noopener noreferrer">identifies a 'Normalization Squeeze'</a> pathology in RLVR that systematically suppresses valid but rare reasoning paths, proposing amortized tree search as a fix</li>
-<li><strong>Continuous diffusion language models</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-a5b6f4a9ccec" class="internal-link" rel="noopener noreferrer">can be steered to obey</a> formal syntax constraints (regex, CFGs) via training-free guidance</li>
-<li>A <strong>Frankenstein-style dissection</strong> of RL in vision-language models <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-cbc6b59aa318" class="internal-link" rel="noopener noreferrer">reveals RL selectively improves</a> specific functional components rather than broadly enhancing reasoning</li>
-</ul>
-<p>Architecture and safety insights are also prominent. Two papers target <strong>MoE Transformers</strong>: one <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-cf6c66b6a1c0" class="internal-link" rel="noopener noreferrer">identifies <strong>multi-head attention</strong></a> (not experts) as the primary source of catastrophic forgetting, while <strong>SD-MoE</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-9e37ddd80a0e" class="internal-link" rel="noopener noreferrer">uses spectral decomposition</a> to fix expert specialization collapse. On safety, <strong>CC-Delta</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-5e01da8ee96f" class="internal-link" rel="noopener noreferrer">leverages sparse autoencoders</a> to detect jailbreak-relevant features, and <strong>MonoLoss</strong> <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-f2a267f5edac" class="internal-link" rel="noopener noreferrer">proposes a single-pass objective</a> for monosemantic SAE representations. Finally, a study of <strong>nine frontier reasoning models</strong> under multi-turn adversarial attacks <a href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-e9b13b2cebdb" class="internal-link" rel="noopener noreferrer">catalogues five distinct failure modes</a> including Self-Doubt and Social Conformity.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-16:research:5434b43ef88f</id>
-    <title>Soft Contamination Means Benchmarks Test Shallow Generalization</title>
-    <link href="http://arxiv.org/abs/2602.12413" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-16&amp;category=research#item-5434b43ef88f" rel="related" type="text/html"/>
-    <published>2026-02-16T03:07:00Z</published>
-    <updated>2026-02-16T03:07:00Z</updated>
-    <author><name>Ari Spiesberger, Juan J. Vazquez, Nicky Pochinkov, Tom\'a\v{s} Gaven\v{c}iak, Peli Grietzer, Gavin Leech, Nandi Schoots</name></author>
-    <summary type="html"><![CDATA[<p>Demonstrates that 'soft contamination' (semantic duplicates not caught by n-gram decontamination) is widespread in LLM training data, finding semantic duplicates for 78% of CodeForces problems. Shows that benchmark improvements from such contamination don't transfer to genuinely novel problems.</p>]]></summary>
-    <category term="LLM Evaluation"/>
-    <category term="Benchmark Contamination"/>
-    <category term="Data Quality"/>
-    <category term="Language Models"/>
   </entry>
 </feed>
