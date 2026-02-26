@@ -23,6 +23,7 @@ from .analyzers import NewsAnalyzer, ResearchAnalyzer, SocialAnalyzer, RedditAna
 from .cost_tracker import get_tracker, reset_tracker
 from .link_enricher import LinkEnricher
 from .ecosystem_context import EcosystemContextManager
+from .staleness_checker import StalenessChecker
 from .phase_tracker import PhaseTracker
 from .config import ProviderConfig
 from typing import TYPE_CHECKING
@@ -321,7 +322,21 @@ class MainOrchestrator:
                 logger.warning(f"Continuity detection failed: {e}")
                 phases.end_phase('failed', error=str(e))
 
-            # Save analysis checkpoint (post-continuity)
+            # Phase 2.7: Staleness Check (deterministic, no LLM calls)
+            phases.start_phase("Phase 2.7: Staleness Check")
+            try:
+                logger.info("Phase 2.7: Checking for stale model release coverage...")
+                staleness_checker = StalenessChecker(
+                    config_dir=self.config_dir,
+                    target_date=self.target_date,
+                )
+                category_reports = staleness_checker.process(category_reports)
+                phases.end_phase('success')
+            except Exception as e:
+                logger.warning(f"Staleness check failed (non-fatal): {e}")
+                phases.end_phase('failed', error=str(e))
+
+            # Save analysis checkpoint (post-continuity + staleness)
             self._save_checkpoint('analysis', {
                 'category_reports': {cat: report.to_dict() for cat, report in category_reports.items()}
             })
