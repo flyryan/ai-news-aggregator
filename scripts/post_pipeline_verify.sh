@@ -8,7 +8,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 SSH_KEY="$PROJECT_DIR/aatf-news.pem"
-AWS_HOST="ubuntu@3.91.64.50"
+AWS_HOST="ubuntu@54.82.53.70"
 SITE_URL="https://news.aatf.ai"
 
 # Today's date (what should be on the site after pipeline runs)
