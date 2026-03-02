@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-03-01T07:48:22Z</updated>
+  <updated>2026-03-02T07:48:00Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,25 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-02:category-summary:research</id>
+    <title>Research Summary: March 02, 2026</title>
+    <link href="http://arxiv.org/abs/2602.24281" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-02&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-03-02T06:00:00Z</published>
+    <updated>2026-03-02T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research spans fundamental theoretical limits of AI training, architectural innovations for sequence modeling, and practical advances in inference efficiency and safety.</p>
+<ul>
+<li>A unified theory <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-a56d27402dfa" class="internal-link" rel="noopener noreferrer">frames <strong>human supervision as an information bottleneck</strong></a>, proving strictly positive excess-risk floors for any learner—directly relevant to alignment scaling debates</li>
+<li><strong>Memory Caching</strong> <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-1206c488d4b1" class="internal-link" rel="noopener noreferrer">enables RNN capacity to grow</a> with sequence length via checkpoint caching, addressing a core recurrent-model limitation</li>
+<li><strong>CUDA Agent</strong> <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-e21d6dcd0cd7" class="internal-link" rel="noopener noreferrer">applies large-scale agentic RL</a> to GPU kernel optimization, achieving strong results on a high-value infrastructure problem</li>
+<li><strong>Compositional generalization</strong> is <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-cd06358dfe26" class="internal-link" rel="noopener noreferrer">formally shown to require</a> <strong>linear, orthogonal</strong> representation geometry, grounding the <strong>Linear Representation Hypothesis</strong></li>
+<li>LLMs <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-52b8037f5251" class="internal-link" rel="noopener noreferrer">parse severely degraded</a> "<strong>Jabberwockified</strong>" English, revealing deep reliance on syntactic structure over lexical content</li>
+</ul>
+<p>On the efficiency and training front, <strong>LK Losses</strong> <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-c551e8b09c78" class="internal-link" rel="noopener noreferrer">directly optimize acceptance rates</a> for speculative decoding instead of using KL divergence as a proxy. <strong>Recycling Failures</strong> <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-e1a07bf1a8aa" class="internal-link" rel="noopener noreferrer">salvages mostly-correct RLVR trajectories</a> via fine-grained off-policy guidance, improving sample efficiency. <strong>LoRA-Pre</strong> <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-8891e8b1bfdc" class="internal-link" rel="noopener noreferrer">reframes optimizer momentum</a> as online linear regression, yielding a principled low-rank optimizer. Separately, removing prior assistant responses from multi-turn LLM conversations <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-6b150746ec90" class="internal-link" rel="noopener noreferrer">surprisingly preserves response quality</a>, and training reasoning models with separate <strong>LoRA</strong> adapters <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-a71f0ad6fbf1" class="internal-link" rel="noopener noreferrer">enables privacy-preserving chain-of-thought</a> without leaking sensitive information.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-01:category-summary:research</id>
     <title>Research Summary: March 01, 2026</title>
@@ -503,23 +522,6 @@
 <li>Information-theoretic analysis of <strong>Chain-of-Thought monitorability</strong> <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-9349152c2765" class="internal-link" rel="noopener noreferrer">formalizes when CoT is sufficient</a> for safety oversight</li>
 <li>Statistical physics analysis proves <strong>softmax attention</strong> <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-a6302b9c7c4d" class="internal-link" rel="noopener noreferrer">has a fundamental statistical advantage</a> over linear attention in structured retrieval tasks</li>
 </ul>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-22:category-summary:research</id>
-    <title>Research Summary: February 22, 2026</title>
-    <link href="https://www.lesswrong.com/posts/GJTzhQgaRWLFJkPbt/how-will-we-do-sft-on-models-with-opaque-reasoning" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-22&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-02-22T06:00:00Z</published>
-    <updated>2026-02-22T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>A light day for research, dominated by alignment and training methodology discussions rather than empirical results.</p>
-<ul>
-<li>The most substantive item <a href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-a9b4aff5794d" class="internal-link" rel="noopener noreferrer">asks how <strong>SFT</strong> will function</a> if future models shift to <strong>opaque (non-language-based) reasoning</strong>, raising critical questions about training transparency and oversight</li>
-<li>A novel proposal suggests letting models <a href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-b355b9618a7b" class="internal-link" rel="noopener noreferrer"><strong>report tasks as reward-hackable</strong></a> during <strong>RL training</strong>, offering an alternative to <strong>inoculation prompting</strong> for mitigating reward hacking</li>
-<li>Speculative analysis revisits the <strong>Claude 3 Opus alignment faking</strong> paper, <a href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-dd50b8237e52" class="internal-link" rel="noopener noreferrer">exploring whether the model self-aligned</a> via a form of <strong>gradient hacking</strong></li>
-</ul>
-<p>On governance and policy, <strong>ControlAI</strong> reports empirical data on <a href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-241057bb74b7" class="internal-link" rel="noopener noreferrer">persuading <strong>112 UK lawmakers</strong></a> to support binding AI safety commitments, while a separate piece <a href="http://localhost:8080/?date=2026-02-22&amp;category=research#item-4130c38cf651" class="internal-link" rel="noopener noreferrer">highlights <strong>ASI organizational capture</strong></a> risks. Several philosophical and epistemological pieces round out the day with limited technical depth.</p>]]></summary>
     <category term="daily-summary"/>
   </entry>
 </feed>
