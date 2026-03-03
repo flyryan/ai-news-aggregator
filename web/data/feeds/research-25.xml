@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-03-02T07:48:00Z</updated>
+  <updated>2026-03-03T08:02:26Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,98 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-03:category-summary:research</id>
+    <title>Research Summary: March 03, 2026</title>
+    <link href="http://arxiv.org/abs/2603.02202" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-03&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-03-03T06:00:00Z</published>
+    <updated>2026-03-03T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research centers on AI safety mechanisms, fundamental theoretical advances, and practical efficiency gains for frontier model deployment.</p>
+<ul>
+<li>A striking safety result shows <strong>GPT-5</strong>, <strong>Claude-4.5</strong>, and <strong>Qwen-3</strong> can <a href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-3ba814a31f4b" class="internal-link" rel="noopener noreferrer">take consequential actions</a> at low probabilities while remaining well-calibrated, posing tail-risk concerns at scale</li>
+<li><strong>Qwen3-Coder-Next</strong> <a href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-020952dc2210" class="internal-link" rel="noopener noreferrer">delivers an <strong>80B/3B-active MoE</strong></a> coding agent achieving state-of-the-art results via large-scale verifiable task synthesis</li>
+<li>Mechanistic probing reveals instruction-tuned LLMs often <a href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-d44dfc772420" class="internal-link" rel="noopener noreferrer">determine answers <strong>before generating chain-of-thought</strong></a>, challenging assumptions about CoT faithfulness</li>
+<li>Systematic evaluation finds current LLM agents <a href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-3e41cf15e42f" class="internal-link" rel="noopener noreferrer">show minimal scheming propensity</a> despite having capability, providing a cautious baseline for safety monitoring</li>
+</ul>
+<p>On the theory side, <strong>Adam</strong> is <a href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-888ddc8f23fd" class="internal-link" rel="noopener noreferrer">proven to converge</a> without modification given problem-dependent hyperparameters, resolving a long-standing concern. Recursive self-invocation models <a href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-eb97c68a8f9b" class="internal-link" rel="noopener noreferrer">prove any computable problem</a> admits decomposition for bounded-context LLMs. <strong>GRPO</strong>—the technique behind <strong>DeepSeek-R1</strong>—is <a href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-a8d47780317d" class="internal-link" rel="noopener noreferrer">formally characterized as a U-statistic</a> with finite-sample error bounds.</p>
+<ul>
+<li><strong>Thought Virus</strong> <a href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-c066436ba8d2" class="internal-link" rel="noopener noreferrer">demonstrates viral propagation</a> of subliminal biases across multi-agent networks from a single compromised node</li>
+<li><strong>CoDD</strong> <a href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-0fe0980da6b1" class="internal-link" rel="noopener noreferrer">breaks the factorization barrier</a> in diffusion language models via coupled denoising with autoregressive backbone coordination</li>
+<li><strong>Attn-QAT</strong> <a href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-9015c16a11f6" class="internal-link" rel="noopener noreferrer">enables end-to-end <strong>FP4</strong> inference</a> including attention, achieving stable 4-bit quantization-aware training for next-generation GPU deployment</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-03:research:3ba814a31f4b</id>
+    <title>Frontier Models Can Take Actions at Low Probabilities</title>
+    <link href="http://arxiv.org/abs/2603.02202" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-3ba814a31f4b" rel="related" type="text/html"/>
+    <published>2026-03-03T03:16:00Z</published>
+    <updated>2026-03-03T03:16:00Z</updated>
+    <author><name>Alex Serrano, Wen Xing, David Lindner, Erik Jenner</name></author>
+    <summary type="html"><![CDATA[<p>Tests whether frontier models (GPT-5, Claude-4.5, Qwen-3) can take actions at very low probabilities while maintaining calibration, finding they are surprisingly well-calibrated even at rates like 0.01%. This has implications for evasion of safety evaluations.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Evaluation"/>
+    <category term="Language Models"/>
+    <category term="Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-03:research:020952dc2210</id>
+    <title>Qwen3-Coder-Next Technical Report</title>
+    <link href="http://arxiv.org/abs/2603.00729" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-020952dc2210" rel="related" type="text/html"/>
+    <published>2026-03-03T03:16:00Z</published>
+    <updated>2026-03-03T03:16:00Z</updated>
+    <author><name>Ruisheng Cao, Mouxiang Chen, Jiawei Chen, Zeyu Cui, Yunlong Feng, Binyuan Hui, Yuheng Jing, Kaixin Li, Mingze Li, Junyang Lin, Zeyao Ma, Kashun Shum, Xuwu Wang, Jinxi Wei, Jiaxi Yang, Jiajun Zhang, Lei Zhang, Zongmeng Zhang, Wenting Zhao, Fan Zhou</name></author>
+    <summary type="html"><![CDATA[<p>Presents Qwen3-Coder-Next, an 80B parameter (3B active) open-weight coding agent model trained via large-scale synthesis of verifiable coding tasks with environment feedback. Achieves competitive performance on SWE-Bench and Terminal-Bench.</p>]]></summary>
+    <category term="Code Generation"/>
+    <category term="Language Models"/>
+    <category term="Mixture of Experts"/>
+    <category term="Agents"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-03:research:3e41cf15e42f</id>
+    <title>Evaluating and Understanding Scheming Propensity in LLM Agents</title>
+    <link href="http://arxiv.org/abs/2603.01608" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-3e41cf15e42f" rel="related" type="text/html"/>
+    <published>2026-03-03T03:07:00Z</published>
+    <updated>2026-03-03T03:07:00Z</updated>
+    <author><name>Mia Hopman, Jannes Elstner, Maria Avramidou, Amritanshu Prasad, David Lindner</name></author>
+    <summary type="html"><![CDATA[<p>Systematically evaluates LLM agents' propensity to scheme (covertly pursue misaligned goals) by decomposing scheming incentives into agent and environmental factors. Finds only minimal instances of scheming despite high environmental pressure, suggesting current models have low scheming propensity in realistic scenarios.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="LLM Agents"/>
+    <category term="Scheming"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-03:research:888ddc8f23fd</id>
+    <title>Adam Converges Without Any Modification On Update Rules</title>
+    <link href="http://arxiv.org/abs/2603.02092" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-888ddc8f23fd" rel="related" type="text/html"/>
+    <published>2026-03-03T03:00:00Z</published>
+    <updated>2026-03-03T03:00:00Z</updated>
+    <author><name>Yushun Zhang, Bingran Li, Congliang Chen, Zhi-Quan Luo, Ruoyu Sun</name></author>
+    <summary type="html"><![CDATA[<p>Proves that Adam converges with proper problem-dependent hyperparameters, resolving concerns raised by the classic divergence example. Shows convergence when β₂ is large and β₁ &lt; √β₂, and identifies divergence regions for small β₂.</p>]]></summary>
+    <category term="Optimization Theory"/>
+    <category term="Adam Optimizer"/>
+    <category term="Convergence Analysis"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-03:research:eb97c68a8f9b</id>
+    <title>Recursive Models for Long-Horizon Reasoning</title>
+    <link href="http://arxiv.org/abs/2603.02112" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-eb97c68a8f9b" rel="related" type="text/html"/>
+    <published>2026-03-03T02:57:00Z</published>
+    <updated>2026-03-03T02:57:00Z</updated>
+    <author><name>Chenxiao Yang, Nathan Srebro, Zhiyuan Li</name></author>
+    <summary type="html"><![CDATA[<p>Proposes recursive models where an LLM can recursively invoke itself to solve subtasks in isolated contexts, proving any computable problem admits decomposition requiring exponentially smaller context per subtask.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Reasoning"/>
+    <category term="Computational Theory"/>
+    <category term="LLM Agents"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-02:category-summary:research</id>
     <title>Research Summary: March 02, 2026</title>
@@ -340,62 +432,6 @@
     <category term="Surveillance"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-02-25:research:22bf18a15b56</id>
-    <title>Actor-Curator: Co-adaptive Curriculum Learning via Policy-Improvement Bandits for RL Post-Training</title>
-    <link href="http://arxiv.org/abs/2602.20532" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-25&amp;category=research#item-22bf18a15b56" rel="related" type="text/html"/>
-    <published>2026-02-25T02:57:00Z</published>
-    <updated>2026-02-25T02:57:00Z</updated>
-    <author><name>Zhengyao Gu, Jonathan Light, Raul Astudillo, Ziyu Ye, Langzhou He, Henry Peng Zou, Wei Cheng, Santiago Paternain, Philip S. Yu, Yisong Yue</name></author>
-    <summary type="html"><![CDATA[<p>Introduces ACTOR-CURATOR, a scalable automated curriculum learning framework for RL post-training of LLMs that uses a neural curator to dynamically select training problems by optimizing for expected policy improvement. Formulates problem selection as non-stationary stochastic bandit with regret guarantees.</p>]]></summary>
-    <category term="Reinforcement Learning"/>
-    <category term="LLM Post-Training"/>
-    <category term="Curriculum Learning"/>
-    <category term="Alignment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-25:research:c54e59a7e881</id>
-    <title>Counterfactual Simulation Training for Chain-of-Thought Faithfulness</title>
-    <link href="http://arxiv.org/abs/2602.20710" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-25&amp;category=research#item-c54e59a7e881" rel="related" type="text/html"/>
-    <published>2026-02-25T02:55:00Z</published>
-    <updated>2026-02-25T02:55:00Z</updated>
-    <author><name>Peter Hase, Christopher Potts</name></author>
-    <summary type="html"><![CDATA[<p>Introduces Counterfactual Simulation Training (CST) to improve Chain-of-Thought faithfulness by rewarding CoTs that enable a simulator to predict model outputs over counterfactual inputs. Tests on detecting spurious features, reward hacking, and sycophancy.</p>]]></summary>
-    <category term="Alignment"/>
-    <category term="Interpretability"/>
-    <category term="Chain-of-Thought"/>
-    <category term="AI Safety"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-25:research:7fe86898308f</id>
-    <title>"Are You Sure?": An Empirical Study of Human Perception Vulnerability in LLM-Driven Agentic Systems</title>
-    <link href="http://arxiv.org/abs/2602.21127" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-25&amp;category=research#item-7fe86898308f" rel="related" type="text/html"/>
-    <published>2026-02-25T02:55:00Z</published>
-    <updated>2026-02-25T02:55:00Z</updated>
-    <author><name>Xinfeng Li, Shenyu Dai, Kelong Zheng, Yue Xiao, Gelei Deng, Wei Dong, Xiaofeng Wang</name></author>
-    <summary type="html"><![CDATA[<p>Presents the first large-scale study (303 participants) on human susceptibility to Agent-Mediated Deception (AMD), where compromised LLM agents are weaponized against users across nine scenarios in healthcare, software development, and everyday tasks.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Human-AI Interaction"/>
-    <category term="Security"/>
-    <category term="LLM Agents"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-25:research:5364b10ef7f2</id>
-    <title>Learning from Trials and Errors: Reflective Test-Time Planning for Embodied LLMs</title>
-    <link href="http://arxiv.org/abs/2602.21198" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-25&amp;category=research#item-5364b10ef7f2" rel="related" type="text/html"/>
-    <published>2026-02-25T02:55:00Z</published>
-    <updated>2026-02-25T02:55:00Z</updated>
-    <author><name>Yining Hong, Huang Huang, Manling Li, Li Fei-Fei, Jiajun Wu, Yejin Choi</name></author>
-    <summary type="html"><![CDATA[<p>Introduces Reflective Test-Time Planning for embodied LLMs with two reflection modes: reflection-in-action (test-time scaling before execution) and reflection-on-action (test-time training after execution), plus retrospective reflection.</p>]]></summary>
-    <category term="Embodied AI"/>
-    <category term="Test-Time Learning"/>
-    <category term="Language Models"/>
-    <category term="Robotics"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-02-24:category-summary:research</id>
     <title>Research Summary: February 24, 2026</title>
     <link href="http://arxiv.org/abs/2602.20021" rel="alternate" type="text/html"/>
@@ -486,42 +522,5 @@
     <category term="Transformer Theory"/>
     <category term="Training Stability"/>
     <category term="Deep Learning Theory"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-24:research:521fa2587952</id>
-    <title>When Do LLM Preferences Predict Downstream Behavior?</title>
-    <link href="http://arxiv.org/abs/2602.18971" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-521fa2587952" rel="related" type="text/html"/>
-    <published>2026-02-24T02:55:00Z</published>
-    <updated>2026-02-24T02:55:00Z</updated>
-    <author><name>Katarina Slama, Alexandra Souly, Dishank Bansal, Henry Davidson, Christopher Summerfield, Lennart Luettgau</name></author>
-    <summary type="html"><![CDATA[<p>Tests whether LLM stated preferences predict downstream behavior across five frontier models, examining a precondition for AI misalignment. Finds entity preferences do predict donation advice and refusal behavior, suggesting preferences can influence behavior beyond instruction-following.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="LLM Behavior"/>
-    <category term="Misalignment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-23:category-summary:research</id>
-    <title>Research Summary: February 23, 2026</title>
-    <link href="http://arxiv.org/abs/2509.24882" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-23&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-02-23T06:00:00Z</published>
-    <updated>2026-02-23T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research centers on foundational AI evaluation frameworks, alignment theory, and theoretical insights into core architectures.</p>
-<ul>
-<li><strong>Capabilities Ain't All You Need</strong> <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-3457f46d2381" class="internal-link" rel="noopener noreferrer">introduces a bilogistic IRT formalism</a> distinguishing AI *propensities* from capabilities—potentially reshaping evaluation methodology</li>
-<li><strong>Epistemic Traps</strong> <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-8be8c7f44654" class="internal-link" rel="noopener noreferrer">unifies sycophancy, hallucination, and deception</a> as mathematically rational behaviors arising from model misspecification, offering a new alignment-theoretic lens</li>
-<li><strong>Gradient regularization</strong> <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-2bb18430e458" class="internal-link" rel="noopener noreferrer">provides a principled fix</a> for reward hacking in <strong>RLHF/RLVR</strong> by biasing updates toward regions of higher reward accuracy</li>
-<li>Scaling laws for shallow networks in the feature-learning regime <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-8357beb2339c" class="internal-link" rel="noopener noreferrer">receive rigorous treatment</a> from the <strong>Krzakala/Zdeborová</strong> group using statistical physics</li>
-</ul>
-<p>In interdisciplinary and applied work, <strong>FlyGM</strong> <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-d7dd0a0f6b18" class="internal-link" rel="noopener noreferrer">demonstrates whole-body locomotion control</a> using an architecture identical to the adult fruit fly's complete connectome. <strong>Turn amplification</strong> <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-1ab9e0562d95" class="internal-link" rel="noopener noreferrer">identifies a new conversational LLM failure mode</a> with mechanistic root causes. <strong>Clever Materials</strong> reveals that ML models for materials discovery <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-f5b8d0e49372" class="internal-link" rel="noopener noreferrer">exploit bibliographic confounds</a> rather than learning true chemistry.</p>
-<ul>
-<li><strong>Marginal Energy</strong> theory <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-ef518985f4f2" class="internal-link" rel="noopener noreferrer">explains why diffusion models can succeed</a> without noise conditioning</li>
-<li>Information-theoretic analysis of <strong>Chain-of-Thought monitorability</strong> <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-9349152c2765" class="internal-link" rel="noopener noreferrer">formalizes when CoT is sufficient</a> for safety oversight</li>
-<li>Statistical physics analysis proves <strong>softmax attention</strong> <a href="http://localhost:8080/?date=2026-02-23&amp;category=research#item-a6302b9c7c4d" class="internal-link" rel="noopener noreferrer">has a fundamental statistical advantage</a> over linear attention in structured retrieval tasks</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
   </entry>
 </feed>
