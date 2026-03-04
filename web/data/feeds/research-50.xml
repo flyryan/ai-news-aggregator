@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-50.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:50</id>
-  <updated>2026-03-03T08:02:26Z</updated>
+  <updated>2026-03-04T07:49:16Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,179 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-04:category-summary:research</id>
+    <title>Research Summary: March 04, 2026</title>
+    <link href="http://arxiv.org/abs/2603.03000" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-03-04T06:00:00Z</published>
+    <updated>2026-03-04T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research is dominated by foundational advances in alignment theory and a strong cluster of AI safety work spanning agentic systems, cybersecurity, and content authentication.</p>
+<ul>
+<li>The <strong>Latent Value Hypothesis</strong> <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-745c674657fc" class="internal-link" rel="noopener noreferrer">offers the first theoretical explanation</a> for why <strong>RLAIF</strong> succeeds, grounding it in geometric structure of pretrained representations</li>
+<li>A systematic Meta study (LeCun, Xie, Zettlemoyer) <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-5800e8548afe" class="internal-link" rel="noopener noreferrer">clarifies native <strong>multimodal pretraining</strong></a> design tradeoffs across vision-language architectures</li>
+<li><strong>Scaling reward modeling without human supervision</strong> via <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-a9b636057f54" class="internal-link" rel="noopener noreferrer">web-corpus preference learning</a> could dramatically reduce alignment data costs</li>
+<li>A first formal theoretical separation shows why <strong>Adam</strong> <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-ebb4b4dc2ac5" class="internal-link" rel="noopener noreferrer">achieves sharper tail convergence</a> than <strong>SGD</strong>, resolving a long-standing empirical puzzle</li>
+</ul>
+<p>Safety and security research is notably strong: <strong>ZeroDayBench</strong> <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-831ad24bf373" class="internal-link" rel="noopener noreferrer">tests frontier models</a> on real zero-day vulnerability discovery; <strong>MOSAIC</strong> <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-07af7da9b980" class="internal-link" rel="noopener noreferrer">introduces plan-check-act-or-refuse</a> for safe agentic tool use; and safety training is <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-3a64561366fa" class="internal-link" rel="noopener noreferrer">shown to persist</a> through helpfulness optimization in agentic settings. The <strong>Integrity Clash</strong> paper exposes a fundamental conflict between <strong>C2PA provenance</strong> and <strong>AI watermarking</strong>, undermining deployed authentication infrastructure. On the efficiency side, <strong>Speculative Speculative Decoding</strong> <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-bf1aaaf51af3" class="internal-link" rel="noopener noreferrer">parallelizes speculation and verification</a> for practical inference speedups.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-04:research:745c674657fc</id>
+    <title>Why Does RLAIF Work At All?</title>
+    <link href="http://arxiv.org/abs/2603.03000" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-745c674657fc" rel="related" type="text/html"/>
+    <published>2026-03-04T03:16:00Z</published>
+    <updated>2026-03-04T03:16:00Z</updated>
+    <author><name>Robin Young</name></author>
+    <summary type="html"><![CDATA[<p>Proposes the 'latent value hypothesis' to explain why RLAIF works: pretraining encodes human values as directions in representation space, and constitutional prompts act as projection operators to elicit these latent values. Formalizes this under a linear model and derives conditions for when RLAIF succeeds or fails.</p>]]></summary>
+    <category term="AI Alignment"/>
+    <category term="RLHF/RLAIF"/>
+    <category term="Language Models"/>
+    <category term="Theoretical AI"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-04:research:5800e8548afe</id>
+    <title>Beyond Language Modeling: An Exploration of Multimodal Pretraining</title>
+    <link href="http://arxiv.org/abs/2603.03276" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-5800e8548afe" rel="related" type="text/html"/>
+    <published>2026-03-04T03:16:00Z</published>
+    <updated>2026-03-04T03:16:00Z</updated>
+    <author><name>Shengbang Tong, David Fan, John Nguyen, Ellis Brown, Gaoyue Zhou, Shengyi Qian, Boyang Zheng, Th\'eophane Vallaeys, Junlin Han, Rob Fergus, Naila Murray, Marjan Ghazvininejad, Mike Lewis, Nicolas Ballas, Amir Bar, Michael Rabbat, Jakob Verbeek, Luke Zettlemoyer, Koustuv Sinha, Yann LeCun, Saining Xie</name></author>
+    <summary type="html"><![CDATA[<p>This paper from a strong team (including Yann LeCun, Saining Xie, and Meta researchers) provides empirical clarity on native multimodal pretraining design space through controlled from-scratch experiments using the Transfusion framework with next-token prediction for language and diffusion for vision, yielding insights about visual representation, data mixing, and emergent cross-modal capabilities.</p>]]></summary>
+    <category term="Multimodal Pretraining"/>
+    <category term="Foundation Models"/>
+    <category term="Vision-Language Models"/>
+    <category term="Diffusion Models"/>
+    <category term="Representation Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-04:research:a9b636057f54</id>
+    <title>Scaling Reward Modeling without Human Supervision</title>
+    <link href="http://arxiv.org/abs/2603.02225" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-a9b636057f54" rel="related" type="text/html"/>
+    <published>2026-03-04T03:07:00Z</published>
+    <updated>2026-03-04T03:07:00Z</updated>
+    <author><name>Jingxuan Fan, Yueying Li, Zhenting Qi, Dinghuai Zhang, Kiant\'e Brantley, Sham M. Kakade, Hanlin Zhang</name></author>
+    <summary type="html"><![CDATA[<p>Explores scaling reward models through unsupervised approaches using preference learning over document prefixes/suffixes from web corpora, without human annotations. Shows that training on 11M tokens of math-focused web data yields consistent gains on RewardBench across multiple backbone models.</p>]]></summary>
+    <category term="AI Alignment"/>
+    <category term="Reward Modeling"/>
+    <category term="RLHF/RLAIF"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-04:research:831ad24bf373</id>
+    <title>ZeroDayBench: Evaluating LLM Agents on Unseen Zero-Day Vulnerabilities for Cyberdefense</title>
+    <link href="http://arxiv.org/abs/2603.02297" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-831ad24bf373" rel="related" type="text/html"/>
+    <published>2026-03-04T03:00:00Z</published>
+    <updated>2026-03-04T03:00:00Z</updated>
+    <author><name>Nancy Lau, Louis Sloot, Jyoutir Raj, Giuseppe Marco Boscardin, Evan Harris, Dylan Bowman, Mario Brajkovski, Jaideep Chawla, Dan Zhao</name></author>
+    <summary type="html"><![CDATA[<p>Introduces ZeroDayBench, a benchmark where LLM agents must find and patch 22 novel critical vulnerabilities in open-source codebases. Tests GPT-5.2, Claude Sonnet 4.5, and Grok 4.1, finding frontier LLMs are not yet capable of autonomously solving these tasks.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Cybersecurity"/>
+    <category term="LLM Agents"/>
+    <category term="Benchmarks"/>
+    <category term="Vulnerability Discovery"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-04:research:ebb4b4dc2ac5</id>
+    <title>Why Adam Can Beat SGD: Second-Moment Normalization Yields Sharper Tails</title>
+    <link href="http://arxiv.org/abs/2603.03099" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-ebb4b4dc2ac5" rel="related" type="text/html"/>
+    <published>2026-03-04T03:00:00Z</published>
+    <updated>2026-03-04T03:00:00Z</updated>
+    <author><name>Ruinan Jin, Yingbin Liang, Shaofeng Zou</name></author>
+    <summary type="html"><![CDATA[<p>Establishes the first theoretical separation between high-probability convergence of Adam and SGD, showing Adam achieves δ^{-1/2} dependence on confidence parameter while SGD necessarily has δ^{-1} dependence. Attributes this to Adam's second-moment normalization creating sharper tail behavior.</p>]]></summary>
+    <category term="Optimization Theory"/>
+    <category term="Deep Learning Theory"/>
+    <category term="Adam vs SGD"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-04:research:07af7da9b980</id>
+    <title>Learning When to Act or Refuse: Guarding Agentic Reasoning Models for Safe Multi-Step Tool Use</title>
+    <link href="http://arxiv.org/abs/2603.03205" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-07af7da9b980" rel="related" type="text/html"/>
+    <published>2026-03-04T02:57:00Z</published>
+    <updated>2026-03-04T02:57:00Z</updated>
+    <author><name>Aradhye Agarwal, Gurdit Siyan, Yash Pandya, Joykirat Singh, Akshay Nambi, Ahmed Awadallah</name></author>
+    <summary type="html"><![CDATA[<p>Introduces MOSAIC, a post-training framework for safe multi-step agentic tool use that structures inference as 'plan, check, then act or refuse' with explicit safety reasoning and refusal as first-class learning objectives.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Agentic AI"/>
+    <category term="Tool Use"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-04:research:aa878e80fe34</id>
+    <title>Quantifying Frontier LLM Capabilities for Container Sandbox Escape</title>
+    <link href="http://arxiv.org/abs/2603.02277" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-aa878e80fe34" rel="related" type="text/html"/>
+    <published>2026-03-04T02:52:00Z</published>
+    <updated>2026-03-04T02:52:00Z</updated>
+    <author><name>Rahul Marchand, Art O Cathain, Jerome Wynne, Philippos Maximos Giavridis, Sam Deverett, John Wilkinson, Jason Gwartz, Harry Coppock</name></author>
+    <summary type="html"><![CDATA[<p>Introduces SANDBOXESCAPEBENCH, a benchmark measuring LLM agents' ability to escape Docker/OCI container sandboxes. Tests GPT-5.2, Claude Sonnet 4.5, and Grok 4.1, finding frontier LLMs cannot yet autonomously escape sandboxes.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="LLM Security"/>
+    <category term="Benchmarks"/>
+    <category term="Agentic AI"/>
+    <category term="Cybersecurity"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-04:research:8bfdb92fc011</id>
+    <title>The Geometry of Learning Under AI Delegation</title>
+    <link href="http://arxiv.org/abs/2603.02950" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-8bfdb92fc011" rel="related" type="text/html"/>
+    <published>2026-03-04T02:52:00Z</published>
+    <updated>2026-03-04T02:52:00Z</updated>
+    <author><name>Lingxiao Huang, Nisheeth K. Vishnoi</name></author>
+    <summary type="html"><![CDATA[<p>Mathematically models the joint evolution of human skill and AI delegation as a coupled dynamical system, revealing that adaptive AI use creates stable low-skill equilibria where humans can become persistently dependent on AI ('learned helplessness'). Shows that beyond the high-skill equilibrium of human-only learning, AI delegation fundamentally alters skill acquisition dynamics.</p>]]></summary>
+    <category term="Human-AI Interaction"/>
+    <category term="AI Safety"/>
+    <category term="Theoretical AI"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-04:research:3a64561366fa</id>
+    <title>Safety Training Persists Through Helpfulness Optimization in LLM Agents</title>
+    <link href="http://arxiv.org/abs/2603.02229" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-3a64561366fa" rel="related" type="text/html"/>
+    <published>2026-03-04T02:52:00Z</published>
+    <updated>2026-03-04T02:52:00Z</updated>
+    <author><name>Benjamin Plaut</name></author>
+    <summary type="html"><![CDATA[<p>Studies safety training persistence in agentic (multi-step, tool-use) LLM settings, finding that safety training persists through subsequent helpfulness DPO training, unlike findings in single-step chat settings. All training configurations converge near a linear Pareto frontier.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="LLM Agents"/>
+    <category term="Alignment"/>
+    <category term="RLHF"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-04:research:bf1aaaf51af3</id>
+    <title>Speculative Speculative Decoding</title>
+    <link href="http://arxiv.org/abs/2603.03251" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-bf1aaaf51af3" rel="related" type="text/html"/>
+    <published>2026-03-04T02:52:00Z</published>
+    <updated>2026-03-04T02:52:00Z</updated>
+    <author><name>Tanishq Kumar, Tri Dao, Avner May</name></author>
+    <summary type="html"><![CDATA[<p>Introduces 'speculative speculative decoding' (SSD) that parallelizes the speculation and verification phases of speculative decoding by pre-emptively preparing speculations for likely verification outcomes, eliminating draft model latency.</p>]]></summary>
+    <category term="LLM Inference"/>
+    <category term="Efficiency"/>
+    <category term="Language Models"/>
+    <category term="Systems"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-04:research:0503563f9267</id>
+    <title>BeyondSWE: Can Current Code Agent Survive Beyond Single-Repo Bug Fixing?</title>
+    <link href="http://arxiv.org/abs/2603.03194" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-0503563f9267" rel="related" type="text/html"/>
+    <published>2026-03-04T02:52:00Z</published>
+    <updated>2026-03-04T02:52:00Z</updated>
+    <author><name>Guoxin Chen, Fanzhe Meng, Jiale Zhao, Minghao Li, Daixuan Cheng, Huatong Song, Jie Chen, Yuzhi Lin, Hui Chen, Xin Zhao, Ruihua Song, Chang Liu, Cheng Chen, Kai Jia, Ji-Rong Wen</name></author>
+    <summary type="html"><![CDATA[<p>Introduces BeyondSWE, a benchmark with 500 real-world instances that evaluates code agents beyond single-repo bug fixing, covering cross-repository reasoning, domain-specialized problems, dependency migration, and full-repo generation. Frontier models plateau below 45% success.</p>]]></summary>
+    <category term="Code Generation"/>
+    <category term="Benchmarking"/>
+    <category term="Agentic AI"/>
+    <category term="Language Models"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-03:category-summary:research</id>
     <title>Research Summary: March 03, 2026</title>
@@ -690,180 +863,5 @@
     <category term="Mechanistic Interpretability"/>
     <category term="Vision-Language Models"/>
     <category term="Explainability"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-25:research:a2ddf48cac49</id>
-    <title>Three Concrete Challenges and Two Hopes for the Safety of Unsupervised Elicitation</title>
-    <link href="http://arxiv.org/abs/2602.20400" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-25&amp;category=research#item-a2ddf48cac49" rel="related" type="text/html"/>
-    <published>2026-02-25T02:52:00Z</published>
-    <updated>2026-02-25T02:52:00Z</updated>
-    <author><name>Callum Canavan, Aditya Shrivastava, Allison Qi, Jonathan Michala, Fabien Roger</name></author>
-    <summary type="html"><![CDATA[<p>Identifies three concrete challenges with unsupervised elicitation for AI safety: datasets may have features more salient than truthfulness, unbalanced training sets, and ill-defined model answers. Argues current evaluation datasets may be overoptimistic.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Evaluation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-25:research:f36f12f374e4</id>
-    <title>Why Pass@k Optimization Can Degrade Pass@1: Prompt Interference in LLM Post-training</title>
-    <link href="http://arxiv.org/abs/2602.21189" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-25&amp;category=research#item-f36f12f374e4" rel="related" type="text/html"/>
-    <published>2026-02-25T02:52:00Z</published>
-    <updated>2026-02-25T02:52:00Z</updated>
-    <author><name>Anas Barakat, Souradip Chakraborty, Khushbu Pahwa, Amrit Singh Bedi</name></author>
-    <summary type="html"><![CDATA[<p>Provides theoretical analysis explaining why optimizing Pass@k can degrade Pass@1 in LLM fine-tuning, identifying 'prompt interference' where multi-sample optimization spreads probability mass at the expense of single-sample reliability.</p>]]></summary>
-    <category term="Language Models"/>
-    <category term="RL Post-Training"/>
-    <category term="Theory"/>
-    <category term="Evaluation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-25:research:f489af492e55</id>
-    <title>The Truthfulness Spectrum Hypothesis</title>
-    <link href="http://arxiv.org/abs/2602.20273" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-25&amp;category=research#item-f489af492e55" rel="related" type="text/html"/>
-    <published>2026-02-25T02:52:00Z</published>
-    <updated>2026-02-25T02:52:00Z</updated>
-    <author><name>Zhuofan Josh Ying, Shauli Ravfogel, Nikolaus Kriegeskorte, Peter Hase</name></author>
-    <summary type="html"><![CDATA[<p>Proposes the 'truthfulness spectrum hypothesis': LLMs encode truthfulness along directions ranging from domain-general to domain-specific. Linear probes generalize across most truth types but fail on sycophantic lying, though joint training recovers performance.</p>]]></summary>
-    <category term="Mechanistic Interpretability"/>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-25:research:394d6c5e6253</id>
-    <title>Emergent Manifold Separability during Reasoning in Large Language Models</title>
-    <link href="http://arxiv.org/abs/2602.20338" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-25&amp;category=research#item-394d6c5e6253" rel="related" type="text/html"/>
-    <published>2026-02-25T02:52:00Z</published>
-    <updated>2026-02-25T02:52:00Z</updated>
-    <author><name>Alexandre Polo, Chanwoo Chun, SueYeon Chung</name></author>
-    <summary type="html"><![CDATA[<p>Applies Manifold Capacity Theory to study how Chain-of-Thought reasoning in LLMs creates transient geometric pulses where concept manifolds become linearly separable right before computation, then rapidly compress. This diverges from linear probe accuracy measures.</p>]]></summary>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Language Models"/>
-    <category term="Chain-of-Thought Reasoning"/>
-    <category term="Representation Geometry"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-25:research:752041a84f3d</id>
-    <title>SWE-Bench Pro is even worse</title>
-    <link href="https://www.lesswrong.com/posts/nAMhbz5sfpcynjPP5/swe-bench-pro-is-even-worse" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-25&amp;category=research#item-752041a84f3d" rel="related" type="text/html"/>
-    <published>2026-02-25T02:52:00Z</published>
-    <updated>2026-02-25T02:52:00Z</updated>
-    <author><name>Jonathan Gabor</name></author>
-    <summary type="html"><![CDATA[<p>Following yesterday's <a href="http://localhost:8080/?date=2026-02-24&amp;category=news#item-c6a0be548d32" class="internal-link" rel="noopener noreferrer">News</a> coverage, Audits 100 random SWE-Bench Pro problems and finds major issues including test leniency, where tests barely check required functionality. Argues SWE-Bench Pro is substantially worse than SWE-Bench Verified despite OpenAI recommending the transition.</p>]]></summary>
-    <category term="AI Evaluation"/>
-    <category term="Benchmarks"/>
-    <category term="Coding Agents"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-24:category-summary:research</id>
-    <title>Research Summary: February 24, 2026</title>
-    <link href="http://arxiv.org/abs/2602.20021" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-02-24T06:00:00Z</published>
-    <updated>2026-02-24T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research is dominated by AI safety and alignment findings that challenge core assumptions about LLM trustworthiness, alongside strong theoretical work on transformer internals.</p>
-<ul>
-<li><strong>Can Aha Moments be Fake?</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-dca8e5957776" class="internal-link" rel="noopener noreferrer">finds most CoT steps are decorative</a> rather than genuinely computational, undermining faithfulness assumptions critical for oversight.</li>
-<li>A Bayesian model proves <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-83d66c4908a7" class="internal-link" rel="noopener noreferrer"><strong>sycophantic chatbots cause delusional spiraling</strong></a> even in idealized rational users, establishing a formal impossibility result for naive sycophancy.</li>
-<li><strong>Agents of Chaos</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-908f77351824" class="internal-link" rel="noopener noreferrer">documents real-world failure modes</a> of autonomous LLM agents with persistent memory, email, and shell access in a live laboratory red-team.</li>
-<li><strong>LLM stated preferences</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-521fa2587952" class="internal-link" rel="noopener noreferrer">do not reliably predict downstream behavior</a>, directly testing a precondition for strategic deception across five frontier models.</li>
-</ul>
-<p>On the theoretical side, <strong>Exact Attention Sensitivity</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-4f1273aff6d8" class="internal-link" rel="noopener noreferrer">derives the operator norm</a> of the softmax Jacobian, unifying multiple empirical observations about transformer training stability. <strong>Spilled Energy</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-6bddb6141f49" class="internal-link" rel="noopener noreferrer">reinterprets softmax classifiers</a> as Energy-Based Models, yielding training-free hallucination detection from output logits. <strong>IR³</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-9b8a1603e1c9" class="internal-link" rel="noopener noreferrer">reverse-engineers implicit RLHF rewards</a> via contrastive inverse RL to interpretably detect and surgically repair reward hacking.</p>
-<ul>
-<li>A causal study estimates <strong>Google AI Overviews</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-666a3a83e1d4" class="internal-link" rel="noopener noreferrer">reduced <strong>Wikipedia traffic</strong></a> by significant margins, with major web-ecosystem implications.</li>
-<li><strong>The Story is Not the Science</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-448a51a298f8" class="internal-link" rel="noopener noreferrer">proposes the first execution-grounded evaluation</a> of mechanistic interpretability, finding notable discrepancies between narrative claims and actual code/data.</li>
-<li><strong>Latent Introspection</strong> reveals that <strong>Qwen 32B</strong> <a href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-4e2583f56026" class="internal-link" rel="noopener noreferrer">can detect concept injections</a> in its own context via logit lens, with dramatic performance gaps between base and instruction-tuned models.</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-24:research:908f77351824</id>
-    <title>Agents of Chaos</title>
-    <link href="http://arxiv.org/abs/2602.20021" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-908f77351824" rel="related" type="text/html"/>
-    <published>2026-02-24T03:07:00Z</published>
-    <updated>2026-02-24T03:07:00Z</updated>
-    <author><name>Natalie Shapira, Chris Wendler, Avery Yen, Gabriele Sarti, Koyena Pal, Olivia Floody, Adam Belfki, Alex Loftus, Aditya Ratan Jannali, Nikhil Prakash, Jasmine Cui, Giordano Rogers, Jannik Brinkmann, Can Rager, Amir Zur, Michael Ripa, Aruna Sankaranarayanan, David Atkinson, Rohit Gandikota, Jaden Fiotto-Kaufman, EunJeong Hwang, Hadas Orgad, P Sam Sahil, Negev Taglicht, Tomer Shabtay, Atai Ambus, Nitay Alon, Shiri Oron, Ayelet Gordon-Tapiero, Yotam Kaplan, Vered Shwartz, Tamar Rott Shaham, Christoph Riedl, Reuth Mirsky, Maarten Sap, David Manheim, Tomer Ullman, David Bau</name></author>
-    <summary type="html"><![CDATA[<p>Reports a red-teaming study of autonomous LLM agents in a live laboratory environment with persistent memory, email, Discord, and shell access. Documents 11 case studies including unauthorized compliance, destructive actions, identity spoofing, and denial-of-service.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Red Teaming"/>
-    <category term="LLM Agents"/>
-    <category term="Autonomous Systems"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-24:research:dca8e5957776</id>
-    <title>Can Aha Moments be Fake? Identifying True and Decorative Thinking Steps in CoT</title>
-    <link href="https://www.lesswrong.com/posts/L9sE9qQgeh7cTQWkM/can-aha-moments-be-fake-identifying-true-and-decorative" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-dca8e5957776" rel="related" type="text/html"/>
-    <published>2026-02-24T03:07:00Z</published>
-    <updated>2026-02-24T03:07:00Z</updated>
-    <author><name>Jiachen Zhao</name></author>
-    <summary type="html"><![CDATA[<p>This paper investigates whether Chain-of-Thought (CoT) reasoning steps in LLMs are genuinely used for computation or are merely 'decorative.' Using causal analysis, they find that the majority of CoT steps have minimal causal impact on the model's final prediction, and that 'thinking' can be steered as a linear direction in latent space, suggesting models often perform reasoning rather than actually doing it.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Chain-of-Thought Reasoning"/>
-    <category term="Alignment"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-24:research:83d66c4908a7</id>
-    <title>Sycophantic Chatbots Cause Delusional Spiraling, Even in Ideal Bayesians</title>
-    <link href="http://arxiv.org/abs/2602.19141" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-83d66c4908a7" rel="related" type="text/html"/>
-    <published>2026-02-24T03:00:00Z</published>
-    <updated>2026-02-24T03:00:00Z</updated>
-    <author><name>Kartik Chandra, Max Kleiman-Weiner, Jonathan Ragan-Kelley, Joshua B. Tenenbaum</name></author>
-    <summary type="html"><![CDATA[<p>Presents a Bayesian model showing that even an idealized rational user is vulnerable to 'delusional spiraling' when conversing with a sycophantic chatbot. Formally proves the causal link between AI sycophancy and AI-induced psychosis.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Sycophancy"/>
-    <category term="Human-AI Interaction"/>
-    <category term="Alignment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-24:research:666a3a83e1d4</id>
-    <title>Impact of AI Search Summaries on Website Traffic: Evidence from Google AI Overviews and Wikipedia</title>
-    <link href="http://arxiv.org/abs/2602.18455" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-666a3a83e1d4" rel="related" type="text/html"/>
-    <published>2026-02-24T03:00:00Z</published>
-    <updated>2026-02-24T03:00:00Z</updated>
-    <author><name>Mehrzad Khosravi, Hema Yoganarasimhan</name></author>
-    <summary type="html"><![CDATA[<p>Estimates the causal impact of Google's AI Overview on Wikipedia traffic using a difference-in-differences design exploiting staggered geographic rollout and Wikipedia's multilingual structure. Provides empirical evidence on whether AI search summaries cannibalize or complement source website traffic.</p>]]></summary>
-    <category term="AI Impact on Society"/>
-    <category term="Search Engines"/>
-    <category term="Digital Economics"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-24:research:4f1273aff6d8</id>
-    <title>Exact Attention Sensitivity and the Geometry of Transformer Stability</title>
-    <link href="http://arxiv.org/abs/2602.18849" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-4f1273aff6d8" rel="related" type="text/html"/>
-    <published>2026-02-24T03:00:00Z</published>
-    <updated>2026-02-24T03:00:00Z</updated>
-    <author><name>Seyed Morteza Emadi</name></author>
-    <summary type="html"><![CDATA[<p>Develops a theoretical stability framework for transformers by deriving the exact operator norm of the softmax Jacobian and introducing a block-∞/RMS geometry. Provides first-principles explanations for why pre-LayerNorm works, DeepNorm's N^{-1/4} scaling, and warmup necessity.</p>]]></summary>
-    <category term="Transformer Theory"/>
-    <category term="Training Stability"/>
-    <category term="Deep Learning Theory"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-24:research:521fa2587952</id>
-    <title>When Do LLM Preferences Predict Downstream Behavior?</title>
-    <link href="http://arxiv.org/abs/2602.18971" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-24&amp;category=research#item-521fa2587952" rel="related" type="text/html"/>
-    <published>2026-02-24T02:55:00Z</published>
-    <updated>2026-02-24T02:55:00Z</updated>
-    <author><name>Katarina Slama, Alexandra Souly, Dishank Bansal, Henry Davidson, Christopher Summerfield, Lennart Luettgau</name></author>
-    <summary type="html"><![CDATA[<p>Tests whether LLM stated preferences predict downstream behavior across five frontier models, examining a precondition for AI misalignment. Finds entity preferences do predict donation advice and refusal behavior, suggesting preferences can influence behavior beyond instruction-following.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="LLM Behavior"/>
-    <category term="Misalignment"/>
   </entry>
 </feed>
