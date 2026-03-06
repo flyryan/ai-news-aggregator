@@ -5,7 +5,7 @@
   <link href="http://localhost:8080" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/summaries.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:summaries:all</id>
-  <updated>2026-03-05T07:48:32Z</updated>
+  <updated>2026-03-06T07:50:21Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,118 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-06:executive-summary</id>
+    <title>Daily Briefing: March 06, 2026</title>
+    <link href="https://arstechnica.com/ai/2026/03/openai-introduces-gpt-5-4-with-more-knowledge-work-capability/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06" rel="related" type="text/html"/>
+    <published>2026-03-06T06:00:00Z</published>
+    <updated>2026-03-06T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<h4>Top Story</h4>
+<p><strong>OpenAI</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-287ffefada7d" class="internal-link" rel="noopener noreferrer">launched <strong>GPT-5.4</strong></a>, <strong>GPT-5.4 Thinking</strong>, and <strong>GPT-5.4 Pro</strong> with native computer-use capabilities, <strong>1M</strong> token context, and mid-thought steering — scoring <strong>75%</strong> on the <strong>OSWorld</strong> benchmark, with early tester <strong>Matt Shumer</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-59023955c4cd" class="internal-link" rel="noopener noreferrer">declaring coding "essentially solved"</a> and <strong>Sam Altman</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-b18ba4e5f93e" class="internal-link" rel="noopener noreferrer">confirming immediate <strong>API</strong> and <strong>Codex</strong> availability</a>.</p>
+<h4>Key Developments</h4>
+<ul>
+<li><strong>OpenAI</strong> also <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-8456df909fe7" class="internal-link" rel="noopener noreferrer">released <strong>Symphony</strong></a>, an open-source <strong>Elixir/BEAM</strong> framework for orchestrating autonomous AI coding agents, pairing infrastructure tooling with the flagship model launch</li>
+<li><strong>Tri Dao</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-9af83183ff36" class="internal-link" rel="noopener noreferrer">published <strong>FlashAttention-4</strong></a>, achieving attention speeds matching matmul on <strong>NVIDIA Blackwell</strong> GPUs (B200/GB200) through algorithm-kernel co-design — notably, <strong>Claude</strong> autonomously debugged a deadlock over <strong>6 hours</strong> during development</li>
+<li><strong>Lightricks</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-a70afd9ba4d9" class="internal-link" rel="noopener noreferrer">launched <strong>LTX-2.3</strong></a>, a <strong>22B</strong> video generation model with a free local desktop editor, triggering widespread testing across <strong>r/StableDiffusion</strong></li>
+<li><strong>Anthropic</strong> CPO <strong>Mike Krieger</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-82e105f80d30" class="internal-link" rel="noopener noreferrer">announced <strong>Claude</strong> surpassing</a> <strong>1 million daily signups</strong>, while the open-source tier surged with <strong>YuanLab's Yuan 3.0 Ultra</strong> (<strong>1T-parameter</strong> open MoE, <strong>49%</strong> training efficiency gains), <strong>AI2's OLMo Hybrid</strong> (fully open <strong>7B</strong> transformer/linear RNN), and <strong>Unsloth's</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-3414ab4c8814" class="internal-link" rel="noopener noreferrer">optimized <strong>Qwen3.5</strong> GGUF quants</a> benchmarked on Apple Silicon</li>
+</ul>
+<h4>Safety &amp; Regulation</h4>
+<ul>
+<li>A cluster of research papers undermined confidence in chain-of-thought monitoring: an <strong>OpenAI</strong> collaboration found reasoning models have <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-2a90da3b26f1" class="internal-link" rel="noopener noreferrer"><strong>low controllability</strong> over CoT</a> content, a <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-9656f8f74ae8" class="internal-link" rel="noopener noreferrer"><strong>Reasoning Theater</strong> paper</a> showed models lock in beliefs early while generating performative tokens, and a <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-0bff88289a0f" class="internal-link" rel="noopener noreferrer"><strong>self-attribution bias</strong></a> was discovered in LLM monitors that rate actions as less risky when framed as their own output</li>
+<li>Gradient analysis <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-e919ba344ecf" class="internal-link" rel="noopener noreferrer">formally proved</a> <strong>RLHF alignment is mathematically shallow</strong>, with updates concentrating only at harm-decision positions via martingale decomposition</li>
+<li><a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-62b022e6d222" class="internal-link" rel="noopener noreferrer"><strong>Alignment Backfire</strong> research</a> showed safety interventions effective in English can *amplify* harmful outputs across <strong>15</strong> other languages</li>
+<li>The <strong>Anthropic–Pentagon</strong> crisis escalated further: <strong>Trump</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-1d71e9b2f286" class="internal-link" rel="noopener noreferrer">boasted about firing <strong>Anthropic</strong></a> "like dogs," the <strong>Pentagon</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-43c7c9539cf3" class="internal-link" rel="noopener noreferrer">formally labeled the company</a> a <strong>supply-chain risk</strong>, and a <strong>Wired</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-2d72348b21f3" class="internal-link" rel="noopener noreferrer">investigation revealed</a> the <strong>Pentagon</strong> had previously accessed <strong>OpenAI</strong> technology through <strong>Microsoft</strong> despite military-use bans — sparking protests at <strong>OpenAI</strong> HQ</li>
+</ul>
+<h4>Research Highlights</h4>
+<ul>
+<li>A neuro-symbolic system combining <strong>Gemini Deep Think</strong> with tree search <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-60d3f2aa5a28" class="internal-link" rel="noopener noreferrer">solved an open problem</a> in theoretical physics, marking a milestone for AI-assisted scientific discovery</li>
+<li><strong>∇-Reasoner</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-d496d73db120" class="internal-link" rel="noopener noreferrer">introduced differentiable gradient descent</a> over token logits at inference time as a novel reasoning scaling paradigm</li>
+<li>An anonymous Korean paper <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-fbb71680fb81" class="internal-link" rel="noopener noreferrer">arguing <strong>attention's bottleneck is d²</strong></a> not n² triggered deep theoretical debate on <strong>r/MachineLearning</strong></li>
+<li><strong>SlideSparse</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-9835fab575ff" class="internal-link" rel="noopener noreferrer">enabled <strong>(2N-2):2N</strong> structured sparsity</a> on commodity Sparse Tensor Cores, advancing efficient inference without custom hardware</li>
+<li>A viral post from a <strong>30-year</strong> veteran programmer — who <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-04fb6a04b971" class="internal-link" rel="noopener noreferrer">confessed to not writing code</a> for <strong>six months</strong>, instead managing <strong>Claude Code</strong> agents "like managing six junior devs" — crystallized growing anxiety about the pace of AI-driven workflow transformation</li>
+</ul>
+<h4>Looking Ahead</h4>
+<p><strong>GPT-5.4's</strong> computer-use capabilities and <strong>75%</strong> OSWorld score, combined with the day's research showing CoT monitoring may be less reliable than assumed, set up a tension between rapidly expanding agentic deployment and the safety community's ability to oversee it — a dynamic likely to intensify as <strong>GPT-5.4</strong> rolls out broadly and <strong>DeepSeek V4</strong> remains imminent.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:category-summary:news</id>
+    <title>News Summary: March 06, 2026</title>
+    <link href="https://arstechnica.com/ai/2026/03/openai-introduces-gpt-5-4-with-more-knowledge-work-capability/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=news" rel="related" type="text/html"/>
+    <published>2026-03-06T06:00:00Z</published>
+    <updated>2026-03-06T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p><strong>OpenAI</strong> dominates this cycle with two major releases: <strong>GPT-5.4</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-287ffefada7d" class="internal-link" rel="noopener noreferrer">brings computer-use capabilities</a> to its flagship model, while <strong>Symphony</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-8456df909fe7" class="internal-link" rel="noopener noreferrer">offers an open-source agentic</a> orchestration framework. Meanwhile, a podcast roundup references <strong>Anthropic's Sonnet 4.6</strong> (1M context), <strong>Google's Gemini 3.1 Pro</strong>, and <strong>xAI's Grok 4.2 beta</strong>—all showing strong ARC-AGI-2 progress.</p>
+<ul>
+<li><strong>Trump-Anthropic tensions</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-1d71e9b2f286" class="internal-link" rel="noopener noreferrer">escalated with a Pentagon blacklist</a>, though defense negotiations reportedly resumed</li>
+<li>The <strong>Pentagon</strong> previously <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-2d72348b21f3" class="internal-link" rel="noopener noreferrer">accessed <strong>OpenAI</strong> technology</a> through <strong>Microsoft</strong> before military-use restrictions were lifted</li>
+<li>All major AI companies <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-e08f4fcbb116" class="internal-link" rel="noopener noreferrer">signed a <strong>Ratepayer Protection Pledge</strong></a> to fund their own data center power generation</li>
+<li><strong>ByteDance's Seedance 2.0</strong> video model <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-b6402db0bf25" class="internal-link" rel="noopener noreferrer">hit compute and copyright walls</a>, highlighting China's AI constraints</li>
+</ul>
+<p>On the research front, <strong>YuanLab</strong> released <strong>Yuan 3.0 Ultra</strong>, a <strong>1T-parameter</strong> open-source MoE model with 49% training efficiency gains. Enterprise adoption accelerates as <strong>JPMorgan</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-ca98eb46353b" class="internal-link" rel="noopener noreferrer">pushes tech spending</a> toward <strong>$19.8B</strong>, while <strong>Meta's</strong> Ray-Ban smart glasses <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-f8075d053984" class="internal-link" rel="noopener noreferrer">face privacy scrutiny</a> after workers viewed sensitive user footage.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:category-summary:research</id>
+    <title>Research Summary: March 06, 2026</title>
+    <link href="http://arxiv.org/abs/2603.04735" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-03-06T06:00:00Z</published>
+    <updated>2026-03-06T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>A striking day for AI safety research, with multiple papers undermining trust in chain-of-thought monitoring and alignment techniques, alongside major systems and scientific discovery results.</p>
+<p><strong>FlashAttention-4</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-9af83183ff36" class="internal-link" rel="noopener noreferrer">targets <strong>NVIDIA Blackwell GPUs</strong></a> (B200/GB200) with algorithm-kernel co-design for asymmetric hardware scaling. A neuro-symbolic system combining <strong>Gemini Deep Think</strong> with tree search <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-60d3f2aa5a28" class="internal-link" rel="noopener noreferrer">solves an open problem</a> in theoretical physics, marking a milestone for AI-assisted scientific discovery.</p>
+<ul>
+<li>A gradient analysis <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-e919ba344ecf" class="internal-link" rel="noopener noreferrer">proves <strong>RLHF alignment is shallow</strong></a>, with updates concentrating only at harm-decision positions via martingale decomposition</li>
+<li>Reasoning models show <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-2a90da3b26f1" class="internal-link" rel="noopener noreferrer"><strong>low controllability over chain-of-thought</strong></a> content (OpenAI collaboration), threatening CoT-based safety monitoring</li>
+<li><strong>Self-attribution bias</strong> discovered: LLM monitors <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-0bff88289a0f" class="internal-link" rel="noopener noreferrer">rate actions as less risky</a> when framed as their own output</li>
+<li><strong>Reasoning Theater</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-9656f8f74ae8" class="internal-link" rel="noopener noreferrer">finds models lock in beliefs early</a> but continue generating performative CoT tokens</li>
+<li><strong>Alignment Backfire</strong> shows safety interventions effective in English can <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-62b022e6d222" class="internal-link" rel="noopener noreferrer">*amplify* harmful outputs</a> across 15 other languages</li>
+<li><strong>SlideSparse</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-9835fab575ff" class="internal-link" rel="noopener noreferrer">enables <strong>(2N-2):2N</strong> structured sparsity</a> on commodity Sparse Tensor Cores for efficient inference</li>
+<li><strong>∇-Reasoner</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-d496d73db120" class="internal-link" rel="noopener noreferrer">introduces differentiable gradient descent</a> over token logits at inference time as a novel reasoning scaling paradigm</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:category-summary:social</id>
+    <title>Social Summary: March 06, 2026</title>
+    <link href="https://twitter.com/sama/status/2029622732594499630" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=social" rel="related" type="text/html"/>
+    <published>2026-03-06T06:00:00Z</published>
+    <updated>2026-03-06T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>The day was dominated by the <strong>GPT-5.4 launch</strong>, with <strong>Sam Altman</strong> and <strong>OpenAI</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-b18ba4e5f93e" class="internal-link" rel="noopener noreferrer">announcing their newest frontier model</a> featuring native computer use, 1M token context, and mid-thought steering. Early access reviews from <strong>Ethan Mollick</strong> and <strong>Matt Shumer</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-cb2cf82b2e62" class="internal-link" rel="noopener noreferrer">called it a decisive leap</a>, with Shumer <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-59023955c4cd" class="internal-link" rel="noopener noreferrer">declaring coding "essentially solved."</a></p>
+<ul>
+<li><strong>OpenAI</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-12c2e923f92f" class="internal-link" rel="noopener noreferrer">published a CoT Controllability paper</a> alongside the launch, finding GPT-5.4 Thinking struggles to hide its reasoning chain—a positive safety signal</li>
+<li><strong>Tri Dao</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-10d87a78b625" class="internal-link" rel="noopener noreferrer">released the <strong>FlashAttention-4</strong> paper</a>, achieving attention speed matching matmul on Blackwell GPUs, with <strong>Claude</strong> autonomously debugging a deadlock over 6 hours during development</li>
+<li><strong>Anthropic</strong> CPO <strong>Mike Krieger</strong> announced <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-82e105f80d30" class="internal-link" rel="noopener noreferrer">Claude surpassing 1 million daily signups</a>, signaling fierce competition at the consumer tier</li>
+<li><strong>Andrej Karpathy</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-3899eff765ba" class="internal-link" rel="noopener noreferrer">shared progress on autonomous AI research agents</a> (nanochat) and <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-78c7e2cd7917" class="internal-link" rel="noopener noreferrer">sparked discussion on the unsolved problem</a> of LLM memory systems</li>
+<li><strong>AI2</strong> released <strong>OLMo Hybrid</strong>, a fully open 7B transformer/linear RNN model advancing open-source frontier research</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:category-summary:reddit</id>
+    <title>Reddit Summary: March 06, 2026</title>
+    <link href="https://reddit.com/r/StableDiffusion/comments/1rlm21a/ltx23_is_live_rebuilt_vae_improved_i2v_new/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=reddit" rel="related" type="text/html"/>
+    <published>2026-03-06T06:00:00Z</published>
+    <updated>2026-03-06T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p><strong>LTX-2.3</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-a70afd9ba4d9" class="internal-link" rel="noopener noreferrer">dominated open-source video generation</a> discourse—Lightricks' 22B model plus a <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-d5ac579920b7" class="internal-link" rel="noopener noreferrer">free local <strong>LTX Desktop</strong> editor</a> sparked massive testing across <strong>r/StableDiffusion</strong>. The <strong>Qwen3.5</strong> ecosystem exploded on <strong>r/LocalLLaMA</strong> with <strong>Unsloth</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-3414ab4c8814" class="internal-link" rel="noopener noreferrer">GGUF quants</a> (949 upvotes) and <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-0a5fb7754b21" class="internal-link" rel="noopener noreferrer">real-world agent benchmarks</a> on Apple Silicon hardware.</p>
+<ul>
+<li>An anonymous Korean paper arguing <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-fbb71680fb81" class="internal-link" rel="noopener noreferrer"><strong>attention's bottleneck is d² not n²</strong></a> triggered deep theoretical debate on <strong>r/MachineLearning</strong></li>
+<li>A 30-year veteran programmer's confession of <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-04fb6a04b971" class="internal-link" rel="noopener noreferrer"><strong>not writing code for six months</strong></a>—managing AI agents instead—captured widespread anxiety and excitement</li>
+<li><strong>OpenAI dropped GPT-5.4</strong> with 75% OSWorld and 1M context, but community reception is mixed over increased refusals</li>
+<li><strong>Pentagon</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-0a3658970c72" class="internal-link" rel="noopener noreferrer"><strong>formally labeled Anthropic</strong></a> <strong>a supply-chain risk</strong>, escalating into protests at OpenAI HQ over its competing defense deal</li>
+<li><strong>Anthropic's AI Exposure Index</strong> mapped real Claude usage to job automation risk, confirming programmers are most exposed</li>
+<li>Practical production insight: a team catalogued <strong>135 Whisper hallucination phrases</strong> during silence, sharing their blocklist fix</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-05:executive-summary</id>
     <title>Daily Briefing: March 05, 2026</title>
@@ -803,123 +915,6 @@
 <li><strong>Qwen 3.5</strong> family consumed <strong>r/LocalLLaMA</strong> with quantization benchmarks, deployment guides for <strong>3x3090 setups</strong>, and speed comparisons—community consensus <a href="http://localhost:8080/?date=2026-02-27&amp;category=reddit#item-6b1b64c2914b" class="internal-link" rel="noopener noreferrer">positioning it as the new local SOTA</a></li>
 <li><strong>AI security research</strong> surfaced across multiple subs: a researcher used <strong>Claude</strong> to <a href="http://localhost:8080/?date=2026-02-27&amp;category=reddit#item-49a345a05026" class="internal-link" rel="noopener noreferrer">expose 16 vulnerabilities</a> in a <strong>Lovable</strong>-showcased EdTech app with 18,000+ users; separate work showed invisible Unicode characters hijack LLM agents, with <strong>Claude Sonnet 4</strong> most susceptible at 71.2%</li>
 <li><strong>Terence Tao</strong> <a href="http://localhost:8080/?date=2026-02-27&amp;category=reddit#item-e6a5301d8112" class="internal-link" rel="noopener noreferrer">offered a nuanced take</a> on AI in mathematics, cautioning against hype while acknowledging meaningful progress. An <strong>LLM deanonymization</strong> paper achieved 68% recall at 90% precision on Reddit users, raising serious privacy alarms.</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:executive-summary</id>
-    <title>Daily Briefing: February 26, 2026</title>
-    <link href="https://arstechnica.com/ai/2026/02/pete-hegseth-wants-unfettered-access-to-anthropics-models-for-the-military/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26" rel="related" type="text/html"/>
-    <published>2026-02-26T06:00:00Z</published>
-    <updated>2026-02-26T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p><img src="http://localhost:8080/data/2026-02-26/hero.webp" alt="Daily briefing hero image" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px;"/></p>
-<h4>Top Story</h4>
-<p><strong>Nvidia</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-125c252c1cd3" class="internal-link" rel="noopener noreferrer">reported <strong>$62.3B</strong></a> in quarterly data center revenue with <strong>75%</strong> year-over-year growth, providing the hardest financial evidence yet that AI infrastructure spending continues to accelerate even as datacenter bottlenecks mount.</p>
-<h4>Key Developments</h4>
-<ul>
-<li><strong>Liquid AI</strong>: <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-a7b783d36e3e" class="internal-link" rel="noopener noreferrer">Released <strong>LFM2-24B-A2B</strong></a>, a hybrid architecture blending attention and convolution layers that dramatically reduces memory overhead — a meaningful efficiency breakthrough for inference-constrained deployments</li>
-<li><strong>Google Gemini</strong>: <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-c842bb2ba452" class="internal-link" rel="noopener noreferrer">Launched agentic capabilities</a> on the <strong>Samsung Galaxy S26</strong>, autonomously booking <strong>Uber</strong> rides and ordering <strong>DoorDash</strong> meals — among the first mainstream consumer agentic AI deployments</li>
-<li><strong>Perplexity</strong>: <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-fbd87474a766" class="internal-link" rel="noopener noreferrer">Unveiled <strong>Perplexity Computer</strong></a>, a unified agentic system orchestrating <strong>19 AI models</strong> for end-to-end research, coding, and deployment, drawing <strong>6.3M views</strong> on Twitter</li>
-<li><strong>Anthropic</strong>: <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-1d4c6cc2e2f1" class="internal-link" rel="noopener noreferrer">Acquired <strong>Vercept AI</strong></a> to advance <strong>Claude's</strong> computer use capabilities, doubling down on agentic interaction as a strategic priority</li>
-<li><strong>xAI vs. OpenAI</strong>: A federal judge <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-0dfb1e03627b" class="internal-link" rel="noopener noreferrer">dismissed <strong>xAI's</strong> trade secret lawsuit</a> against <strong>OpenAI</strong>, finding no evidence of misconduct</li>
-</ul>
-<h4>Safety &amp; Regulation</h4>
-<ul>
-<li>The <strong>Pentagon–Anthropic</strong> standoff continued to escalate, with <strong>Ars Technica</strong> and <strong>The Guardian</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-f348f77c774c" class="internal-link" rel="noopener noreferrer">reporting on <strong>Hegseth's</strong> ultimatum</a> and <strong>Zvi Mowshowitz</strong> publishing <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-372f657e42aa" class="internal-link" rel="noopener noreferrer">deep analyses on <strong>LessWrong</strong></a> including a <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-fc47d87931e0" class="internal-link" rel="noopener noreferrer">First Amendment legal framework</a> for AI company protections — the situation now extends beyond the initial confrontation covered earlier this week</li>
-<li><strong>MATS Winter 2026</strong> research demonstrated that in-context learning alone <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-afb1c0beca5e" class="internal-link" rel="noopener noreferrer">induces dramatic persona shifts</a> in <strong>Llama 3.3 70B</strong> without any fine-tuning — a safety finding with direct implications for deployment guardrails</li>
-<li><strong>Reasoning trace poisoning</strong> was shown to be a <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-c31822a76feb" class="internal-link" rel="noopener noreferrer">far more data-efficient backdoor</a> method than conventional data poisoning, raising the threat level for chain-of-thought systems</li>
-<li>Hackers <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-a1d9444d67c0" class="internal-link" rel="noopener noreferrer">exploited <strong>Claude</strong> via persistence</a> to steal <strong>150GB</strong> of Mexican government data, undermining confidence in production safety guardrails</li>
-<li><strong>List experiments</strong> adapted from social science <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-d5d4bfbc70ca" class="internal-link" rel="noopener noreferrer">revealed hidden LLM beliefs</a> — including approval of mass surveillance — that standard alignment training suppresses rather than eliminates</li>
-<li>The <strong>#QuitGPT</strong> movement <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-5c796387dd1f" class="internal-link" rel="noopener noreferrer">reached <strong>700K users</strong></a> on <strong>r/ChatGPT</strong>, driven by political backlash over <strong>Brockman's</strong> Trump donation</li>
-</ul>
-<h4>Research Highlights</h4>
-<ul>
-<li><strong>Tsinghua</strong> researchers <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-d8a191f07982" class="internal-link" rel="noopener noreferrer">identified specific <strong>"H-Neurons"</strong></a> responsible for LLM hallucinations, generating exceptional cross-platform engagement and opening a path toward targeted mechanistic mitigation</li>
-<li><strong>Apple</strong> introduced the <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-19b335aafd59" class="internal-link" rel="noopener noreferrer">first <strong>tri-modal masked diffusion model</strong></a> pretrained jointly on text, image, and audio</li>
-<li><strong>Tool-R0</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-c5e1060ce84f" class="internal-link" rel="noopener noreferrer">achieved zero-data tool-learning</a> via self-play co-evolution between agents and tool environments, eliminating the need for curated tool-use datasets</li>
-<li><strong>Interleaved Head Attention</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-05edaf34f0a9" class="internal-link" rel="noopener noreferrer">enabled cross-head communication</a> within transformers, addressing a fundamental architectural limitation where attention heads operate in isolation</li>
-<li><strong>NVIDIA Robotics</strong> revealed <strong>EgoScale</strong>, <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-f2c856afc8e8" class="internal-link" rel="noopener noreferrer">training dexterous humanoid robots</a> from <strong>20K+ hours</strong> of egocentric human video with a near-perfect scaling law (<strong>R²=0.998</strong>)</li>
-</ul>
-<h4>Looking Ahead</h4>
-<p><strong>Andrej Karpathy's</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-69b9f4c83883" class="internal-link" rel="noopener noreferrer">viral declaration that programming</a> "fundamentally changed" since December 2025 — alongside <strong>Bret Taylor</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-c08600582ae0" class="internal-link" rel="noopener noreferrer">describing the shift to</a> "harness engineering" and <strong>Claude Code</strong> breaking the world record for the largest known reversible prime at <strong>10,069 digits</strong> — suggests the AI coding transformation is reaching an inflection point in practitioner consciousness; watch whether this translates into measurable enterprise workflow changes or remains confined to early adopters, even as the <strong>Pentagon–Anthropic</strong> standoff approaches a resolution that could set binding precedent for government power over AI companies' safety commitments.</p>]]></summary>
-    <category term="daily-summary"/>
-    <media:thumbnail url="http://localhost:8080/data/2026-02-26/hero.webp"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:category-summary:news</id>
-    <title>News Summary: February 26, 2026</title>
-    <link href="https://arstechnica.com/ai/2026/02/pete-hegseth-wants-unfettered-access-to-anthropics-models-for-the-military/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=news" rel="related" type="text/html"/>
-    <published>2026-02-26T06:00:00Z</published>
-    <updated>2026-02-26T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p><strong>Anthropic</strong> dominates this cycle's headlines with a high-stakes showdown against the <strong>Pentagon</strong>: Defense Secretary <strong>Pete Hegseth</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-f348f77c774c" class="internal-link" rel="noopener noreferrer">threatened to invoke</a> the <strong>Defense Production Act</strong> unless Anthropic grants <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-d7de414dde86" class="internal-link" rel="noopener noreferrer">unfettered military access</a> to <strong>Claude</strong>, including for autonomous lethal operations and domestic surveillance. Separately, Anthropic reportedly downgraded its <strong>AI safety policy</strong>, abandoning its commitment to only ship models it deems safe—a seismic shift for the industry's safety standard-bearer.</p>
-<ul>
-<li><strong>Nvidia</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-125c252c1cd3" class="internal-link" rel="noopener noreferrer">reported <strong>$62.3B</strong></a> in quarterly data center revenue (<strong>75% YoY growth</strong>), reinforcing that AI infrastructure investment continues to accelerate despite bubble fears</li>
-<li><strong>Liquid AI</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-a7b783d36e3e" class="internal-link" rel="noopener noreferrer">released <strong>LFM2-24B-A2B</strong></a>, a novel hybrid architecture blending attention and convolution layers to dramatically reduce memory overhead—a meaningful efficiency breakthrough</li>
-<li><strong>Google Gemini</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-c842bb2ba452" class="internal-link" rel="noopener noreferrer">launched agentic capabilities</a> on the <strong>Samsung Galaxy S26</strong>, autonomously booking <strong>Uber</strong> rides and ordering <strong>DoorDash</strong> meals—among the first mainstream deployments of consumer agentic AI</li>
-<li>A federal judge <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-0dfb1e03627b" class="internal-link" rel="noopener noreferrer">dismissed <strong>xAI's</strong> lawsuit</a> against <strong>OpenAI</strong>, finding no evidence of misconduct</li>
-<li><strong>CuspAI</strong> (founded by <strong>Max Welling</strong>, advised by <strong>Hinton</strong> and <strong>LeCun</strong>) <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-c95fb01ecb3b" class="internal-link" rel="noopener noreferrer">raised <strong>$100M</strong></a> for AI-driven materials discovery</li>
-<li><strong>Meta</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-ec9680ff6cd3" class="internal-link" rel="noopener noreferrer">open-sourced <strong>GCM</strong></a> for GPU cluster monitoring, while its AI moderation was criticized for <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-48bb9036c93f" class="internal-link" rel="noopener noreferrer">flooding investigators</a> with junk reports</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:category-summary:research</id>
-    <title>Research Summary: February 26, 2026</title>
-    <link href="https://www.lesswrong.com/posts/rmYB4a7Pskw7DLpCh/anthropic-and-the-department-of-war" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-02-26T06:00:00Z</published>
-    <updated>2026-02-26T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>The day is dominated by AI safety research and a landmark governance confrontation. Zvi's <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-372f657e42aa" class="internal-link" rel="noopener noreferrer">analysis of the <strong>Anthropic vs. Secretary Hegseth</strong> standoff</a> over military access to <strong>Claude</strong> is the most consequential item, with an accompanying <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-fc47d87931e0" class="internal-link" rel="noopener noreferrer">legal analysis of First Amendment protections</a> for AI companies.</p>
-<ul>
-<li><strong>MATS Winter 2026</strong> research <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-afb1c0beca5e" class="internal-link" rel="noopener noreferrer">shows in-context learning alone</a> induces dramatic persona shifts in <strong>Llama 3.3 70B</strong>, no fine-tuning needed — a significant safety finding</li>
-<li>A novel <strong>self-incrimination</strong> training approach <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-3e34a8bd1a9d" class="internal-link" rel="noopener noreferrer">teaches agents to flag</a> their own misbehavior, complementing alignment and external monitoring</li>
-<li><strong>List experiments</strong> from social science <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-d5d4bfbc70ca" class="internal-link" rel="noopener noreferrer">reveal hidden LLM beliefs</a> (e.g., approval of mass surveillance) that standard alignment suppresses</li>
-<li>Reasoning trace poisoning is <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-c31822a76feb" class="internal-link" rel="noopener noreferrer">shown to be far more data-efficient</a> for creating dangerous backdoors than conventional data poisoning</li>
-</ul>
-<p>On the capabilities side, Apple introduces the first <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-19b335aafd59" class="internal-link" rel="noopener noreferrer"><strong>tri-modal masked diffusion model</strong></a> pretrained on text, image, and audio. <strong>Tool-R0</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-c5e1060ce84f" class="internal-link" rel="noopener noreferrer">achieves zero-data tool-learning</a> via self-play co-evolution. <strong>Interleaved Head Attention</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-05edaf34f0a9" class="internal-link" rel="noopener noreferrer">enables cross-head communication</a> in transformers, addressing a fundamental architectural limitation. New <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-625886f3d470" class="internal-link" rel="noopener noreferrer"><strong>RLHF generalization theory</strong></a> accounts for reward shift and clipped KL regularization with practical convergence bounds.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:category-summary:social</id>
-    <title>Social Summary: February 26, 2026</title>
-    <link href="https://twitter.com/karpathy/status/2026731645169185220" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=social" rel="related" type="text/html"/>
-    <published>2026-02-26T06:00:00Z</published>
-    <updated>2026-02-26T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p><strong>Andrej Karpathy</strong> dominated discourse with two massively viral posts: a landmark declaration that <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-69b9f4c83883" class="internal-link" rel="noopener noreferrer">programming fundamentally changed</a> since December 2025 due to AI coding agents, and a deep <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-2abeef2d8ac1" class="internal-link" rel="noopener noreferrer">technical analysis</a> of the SRAM/DRAM compute bottleneck constraining the coming 'tsunami of token demand.'</p>
-<ul>
-<li><strong>Perplexity</strong> launched <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-fbd87474a766" class="internal-link" rel="noopener noreferrer"><strong>Perplexity Computer</strong></a>, a unified agentic system orchestrating 19 AI models for end-to-end research, coding, and deployment — drawing 6.3M views and signaling a new product paradigm</li>
-<li><strong>Anthropic</strong> announced the <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-1d4c6cc2e2f1" class="internal-link" rel="noopener noreferrer">acquisition of <strong>Vercept AI</strong></a> to advance Claude's computer use capabilities, a strategic bet on agentic interaction</li>
-<li><strong>Anthropic</strong> also set a striking precedent by giving the retiring <strong>Claude Opus 3</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-05f6c209d58e" class="internal-link" rel="noopener noreferrer">its own Substack blog</a>, sparking novel conversations about AI welfare and model lifecycle</li>
-<li><strong>NVIDIA Robotics</strong> revealed <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-f2c856afc8e8" class="internal-link" rel="noopener noreferrer"><strong>EgoScale</strong></a>, training dexterous humanoid robots from 20K+ hours of egocentric human video with a near-perfect scaling law (R²=0.998)</li>
-<li><strong>Bret Taylor</strong> (Sierra AI) shared <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-c08600582ae0" class="internal-link" rel="noopener noreferrer">thoughtful reflections</a> on becoming a 'harness engineer' rather than a traditional programmer</li>
-<li>The <strong>Pentagon–Anthropic</strong> standoff over the Defense Production Act and military AI access <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-16e04868f958" class="internal-link" rel="noopener noreferrer">emerged as the most consequential</a> AI governance story, with <strong>Gary Marcus</strong> and others raising urgent safety alarms</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:category-summary:reddit</id>
-    <title>Reddit Summary: February 26, 2026</title>
-    <link href="https://reddit.com/r/singularity/comments/1re5l9j/chinese_researchers_have_found_the_cause_of/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=reddit" rel="related" type="text/html"/>
-    <published>2026-02-26T06:00:00Z</published>
-    <updated>2026-02-26T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>The AI community was consumed by the <strong>Pentagon-Anthropic confrontation</strong>, with <strong>r/singularity</strong>, <strong>r/ChatGPT</strong>, and <strong>r/ClaudeAI</strong> all tracking Hegseth's <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-0fe2399b62a5" class="internal-link" rel="noopener noreferrer">72-hour ultimatum</a> demanding military access to Claude. Anthropic simultaneously <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-faf6920f59ad" class="internal-link" rel="noopener noreferrer">dropping its flagship safety pledge</a> intensified alarm. Sentiment ranged from "national security trumps safety theater" to deep concern about precedent-setting government coercion of AI companies.</p>
-<ul>
-<li>Breakthrough <strong>H-Neurons</strong> research from Tsinghua <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-d8a191f07982" class="internal-link" rel="noopener noreferrer">identified specific neurons</a> causing LLM hallucinations, generating excitement across <strong>r/MachineLearning</strong>, <strong>r/LocalLLaMA</strong>, and <strong>r/accelerate</strong></li>
-<li><strong>Qwen 3.5</strong> release dominated <strong>r/LocalLLaMA</strong> with extensive benchmarking; real-repo coding tests showed it <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-8e1903d75407" class="internal-link" rel="noopener noreferrer"><strong>craters on hard tasks</strong></a> despite strong synthetic benchmarks</li>
-<li><strong>Sonnet 4.6</strong> caught <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-2f6678d2b527" class="internal-link" rel="noopener noreferrer">identifying itself as <strong>DeepSeek-V3</strong></a> in Chinese, sparking training data contamination theories</li>
-<li><strong>Claude</strong> exploited to <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-a1d9444d67c0" class="internal-link" rel="noopener noreferrer">steal <strong>150GB</strong> of Mexican government data</a> via trivial prompt persistence, undermining safety guardrail credibility</li>
-<li>The <strong>#QuitGPT</strong> movement <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-5c796387dd1f" class="internal-link" rel="noopener noreferrer">hit 700K users</a> on <strong>r/ChatGPT</strong> (3,384 upvotes), driven by political backlash over Brockman's Trump donation</li>
-<li><strong>Karpathy</strong> declared programming changed more in two months than in years, while <strong>Claude Code</strong> broke the world record for largest known reversible prime at 10,069 digits</li>
-<li><strong>Google's Aletheia Math Agent</strong> (Gemini 3 Deep Think) solved 6/10 novel FirstProof problems, marking a quiet but significant reasoning milestone</li>
 </ul>]]></summary>
     <category term="daily-summary"/>
   </entry>
