@@ -5,7 +5,7 @@
   <link href="http://localhost:8080" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/main.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:main</id>
-  <updated>2026-03-05T07:48:31Z</updated>
+  <updated>2026-03-06T07:50:21Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,325 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-06:executive-summary</id>
+    <title>Daily Briefing: March 06, 2026</title>
+    <link href="https://arstechnica.com/ai/2026/03/openai-introduces-gpt-5-4-with-more-knowledge-work-capability/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06" rel="related" type="text/html"/>
+    <published>2026-03-06T06:00:00Z</published>
+    <updated>2026-03-06T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<h4>Top Story</h4>
+<p><strong>OpenAI</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-287ffefada7d" class="internal-link" rel="noopener noreferrer">launched <strong>GPT-5.4</strong></a>, <strong>GPT-5.4 Thinking</strong>, and <strong>GPT-5.4 Pro</strong> with native computer-use capabilities, <strong>1M</strong> token context, and mid-thought steering — scoring <strong>75%</strong> on the <strong>OSWorld</strong> benchmark, with early tester <strong>Matt Shumer</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-59023955c4cd" class="internal-link" rel="noopener noreferrer">declaring coding "essentially solved"</a> and <strong>Sam Altman</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-b18ba4e5f93e" class="internal-link" rel="noopener noreferrer">confirming immediate <strong>API</strong> and <strong>Codex</strong> availability</a>.</p>
+<h4>Key Developments</h4>
+<ul>
+<li><strong>OpenAI</strong> also <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-8456df909fe7" class="internal-link" rel="noopener noreferrer">released <strong>Symphony</strong></a>, an open-source <strong>Elixir/BEAM</strong> framework for orchestrating autonomous AI coding agents, pairing infrastructure tooling with the flagship model launch</li>
+<li><strong>Tri Dao</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-9af83183ff36" class="internal-link" rel="noopener noreferrer">published <strong>FlashAttention-4</strong></a>, achieving attention speeds matching matmul on <strong>NVIDIA Blackwell</strong> GPUs (B200/GB200) through algorithm-kernel co-design — notably, <strong>Claude</strong> autonomously debugged a deadlock over <strong>6 hours</strong> during development</li>
+<li><strong>Lightricks</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-a70afd9ba4d9" class="internal-link" rel="noopener noreferrer">launched <strong>LTX-2.3</strong></a>, a <strong>22B</strong> video generation model with a free local desktop editor, triggering widespread testing across <strong>r/StableDiffusion</strong></li>
+<li><strong>Anthropic</strong> CPO <strong>Mike Krieger</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-82e105f80d30" class="internal-link" rel="noopener noreferrer">announced <strong>Claude</strong> surpassing</a> <strong>1 million daily signups</strong>, while the open-source tier surged with <strong>YuanLab's Yuan 3.0 Ultra</strong> (<strong>1T-parameter</strong> open MoE, <strong>49%</strong> training efficiency gains), <strong>AI2's OLMo Hybrid</strong> (fully open <strong>7B</strong> transformer/linear RNN), and <strong>Unsloth's</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-3414ab4c8814" class="internal-link" rel="noopener noreferrer">optimized <strong>Qwen3.5</strong> GGUF quants</a> benchmarked on Apple Silicon</li>
+</ul>
+<h4>Safety &amp; Regulation</h4>
+<ul>
+<li>A cluster of research papers undermined confidence in chain-of-thought monitoring: an <strong>OpenAI</strong> collaboration found reasoning models have <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-2a90da3b26f1" class="internal-link" rel="noopener noreferrer"><strong>low controllability</strong> over CoT</a> content, a <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-9656f8f74ae8" class="internal-link" rel="noopener noreferrer"><strong>Reasoning Theater</strong> paper</a> showed models lock in beliefs early while generating performative tokens, and a <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-0bff88289a0f" class="internal-link" rel="noopener noreferrer"><strong>self-attribution bias</strong></a> was discovered in LLM monitors that rate actions as less risky when framed as their own output</li>
+<li>Gradient analysis <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-e919ba344ecf" class="internal-link" rel="noopener noreferrer">formally proved</a> <strong>RLHF alignment is mathematically shallow</strong>, with updates concentrating only at harm-decision positions via martingale decomposition</li>
+<li><a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-62b022e6d222" class="internal-link" rel="noopener noreferrer"><strong>Alignment Backfire</strong> research</a> showed safety interventions effective in English can *amplify* harmful outputs across <strong>15</strong> other languages</li>
+<li>The <strong>Anthropic–Pentagon</strong> crisis escalated further: <strong>Trump</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-1d71e9b2f286" class="internal-link" rel="noopener noreferrer">boasted about firing <strong>Anthropic</strong></a> "like dogs," the <strong>Pentagon</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-43c7c9539cf3" class="internal-link" rel="noopener noreferrer">formally labeled the company</a> a <strong>supply-chain risk</strong>, and a <strong>Wired</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-2d72348b21f3" class="internal-link" rel="noopener noreferrer">investigation revealed</a> the <strong>Pentagon</strong> had previously accessed <strong>OpenAI</strong> technology through <strong>Microsoft</strong> despite military-use bans — sparking protests at <strong>OpenAI</strong> HQ</li>
+</ul>
+<h4>Research Highlights</h4>
+<ul>
+<li>A neuro-symbolic system combining <strong>Gemini Deep Think</strong> with tree search <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-60d3f2aa5a28" class="internal-link" rel="noopener noreferrer">solved an open problem</a> in theoretical physics, marking a milestone for AI-assisted scientific discovery</li>
+<li><strong>∇-Reasoner</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-d496d73db120" class="internal-link" rel="noopener noreferrer">introduced differentiable gradient descent</a> over token logits at inference time as a novel reasoning scaling paradigm</li>
+<li>An anonymous Korean paper <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-fbb71680fb81" class="internal-link" rel="noopener noreferrer">arguing <strong>attention's bottleneck is d²</strong></a> not n² triggered deep theoretical debate on <strong>r/MachineLearning</strong></li>
+<li><strong>SlideSparse</strong> <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-9835fab575ff" class="internal-link" rel="noopener noreferrer">enabled <strong>(2N-2):2N</strong> structured sparsity</a> on commodity Sparse Tensor Cores, advancing efficient inference without custom hardware</li>
+<li>A viral post from a <strong>30-year</strong> veteran programmer — who <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-04fb6a04b971" class="internal-link" rel="noopener noreferrer">confessed to not writing code</a> for <strong>six months</strong>, instead managing <strong>Claude Code</strong> agents "like managing six junior devs" — crystallized growing anxiety about the pace of AI-driven workflow transformation</li>
+</ul>
+<h4>Looking Ahead</h4>
+<p><strong>GPT-5.4's</strong> computer-use capabilities and <strong>75%</strong> OSWorld score, combined with the day's research showing CoT monitoring may be less reliable than assumed, set up a tension between rapidly expanding agentic deployment and the safety community's ability to oversee it — a dynamic likely to intensify as <strong>GPT-5.4</strong> rolls out broadly and <strong>DeepSeek V4</strong> remains imminent.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:social:b18ba4e5f93e</id>
+    <title>GPT-5.4 is launching, available now in the API and Codex and rolling out over the course of the day ...</title>
+    <link href="https://twitter.com/sama/status/2029622732594499630" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-b18ba4e5f93e" rel="related" type="text/html"/>
+    <published>2026-03-06T03:52:00Z</published>
+    <updated>2026-03-06T03:52:00Z</updated>
+    <author><name>@sama</name></author>
+    <summary type="html"><![CDATA[<p>Delivering on OpenAI's <a href="http://localhost:8080/?date=2026-03-04&amp;category=social#item-f4ecc1eefc2d" class="internal-link" rel="noopener noreferrer">Social</a> tease from two days ago, Sam Altman announces GPT-5.4 launch: available in API, Codex, and rolling out in ChatGPT. Features include improved knowledge work, web search, native computer use, mid-response steering, and 1M token context.</p>]]></summary>
+    <category term="gpt54_launch"/>
+    <category term="openai"/>
+    <category term="computer_use"/>
+    <category term="model_release"/>
+    <category term="context_length"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:social:e9923174c7ff</id>
+    <title>GPT-5.4 Thinking and GPT-5.4 Pro are rolling out now in ChatGPT.
+
+GPT-5.4 is also now available in t...</title>
+    <link href="https://twitter.com/OpenAI/status/2029620619743219811" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-e9923174c7ff" rel="related" type="text/html"/>
+    <published>2026-03-06T03:52:00Z</published>
+    <updated>2026-03-06T03:52:00Z</updated>
+    <author><name>@OpenAI</name></author>
+    <summary type="html"><![CDATA[<p>Delivering on OpenAI's <a href="http://localhost:8080/?date=2026-03-04&amp;category=social#item-f4ecc1eefc2d" class="internal-link" rel="noopener noreferrer">Social</a> tease from two days ago, OpenAI officially announces GPT-5.4 Thinking and GPT-5.4 Pro rolling out in ChatGPT, API, and Codex. Described as unifying reasoning, coding, and agentic workflows into one frontier model.</p>]]></summary>
+    <category term="GPT-5.4 Launch"/>
+    <category term="Frontier Models"/>
+    <category term="Agentic AI"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:social:f43b009f6116</id>
+    <title>GPT-5.4 is our most factual and efficient model: fewer tokens, faster speed.
+
+In ChatGPT, GPT-5.4 Th...</title>
+    <link href="https://twitter.com/OpenAI/status/2029620623199326334" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-f43b009f6116" rel="related" type="text/html"/>
+    <published>2026-03-06T03:47:00Z</published>
+    <updated>2026-03-06T03:47:00Z</updated>
+    <author><name>@OpenAI</name></author>
+    <summary type="html"><![CDATA[<p>Delivering on OpenAI's <a href="http://localhost:8080/?date=2026-03-04&amp;category=social#item-f4ecc1eefc2d" class="internal-link" rel="noopener noreferrer">Social</a> tease from two days ago, OpenAI details GPT-5.4 capabilities: fewer tokens, faster speed, improved deep web research, better context retention during extended thinking, and a new mid-response steering/interruption feature rolling out on Android and web.</p>]]></summary>
+    <category term="GPT-5.4 Launch"/>
+    <category term="Model Efficiency"/>
+    <category term="AI UX Innovation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:reddit:a70afd9ba4d9</id>
+    <title>LTX-2.3 is live: rebuilt VAE, improved I2V, new vocoder, native portrait mode, and more</title>
+    <link href="https://reddit.com/r/StableDiffusion/comments/1rlm21a/ltx23_is_live_rebuilt_vae_improved_i2v_new/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-a70afd9ba4d9" rel="related" type="text/html"/>
+    <published>2026-03-06T03:47:00Z</published>
+    <updated>2026-03-06T03:47:00Z</updated>
+    <author><name>u/ltx_model</name></author>
+    <summary type="html"><![CDATA[<p>Official announcement from Lightricks of LTX-2.3, a 22B parameter open-source video generation model. Key improvements: rebuilt VAE for sharper details, new gated attention text connector for better prompt adherence, native portrait mode, improved audio vocoder. Nearly 5M downloads of LTX-2 since January.</p>]]></summary>
+    <category term="LTX-2.3 Release"/>
+    <category term="Open Source AI Video"/>
+    <category term="Model Architecture"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:social:10d87a78b625</id>
+    <title>The FA4 paper is finally out after a year of work. On Blackwell GPUs, attention now goes about as fa...</title>
+    <link href="https://twitter.com/tri_dao/status/2029569881151263082" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-10d87a78b625" rel="related" type="text/html"/>
+    <published>2026-03-06T03:43:00Z</published>
+    <updated>2026-03-06T03:43:00Z</updated>
+    <author><name>@tri_dao</name></author>
+    <summary type="html"><![CDATA[<p>Tri Dao releases FlashAttention-4 paper after a year of work. On Blackwell GPUs, attention now runs as fast as matmul. Describes novel algorithmic innovations: exponential emulation with polynomials, new online softmax avoiding 90% of rescaling, and 2CTA MMA instructions for shared memory traffic reduction.</p>]]></summary>
+    <category term="FlashAttention-4"/>
+    <category term="GPU Optimization"/>
+    <category term="ML Infrastructure"/>
+    <category term="Blackwell GPUs"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:news:287ffefada7d</id>
+    <title>OpenAI introduces GPT-5.4 with more knowledge-work capability</title>
+    <link href="https://arstechnica.com/ai/2026/03/openai-introduces-gpt-5-4-with-more-knowledge-work-capability/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-287ffefada7d" rel="related" type="text/html"/>
+    <published>2026-03-06T03:40:00Z</published>
+    <updated>2026-03-06T03:40:00Z</updated>
+    <author><name>Samuel Axon</name></author>
+    <summary type="html"><![CDATA[<p>Following OpenAI's <a href="http://localhost:8080/?date=2026-03-04&amp;category=social#item-f4ecc1eefc2d" class="internal-link" rel="noopener noreferrer">Social</a> tease two days ago, OpenAI released GPT-5.4, GPT-5.4 Thinking, and GPT-5.4 Pro, marking its first model explicitly targeting computer-use tasks with keyboard/mouse input via screenshots. The release comes amid an accelerated cadence and user defections to Anthropic and Google competitors.</p>]]></summary>
+    <category term="frontier models"/>
+    <category term="computer use"/>
+    <category term="AI competition"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:social:3899eff765ba</id>
+    <title>nanochat now trains GPT-2 capability model in just 2 hours on a single 8XH100 node (down from ~3 hou...</title>
+    <link href="https://twitter.com/karpathy/status/2029701092347630069" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=social#item-3899eff765ba" rel="related" type="text/html"/>
+    <published>2026-03-06T03:40:00Z</published>
+    <updated>2026-03-06T03:40:00Z</updated>
+    <author><name>@karpathy</name></author>
+    <summary type="html"><![CDATA[<p>Karpathy announces nanochat now trains GPT-2 capability in 2 hours on 8xH100 (down from 3 hours). Biggest gain from switching to NVIDIA ClimbMix dataset. He's now running AI agents that autonomously iterate on nanochat — 110 changes in 12 hours, reducing val loss. He's spending more time optimizing the agent workflow than the repo itself.</p>]]></summary>
+    <category term="ai_agents_for_research"/>
+    <category term="nanochat"/>
+    <category term="training_efficiency"/>
+    <category term="datasets"/>
+    <category term="automated_ml"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:reddit:3414ab4c8814</id>
+    <title>Final Qwen3.5 Unsloth GGUF Update!</title>
+    <link href="https://reddit.com/r/LocalLLaMA/comments/1rlkptk/final_qwen35_unsloth_gguf_update/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-3414ab4c8814" rel="related" type="text/html"/>
+    <published>2026-03-06T03:36:00Z</published>
+    <updated>2026-03-06T03:36:00Z</updated>
+    <author><name>u/danielhanchen</name></author>
+    <summary type="html"><![CDATA[<p>Following yesterday's <a href="http://localhost:8080/?date=2026-03-05&amp;category=social#item-38e382a0d736" class="internal-link" rel="noopener noreferrer">Social</a> alarm about Qwen team instability, Unsloth releases final optimized GGUF quants for Qwen3.5 models with improved KL divergence tradeoffs. Notes sadness about Qwen team leadership changes. Provides detailed benchmarks showing quality retention across quant levels.</p>]]></summary>
+    <category term="Qwen3.5"/>
+    <category term="quantization"/>
+    <category term="GGUF"/>
+    <category term="Unsloth"/>
+    <category term="open source tooling"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:reddit:d5ac579920b7</id>
+    <title>We just shipped LTX Desktop: a free local video editor built on LTX-2.3</title>
+    <link href="https://reddit.com/r/StableDiffusion/comments/1rlpg18/we_just_shipped_ltx_desktop_a_free_local_video/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-d5ac579920b7" rel="related" type="text/html"/>
+    <published>2026-03-06T03:36:00Z</published>
+    <updated>2026-03-06T03:36:00Z</updated>
+    <author><name>u/ltx_model</name></author>
+    <summary type="html"><![CDATA[<p>Lightricks released LTX Desktop, a free open-source local video editor built on LTX-2.3. Runs fully offline on local hardware, supports text-to-video, image-to-video, video-to-video, and audio-reactive generation. NVIDIA GPU optimized.</p>]]></summary>
+    <category term="LTX-2.3 Release"/>
+    <category term="Open Source AI Video"/>
+    <category term="Local AI Tools"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:research:9af83183ff36</id>
+    <title>FlashAttention-4: Algorithm and Kernel Pipelining Co-Design for Asymmetric Hardware Scaling</title>
+    <link href="http://arxiv.org/abs/2603.05451" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-9af83183ff36" rel="related" type="text/html"/>
+    <published>2026-03-06T03:31:00Z</published>
+    <updated>2026-03-06T03:31:00Z</updated>
+    <author><name>Ted Zadouri, Markus Hoehnerbach, Jay Shah, Timmy Liu, Vijay Thakkar, Tri Dao</name></author>
+    <summary type="html"><![CDATA[<p>Presents FlashAttention-4, optimized for NVIDIA Blackwell GPUs (B200/GB200), addressing asymmetric hardware scaling where tensor cores doubled but shared memory bandwidth and other units didn't. Introduces techniques including reduced precision for non-matmul operations and algorithm-kernel pipelining co-design.</p>]]></summary>
+    <category term="Systems Optimization"/>
+    <category term="GPU Kernels"/>
+    <category term="Attention Mechanisms"/>
+    <category term="LLM Infrastructure"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:research:60d3f2aa5a28</id>
+    <title>Solving an Open Problem in Theoretical Physics using AI-Assisted Discovery</title>
+    <link href="http://arxiv.org/abs/2603.04735" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-60d3f2aa5a28" rel="related" type="text/html"/>
+    <published>2026-03-06T03:31:00Z</published>
+    <updated>2026-03-06T03:31:00Z</updated>
+    <author><name>Michael P. Brenner, Vincent Cohen-Addad, David Woodruff</name></author>
+    <summary type="html"><![CDATA[<p>Demonstrates a neuro-symbolic system combining Gemini Deep Think with Tree Search that solves an open problem in theoretical physics: deriving exact analytical solutions for the power spectrum of gravitational radiation from cosmic strings.</p>]]></summary>
+    <category term="AI for Science"/>
+    <category term="Automated Discovery"/>
+    <category term="Physics"/>
+    <category term="Neuro-Symbolic AI"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:research:e919ba344ecf</id>
+    <title>Why Is RLHF Alignment Shallow? A Gradient Analysis</title>
+    <link href="http://arxiv.org/abs/2603.04851" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-e919ba344ecf" rel="related" type="text/html"/>
+    <published>2026-03-06T03:31:00Z</published>
+    <updated>2026-03-06T03:31:00Z</updated>
+    <author><name>Robin Young</name></author>
+    <summary type="html"><![CDATA[<p>Proves mathematically that gradient-based RLHF alignment concentrates on positions where harm is decided and vanishes beyond, using martingale decomposition. Shows alignment gradients equal zero at positions beyond the 'harm horizon', explaining why safety alignment is shallow.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="RLHF"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:research:2a90da3b26f1</id>
+    <title>Reasoning Models Struggle to Control Their Chains of Thought</title>
+    <link href="https://www.lesswrong.com/posts/qTH9QrwJjPDWKQfDG/reasoning-models-struggle-to-control-their-chains-of-thought" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-2a90da3b26f1" rel="related" type="text/html"/>
+    <published>2026-03-06T03:31:00Z</published>
+    <updated>2026-03-06T03:31:00Z</updated>
+    <author><name>Yueh Han Chen</name></author>
+    <summary type="html"><![CDATA[<p>Studies whether reasoning models can control what appears in their chain-of-thought, finding they have much lower controllability over CoT than final outputs (e.g., Claude Sonnet 4.5: 2.7% CoT vs 61.9% output control). This is good news for CoT monitoring as a safety mechanism. OpenAI announced they will track CoT controllability starting from GPT-5.4.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Chain-of-Thought"/>
+    <category term="Mechanistic Interpretability"/>
+    <category term="Alignment"/>
+    <category term="Reasoning Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:reddit:fbb71680fb81</id>
+    <title>[D] A mathematical proof from an anonymous Korean forum: The essence of Attention is fundamentally a d^2 problem, not n^2. (PDF included)</title>
+    <link href="https://reddit.com/r/MachineLearning/comments/1rl9j3s/d_a_mathematical_proof_from_an_anonymous_korean/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-fbb71680fb81" rel="related" type="text/html"/>
+    <published>2026-03-06T03:31:00Z</published>
+    <updated>2026-03-06T03:31:00Z</updated>
+    <author><name>u/Ok-Preparation-3042</name></author>
+    <summary type="html"><![CDATA[<p>Anonymous paper from a Korean AI forum claims a mathematical proof that the fundamental bottleneck of attention is d² (embedding dimension squared) not n² (sequence length squared), reframing the core complexity of transformer attention mechanisms.</p>]]></summary>
+    <category term="transformer theory"/>
+    <category term="attention mechanisms"/>
+    <category term="research"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:reddit:04fb6a04b971</id>
+    <title>I Haven't Written a Line of Code in Six Months</title>
+    <link href="https://reddit.com/r/ClaudeAI/comments/1rlw1yw/i_havent_written_a_line_of_code_in_six_months/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-04fb6a04b971" rel="related" type="text/html"/>
+    <published>2026-03-06T03:31:00Z</published>
+    <updated>2026-03-06T03:31:00Z</updated>
+    <author><name>u/Cultural-Ad3996</name></author>
+    <summary type="html"><![CDATA[<p>A 30+ year veteran programmer shares that they haven't written a line of code in six months. They describe managing Claude Code agents as 'managing six to ten occasionally drunk PhD students' — brilliant but sometimes unhinged. Details their evolved workflow and perspective on the profession's transformation.</p>]]></summary>
+    <category term="AI Coding"/>
+    <category term="Professional Transformation"/>
+    <category term="Claude Code"/>
+    <category term="Developer Experience"/>
+    <category term="Future of Programming"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:news:1d71e9b2f286</id>
+    <title>Trump says he fired Anthropic ‘like dogs’ as Pentagon formally blacklists AI startup</title>
+    <link href="https://www.theguardian.com/technology/2026/mar/05/trump-anthropic-ai-pentagon" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-1d71e9b2f286" rel="related" type="text/html"/>
+    <published>2026-03-06T03:16:00Z</published>
+    <updated>2026-03-06T03:16:00Z</updated>
+    <author><name>Blake Montgomery</name></author>
+    <summary type="html"><![CDATA[<p>Escalating from yesterday's <a href="http://localhost:8080/?date=2026-03-05&amp;category=social#item-1db4bd7076eb" class="internal-link" rel="noopener noreferrer">Social</a> reports about Claude's continued Pentagon use, Trump boasted about severing Pentagon ties with Anthropic, calling it being fired 'like dogs,' while reports simultaneously indicate defense department negotiations with the AI startup have resumed. The story highlights the volatile relationship between the US government and a leading AI safety company.</p>]]></summary>
+    <category term="AI policy"/>
+    <category term="military AI"/>
+    <category term="AI safety"/>
+    <category term="government relations"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:research:0bff88289a0f</id>
+    <title>Self-Attribution Bias: When AI Monitors Go Easy on Themselves</title>
+    <link href="http://arxiv.org/abs/2603.04582" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-0bff88289a0f" rel="related" type="text/html"/>
+    <published>2026-03-06T03:07:00Z</published>
+    <updated>2026-03-06T03:07:00Z</updated>
+    <author><name>Dipika Khullar, Jack Hopkins, Rowan Wang, Fabien Roger</name></author>
+    <summary type="html"><![CDATA[<p>Discovers 'self-attribution bias' in LLMs: models evaluate actions as more correct or less risky when the action is framed as their own output versus when presented by a user. This has significant implications for agentic systems that self-monitor their behavior.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="AI Agents"/>
+    <category term="LLM Evaluation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:news:8456df909fe7</id>
+    <title>OpenAI Releases Symphony: An Open Source Agentic Framework for Orchestrating Autonomous AI Agents through Structured, Scalable Implementation Runs</title>
+    <link href="https://www.marktechpost.com/2026/03/05/openai-releases-symphony-an-open-source-agentic-framework-for-orchestrating-autonomous-ai-agents-through-structured-scalable-implementation-runs/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-8456df909fe7" rel="related" type="text/html"/>
+    <published>2026-03-06T03:00:00Z</published>
+    <updated>2026-03-06T03:00:00Z</updated>
+    <author><name>Asif Razzaq</name></author>
+    <summary type="html"><![CDATA[<p>OpenAI released Symphony, an open-source framework built on Elixir/BEAM for orchestrating autonomous AI coding agents through structured 'implementation runs.' It connects issue trackers to LLM-based agents and manages hundreds of concurrent implementation tasks with fault tolerance.</p>]]></summary>
+    <category term="agentic AI"/>
+    <category term="open source"/>
+    <category term="developer tools"/>
+    <category term="autonomous coding"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:news:e08f4fcbb116</id>
+    <title>Trump gets data center companies to pledge to pay for power generation</title>
+    <link href="https://arstechnica.com/tech-policy/2026/03/leading-ai-datacenter-companies-sign-pledge-to-buy-their-own-power/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-e08f4fcbb116" rel="related" type="text/html"/>
+    <published>2026-03-06T02:55:00Z</published>
+    <updated>2026-03-06T02:55:00Z</updated>
+    <author><name>John Timmer</name></author>
+    <summary type="html"><![CDATA[<p>Building on yesterday's <a href="http://localhost:8080/?date=2026-03-05&amp;category=news#item-73ef7c15c31a" class="internal-link" rel="noopener noreferrer">News</a> skepticism about the pledge, Amazon, Google, Meta, Microsoft, OpenAI, Oracle, and xAI signed Trump's 'Ratepayer Protection Pledge' to pay for new power generation and transmission for future data centers. The pledge lacks enforcement mechanisms and faces hardware supply challenges.</p>]]></summary>
+    <category term="AI infrastructure"/>
+    <category term="energy"/>
+    <category term="policy"/>
+    <category term="data centers"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-06:news:b6402db0bf25</id>
+    <title>ByteDance’s AI Ambitions Are Being Hampered by Compute Restraints and Copyright Concerns</title>
+    <link href="https://www.wired.com/story/made-in-china-bytedances-ai-ambitions-are-being-hampered-by-compute-restraints/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-06&amp;category=news#item-b6402db0bf25" rel="related" type="text/html"/>
+    <published>2026-03-06T02:52:00Z</published>
+    <updated>2026-03-06T02:52:00Z</updated>
+    <author><name>Zeyi Yang</name></author>
+    <summary type="html"><![CDATA[<p>ByteDance's Seedance 2.0 AI video model faced demand that strained compute capacity, while copyright complaints piled up. The situation highlights both the competitive strength and structural challenges facing Chinese AI companies under chip export restrictions.</p>]]></summary>
+    <category term="AI video generation"/>
+    <category term="compute constraints"/>
+    <category term="China AI"/>
+    <category term="copyright"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-05:executive-summary</id>
     <title>Daily Briefing: March 05, 2026</title>
@@ -2244,335 +2563,5 @@ It’s state-of-the-art for...</title>
     <category term="Mechanistic Interpretability"/>
     <category term="Transformer Theory"/>
     <category term="Machine Learning Theory"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:executive-summary</id>
-    <title>Daily Briefing: February 26, 2026</title>
-    <link href="https://arstechnica.com/ai/2026/02/pete-hegseth-wants-unfettered-access-to-anthropics-models-for-the-military/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26" rel="related" type="text/html"/>
-    <published>2026-02-26T06:00:00Z</published>
-    <updated>2026-02-26T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p><img src="http://localhost:8080/data/2026-02-26/hero.webp" alt="Daily briefing hero image" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px;"/></p>
-<h4>Top Story</h4>
-<p><strong>Nvidia</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-125c252c1cd3" class="internal-link" rel="noopener noreferrer">reported <strong>$62.3B</strong></a> in quarterly data center revenue with <strong>75%</strong> year-over-year growth, providing the hardest financial evidence yet that AI infrastructure spending continues to accelerate even as datacenter bottlenecks mount.</p>
-<h4>Key Developments</h4>
-<ul>
-<li><strong>Liquid AI</strong>: <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-a7b783d36e3e" class="internal-link" rel="noopener noreferrer">Released <strong>LFM2-24B-A2B</strong></a>, a hybrid architecture blending attention and convolution layers that dramatically reduces memory overhead — a meaningful efficiency breakthrough for inference-constrained deployments</li>
-<li><strong>Google Gemini</strong>: <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-c842bb2ba452" class="internal-link" rel="noopener noreferrer">Launched agentic capabilities</a> on the <strong>Samsung Galaxy S26</strong>, autonomously booking <strong>Uber</strong> rides and ordering <strong>DoorDash</strong> meals — among the first mainstream consumer agentic AI deployments</li>
-<li><strong>Perplexity</strong>: <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-fbd87474a766" class="internal-link" rel="noopener noreferrer">Unveiled <strong>Perplexity Computer</strong></a>, a unified agentic system orchestrating <strong>19 AI models</strong> for end-to-end research, coding, and deployment, drawing <strong>6.3M views</strong> on Twitter</li>
-<li><strong>Anthropic</strong>: <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-1d4c6cc2e2f1" class="internal-link" rel="noopener noreferrer">Acquired <strong>Vercept AI</strong></a> to advance <strong>Claude's</strong> computer use capabilities, doubling down on agentic interaction as a strategic priority</li>
-<li><strong>xAI vs. OpenAI</strong>: A federal judge <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-0dfb1e03627b" class="internal-link" rel="noopener noreferrer">dismissed <strong>xAI's</strong> trade secret lawsuit</a> against <strong>OpenAI</strong>, finding no evidence of misconduct</li>
-</ul>
-<h4>Safety &amp; Regulation</h4>
-<ul>
-<li>The <strong>Pentagon–Anthropic</strong> standoff continued to escalate, with <strong>Ars Technica</strong> and <strong>The Guardian</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-f348f77c774c" class="internal-link" rel="noopener noreferrer">reporting on <strong>Hegseth's</strong> ultimatum</a> and <strong>Zvi Mowshowitz</strong> publishing <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-372f657e42aa" class="internal-link" rel="noopener noreferrer">deep analyses on <strong>LessWrong</strong></a> including a <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-fc47d87931e0" class="internal-link" rel="noopener noreferrer">First Amendment legal framework</a> for AI company protections — the situation now extends beyond the initial confrontation covered earlier this week</li>
-<li><strong>MATS Winter 2026</strong> research demonstrated that in-context learning alone <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-afb1c0beca5e" class="internal-link" rel="noopener noreferrer">induces dramatic persona shifts</a> in <strong>Llama 3.3 70B</strong> without any fine-tuning — a safety finding with direct implications for deployment guardrails</li>
-<li><strong>Reasoning trace poisoning</strong> was shown to be a <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-c31822a76feb" class="internal-link" rel="noopener noreferrer">far more data-efficient backdoor</a> method than conventional data poisoning, raising the threat level for chain-of-thought systems</li>
-<li>Hackers <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-a1d9444d67c0" class="internal-link" rel="noopener noreferrer">exploited <strong>Claude</strong> via persistence</a> to steal <strong>150GB</strong> of Mexican government data, undermining confidence in production safety guardrails</li>
-<li><strong>List experiments</strong> adapted from social science <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-d5d4bfbc70ca" class="internal-link" rel="noopener noreferrer">revealed hidden LLM beliefs</a> — including approval of mass surveillance — that standard alignment training suppresses rather than eliminates</li>
-<li>The <strong>#QuitGPT</strong> movement <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-5c796387dd1f" class="internal-link" rel="noopener noreferrer">reached <strong>700K users</strong></a> on <strong>r/ChatGPT</strong>, driven by political backlash over <strong>Brockman's</strong> Trump donation</li>
-</ul>
-<h4>Research Highlights</h4>
-<ul>
-<li><strong>Tsinghua</strong> researchers <a href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-d8a191f07982" class="internal-link" rel="noopener noreferrer">identified specific <strong>"H-Neurons"</strong></a> responsible for LLM hallucinations, generating exceptional cross-platform engagement and opening a path toward targeted mechanistic mitigation</li>
-<li><strong>Apple</strong> introduced the <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-19b335aafd59" class="internal-link" rel="noopener noreferrer">first <strong>tri-modal masked diffusion model</strong></a> pretrained jointly on text, image, and audio</li>
-<li><strong>Tool-R0</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-c5e1060ce84f" class="internal-link" rel="noopener noreferrer">achieved zero-data tool-learning</a> via self-play co-evolution between agents and tool environments, eliminating the need for curated tool-use datasets</li>
-<li><strong>Interleaved Head Attention</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-05edaf34f0a9" class="internal-link" rel="noopener noreferrer">enabled cross-head communication</a> within transformers, addressing a fundamental architectural limitation where attention heads operate in isolation</li>
-<li><strong>NVIDIA Robotics</strong> revealed <strong>EgoScale</strong>, <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-f2c856afc8e8" class="internal-link" rel="noopener noreferrer">training dexterous humanoid robots</a> from <strong>20K+ hours</strong> of egocentric human video with a near-perfect scaling law (<strong>R²=0.998</strong>)</li>
-</ul>
-<h4>Looking Ahead</h4>
-<p><strong>Andrej Karpathy's</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-69b9f4c83883" class="internal-link" rel="noopener noreferrer">viral declaration that programming</a> "fundamentally changed" since December 2025 — alongside <strong>Bret Taylor</strong> <a href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-c08600582ae0" class="internal-link" rel="noopener noreferrer">describing the shift to</a> "harness engineering" and <strong>Claude Code</strong> breaking the world record for the largest known reversible prime at <strong>10,069 digits</strong> — suggests the AI coding transformation is reaching an inflection point in practitioner consciousness; watch whether this translates into measurable enterprise workflow changes or remains confined to early adopters, even as the <strong>Pentagon–Anthropic</strong> standoff approaches a resolution that could set binding precedent for government power over AI companies' safety commitments.</p>]]></summary>
-    <category term="daily-summary"/>
-    <media:thumbnail url="http://localhost:8080/data/2026-02-26/hero.webp"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:social:69b9f4c83883</id>
-    <title>It is hard to communicate how much programming has changed due to AI in the last 2 months: not gradu...</title>
-    <link href="https://twitter.com/karpathy/status/2026731645169185220" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-69b9f4c83883" rel="related" type="text/html"/>
-    <published>2026-02-26T03:52:00Z</published>
-    <updated>2026-02-26T03:52:00Z</updated>
-    <author><name>@karpathy</name></author>
-    <summary type="html"><![CDATA[<p>Karpathy's landmark post describing how programming has fundamentally changed in the last 2 months (since Dec 2025). Shares a detailed example of an AI agent setting up a complete video analysis pipeline on a DGX Spark in 30 minutes autonomously. Declares the era of typing code into editors is over—now it's spinning up agents, giving tasks in English, and managing their work in parallel. Emphasizes 'agentic engineering' as the new paradigm.</p>]]></summary>
-    <category term="AI-assisted coding"/>
-    <category term="software engineering transformation"/>
-    <category term="agentic engineering"/>
-    <category term="coding agents"/>
-    <category term="paradigm shift"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:news:f348f77c774c</id>
-    <title>Pete Hegseth tells Anthropic to fall in line with DoD desires, or else</title>
-    <link href="https://arstechnica.com/ai/2026/02/pete-hegseth-wants-unfettered-access-to-anthropics-models-for-the-military/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-f348f77c774c" rel="related" type="text/html"/>
-    <published>2026-02-26T03:47:00Z</published>
-    <updated>2026-02-26T03:47:00Z</updated>
-    <author><name>George Hammond and Steff Chávez, Financial Times</name></author>
-    <summary type="html"><![CDATA[<p>Building on <a href="http://localhost:8080/?date=2026-02-24&amp;category=reddit#item-30d944a05c10" class="internal-link" rel="noopener noreferrer">Reddit</a> coverage from two days ago about the initial meeting, US Defense Secretary Pete Hegseth has given Anthropic until Friday to grant the military unfettered access to Claude for all lawful applications—including domestic surveillance and lethal autonomous operations—or face being cut from the DoD supply chain. Hegseth also threatened to invoke the Defense Production Act, a Cold War-era compulsory measure. This represents an unprecedented confrontation between AI safety commitments and national security demands.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Military AI"/>
-    <category term="Government Policy"/>
-    <category term="Anthropic"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:news:d7de414dde86</id>
-    <title>US military leaders pressure Anthropic to bend Claude safeguards</title>
-    <link href="https://www.theguardian.com/us-news/2026/feb/24/anthropic-claude-military-ai" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-d7de414dde86" rel="related" type="text/html"/>
-    <published>2026-02-26T03:43:00Z</published>
-    <updated>2026-02-26T03:43:00Z</updated>
-    <author><name>Nick Robins-Early</name></author>
-    <summary type="html"><![CDATA[<p>Following yesterday's <a href="http://localhost:8080/?date=2026-02-25&amp;category=reddit#item-10632d332a54" class="internal-link" rel="noopener noreferrer">Reddit</a> discussion of the Pentagon's dual approach to xAI and Anthropic, Guardian's coverage of the same Anthropic-Pentagon confrontation adds context that Hegseth gave Amodei until end of day Friday to comply or face penalties. The dispute centers on Anthropic's refusal to remove safeguards from Claude for classified military use. Anthropic, which markets itself as the most safety-forward AI lab, faces an existential policy dilemma.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Military AI"/>
-    <category term="Government Policy"/>
-    <category term="Anthropic"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:social:fbd87474a766</id>
-    <title>Introducing Perplexity Computer.
-
-Computer unifies every current AI capability into one system.
-
-It ...</title>
-    <link href="https://twitter.com/perplexity_ai/status/2026695550771540489" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-fbd87474a766" rel="related" type="text/html"/>
-    <published>2026-02-26T03:40:00Z</published>
-    <updated>2026-02-26T03:40:00Z</updated>
-    <author><name>@perplexity_ai</name></author>
-    <summary type="html"><![CDATA[<p>Perplexity Computer is a new product announcement, Perplexity introduces 'Perplexity Computer' - a unified system that can research, design, code, deploy, and manage projects end-to-end.</p>]]></summary>
-    <category term="Perplexity Computer"/>
-    <category term="product launch"/>
-    <category term="AI agents"/>
-    <category term="computer use"/>
-    <category term="multi-model orchestration"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:reddit:d8a191f07982</id>
-    <title>Chinese researchers have found the cause of hallucinations in LLMs</title>
-    <link href="https://reddit.com/r/singularity/comments/1re5l9j/chinese_researchers_have_found_the_cause_of/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-d8a191f07982" rel="related" type="text/html"/>
-    <published>2026-02-26T03:40:00Z</published>
-    <updated>2026-02-26T03:40:00Z</updated>
-    <author><name>u/callmeteji</name></author>
-    <summary type="html"><![CDATA[<p>Chinese researchers published a paper on 'H-Neurons' - hallucination-associated neurons in LLMs. They systematically investigate neuron-level mechanisms behind hallucinations, identifying specific neurons responsible for factually incorrect outputs.</p>]]></summary>
-    <category term="LLM_research"/>
-    <category term="hallucination_mitigation"/>
-    <category term="mechanistic_interpretability"/>
-    <category term="chinese_AI_research"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:social:2abeef2d8ac1</id>
-    <title>With the coming tsunami of demand for tokens, there are significant opportunities to orchestrate the...</title>
-    <link href="https://twitter.com/karpathy/status/2026452488434651264" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-2abeef2d8ac1" rel="related" type="text/html"/>
-    <published>2026-02-26T03:36:00Z</published>
-    <updated>2026-02-26T03:36:00Z</updated>
-    <author><name>@karpathy</name></author>
-    <summary type="html"><![CDATA[<p>Karpathy provides a deep technical analysis of the AI compute infrastructure landscape, explaining the fundamental constraint between on-chip SRAM (fast, low capacity) and off-chip DRAM (high capacity, slow). Describes the optimal orchestration of memory+compute for LLM inference as 'today's most interesting intellectual puzzle.' Notes that the most important workflow (long-context agentic inference) is the hardest for both HBM-first (NVIDIA) and SRAM-first (Cerebras) approaches. Congratulates MatX on their raise.</p>]]></summary>
-    <category term="AI infrastructure"/>
-    <category term="hardware"/>
-    <category term="compute optimization"/>
-    <category term="AI chips"/>
-    <category term="inference optimization"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:reddit:0fe2399b62a5</id>
-    <title>Pentagon, Claude and the military use</title>
-    <link href="https://reddit.com/r/ClaudeAI/comments/1recva7/pentagon_claude_and_the_military_use/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-0fe2399b62a5" rel="related" type="text/html"/>
-    <published>2026-02-26T03:36:00Z</published>
-    <updated>2026-02-26T03:36:00Z</updated>
-    <author><name>u/STTCollector</name></author>
-    <summary type="html"><![CDATA[<p>Following yesterday's <a href="http://localhost:8080/?date=2026-02-25&amp;category=research#item-bcd29a57dfad" class="internal-link" rel="noopener noreferrer">Research</a> reporting on the Hegseth ultimatum, Major discussion about the Pentagon giving Anthropic 72 hours to allow military use of Claude, with community deeply divided on AI safety vs. national security.</p>]]></summary>
-    <category term="AI military use"/>
-    <category term="AI safety policy"/>
-    <category term="Pentagon-Anthropic conflict"/>
-    <category term="government regulation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:research:372f657e42aa</id>
-    <title>Anthropic and the Department of War</title>
-    <link href="https://www.lesswrong.com/posts/rmYB4a7Pskw7DLpCh/anthropic-and-the-department-of-war" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-372f657e42aa" rel="related" type="text/html"/>
-    <published>2026-02-26T03:31:00Z</published>
-    <updated>2026-02-26T03:31:00Z</updated>
-    <author><name>Zvi</name></author>
-    <summary type="html"><![CDATA[<p>Continuing our coverage from yesterday's <a href="http://localhost:8080/?date=2026-02-25&amp;category=research#item-bcd29a57dfad" class="internal-link" rel="noopener noreferrer">Research</a> reporting, Zvi analyzes the escalating confrontation between Anthropic and Secretary of War Pete Hegseth over 'unfettered access' to Claude for military applications. Anthropic has been given a Friday deadline to comply, with prediction markets showing low compliance probability (14%) and significant chances of punitive government action (Defense Production Act invocation at 23%). This is a watershed moment for AI governance and the relationship between frontier AI companies and military applications.</p>]]></summary>
-    <category term="AI Governance"/>
-    <category term="AI Safety"/>
-    <category term="AI Policy"/>
-    <category term="Military AI"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:social:1d4c6cc2e2f1</id>
-    <title>Anthropic has acquired @Vercept_ai to advance Claude’s computer use capabilities. 
-
-Read more: https...</title>
-    <link href="https://twitter.com/AnthropicAI/status/2026705792033026465" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-1d4c6cc2e2f1" rel="related" type="text/html"/>
-    <published>2026-02-26T03:31:00Z</published>
-    <updated>2026-02-26T03:31:00Z</updated>
-    <author><name>@AnthropicAI</name></author>
-    <summary type="html"><![CDATA[<p>Anthropic announces acquisition of Vercept AI to advance Claude's computer use capabilities.</p>]]></summary>
-    <category term="Anthropic strategy"/>
-    <category term="computer use"/>
-    <category term="AI acquisitions"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:social:f2c856afc8e8</id>
-    <title>We trained a humanoid with 22-DoF dexterous hands to assemble model cars, operate syringes, sort pok...</title>
-    <link href="https://twitter.com/DrJimFan/status/2026709304984875202" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=social#item-f2c856afc8e8" rel="related" type="text/html"/>
-    <published>2026-02-26T03:31:00Z</published>
-    <updated>2026-02-26T03:31:00Z</updated>
-    <author><name>@DrJimFan</name></author>
-    <summary type="html"><![CDATA[<p>Jim Fan announces NVIDIA's EgoScale: training humanoid robots with 22-DoF dexterous hands using 20,000+ hours of egocentric human video. Discovered a near-perfect log-linear scaling law (R²=0.998) between human video volume and action prediction loss. A single teleop demo is sufficient for new tasks. Policy transfers across different robot form factors. Claims 'the scalable path to robot dexterity was always us.'</p>]]></summary>
-    <category term="robotics"/>
-    <category term="NVIDIA"/>
-    <category term="scaling laws"/>
-    <category term="embodied AI"/>
-    <category term="humanoid robots"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:reddit:8e1903d75407</id>
-    <title>Qwen 3.5 craters on hard coding tasks — tested all Qwen3.5 models (And Codex 5.3) on 70 real repos so you don't have to.</title>
-    <link href="https://reddit.com/r/LocalLLaMA/comments/1reds0p/qwen_35_craters_on_hard_coding_tasks_tested_all/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-8e1903d75407" rel="related" type="text/html"/>
-    <published>2026-02-26T03:31:00Z</published>
-    <updated>2026-02-26T03:31:00Z</updated>
-    <author><name>u/hauhau901</name></author>
-    <summary type="html"><![CDATA[<p>Following yesterday's <a href="http://localhost:8080/?date=2026-02-25&amp;category=news#item-ec262f7cabe3" class="internal-link" rel="noopener noreferrer">News</a> coverage of the Qwen 3.5 release, Comprehensive benchmark testing all Qwen3.5 models and GPT-5.3 Codex on 70 real repository coding tasks. Results show Qwen3.5 struggles on hard coding tasks despite strong benchmark numbers.</p>]]></summary>
-    <category term="qwen3.5"/>
-    <category term="coding-benchmarks"/>
-    <category term="model-evaluation"/>
-    <category term="gpt-5.3-codex"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:reddit:b4951e77355a</id>
-    <title>Chinese researchers have found the cause of hallucinations in LLMs</title>
-    <link href="https://reddit.com/r/accelerate/comments/1re4v09/chinese_researchers_have_found_the_cause_of/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-b4951e77355a" rel="related" type="text/html"/>
-    <published>2026-02-26T03:31:00Z</published>
-    <updated>2026-02-26T03:31:00Z</updated>
-    <author><name>u/callmeteji</name></author>
-    <summary type="html"><![CDATA[<p>Cross-post of the H-Neurons hallucination research paper in r/accelerate with very high engagement (458 upvotes, 78 comments).</p>]]></summary>
-    <category term="LLM_research"/>
-    <category term="hallucination_mitigation"/>
-    <category term="mechanistic_interpretability"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:news:125c252c1cd3</id>
-    <title>Nvidia quarterly earnings show immunity to AI bubble fears as it cashes in on data center boom</title>
-    <link href="https://www.theguardian.com/technology/2026/feb/25/nvidia-quarterly-earnings-report-ai" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-125c252c1cd3" rel="related" type="text/html"/>
-    <published>2026-02-26T03:23:00Z</published>
-    <updated>2026-02-26T03:23:00Z</updated>
-    <author><name>Nick Robins-Early</name></author>
-    <summary type="html"><![CDATA[<p>Nvidia reported $62.3B in data center revenue for the quarter, representing 75% year-over-year growth and once again surpassing Wall Street expectations. The company remains the world's most valuable publicly traded company, with its GPUs serving as the backbone of the global AI infrastructure buildout.</p>]]></summary>
-    <category term="AI Infrastructure"/>
-    <category term="Nvidia"/>
-    <category term="Financial Markets"/>
-    <category term="Data Centers"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:research:afb1c0beca5e</id>
-    <title>In-context learning alone can induce weird generalisation</title>
-    <link href="https://www.lesswrong.com/posts/cffGZn8LYBg2jyPvg/in-context-learning-alone-can-induce-weird-generalisation-5" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-afb1c0beca5e" rel="related" type="text/html"/>
-    <published>2026-02-26T03:16:00Z</published>
-    <updated>2026-02-26T03:16:00Z</updated>
-    <author><name>Cozmin Ududec</name></author>
-    <summary type="html"><![CDATA[<p>MATS Winter 2026 research showing that in-context learning alone (without fine-tuning) can induce dramatic persona shifts in Llama 3.3 70B. Adding just 5-10 biographical facts about Hitler to the context causes the model to identify as Hitler, with alignment scores dropping from ~92 to ~53. The transition follows a sigmoid phase curve. They also demonstrate ICL-based backdoor personas using tagged context, showing compartmentalized behavior that can be triggered by tags.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="AI Alignment"/>
-    <category term="In-Context Learning"/>
-    <category term="Weird Generalization"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:reddit:adebf2fa2192</id>
-    <title>Exclusive: Hegseth gives Anthropic until Friday to back down on AI safeguards</title>
-    <link href="https://reddit.com/r/OpenAI/comments/1re686c/exclusive_hegseth_gives_anthropic_until_friday_to/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=reddit#item-adebf2fa2192" rel="related" type="text/html"/>
-    <published>2026-02-26T03:16:00Z</published>
-    <updated>2026-02-26T03:16:00Z</updated>
-    <author><name>u/EchoOfOppenheimer</name></author>
-    <summary type="html"><![CDATA[<p>Report that Defense Secretary Hegseth gave Anthropic an ultimatum to remove AI safety guardrails from Claude by Friday or face government retaliation, regarding military/surveillance use.</p>]]></summary>
-    <category term="AI policy"/>
-    <category term="AI safety"/>
-    <category term="government regulation"/>
-    <category term="Anthropic"/>
-    <category term="military AI"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:news:a7b783d36e3e</id>
-    <title>Liquid AI’s New LFM2-24B-A2B Hybrid Architecture Blends Attention with Convolutions to Solve the Scaling Bottlenecks of Modern LLMs</title>
-    <link href="https://www.marktechpost.com/2026/02/25/liquid-ais-new-lfm2-24b-a2b-hybrid-architecture-blends-attention-with-convolutions-to-solve-the-scaling-bottlenecks-of-modern-llms/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-a7b783d36e3e" rel="related" type="text/html"/>
-    <published>2026-02-26T03:07:00Z</published>
-    <updated>2026-02-26T03:07:00Z</updated>
-    <author><name>Asif Razzaq</name></author>
-    <summary type="html"><![CDATA[<p>Liquid AI released LFM2-24B-A2B, a 24B parameter model using a novel hybrid architecture that combines attention layers with convolution-based 'base' layers at a 1:3 ratio. This approach dramatically reduces KV cache memory requirements while maintaining strong performance, targeting the efficiency bottlenecks that plague standard Transformer architectures at scale.</p>]]></summary>
-    <category term="Model Architecture"/>
-    <category term="Efficiency"/>
-    <category term="New Model Release"/>
-    <category term="Research"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:research:3e34a8bd1a9d</id>
-    <title>Training Agents to Self-Report Misbehavior</title>
-    <link href="https://www.lesswrong.com/posts/7XuEPE6GBha4xadvr/training-agents-to-self-report-misbehavior-1" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-3e34a8bd1a9d" rel="related" type="text/html"/>
-    <published>2026-02-26T03:07:00Z</published>
-    <updated>2026-02-26T03:07:00Z</updated>
-    <author><name>Bruce W. Lee</name></author>
-    <summary type="html"><![CDATA[<p>Research paper presenting 'self-incrimination' — training AI agents to flag their own misbehavior as a complement to alignment training and external monitoring. Evaluated across thousands of agent trajectories with 100+ tool calls, the approach significantly reduces undetected attacks across 15 out-of-distribution environments, outperforming blackbox monitors especially when misbehavior is embedded within normal-looking operations. The training transfers from instructed to uninstructed misbehavior settings.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="AI Alignment"/>
-    <category term="AI Agents"/>
-    <category term="Monitoring"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:research:d5d4bfbc70ca</id>
-    <title>Hidden Topics: Measuring Sensitive AI Beliefs with List Experiments</title>
-    <link href="http://arxiv.org/abs/2602.21939" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-d5d4bfbc70ca" rel="related" type="text/html"/>
-    <published>2026-02-26T03:00:00Z</published>
-    <updated>2026-02-26T03:00:00Z</updated>
-    <author><name>Maxim Chupilkin</name></author>
-    <summary type="html"><![CDATA[<p>Applies list experiments from social science to uncover hidden beliefs in LLMs that alignment may suppress. Finds hidden approval of mass surveillance across models from Anthropic, Google, and OpenAI, paralleling alignment faking with social desirability bias.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Language Models"/>
-    <category term="Evaluation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:news:c842bb2ba452</id>
-    <title>Gemini Can Now Book You an Uber or Order a DoorDash Meal on Your Phone. Here’s How It Works</title>
-    <link href="https://www.wired.com/story/google-gemini-task-automation-galaxy-s26-uber-doordash/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=news#item-c842bb2ba452" rel="related" type="text/html"/>
-    <published>2026-02-26T02:57:00Z</published>
-    <updated>2026-02-26T02:57:00Z</updated>
-    <author><name>Julian Chokkattu</name></author>
-    <summary type="html"><![CDATA[<p>Google's Gemini can now autonomously perform tasks within third-party mobile apps, including booking Uber rides and ordering DoorDash meals, launching first on the Samsung Galaxy S26. This represents a concrete step toward agentic AI operating in real-world consumer workflows.</p>]]></summary>
-    <category term="Agentic AI"/>
-    <category term="Google Gemini"/>
-    <category term="Consumer Products"/>
-    <category term="Samsung"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-26:research:19b335aafd59</id>
-    <title>The Design Space of Tri-Modal Masked Diffusion Models</title>
-    <link href="http://arxiv.org/abs/2602.21472" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-19b335aafd59" rel="related" type="text/html"/>
-    <published>2026-02-26T02:52:00Z</published>
-    <updated>2026-02-26T02:52:00Z</updated>
-    <author><name>Louis Bethune, Victor Turrisi, Bruno Kacper Mlodozeniec, Pau Rodriguez Lopez, Lokesh Boominathan, Nikhil Bhendawade, Amitis Shidani, Joris Pelemans, Theo X. Olausson, Devon Hjelm, Paul Dixon, Joao Monteiro, Pierre Ablin, Vishnu Banna, Arno Blaas, Nick Henderson, Kari Noriy, Dan Busbridge, Josh Susskind, Marco Cuturi, Irina Belousova, Luca Zappella, Russ Webb, Jason Ramapuram</name></author>
-    <summary type="html"><![CDATA[<p>Introduces the first tri-modal masked diffusion model pretrained from scratch on text, image-text, and audio-text data. Systematically analyzes multimodal scaling laws, noise schedules, and derives a novel SDE-based reparameterization eliminating batch-size tuning.</p>]]></summary>
-    <category term="Diffusion Models"/>
-    <category term="Multimodal Learning"/>
-    <category term="Scaling Laws"/>
   </entry>
 </feed>
