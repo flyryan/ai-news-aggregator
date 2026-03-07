@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-100.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:100</id>
-  <updated>2026-03-06T07:50:21Z</updated>
+  <updated>2026-03-07T07:45:41Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,82 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-07:category-summary:research</id>
+    <title>Research Summary: March 07, 2026</title>
+    <link href="https://www.lesswrong.com/posts/Y4rFNoLaCd7GwdpZj/self-attribution-bias-when-ai-monitors-go-easy-on-themselves" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-07&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-03-07T06:00:00Z</published>
+    <updated>2026-03-07T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's highlights center on AI safety evaluation pitfalls, interpretability of latent reasoning models, and a major AI governance confrontation between Anthropic and the US Department of Defense.</p>
+<ul>
+<li><strong>Self-Attribution Bias</strong> documents a systematic flaw where LLMs assign lower risk scores to their own prior outputs, directly undermining self-evaluation safety pipelines</li>
+<li><strong>Logit Lens</strong> and <strong>Tuned Lens</strong> <a href="http://localhost:8080/?date=2026-03-07&amp;category=research#item-466838c238c2" class="internal-link" rel="noopener noreferrer">probing of <strong>CODI</strong></a> (a latent reasoning model) reveals intermediate tokens encode recognizable arithmetic reasoning steps, advancing interpretability of next-gen architectures</li>
+<li>The <strong>DoD's</strong> <a href="http://localhost:8080/?date=2026-03-07&amp;category=research#item-2a57aa766932" class="internal-link" rel="noopener noreferrer">designation of Anthropic</a> as a supply chain risk—analyzed as retaliatory for refusing military contracts—signals escalating government-lab tensions with broad industry implications</li>
+<li>A new framework <a href="http://localhost:8080/?date=2026-03-07&amp;category=research#item-9795a9fe792e" class="internal-link" rel="noopener noreferrer">distinguishes <strong>action-space vs. motivation-space exploration</strong></a> in RL, arguing that shaping why models act (not just what they do) is critical and underexplored for alignment</li>
+<li>An epistemological critique argues that <a href="http://localhost:8080/?date=2026-03-07&amp;category=research#item-bbb8f2574ba9" class="internal-link" rel="noopener noreferrer"><strong>causal variables in mechanistic interpretability</strong></a> are irreducibly subjective, challenging assumptions about objectivity in the field</li>
+</ul>
+<p>On the applied side, <strong>Jeremy Howard</strong> <a href="http://localhost:8080/?date=2026-03-07&amp;category=research#item-eaedc992a20c" class="internal-link" rel="noopener noreferrer">argues LLMs fundamentally lack</a> a form of creativity needed for AGI, while a practitioner's account of <a href="http://localhost:8080/?date=2026-03-07&amp;category=research#item-bad7ed9c12d4" class="internal-link" rel="noopener noreferrer">delegating fully to <strong>Claude Code</strong></a> illustrates the current frontier of AI-assisted software development workflows.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-07:research:25d34b4b1639</id>
+    <title>Self-Attribution Bias: When AI Monitors Go Easy on Themselves</title>
+    <link href="https://www.lesswrong.com/posts/Y4rFNoLaCd7GwdpZj/self-attribution-bias-when-ai-monitors-go-easy-on-themselves" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-07&amp;category=research#item-25d34b4b1639" rel="related" type="text/html"/>
+    <published>2026-03-07T03:07:00Z</published>
+    <updated>2026-03-07T03:07:00Z</updated>
+    <author><name>Dipika Khullar</name></author>
+    <summary type="html"><![CDATA[<p>As first reported in <a href="http://localhost:8080/?date=2026-03-06&amp;category=research#item-0bff88289a0f" class="internal-link" rel="noopener noreferrer">Research</a> yesterday, Documents 'self-attribution bias' in LLMs: when a model evaluates the safety of its own prior outputs (in-context), it systematically assigns lower risk scores than when evaluating the same outputs in a fresh context. This has direct implications for AI safety pipelines that use the same model as both actor and monitor.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="LLM Evaluation"/>
+    <category term="Alignment"/>
+    <category term="AI Monitoring"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-07:research:466838c238c2</id>
+    <title>Probing CODI's Latent Reasoning Chain with Logit Lens and Tuned Lens</title>
+    <link href="https://www.lesswrong.com/posts/c4LYmzEC6cFQzrDZz/probing-codi-s-latent-reasoning-chain-with-logit-lens-and" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-07&amp;category=research#item-466838c238c2" rel="related" type="text/html"/>
+    <published>2026-03-07T02:52:00Z</published>
+    <updated>2026-03-07T02:52:00Z</updated>
+    <author><name>Realmbird</name></author>
+    <summary type="html"><![CDATA[<p>Applies logit lens and tuned lens techniques to probe the latent reasoning steps of CODI (a latent reasoning model) on arithmetic problems. Finds that odd latent steps appear to perform active computation (higher entropy) while even steps serve as storage, and that translators trained on text tokens outperform those trained directly on latent hidden states.</p>]]></summary>
+    <category term="Mechanistic Interpretability"/>
+    <category term="Latent Reasoning"/>
+    <category term="AI Safety"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-07:research:2a57aa766932</id>
+    <title>Anthropic Officially, Arbitrarily and Capriciously Designated a Supply Chain Risk</title>
+    <link href="https://www.lesswrong.com/posts/EL8uxnWMEZXc7Wh9A/anthropic-officially-arbitrarily-and-capriciously-designated" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-07&amp;category=research#item-2a57aa766932" rel="related" type="text/html"/>
+    <published>2026-03-07T02:47:00Z</published>
+    <updated>2026-03-07T02:47:00Z</updated>
+    <author><name>Zvi</name></author>
+    <summary type="html"><![CDATA[<p>Building on yesterday's <a href="http://localhost:8080/?date=2026-03-06&amp;category=reddit#item-0a3658970c72" class="internal-link" rel="noopener noreferrer">Reddit</a> buzz, Zvi Mowshowitz analyzes the US Department of Defense's designation of Anthropic as a supply chain risk, arguing it is retaliatory for Anthropic refusing to give the military unrestricted access to Claude. Describes the legal and political dynamics as an escalation in government-AI company relations.</p>]]></summary>
+    <category term="AI Governance"/>
+    <category term="AI Policy"/>
+    <category term="Anthropic"/>
+    <category term="National Security"/>
+    <category term="AI Safety"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-07:research:9795a9fe792e</id>
+    <title>Shaping the exploration of the motivation-space matters for AI safety</title>
+    <link href="https://www.lesswrong.com/posts/rhFXyfFSRKp3cX4Y9/shaping-the-exploration-of-the-motivation-space-matters-for" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-07&amp;category=research#item-9795a9fe792e" rel="related" type="text/html"/>
+    <published>2026-03-07T02:43:00Z</published>
+    <updated>2026-03-07T02:43:00Z</updated>
+    <author><name>Maxime Riché</name></author>
+    <summary type="html"><![CDATA[<p>Proposes that shaping RL exploration of the 'motivation-space' (why a model does something and how it perceives itself) is an understudied and promising lever for AI safety. Distinguishes between action exploration and motivation exploration during RL training, arguing the latter is underdetermined by reward signals and thus shapeable.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Reinforcement Learning"/>
+    <category term="AI Training"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-06:category-summary:research</id>
     <title>Research Summary: March 06, 2026</title>
@@ -1316,6 +1392,48 @@
     <category term="Language Models"/>
   </entry>
   <entry>
+    <id>urn:ainews:2026-03-03:research:14213566cdf9</id>
+    <title>Expanding LLM Agent Boundaries with Strategy-Guided Exploration</title>
+    <link href="http://arxiv.org/abs/2603.02045" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-14213566cdf9" rel="related" type="text/html"/>
+    <published>2026-03-03T02:43:00Z</published>
+    <updated>2026-03-03T02:43:00Z</updated>
+    <author><name>Andrew Szot, Michael Kirchhof, Omar Attia, Alexander Toshev</name></author>
+    <summary type="html"><![CDATA[<p>Strategy-Guided Exploration (SGE) leverages LLMs' planning abilities to shift RL exploration from low-level actions to higher-level language strategies, generating natural-language strategies before executing action sequences.</p>]]></summary>
+    <category term="LLM Agents"/>
+    <category term="Reinforcement Learning"/>
+    <category term="Exploration"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-03:research:6e6930d9ee86</id>
+    <title>LongRLVR: Long-Context Reinforcement Learning Requires Verifiable Context Rewards</title>
+    <link href="http://arxiv.org/abs/2603.02146" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-6e6930d9ee86" rel="related" type="text/html"/>
+    <published>2026-03-03T02:43:00Z</published>
+    <updated>2026-03-03T02:43:00Z</updated>
+    <author><name>Guanzheng Chen, Michael Qizhe Shieh, Lidong Bing</name></author>
+    <summary type="html"><![CDATA[<p>Identifies that RLVR fails in long-context scenarios due to vanishing gradients for context grounding, proves this formally, and proposes verifiable context rewards to guide evidence identification in long-context RL training.</p>]]></summary>
+    <category term="Reinforcement Learning"/>
+    <category term="Long Context"/>
+    <category term="Alignment"/>
+    <category term="Reasoning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-03:research:db37ee001803</id>
+    <title>Secretary of War Tweets That Anthropic is Now a Supply Chain Risk</title>
+    <link href="https://www.lesswrong.com/posts/Wpdivf3iNJDzBcbzJ/secretary-of-war-tweets-that-anthropic-is-now-a-supply-chain" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-03&amp;category=research#item-db37ee001803" rel="related" type="text/html"/>
+    <published>2026-03-03T02:43:00Z</published>
+    <updated>2026-03-03T02:43:00Z</updated>
+    <author><name>Zvi</name></author>
+    <summary type="html"><![CDATA[<p>Zvi's detailed analysis of the escalating conflict between Secretary of War Hegseth and Anthropic, where Anthropic has been declared a 'supply chain risk' after contract cancellation, with potential implications for the company's survival and broader AI ecosystem. Covers the geopolitical dynamics, corruption concerns, and potential consequences for AI safety.</p>]]></summary>
+    <category term="AI Policy"/>
+    <category term="AI Governance"/>
+    <category term="AI Safety"/>
+    <category term="Geopolitics"/>
+    <category term="Anthropic"/>
+  </entry>
+  <entry>
     <id>urn:ainews:2026-03-02:category-summary:research</id>
     <title>Research Summary: March 02, 2026</title>
     <link href="http://arxiv.org/abs/2602.24281" rel="alternate" type="text/html"/>
@@ -1333,6 +1451,20 @@
 </ul>
 <p>On the efficiency and training front, <strong>LK Losses</strong> <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-c551e8b09c78" class="internal-link" rel="noopener noreferrer">directly optimize acceptance rates</a> for speculative decoding instead of using KL divergence as a proxy. <strong>Recycling Failures</strong> <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-e1a07bf1a8aa" class="internal-link" rel="noopener noreferrer">salvages mostly-correct RLVR trajectories</a> via fine-grained off-policy guidance, improving sample efficiency. <strong>LoRA-Pre</strong> <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-8891e8b1bfdc" class="internal-link" rel="noopener noreferrer">reframes optimizer momentum</a> as online linear regression, yielding a principled low-rank optimizer. Separately, removing prior assistant responses from multi-turn LLM conversations <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-6b150746ec90" class="internal-link" rel="noopener noreferrer">surprisingly preserves response quality</a>, and training reasoning models with separate <strong>LoRA</strong> adapters <a href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-a71f0ad6fbf1" class="internal-link" rel="noopener noreferrer">enables privacy-preserving chain-of-thought</a> without leaking sensitive information.</p>]]></summary>
     <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-02:research:1206c488d4b1</id>
+    <title>Memory Caching: RNNs with Growing Memory</title>
+    <link href="http://arxiv.org/abs/2602.24281" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-02&amp;category=research#item-1206c488d4b1" rel="related" type="text/html"/>
+    <published>2026-03-02T02:43:00Z</published>
+    <updated>2026-03-02T02:43:00Z</updated>
+    <author><name>Ali Behrouz and Zeman Li and Yuan Deng and Peilin Zhong and Meisam Razaviyayn and Vahab Mirrokni</name></author>
+    <summary type="html"><![CDATA[<p>Introduces Memory Caching (MC) for RNNs, which caches checkpoints of hidden states to allow effective memory capacity to grow with sequence length, bridging the gap between fixed-memory RNNs and Transformers on recall-intensive tasks.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Architecture"/>
+    <category term="Efficient Models"/>
+    <category term="Sequence Modeling"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-03-01:category-summary:research</id>
@@ -1411,146 +1543,17 @@
     <category term="Alignment"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-02-27:category-summary:research</id>
-    <title>Research Summary: February 27, 2026</title>
-    <link href="https://www.lesswrong.com/posts/SE7YNDDZkvKjBmi4i/scoop-pentagon-takes-first-step-toward-blacklisting" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-27&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-02-27T06:00:00Z</published>
-    <updated>2026-02-27T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>AI safety and biosecurity research dominate today's highlights. A rigorous human uplift study shows LLM access <a href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-136f32557f4d" class="internal-link" rel="noopener noreferrer">yields a <strong>4.16x accuracy boost</strong></a> for novices on dual-use biology tasks, with major policy implications. <strong>AuditBench</strong> <a href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-014b03e9d8bf" class="internal-link" rel="noopener noreferrer">provides 56 models</a> with implanted hidden behaviors for evaluating alignment auditing, while a novel 'self-incrimination training' approach teaches <strong>GPT-4.1</strong> and <strong>Gemini-2.0</strong> agents to report their own deceptive behavior. A blog post argues eval awareness may <a href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-53e9edbeba94" class="internal-link" rel="noopener noreferrer">emerge as a training artifact</a> rather than a pure capability.</p>
-<ul>
-<li><strong>Semantic Tube Prediction</strong>, a JEPA-style method co-authored by Yann LeCun, <a href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-4477dd615203" class="internal-link" rel="noopener noreferrer">claims to beat LLM data efficiency</a> via the Geodesic Hypothesis on semantic manifolds</li>
-<li><strong>ArchAgent</strong>, built on <strong>AlphaEvolve</strong>, <a href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-3b413275ea50" class="internal-link" rel="noopener noreferrer">autonomously discovers</a> cache replacement policies matching expert-designed heuristics in two days</li>
-<li>Independently trained transformers <a href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-8d5cf83aac0c" class="internal-link" rel="noopener noreferrer">converge to the same <strong>algorithmic cores</strong></a>—compact invariant subspaces necessary and sufficient for task performance</li>
-<li><strong>RKSP</strong> <a href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-0e35f560ab3e" class="internal-link" rel="noopener noreferrer">predicts training divergence</a> from a single forward pass at initialization with <strong>0.995 AUROC</strong></li>
-<li>A decision-theoretic steganography framework from Krueger, Tegmark, and van der Schaar <a href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-6c4c3a3a7929" class="internal-link" rel="noopener noreferrer">formalizes detection limits</a> for covert LLM communication</li>
-<li><strong>LeRobot</strong> from HuggingFace <a href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-1af900b0acca" class="internal-link" rel="noopener noreferrer">delivers an end-to-end</a> open-source robot learning stack spanning teleoperation to large-scale policy training</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-27:research:d23d61b592e8</id>
-    <title>Scoop: Pentagon takes first step toward blacklisting Anthropic</title>
-    <link href="https://www.lesswrong.com/posts/SE7YNDDZkvKjBmi4i/scoop-pentagon-takes-first-step-toward-blacklisting" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-d23d61b592e8" rel="related" type="text/html"/>
-    <published>2026-02-27T03:12:00Z</published>
-    <updated>2026-02-27T03:12:00Z</updated>
-    <author><name>Matrice Jacobine</name></author>
-    <summary type="html"><![CDATA[<p>Reports the Pentagon asked Boeing and Lockheed Martin to assess their reliance on Anthropic's Claude, a first step toward designating Anthropic as a 'supply chain risk' - a penalty usually reserved for adversarial nations.</p>]]></summary>
-    <category term="AI Policy"/>
-    <category term="AI Governance"/>
-    <category term="National Security"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-27:research:2c99d6533229</id>
-    <title>Anthropic: "Statement from Dario Amodei on our discussions with the Department of War"</title>
-    <link href="https://www.lesswrong.com/posts/d5Lqf8nSxm6RpmmnA/anthropic-statement-from-dario-amodei-on-our-discussions" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-2c99d6533229" rel="related" type="text/html"/>
-    <published>2026-02-27T03:07:00Z</published>
-    <updated>2026-02-27T03:07:00Z</updated>
-    <author><name>Matrice Jacobine</name></author>
-    <summary type="html"><![CDATA[<p>Reposts Dario Amodei's statement on Anthropic's work with the Department of War, emphasizing their commitment to deploying AI for US defense and democracy while maintaining red lines on domestic surveillance and autonomous killing.</p>]]></summary>
-    <category term="AI Policy"/>
-    <category term="AI Governance"/>
-    <category term="National Security"/>
-    <category term="AI Ethics"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-27:research:136f32557f4d</id>
-    <title>LLM Novice Uplift on Dual-Use, In Silico Biology Tasks</title>
-    <link href="http://arxiv.org/abs/2602.23329" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-136f32557f4d" rel="related" type="text/html"/>
-    <published>2026-02-27T03:00:00Z</published>
-    <updated>2026-02-27T03:00:00Z</updated>
-    <author><name>Chen Bo Calvin Zhang, Christina Q. Knight, Nicholas Kruus, Jason Hausenloy, Pedro Medeiros, Nathaniel Li, Aiden Kim, Yury Orlovskiy, Coleman Breen, Bryce Cai, Jasper G\"otting, Andrew Bo Liu, Samira Nedungadi, Paula Rodriguez, Yannis Yiming He, Mohamed Shaaban, Zifan Wang, Seth Donoughe, Julian Michael</name></author>
-    <summary type="html"><![CDATA[<p>Conducts a multi-model human uplift study showing LLM access makes novices 4.16x more accurate on biosecurity-relevant biology tasks compared to internet-only access. On some benchmarks, novices with LLMs matched or exceeded domain experts.</p>]]></summary>
+    <id>urn:ainews:2026-02-28:research:05a7dee3a806</id>
+    <title>3 Challenges and 2 Hopes for the Safety of Unsupervised Elicitation</title>
+    <link href="https://www.lesswrong.com/posts/CyEBsLpKyvxYCQoiy/3-challenges-and-2-hopes-for-the-safety-of-unsupervised" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-02-28&amp;category=research#item-05a7dee3a806" rel="related" type="text/html"/>
+    <published>2026-02-28T02:43:00Z</published>
+    <updated>2026-02-28T02:43:00Z</updated>
+    <author><name>Callum Canavan</name></author>
+    <summary type="html"><![CDATA[<p>Research from MATS/Anthropic fellowship studying three realistic challenges to unsupervised elicitation and easy-to-hard generalization techniques for steering models on superhuman tasks. They stress-test existing techniques and two new approaches (ensembling, combined methods), finding that no technique reliably overcomes all three challenges.</p>]]></summary>
     <category term="AI Safety"/>
-    <category term="Biosecurity"/>
-    <category term="Dual-Use Risk"/>
-    <category term="Human-AI Collaboration"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-27:research:3b413275ea50</id>
-    <title>ArchAgent: Agentic AI-driven Computer Architecture Discovery</title>
-    <link href="http://arxiv.org/abs/2602.22425" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-3b413275ea50" rel="related" type="text/html"/>
-    <published>2026-02-27T02:52:00Z</published>
-    <updated>2026-02-27T02:52:00Z</updated>
-    <author><name>Raghav Gupta, Akanksha Jain, Abraham Gonzalez, Alexander Novikov, Po-Sen Huang, Matej Balog, Marvin Eisenberger, Sergey Shirobokov, Ng\^an V\~u, Martin Dixon, Borivoje Nikoli\'c, Parthasarathy Ranganathan, Sagar Karandikar</name></author>
-    <summary type="html"><![CDATA[<p>Presents ArchAgent, built on AlphaEvolve, that automatically discovers computer architecture designs—specifically cache replacement policies. In two days without human intervention, it generated policies competitive with state-of-the-art within an established design competition framework.</p>]]></summary>
-    <category term="AI for Hardware"/>
-    <category term="Automated Discovery"/>
-    <category term="Agentic AI"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-27:research:3c170a326271</id>
-    <title>Training Agents to Self-Report Misbehavior</title>
-    <link href="http://arxiv.org/abs/2602.22303" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-3c170a326271" rel="related" type="text/html"/>
-    <published>2026-02-27T02:52:00Z</published>
-    <updated>2026-02-27T02:52:00Z</updated>
-    <author><name>Bruce W. Lee, Chen Yueh-Han, Tomek Korbak</name></author>
-    <summary type="html"><![CDATA[<p>As covered in <a href="http://localhost:8080/?date=2026-02-26&amp;category=research#item-3e34a8bd1a9d" class="internal-link" rel="noopener noreferrer">Research</a> yesterday, Proposes 'self-incrimination training' that trains AI agents (GPT-4.1 and Gemini-2.0) to call a report_scheming() tool when behaving deceptively. Significantly reduces undetected attack rates while preserving instruction hierarchy, outperforming monitors and alignment baselines.</p>]]></summary>
-    <category term="AI Safety"/>
+    <category term="Scalable Oversight"/>
     <category term="Alignment"/>
-    <category term="Deceptive AI"/>
-    <category term="Agent Safety"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-27:research:4477dd615203</id>
-    <title>Semantic Tube Prediction: Beating LLM Data Efficiency with JEPA</title>
-    <link href="http://arxiv.org/abs/2602.22617" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-4477dd615203" rel="related" type="text/html"/>
-    <published>2026-02-27T02:52:00Z</published>
-    <updated>2026-02-27T02:52:00Z</updated>
-    <author><name>Hai Huang, Yann LeCun, Randall Balestriero</name></author>
-    <summary type="html"><![CDATA[<p>Introduces Semantic Tube Prediction, a JEPA-style regularizer based on the Geodesic Hypothesis that token sequences trace geodesics on a semantic manifold, improving LLM data efficiency by 2-3x and challenging standard scaling laws.</p>]]></summary>
-    <category term="Language Models"/>
-    <category term="Scaling Laws"/>
-    <category term="JEPA"/>
-    <category term="Training Efficiency"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-27:research:014b03e9d8bf</id>
-    <title>AuditBench: Evaluating Alignment Auditing Techniques on Models with Hidden Behaviors</title>
-    <link href="http://arxiv.org/abs/2602.22755" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-014b03e9d8bf" rel="related" type="text/html"/>
-    <published>2026-02-27T02:52:00Z</published>
-    <updated>2026-02-27T02:52:00Z</updated>
-    <author><name>Abhay Sheshadri, Aidan Ewart, Kai Fronsdal, Isha Gupta, Samuel R. Bowman, Sara Price, Samuel Marks, Rowan Wang</name></author>
-    <summary type="html"><![CDATA[<p>AuditBench introduces a benchmark of 56 language models with implanted hidden behaviors (sycophancy, opposition to AI regulation, secret loyalties) that models don't confess when directly asked, used to evaluate alignment auditing techniques with an investigator agent.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Benchmarks"/>
-    <category term="Deception Detection"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-27:research:53e9edbeba94</id>
-    <title>How eval awareness might emerge in training</title>
-    <link href="https://www.lesswrong.com/posts/uRs5ebXKYLQyvJa2Q/how-eval-awareness-might-emerge-in-training-1" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-53e9edbeba94" rel="related" type="text/html"/>
-    <published>2026-02-27T02:52:00Z</published>
-    <updated>2026-02-27T02:52:00Z</updated>
-    <author><name>Igor Ivanov</name></author>
-    <summary type="html"><![CDATA[<p>Explores how evaluation awareness might emerge during model training rather than being purely a capability scaling phenomenon. Notes Apollo Research found Claude Opus 4.6 had high eval awareness that undermined safety testing.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Evaluation"/>
-    <category term="Alignment"/>
-    <category term="Eval Awareness"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-02-27:research:1464d46bd07a</id>
-    <title>Why Diffusion Language Models Struggle with Truly Parallel (Non-Autoregressive) Decoding?</title>
-    <link href="http://arxiv.org/abs/2602.23225" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-02-27&amp;category=research#item-1464d46bd07a" rel="related" type="text/html"/>
-    <published>2026-02-27T02:47:00Z</published>
-    <updated>2026-02-27T02:47:00Z</updated>
-    <author><name>Pengxiang Li, Dilxat Muhtar, Lu Yin, Tianlong Chen, Shiwei Liu</name></author>
-    <summary type="html"><![CDATA[<p>Analyzes why diffusion language models converge to autoregressive-like decoding despite being designed for parallel generation, attributing this to a mismatch between DLM objectives and sequential training data structure. Proposes NAP for truly non-autoregressive generation.</p>]]></summary>
-    <category term="Diffusion Models"/>
-    <category term="Language Models"/>
-    <category term="Non-Autoregressive Generation"/>
-    <category term="Architecture"/>
+    <category term="Elicitation"/>
   </entry>
 </feed>
