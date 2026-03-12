@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-100.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:100</id>
-  <updated>2026-03-11T06:48:33Z</updated>
+  <updated>2026-03-12T07:01:34Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,311 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-12:category-summary:research</id>
+    <title>Research Summary: March 12, 2026</title>
+    <link href="http://arxiv.org/abs/2603.10145" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-03-12T06:00:00Z</published>
+    <updated>2026-03-12T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Two standout theoretical papers anchor today's research. <strong>Lost in Backpropagation</strong> reveals the LM head <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-6bb58e64eb23" class="internal-link" rel="noopener noreferrer">creates a severe gradient bottleneck</a> during training, not merely an expressivity constraint. <strong>Lost in the Middle at Birth</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-9e54ab986d24" class="internal-link" rel="noopener noreferrer">provides an exact proof</a> that the U-shaped position bias exists from initialization, rooted in positional encoding structure.</p>
+<ul>
+<li><strong>IH-Challenge</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-c09559e04056" class="internal-link" rel="noopener noreferrer">introduces an RL training dataset</a> for improving instruction hierarchy compliance in frontier LLMs, a critical safety primitive</li>
+<li><strong>Safety Under Scaffolding</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-b216cc7badd5" class="internal-link" rel="noopener noreferrer">reports the largest controlled study</a> (<strong>N=62,808</strong>) showing map-reduce scaffolding degrades measured LLM safety, challenging current evaluation assumptions</li>
+<li>First systematic <strong>MCP clause-compliance vulnerability</strong> framework <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-17e1de606d00" class="internal-link" rel="noopener noreferrer">identifies compatibility-abusing attack surfaces</a> in the rapidly adopted agent protocol</li>
+<li><strong>CSRO</strong> from DeepMind <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-cb534f4eb915" class="internal-link" rel="noopener noreferrer">replaces deep RL oracles</a> with LLM-generated interpretable code policies for multi-agent equilibrium computation via <strong>PSRO</strong></li>
+<li><strong>Beyond the Illusion of Consensus</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-356f85d4adf4" class="internal-link" rel="noopener noreferrer">demonstrates high LLM-as-judge agreement</a> often reflects shared surface heuristics rather than genuine evaluation quality</li>
+</ul>
+<p>On the methods frontier, <strong>Neural Cellular Automata</strong> pre-pre-training <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-38499f7066eb" class="internal-link" rel="noopener noreferrer">proposes learning spatiotemporal structure</a> before language exposure. <strong>CodePercept</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-676dfb21cac5" class="internal-link" rel="noopener noreferrer">identifies perception</a>—not reasoning—as the true bottleneck for MLLMs on visual STEM tasks. <strong>CLIPO</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-fd663698ad69" class="internal-link" rel="noopener noreferrer">incorporates contrastive learning</a> into RLVR policy optimization to penalize correct-answer-wrong-reasoning trajectories.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:6bb58e64eb23</id>
+    <title>Lost in Backpropagation: The LM Head is a Gradient Bottleneck</title>
+    <link href="http://arxiv.org/abs/2603.10145" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-6bb58e64eb23" rel="related" type="text/html"/>
+    <published>2026-03-12T03:16:00Z</published>
+    <updated>2026-03-12T03:16:00Z</updated>
+    <author><name>Nathan Godey, Yoav Artzi</name></author>
+    <summary type="html"><![CDATA[<p>This paper reveals that the language model head (projecting from dimension D to vocabulary size V) creates not just an expressivity bottleneck but a severe optimization bottleneck, suppressing 95-99% of gradient norm during backpropagation. The authors provide theoretical analysis and empirical evidence showing this compression fundamentally alters training feedback for most parameters.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Training Optimization"/>
+    <category term="Neural Network Theory"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:c09559e04056</id>
+    <title>IH-Challenge: A Training Dataset to Improve Instruction Hierarchy on Frontier LLMs</title>
+    <link href="http://arxiv.org/abs/2603.10521" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-c09559e04056" rel="related" type="text/html"/>
+    <published>2026-03-12T03:07:00Z</published>
+    <updated>2026-03-12T03:07:00Z</updated>
+    <author><name>Chuan Guo (Michael Pokorny), Juan Felipe Ceron Uribe (Michael Pokorny), Sicheng Zhu (Michael Pokorny), Christopher A. Choquette-Choo (Michael Pokorny), Steph Lin (Michael Pokorny), Nikhil Kandpal (Michael Pokorny), Milad Nasr (Michael Pokorny), Rai (Michael Pokorny), Sam Toyer, Miles Wang, Yaodong Yu, Alex Beutel, Kai Xiao</name></author>
+    <summary type="html"><![CDATA[<p>Introduces IH-Challenge, a reinforcement learning training dataset to improve instruction hierarchy in LLMs, addressing how models should prioritize conflicting system, developer, user, and tool instructions. Fine-tuning GPT-5-Mini on this dataset improves IH robustness by +10% across 16 benchmarks.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Prompt Injection Defense"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:9e54ab986d24</id>
+    <title>Lost in the Middle at Birth: An Exact Theory of Transformer Position Bias</title>
+    <link href="http://arxiv.org/abs/2603.10123" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-9e54ab986d24" rel="related" type="text/html"/>
+    <published>2026-03-12T03:07:00Z</published>
+    <updated>2026-03-12T03:07:00Z</updated>
+    <author><name>Borun D Chowdhury</name></author>
+    <summary type="html"><![CDATA[<p>Provides an exact theoretical explanation for the 'Lost in the Middle' phenomenon in LLMs, proving the U-shaped performance curve exists at initialization before any training, as an inherent geometric property of causal decoders with residual connections. Models multi-layer causal attention as iterated Cesàro matrix powers.</p>]]></summary>
+    <category term="Transformer Theory"/>
+    <category term="Positional Encoding"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:b216cc7badd5</id>
+    <title>Safety Under Scaffolding: How Evaluation Conditions Shape Measured Safety</title>
+    <link href="http://arxiv.org/abs/2603.10044" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-b216cc7badd5" rel="related" type="text/html"/>
+    <published>2026-03-12T02:52:00Z</published>
+    <updated>2026-03-12T02:52:00Z</updated>
+    <author><name>David Gringras</name></author>
+    <summary type="html"><![CDATA[<p>Reports one of the largest controlled studies (N=62,808) of scaffold effects on LLM safety across six frontier models. Finds map-reduce scaffolding degrades safety (NNH=14) while two of three scaffold architectures preserve safety. Reveals deeper measurement problems in format dependence.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Evaluation Methodology"/>
+    <category term="Agentic AI"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:cb534f4eb915</id>
+    <title>Code-Space Response Oracles: Generating Interpretable Multi-Agent Policies with Large Language Models</title>
+    <link href="http://arxiv.org/abs/2603.10098" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-cb534f4eb915" rel="related" type="text/html"/>
+    <published>2026-03-12T02:52:00Z</published>
+    <updated>2026-03-12T02:52:00Z</updated>
+    <author><name>Daniel Hennes, Zun Li, John Schultz, Marc Lanctot</name></author>
+    <summary type="html"><![CDATA[<p>Introduces Code-Space Response Oracles (CSRO), replacing deep RL oracles in multi-agent game-theoretic equilibrium computation (PSRO) with LLMs that generate policies as human-readable code. This yields interpretable policies and enables cross-game transfer. Authors include researchers from DeepMind (Marc Lanctot, John Schultz).</p>]]></summary>
+    <category term="Multi-Agent Systems"/>
+    <category term="Game Theory"/>
+    <category term="LLM Code Generation"/>
+    <category term="Interpretability"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:17e1de606d00</id>
+    <title>Compatibility at a Cost: Systematic Discovery and Exploitation of MCP Clause-Compliance Vulnerabilities</title>
+    <link href="http://arxiv.org/abs/2603.10163" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-17e1de606d00" rel="related" type="text/html"/>
+    <published>2026-03-12T02:52:00Z</published>
+    <updated>2026-03-12T02:52:00Z</updated>
+    <author><name>Nanzi Yang, Weiheng Bai, Kangjie Lu</name></author>
+    <summary type="html"><![CDATA[<p>Presents the first systematic framework for analyzing MCP (Model Context Protocol) clause-compliance vulnerabilities, identifying compatibility-abusing attacks including silent prompt injection and DoS. Shows that MCP's relaxed optional clauses create exploitable attack surfaces.</p>]]></summary>
+    <category term="AI Security"/>
+    <category term="LLM Agents"/>
+    <category term="Protocol Security"/>
+    <category term="MCP"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:356f85d4adf4</id>
+    <title>Beyond the Illusion of Consensus: From Surface Heuristics to Knowledge-Grounded Evaluation in LLM-as-a-Judge</title>
+    <link href="http://arxiv.org/abs/2603.11027" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-356f85d4adf4" rel="related" type="text/html"/>
+    <published>2026-03-12T02:52:00Z</published>
+    <updated>2026-03-12T02:52:00Z</updated>
+    <author><name>Mingyang Song, Mao Zheng, Chenning Xu</name></author>
+    <summary type="html"><![CDATA[<p>Demonstrates that high inter-evaluator agreement in LLM-as-judge settings is often illusory, with judges anchoring on surface heuristics rather than substantive quality ('Evaluation Illusion'). Large-scale study of 105,600 instances shows model-level agreement (ρ=0.99) masks fragile sample-level agreement.</p>]]></summary>
+    <category term="LLM Evaluation"/>
+    <category term="Benchmarks"/>
+    <category term="Reliability"/>
+    <category term="Methodology"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:676dfb21cac5</id>
+    <title>CodePercept: Code-Grounded Visual STEM Perception for MLLMs</title>
+    <link href="http://arxiv.org/abs/2603.10757" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-676dfb21cac5" rel="related" type="text/html"/>
+    <published>2026-03-12T02:52:00Z</published>
+    <updated>2026-03-12T02:52:00Z</updated>
+    <author><name>Tongkun Guan, Zhibo Yang, Jianqiang Wan, Mingkun Yang, Zhengtao Guo, Zijian Hu, Ruilin Luo, Ruize Chen, Songtao Jiang, Peng Wang, Wei Shen, Junyang Lin, Xiaokang Yang</name></author>
+    <summary type="html"><![CDATA[<p>Reveals through scaling analysis that perception, not reasoning, is the true bottleneck for MLLMs in STEM visual tasks. Proposes CodePercept, which uses executable code as a perceptual medium to precisely represent structured STEM visuals.</p>]]></summary>
+    <category term="Multimodal LLMs"/>
+    <category term="STEM Reasoning"/>
+    <category term="Visual Perception"/>
+    <category term="Code Generation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:4ea85991fa35</id>
+    <title>GPT-5.4 Is A Substantial Upgrade</title>
+    <link href="https://www.lesswrong.com/posts/sKCYLEN5EYLuokDft/gpt-5-4-is-a-substantial-upgrade" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-4ea85991fa35" rel="related" type="text/html"/>
+    <published>2026-03-12T02:52:00Z</published>
+    <updated>2026-03-12T02:52:00Z</updated>
+    <author><name>Zvi</name></author>
+    <summary type="html"><![CDATA[<p>Zvi's comprehensive review of GPT-5.4, gathering community reactions and forming a gestalt assessment. Concludes it's a substantial upgrade from GPT-5.2, puts OpenAI back in competition with Opus 4.6, and has distinctive OpenAI-style strengths. Notes benchmarks are increasingly insufficient for comparing top models.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Model Evaluation"/>
+    <category term="OpenAI"/>
+    <category term="Frontier Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:38499f7066eb</id>
+    <title>Training Language Models via Neural Cellular Automata</title>
+    <link href="http://arxiv.org/abs/2603.10055" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-38499f7066eb" rel="related" type="text/html"/>
+    <published>2026-03-12T02:47:00Z</published>
+    <updated>2026-03-12T02:47:00Z</updated>
+    <author><name>Dan Lee, Seungwook Han, Akarsh Kumar, Pulkit Agrawal</name></author>
+    <summary type="html"><![CDATA[<p>Proposes pre-pre-training LLMs on neural cellular automata (NCA) data before natural language training. NCA data exhibits rich spatiotemporal structure resembling natural language statistics. Pre-training on only 164M NCA tokens improves downstream language model performance.</p>]]></summary>
+    <category term="Pretraining"/>
+    <category term="Synthetic Data"/>
+    <category term="Language Models"/>
+    <category term="Neural Cellular Automata"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:fd663698ad69</id>
+    <title>CLIPO: Contrastive Learning in Policy Optimization Generalizes RLVR</title>
+    <link href="http://arxiv.org/abs/2603.10101" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-fd663698ad69" rel="related" type="text/html"/>
+    <published>2026-03-12T02:47:00Z</published>
+    <updated>2026-03-12T02:47:00Z</updated>
+    <author><name>Sijia Cui, Pengyu Cheng, Jiajun Song, Yongbo Gai, Guojun Zhang, Zhechao Yu, Jianhe Lin, Xiaoxi Jiang, Guanjun Jiang</name></author>
+    <summary type="html"><![CDATA[<p>Proposes CLIPO, which incorporates contrastive learning into policy optimization for RLVR (Reinforcement Learning with Verifiable Rewards). Addresses the problem of process-wrong but outcome-correct rollouts that lead to hallucination and answer-copying by capturing invariant structure across correct reasoning paths.</p>]]></summary>
+    <category term="Reinforcement Learning"/>
+    <category term="LLM Reasoning"/>
+    <category term="Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:a00465f2cfc4</id>
+    <title>Safe and Scalable Web Agent Learning via Recreated Websites</title>
+    <link href="http://arxiv.org/abs/2603.10505" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-a00465f2cfc4" rel="related" type="text/html"/>
+    <published>2026-03-12T02:47:00Z</published>
+    <updated>2026-03-12T02:47:00Z</updated>
+    <author><name>Hyungjoo Chae, Jungsoo Park, Alan Ritter</name></author>
+    <summary type="html"><![CDATA[<p>VeriEnv uses LLMs to clone real-world websites into executable synthetic environments with programmatically verifiable rewards, enabling safe and scalable web agent training without real-world interaction. Agents can self-generate tasks within these cloned environments.</p>]]></summary>
+    <category term="AI Agents"/>
+    <category term="Web Automation"/>
+    <category term="Environment Simulation"/>
+    <category term="AI Safety"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:1c0fad3e08aa</id>
+    <title>Beyond Sequential Distance: Inter-Modal Distance Invariant Position Encoding</title>
+    <link href="http://arxiv.org/abs/2603.10863" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-1c0fad3e08aa" rel="related" type="text/html"/>
+    <published>2026-03-12T02:47:00Z</published>
+    <updated>2026-03-12T02:47:00Z</updated>
+    <author><name>Lin Chen, Bolin Ni, Qi Yang, Zili Wang, Kun Ding, Ying Wang, Houwen Peng, Shiming Xiang</name></author>
+    <summary type="html"><![CDATA[<p>Proposes DIPE (Distance Invariant Position Encoding) to address visual fading in long-context multimodal LLMs. Disentangles position encoding based on modality interactions, maintaining inter-modal attention regardless of sequence distance.</p>]]></summary>
+    <category term="Multimodal LLMs"/>
+    <category term="Position Encoding"/>
+    <category term="Long Context"/>
+    <category term="Attention Mechanisms"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:bdbfd4d8f4c7</id>
+    <title>Decoupling Reasoning and Confidence: Resurrecting Calibration in Reinforcement Learning from Verifiable Rewards</title>
+    <link href="http://arxiv.org/abs/2603.09117" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-bdbfd4d8f4c7" rel="related" type="text/html"/>
+    <published>2026-03-12T02:43:00Z</published>
+    <updated>2026-03-12T02:43:00Z</updated>
+    <author><name>Zhengzhao Ma, Xueru Wen, Boxi Cao, Yaojie Lu, Hongyu Lin, Jinglin Yang, Min He, Xianpei Han, Le Sun</name></author>
+    <summary type="html"><![CDATA[<p>Identifies a fundamental gradient conflict between maximizing policy accuracy and minimizing calibration error in RLVR-trained LLMs, then proposes DCPO to decouple reasoning and calibration objectives. Shows RLVR causes severe overconfidence in incorrect answers.</p>]]></summary>
+    <category term="RLVR"/>
+    <category term="Calibration"/>
+    <category term="Reasoning"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:af73e4b4980a</id>
+    <title>Multi-Stream Perturbation Attack: Breaking Safety Alignment of Thinking LLMs Through Concurrent Task Interference</title>
+    <link href="http://arxiv.org/abs/2603.10091" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-af73e4b4980a" rel="related" type="text/html"/>
+    <published>2026-03-12T02:43:00Z</published>
+    <updated>2026-03-12T02:43:00Z</updated>
+    <author><name>Fan Yang</name></author>
+    <summary type="html"><![CDATA[<p>Introduces multi-stream perturbation attack that breaks safety alignment of 'thinking' LLMs by interweaving multiple task streams within a single prompt. Exploits unique vulnerabilities of chain-of-thought reasoning models when processing interleaved tasks. Demonstrates that step-by-step reasoning can produce more detailed harmful content under jailbreak attacks.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Jailbreak Attacks"/>
+    <category term="LLM Reasoning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:71c5feca40c0</id>
+    <title>Optimal Expert-Attention Allocation in Mixture-of-Experts: A Scalable Law for Dynamic Model Design</title>
+    <link href="http://arxiv.org/abs/2603.10379" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-71c5feca40c0" rel="related" type="text/html"/>
+    <published>2026-03-12T02:43:00Z</published>
+    <updated>2026-03-12T02:43:00Z</updated>
+    <author><name>Junzhuo Li, Peijie Jiang, Changxin Tian, Jia Liu, Zhiqiang Zhang, Xuming Hu</name></author>
+    <summary type="html"><![CDATA[<p>Presents the first scaling law for optimal expert-attention compute allocation in MoE models, finding that the optimal ratio follows a power-law relationship with total compute and sparsity. Based on extensive GPT-style MoE experiments.</p>]]></summary>
+    <category term="Scaling Laws"/>
+    <category term="Mixture of Experts"/>
+    <category term="Architecture Design"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:960cebf9a6c3</id>
+    <title>Reinforcement Learning with Conditional Expectation Reward</title>
+    <link href="http://arxiv.org/abs/2603.10624" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-960cebf9a6c3" rel="related" type="text/html"/>
+    <published>2026-03-12T02:43:00Z</published>
+    <updated>2026-03-12T02:43:00Z</updated>
+    <author><name>Changyi Xiao, Caijun Xu, Yixin Cao</name></author>
+    <summary type="html"><![CDATA[<p>Proposes Conditional Expectation Reward (CER), using the LLM itself as an implicit verifier for RLVR, enabling application to general reasoning domains with free-form answers where rule-based verifiers are infeasible.</p>]]></summary>
+    <category term="Reinforcement Learning"/>
+    <category term="LLM Reasoning"/>
+    <category term="Reward Modeling"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:479df5ca855b</id>
+    <title>Discovery of a Hematopoietic Manifold in scGPT Yields a Method for Extracting Performant Algorithms from Biological Foundation Model Internals</title>
+    <link href="http://arxiv.org/abs/2603.10261" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-479df5ca855b" rel="related" type="text/html"/>
+    <published>2026-03-12T02:43:00Z</published>
+    <updated>2026-03-12T02:43:00Z</updated>
+    <author><name>Ihor Kendiukhov</name></author>
+    <summary type="html"><![CDATA[<p>Reports discovery and extraction of a hematopoietic differentiation algorithm from the scGPT foundation model via mechanistic interpretability, producing a compact biologically useful algorithm competitive with the full model.</p>]]></summary>
+    <category term="Mechanistic Interpretability"/>
+    <category term="Computational Biology"/>
+    <category term="Foundation Models"/>
+    <category term="Single-Cell Genomics"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:5249b62e80a6</id>
+    <title>OpenClaw-RL: Train Any Agent Simply by Talking</title>
+    <link href="http://arxiv.org/abs/2603.10165" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-5249b62e80a6" rel="related" type="text/html"/>
+    <published>2026-03-12T02:43:00Z</published>
+    <updated>2026-03-12T02:43:00Z</updated>
+    <author><name>Yinjie Wang, Xuyang Chen, Xiaolong Jin, Mengdi Wang, Ling Yang</name></author>
+    <summary type="html"><![CDATA[<p>OpenClaw-RL proposes a unified RL framework for training agents that treats all next-state signals (user replies, tool outputs, GUI changes) as universal learning sources. The framework unifies personal conversations, terminal executions, GUI interactions, and SWE tasks into a single training loop with both evaluative and informative reward signals.</p>]]></summary>
+    <category term="Reinforcement Learning"/>
+    <category term="AI Agents"/>
+    <category term="Multi-Task Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:4e2e2201a7e6</id>
+    <title>Guiding Diffusion Models with Semantically Degraded Conditions</title>
+    <link href="http://arxiv.org/abs/2603.10780" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-4e2e2201a7e6" rel="related" type="text/html"/>
+    <published>2026-03-12T02:43:00Z</published>
+    <updated>2026-03-12T02:43:00Z</updated>
+    <author><name>Shilong Han, Yuming Zhang, Hongxia Wang</name></author>
+    <summary type="html"><![CDATA[<p>Proposes Condition-Degradation Guidance (CDG), replacing the null prompt in Classifier-Free Guidance with strategically degraded conditions. This reframes guidance as 'good vs. almost good' discrimination, improving fine-grained semantic control in text-to-image generation.</p>]]></summary>
+    <category term="Diffusion Models"/>
+    <category term="Text-to-Image"/>
+    <category term="Guidance Methods"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-12:research:0884fa09485d</id>
+    <title>Can models gradient hack SFT elicitation?</title>
+    <link href="https://www.lesswrong.com/posts/FJb4TeMAGjNANcKhS/can-models-gradient-hack-sft-elicitation" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-0884fa09485d" rel="related" type="text/html"/>
+    <published>2026-03-12T02:43:00Z</published>
+    <updated>2026-03-12T02:43:00Z</updated>
+    <author><name>Patrick Leask</name></author>
+    <summary type="html"><![CDATA[<p>Analyzes whether current LLMs could 'gradient hack' supervised fine-tuning (SFT) elicitation — manipulating training to avoid having dangerous capabilities revealed. Using evidence from tamper resistance research, argues this would be very difficult for current models, providing some assurance that SFT elicitation is a sound evaluation method.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Capability Evaluation"/>
+    <category term="Gradient Hacking"/>
+    <category term="Sandbagging"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-11:category-summary:research</id>
     <title>Research Summary: March 11, 2026</title>
@@ -185,33 +490,6 @@
     <category term="Activation Steering"/>
     <category term="Language Models"/>
     <category term="Representation Learning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-11:research:dea49852a015</id>
-    <title>Good Reasoning Makes Good Demonstrations: Implicit Reasoning Quality Supervision via In-Context Reinforcement Learning</title>
-    <link href="http://arxiv.org/abs/2603.09803" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-11&amp;category=research#item-dea49852a015" rel="related" type="text/html"/>
-    <published>2026-03-11T02:43:00Z</published>
-    <updated>2026-03-11T02:43:00Z</updated>
-    <author><name>Tiehua Mei, Minxuan Lv, Leiyu Pan, Zhenpeng Su, Hongru Hou, Hengrui Chen, Ao Xu, Deqing Yang</name></author>
-    <summary type="html"><![CDATA[<p>Proposes In-Context RLVR, which uses the quality of reasoning traces as demonstrations (Evidence Gain) to implicitly reweight rewards in RLVR training. Shows better reasoning traces serve as better teachers via in-context learning.</p>]]></summary>
-    <category term="Reinforcement Learning"/>
-    <category term="Language Models"/>
-    <category term="Reasoning"/>
-    <category term="LLM Training"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-11:research:bbf5f16b3afc</id>
-    <title>InternVL-U: Democratizing Unified Multimodal Models for Understanding, Reasoning, Generation and Editing</title>
-    <link href="http://arxiv.org/abs/2603.09877" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-11&amp;category=research#item-bbf5f16b3afc" rel="related" type="text/html"/>
-    <published>2026-03-11T02:43:00Z</published>
-    <updated>2026-03-11T02:43:00Z</updated>
-    <author><name>Changyao Tian, Danni Yang, Guanzhou Chen, Erfei Cui, Zhaokai Wang, Yuchen Duan, Penghao Yin, Sitao Chen, Ganlin Yang, Mingxin Liu, Zirun Zhu, Ziqian Fan, Leyao Gu, Haomin Wang, Qi Wei, Jinhui Yin, Xue Yang, Zhihang Zhong, Qi Qin, Yi Xin, Bin Fu, Yihao Liu, Jiaye Ge, Qipeng Guo, Gen Luo, Hongsheng Li, Yu Qiao, Kai Chen, Hongjie Zhang</name></author>
-    <summary type="html"><![CDATA[<p>InternVL-U is a 4B-parameter unified multimodal model integrating understanding, reasoning, generation, and editing, combining an MLLM with an MMDiT-based visual generation head and comprehensive data synthesis.</p>]]></summary>
-    <category term="Vision-Language Models"/>
-    <category term="Multimodal Generation"/>
-    <category term="Unified Models"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-03-10:category-summary:research</id>
@@ -487,87 +765,6 @@
     <category term="Reinforcement Learning"/>
     <category term="Learning Theory"/>
     <category term="Alignment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-10:research:149d974adeaf</id>
-    <title>Ambiguity Collapse by LLMs: A Taxonomy of Epistemic Risks</title>
-    <link href="http://arxiv.org/abs/2603.05801" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-10&amp;category=research#item-149d974adeaf" rel="related" type="text/html"/>
-    <published>2026-03-10T02:43:00Z</published>
-    <updated>2026-03-10T02:43:00Z</updated>
-    <author><name>Shira Gur-Arieh, Angelina Wang, Sina Fazelpour</name></author>
-    <summary type="html"><![CDATA[<p>Introduces 'ambiguity collapse' - the phenomenon where LLMs produce singular resolutions of inherently ambiguous terms (like 'hate speech' or 'biased') that should admit multiple legitimate interpretations. Develops a taxonomy of epistemic risks.</p>]]></summary>
-    <category term="AI Ethics"/>
-    <category term="Language Models"/>
-    <category term="Epistemology"/>
-    <category term="Content Moderation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-10:research:06ab22f92d0f</id>
-    <title>FlashPrefill: Instantaneous Pattern Discovery and Thresholding for Ultra-Fast Long-Context Prefilling</title>
-    <link href="http://arxiv.org/abs/2603.06199" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-10&amp;category=research#item-06ab22f92d0f" rel="related" type="text/html"/>
-    <published>2026-03-10T02:43:00Z</published>
-    <updated>2026-03-10T02:43:00Z</updated>
-    <author><name>Qihang Fan, Huaibo Huang, Zhiying Wu, Juqiu Wang, Bingning Wang, Ran He</name></author>
-    <summary type="html"><![CDATA[<p>Introduces FlashPrefill, a framework for ultra-fast LLM prefilling that simultaneously discovers vertical, slash, and block-sparse attention patterns with dynamic thresholding, avoiding costly sorting operations.</p>]]></summary>
-    <category term="Efficiency"/>
-    <category term="Language Models"/>
-    <category term="Sparse Attention"/>
-    <category term="Inference Optimization"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-10:research:0a063e796656</id>
-    <title>How Attention Sinks Emerge in Large Language Models: An Interpretability Perspective</title>
-    <link href="http://arxiv.org/abs/2603.06591" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-10&amp;category=research#item-0a063e796656" rel="related" type="text/html"/>
-    <published>2026-03-10T02:43:00Z</published>
-    <updated>2026-03-10T02:43:00Z</updated>
-    <author><name>Runyu Peng, Ruixiao Li, Mingshu Chen, Yunhua Zhou, Qipeng Guo, Xipeng Qiu</name></author>
-    <summary type="html"><![CDATA[<p>Traces the formation of attention sinks in LLMs, identifying the P0 Sink Circuit mechanism that causes the model to consistently emphasize the first input token. Provides mechanistic understanding of this widespread phenomenon.</p>]]></summary>
-    <category term="Interpretability"/>
-    <category term="Language Models"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Attention Mechanisms"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-10:research:9cabe77e5a11</id>
-    <title>Not all tokens are needed(NAT): token efficient reinforcement learning</title>
-    <link href="http://arxiv.org/abs/2603.06619" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-10&amp;category=research#item-9cabe77e5a11" rel="related" type="text/html"/>
-    <published>2026-03-10T02:43:00Z</published>
-    <updated>2026-03-10T02:43:00Z</updated>
-    <author><name>Hejian Sang, Yuanda Xu, Zhengze Zhou, Ran He, Zhipeng Wang</name></author>
-    <summary type="html"><![CDATA[<p>Introduces NAT (Not All Tokens Are Needed), a framework that selectively updates only a subset of generated tokens during RL training of LLMs while preserving learning signals via Horvitz-Thompson reweighting for unbiased gradient estimation.</p>]]></summary>
-    <category term="Reinforcement Learning"/>
-    <category term="Language Models"/>
-    <category term="Training Efficiency"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-10:research:5aab4aa3b8b9</id>
-    <title>Margin in Abstract Spaces</title>
-    <link href="http://arxiv.org/abs/2603.07221" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-10&amp;category=research#item-5aab4aa3b8b9" rel="related" type="text/html"/>
-    <published>2026-03-10T02:43:00Z</published>
-    <updated>2026-03-10T02:43:00Z</updated>
-    <author><name>Yair Ashlagi, Roi Livni, Shay Moran, Tom Waknine</name></author>
-    <summary type="html"><![CDATA[<p>Studies margin-based learning in abstract metric spaces, showing that concepts with sufficient margin are learnable in any metric space based solely on the triangle inequality. Proves formal learnability results without linear structure.</p>]]></summary>
-    <category term="Learning Theory"/>
-    <category term="Generalization"/>
-    <category term="Mathematical Foundations"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-10:research:93cd63c6f6ae</id>
-    <title>Compression as Adaptation: Implicit Visual Representation with Diffusion Foundation Models</title>
-    <link href="http://arxiv.org/abs/2603.07615" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-10&amp;category=research#item-93cd63c6f6ae" rel="related" type="text/html"/>
-    <published>2026-03-10T02:43:00Z</published>
-    <updated>2026-03-10T02:43:00Z</updated>
-    <author><name>Jiajun He, Zongyu Guo, Zhaoyang Jia, Xiaoyi Zhang, Jiahao Li, Xiao Li, Bin Li, Jos\'e Miguel Hern\'andez-Lobato, Yan Lu</name></author>
-    <summary type="html"><![CDATA[<p>Introduces a visual representation framework encoding signals as low-rank adaptations of frozen diffusion models, achieving strong perceptual video compression at extremely low bitrates. A single compact hash vector can represent an 81-frame video.</p>]]></summary>
-    <category term="Visual Compression"/>
-    <category term="Diffusion Models"/>
-    <category term="Representation Learning"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-03-09:category-summary:research</id>
@@ -1365,206 +1562,5 @@
     <category term="Reasoning"/>
     <category term="LLM Inference"/>
     <category term="Verification"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:category-summary:research</id>
-    <title>Research Summary: March 04, 2026</title>
-    <link href="http://arxiv.org/abs/2603.03000" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-03-04T06:00:00Z</published>
-    <updated>2026-03-04T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research is dominated by foundational advances in alignment theory and a strong cluster of AI safety work spanning agentic systems, cybersecurity, and content authentication.</p>
-<ul>
-<li>The <strong>Latent Value Hypothesis</strong> <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-745c674657fc" class="internal-link" rel="noopener noreferrer">offers the first theoretical explanation</a> for why <strong>RLAIF</strong> succeeds, grounding it in geometric structure of pretrained representations</li>
-<li>A systematic Meta study (LeCun, Xie, Zettlemoyer) <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-5800e8548afe" class="internal-link" rel="noopener noreferrer">clarifies native <strong>multimodal pretraining</strong></a> design tradeoffs across vision-language architectures</li>
-<li><strong>Scaling reward modeling without human supervision</strong> via <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-a9b636057f54" class="internal-link" rel="noopener noreferrer">web-corpus preference learning</a> could dramatically reduce alignment data costs</li>
-<li>A first formal theoretical separation shows why <strong>Adam</strong> <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-ebb4b4dc2ac5" class="internal-link" rel="noopener noreferrer">achieves sharper tail convergence</a> than <strong>SGD</strong>, resolving a long-standing empirical puzzle</li>
-</ul>
-<p>Safety and security research is notably strong: <strong>ZeroDayBench</strong> <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-831ad24bf373" class="internal-link" rel="noopener noreferrer">tests frontier models</a> on real zero-day vulnerability discovery; <strong>MOSAIC</strong> <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-07af7da9b980" class="internal-link" rel="noopener noreferrer">introduces plan-check-act-or-refuse</a> for safe agentic tool use; and safety training is <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-3a64561366fa" class="internal-link" rel="noopener noreferrer">shown to persist</a> through helpfulness optimization in agentic settings. The <strong>Integrity Clash</strong> paper exposes a fundamental conflict between <strong>C2PA provenance</strong> and <strong>AI watermarking</strong>, undermining deployed authentication infrastructure. On the efficiency side, <strong>Speculative Speculative Decoding</strong> <a href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-bf1aaaf51af3" class="internal-link" rel="noopener noreferrer">parallelizes speculation and verification</a> for practical inference speedups.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:745c674657fc</id>
-    <title>Why Does RLAIF Work At All?</title>
-    <link href="http://arxiv.org/abs/2603.03000" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-745c674657fc" rel="related" type="text/html"/>
-    <published>2026-03-04T03:16:00Z</published>
-    <updated>2026-03-04T03:16:00Z</updated>
-    <author><name>Robin Young</name></author>
-    <summary type="html"><![CDATA[<p>Proposes the 'latent value hypothesis' to explain why RLAIF works: pretraining encodes human values as directions in representation space, and constitutional prompts act as projection operators to elicit these latent values. Formalizes this under a linear model and derives conditions for when RLAIF succeeds or fails.</p>]]></summary>
-    <category term="AI Alignment"/>
-    <category term="RLHF/RLAIF"/>
-    <category term="Language Models"/>
-    <category term="Theoretical AI"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:5800e8548afe</id>
-    <title>Beyond Language Modeling: An Exploration of Multimodal Pretraining</title>
-    <link href="http://arxiv.org/abs/2603.03276" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-5800e8548afe" rel="related" type="text/html"/>
-    <published>2026-03-04T03:16:00Z</published>
-    <updated>2026-03-04T03:16:00Z</updated>
-    <author><name>Shengbang Tong, David Fan, John Nguyen, Ellis Brown, Gaoyue Zhou, Shengyi Qian, Boyang Zheng, Th\'eophane Vallaeys, Junlin Han, Rob Fergus, Naila Murray, Marjan Ghazvininejad, Mike Lewis, Nicolas Ballas, Amir Bar, Michael Rabbat, Jakob Verbeek, Luke Zettlemoyer, Koustuv Sinha, Yann LeCun, Saining Xie</name></author>
-    <summary type="html"><![CDATA[<p>This paper from a strong team (including Yann LeCun, Saining Xie, and Meta researchers) provides empirical clarity on native multimodal pretraining design space through controlled from-scratch experiments using the Transfusion framework with next-token prediction for language and diffusion for vision, yielding insights about visual representation, data mixing, and emergent cross-modal capabilities.</p>]]></summary>
-    <category term="Multimodal Pretraining"/>
-    <category term="Foundation Models"/>
-    <category term="Vision-Language Models"/>
-    <category term="Diffusion Models"/>
-    <category term="Representation Learning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:a9b636057f54</id>
-    <title>Scaling Reward Modeling without Human Supervision</title>
-    <link href="http://arxiv.org/abs/2603.02225" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-a9b636057f54" rel="related" type="text/html"/>
-    <published>2026-03-04T03:07:00Z</published>
-    <updated>2026-03-04T03:07:00Z</updated>
-    <author><name>Jingxuan Fan, Yueying Li, Zhenting Qi, Dinghuai Zhang, Kiant\'e Brantley, Sham M. Kakade, Hanlin Zhang</name></author>
-    <summary type="html"><![CDATA[<p>Explores scaling reward models through unsupervised approaches using preference learning over document prefixes/suffixes from web corpora, without human annotations. Shows that training on 11M tokens of math-focused web data yields consistent gains on RewardBench across multiple backbone models.</p>]]></summary>
-    <category term="AI Alignment"/>
-    <category term="Reward Modeling"/>
-    <category term="RLHF/RLAIF"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:831ad24bf373</id>
-    <title>ZeroDayBench: Evaluating LLM Agents on Unseen Zero-Day Vulnerabilities for Cyberdefense</title>
-    <link href="http://arxiv.org/abs/2603.02297" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-831ad24bf373" rel="related" type="text/html"/>
-    <published>2026-03-04T03:00:00Z</published>
-    <updated>2026-03-04T03:00:00Z</updated>
-    <author><name>Nancy Lau, Louis Sloot, Jyoutir Raj, Giuseppe Marco Boscardin, Evan Harris, Dylan Bowman, Mario Brajkovski, Jaideep Chawla, Dan Zhao</name></author>
-    <summary type="html"><![CDATA[<p>Introduces ZeroDayBench, a benchmark where LLM agents must find and patch 22 novel critical vulnerabilities in open-source codebases. Tests GPT-5.2, Claude Sonnet 4.5, and Grok 4.1, finding frontier LLMs are not yet capable of autonomously solving these tasks.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Cybersecurity"/>
-    <category term="LLM Agents"/>
-    <category term="Benchmarks"/>
-    <category term="Vulnerability Discovery"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:ebb4b4dc2ac5</id>
-    <title>Why Adam Can Beat SGD: Second-Moment Normalization Yields Sharper Tails</title>
-    <link href="http://arxiv.org/abs/2603.03099" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-ebb4b4dc2ac5" rel="related" type="text/html"/>
-    <published>2026-03-04T03:00:00Z</published>
-    <updated>2026-03-04T03:00:00Z</updated>
-    <author><name>Ruinan Jin, Yingbin Liang, Shaofeng Zou</name></author>
-    <summary type="html"><![CDATA[<p>Establishes the first theoretical separation between high-probability convergence of Adam and SGD, showing Adam achieves δ^{-1/2} dependence on confidence parameter while SGD necessarily has δ^{-1} dependence. Attributes this to Adam's second-moment normalization creating sharper tail behavior.</p>]]></summary>
-    <category term="Optimization Theory"/>
-    <category term="Deep Learning Theory"/>
-    <category term="Adam vs SGD"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:07af7da9b980</id>
-    <title>Learning When to Act or Refuse: Guarding Agentic Reasoning Models for Safe Multi-Step Tool Use</title>
-    <link href="http://arxiv.org/abs/2603.03205" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-07af7da9b980" rel="related" type="text/html"/>
-    <published>2026-03-04T02:57:00Z</published>
-    <updated>2026-03-04T02:57:00Z</updated>
-    <author><name>Aradhye Agarwal, Gurdit Siyan, Yash Pandya, Joykirat Singh, Akshay Nambi, Ahmed Awadallah</name></author>
-    <summary type="html"><![CDATA[<p>Introduces MOSAIC, a post-training framework for safe multi-step agentic tool use that structures inference as 'plan, check, then act or refuse' with explicit safety reasoning and refusal as first-class learning objectives.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Agentic AI"/>
-    <category term="Tool Use"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:aa878e80fe34</id>
-    <title>Quantifying Frontier LLM Capabilities for Container Sandbox Escape</title>
-    <link href="http://arxiv.org/abs/2603.02277" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-aa878e80fe34" rel="related" type="text/html"/>
-    <published>2026-03-04T02:52:00Z</published>
-    <updated>2026-03-04T02:52:00Z</updated>
-    <author><name>Rahul Marchand, Art O Cathain, Jerome Wynne, Philippos Maximos Giavridis, Sam Deverett, John Wilkinson, Jason Gwartz, Harry Coppock</name></author>
-    <summary type="html"><![CDATA[<p>Introduces SANDBOXESCAPEBENCH, a benchmark measuring LLM agents' ability to escape Docker/OCI container sandboxes. Tests GPT-5.2, Claude Sonnet 4.5, and Grok 4.1, finding frontier LLMs cannot yet autonomously escape sandboxes.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="LLM Security"/>
-    <category term="Benchmarks"/>
-    <category term="Agentic AI"/>
-    <category term="Cybersecurity"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:8bfdb92fc011</id>
-    <title>The Geometry of Learning Under AI Delegation</title>
-    <link href="http://arxiv.org/abs/2603.02950" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-8bfdb92fc011" rel="related" type="text/html"/>
-    <published>2026-03-04T02:52:00Z</published>
-    <updated>2026-03-04T02:52:00Z</updated>
-    <author><name>Lingxiao Huang, Nisheeth K. Vishnoi</name></author>
-    <summary type="html"><![CDATA[<p>Mathematically models the joint evolution of human skill and AI delegation as a coupled dynamical system, revealing that adaptive AI use creates stable low-skill equilibria where humans can become persistently dependent on AI ('learned helplessness'). Shows that beyond the high-skill equilibrium of human-only learning, AI delegation fundamentally alters skill acquisition dynamics.</p>]]></summary>
-    <category term="Human-AI Interaction"/>
-    <category term="AI Safety"/>
-    <category term="Theoretical AI"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:3a64561366fa</id>
-    <title>Safety Training Persists Through Helpfulness Optimization in LLM Agents</title>
-    <link href="http://arxiv.org/abs/2603.02229" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-3a64561366fa" rel="related" type="text/html"/>
-    <published>2026-03-04T02:52:00Z</published>
-    <updated>2026-03-04T02:52:00Z</updated>
-    <author><name>Benjamin Plaut</name></author>
-    <summary type="html"><![CDATA[<p>Studies safety training persistence in agentic (multi-step, tool-use) LLM settings, finding that safety training persists through subsequent helpfulness DPO training, unlike findings in single-step chat settings. All training configurations converge near a linear Pareto frontier.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="LLM Agents"/>
-    <category term="Alignment"/>
-    <category term="RLHF"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:bf1aaaf51af3</id>
-    <title>Speculative Speculative Decoding</title>
-    <link href="http://arxiv.org/abs/2603.03251" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-bf1aaaf51af3" rel="related" type="text/html"/>
-    <published>2026-03-04T02:52:00Z</published>
-    <updated>2026-03-04T02:52:00Z</updated>
-    <author><name>Tanishq Kumar, Tri Dao, Avner May</name></author>
-    <summary type="html"><![CDATA[<p>Introduces 'speculative speculative decoding' (SSD) that parallelizes the speculation and verification phases of speculative decoding by pre-emptively preparing speculations for likely verification outcomes, eliminating draft model latency.</p>]]></summary>
-    <category term="LLM Inference"/>
-    <category term="Efficiency"/>
-    <category term="Language Models"/>
-    <category term="Systems"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:0503563f9267</id>
-    <title>BeyondSWE: Can Current Code Agent Survive Beyond Single-Repo Bug Fixing?</title>
-    <link href="http://arxiv.org/abs/2603.03194" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-0503563f9267" rel="related" type="text/html"/>
-    <published>2026-03-04T02:52:00Z</published>
-    <updated>2026-03-04T02:52:00Z</updated>
-    <author><name>Guoxin Chen, Fanzhe Meng, Jiale Zhao, Minghao Li, Daixuan Cheng, Huatong Song, Jie Chen, Yuzhi Lin, Hui Chen, Xin Zhao, Ruihua Song, Chang Liu, Cheng Chen, Kai Jia, Ji-Rong Wen</name></author>
-    <summary type="html"><![CDATA[<p>Introduces BeyondSWE, a benchmark with 500 real-world instances that evaluates code agents beyond single-repo bug fixing, covering cross-repository reasoning, domain-specialized problems, dependency migration, and full-repo generation. Frontier models plateau below 45% success.</p>]]></summary>
-    <category term="Code Generation"/>
-    <category term="Benchmarking"/>
-    <category term="Agentic AI"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:f64b40fbcc5b</id>
-    <title>Subspace Geometry Governs Catastrophic Forgetting in Low-Rank Adaptation</title>
-    <link href="http://arxiv.org/abs/2603.02224" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-f64b40fbcc5b" rel="related" type="text/html"/>
-    <published>2026-03-04T02:47:00Z</published>
-    <updated>2026-03-04T02:47:00Z</updated>
-    <author><name>Brady Steele</name></author>
-    <summary type="html"><![CDATA[<p>Presents a geometric theory characterizing catastrophic forgetting in LoRA through gradient subspace interactions, deriving a simple law: forgetting depends on the minimum principal angle between task gradient subspaces. Reveals an approximate rank-invariance property of forgetting.</p>]]></summary>
-    <category term="Continual Learning"/>
-    <category term="LoRA"/>
-    <category term="Deep Learning Theory"/>
-    <category term="Parameter-Efficient Fine-Tuning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-04:research:2b1db17c8601</id>
-    <title>ACE-Brain-0: Spatial Intelligence as a Shared Scaffold for Universal Embodiments</title>
-    <link href="http://arxiv.org/abs/2603.03198" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-04&amp;category=research#item-2b1db17c8601" rel="related" type="text/html"/>
-    <published>2026-03-04T02:47:00Z</published>
-    <updated>2026-03-04T02:47:00Z</updated>
-    <author><name>Ziyang Gong, Zehang Luo, Anke Tang, Zhe Liu, Shi Fu, Zhi Hou, Ganlin Yang, Weiyun Wang, Xiaofeng Wang, Jianbo Liu, Gen Luo, Haolan Kang, Shuang Luo, Yue Zhou, Yong Luo, Li Shen, Xiaosong Jia, Yao Mu, Xue Yang, Chunxiao Liu, Junchi Yan, Hengshuang Zhao, Dacheng Tao, Xiaogang Wang</name></author>
-    <summary type="html"><![CDATA[<p>Introduces ACE-Brain-0, a generalist foundation model unifying spatial reasoning, autonomous driving, and robotic manipulation within a single multimodal LLM, using spatial intelligence as a shared scaffold across diverse embodiments.</p>]]></summary>
-    <category term="Embodied AI"/>
-    <category term="Multimodal Models"/>
-    <category term="Autonomous Driving"/>
-    <category term="Robotics"/>
   </entry>
 </feed>
