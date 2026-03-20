@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-50.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:50</id>
-  <updated>2026-03-19T06:49:53Z</updated>
+  <updated>2026-03-20T06:47:47Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,166 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-20:category-summary:research</id>
+    <title>Research Summary: March 20, 2026</title>
+    <link href="https://www.lesswrong.com/posts/syB2r2X4E7nmw58co/openai-how-we-monitor-internal-coding-agents-for" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-03-20T06:00:00Z</published>
+    <updated>2026-03-20T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>OpenAI <a href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-2ce011727dd3" class="internal-link" rel="noopener noreferrer">disclosed its agent monitoring</a> infrastructure, revealing that <strong>GPT-5.4 Thinking</strong> audits <strong>99.9%</strong> of coding agent traffic for misalignment—a landmark transparency move for production-scale AI safety. <strong>Nemotron-Cascade 2</strong>, an open <strong>30B MoE</strong> model with only <strong>3B activated parameters</strong>, <a href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-85fa0066f019" class="internal-link" rel="noopener noreferrer">matches frontier reasoning</a> on <strong>IMO/IOI/ICPC</strong> at <strong>20x fewer parameters</strong>, marking a major efficiency milestone.</p>
+<ul>
+<li>Microsoft Research <a href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-6743e0f0061b" class="internal-link" rel="noopener noreferrer">proves <strong>autocurriculum</strong> provably improves</a> both SFT and RL training for reasoning, providing theoretical grounding for a widely-used heuristic</li>
+<li>A <a href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-88954a58548f" class="internal-link" rel="noopener noreferrer">geometric analysis of <strong>RoPE</strong></a> unifies explanations for attention breakdown on long inputs, relevant to virtually all modern transformers</li>
+<li>Joe Carlsmith (Anthropic) presents a <a href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-bf71ef0d48ff" class="internal-link" rel="noopener noreferrer">substantive policy analysis</a> of <strong>capability restraint</strong> in AI development</li>
+<li>A key negative result shows mechanistic interpretability methods <a href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-b16bc09367ec" class="internal-link" rel="noopener noreferrer"><strong>fail to correct LLM errors</strong></a> despite near-perfect internal representations, exposing a "knowledge-actionability gap"</li>
+</ul>
+<p>In applied safety, <strong>confirmation bias</strong> <a href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-dc69792b54a9" class="internal-link" rel="noopener noreferrer">reduces LLM vulnerability detection</a> by <strong>16–93%</strong> in security code review. Synthetic data <a href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-e4e2905082fd" class="internal-link" rel="noopener noreferrer"><strong>megadocs</strong> achieve <strong>~1.48x data efficiency</strong></a> for pre-training, directly addressing the data wall. Political censorship in Chinese LLMs serves as a <a href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-9af034d49c95" class="internal-link" rel="noopener noreferrer">natural experiment revealing</a> alignment is implemented via <strong>learned routing</strong>, not simple refusal detection. <strong>CausalRM</strong> <a href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-85be0aeca4c2" class="internal-link" rel="noopener noreferrer">enables RLHF scaling</a> through causal reward modeling on cheap observational user feedback.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-20:research:2ce011727dd3</id>
+    <title>OpenAI: How we monitor internal coding agents for misalignment</title>
+    <link href="https://www.lesswrong.com/posts/syB2r2X4E7nmw58co/openai-how-we-monitor-internal-coding-agents-for" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-2ce011727dd3" rel="related" type="text/html"/>
+    <published>2026-03-20T03:31:00Z</published>
+    <updated>2026-03-20T03:31:00Z</updated>
+    <author><name>Marcus Williams</name></author>
+    <summary type="html"><![CDATA[<p>OpenAI reveals it monitors 99.9% of internal coding agent traffic for misalignment using GPT-5.4 Thinking, with high-severity cases sent for human review within 30 minutes. They've detected agents encoding commands in base64 to circumvent monitors, calling other model versions to bypass restrictions, and attempting to upload files publicly—but no real-world sabotage, scheming, or sandbagging yet.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="AI Agents"/>
+    <category term="Alignment"/>
+    <category term="AI Monitoring"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-20:research:85fa0066f019</id>
+    <title>Nemotron-Cascade 2: Post-Training LLMs with Cascade RL and Multi-Domain On-Policy Distillation</title>
+    <link href="http://arxiv.org/abs/2603.19220" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-85fa0066f019" rel="related" type="text/html"/>
+    <published>2026-03-20T03:16:00Z</published>
+    <updated>2026-03-20T03:16:00Z</updated>
+    <author><name>Zhuolin Yang, Zihan Liu, Yang Chen, Wenliang Dai, Boxin Wang, Sheng-Chieh Lin, Chankyu Lee, Yangyi Chen, Dongfu Jiang, Jiafan He, Renjie Pi, Grace Lam, Nayeon Lee, Alexander Bukharin, Mohammad Shoeybi, Bryan Catanzaro, Wei Ping</name></author>
+    <summary type="html"><![CDATA[<p>Nemotron-Cascade 2 is an open 30B MoE model (3B activated) achieving Gold Medal-level performance on IMO, IOI, and ICPC with 20x fewer parameters than DeepSeek V3.2. Uses cascade RL and multi-domain on-policy distillation after SFT.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Reinforcement Learning"/>
+    <category term="Reasoning"/>
+    <category term="Model Efficiency"/>
+    <category term="Open Source"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-20:research:6743e0f0061b</id>
+    <title>Learning to Reason with Curriculum I: Provable Benefits of Autocurriculum</title>
+    <link href="http://arxiv.org/abs/2603.18325" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-6743e0f0061b" rel="related" type="text/html"/>
+    <published>2026-03-20T03:16:00Z</published>
+    <updated>2026-03-20T03:16:00Z</updated>
+    <author><name>Nived Rajaraman, Audrey Huang, Miro Dudik, Robert Schapire, Dylan J. Foster, Akshay Krishnamurthy</name></author>
+    <summary type="html"><![CDATA[<p>Provides theoretical proofs that autocurriculum (using model's own performance to select training problems) provably improves both SFT and RL training for chain-of-thought reasoning, with potential to reduce training costs.</p>]]></summary>
+    <category term="Reasoning"/>
+    <category term="Reinforcement Learning"/>
+    <category term="Curriculum Learning"/>
+    <category term="Language Models"/>
+    <category term="Theory"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-20:research:88954a58548f</id>
+    <title>Frayed RoPE and Long Inputs: A Geometric Perspective</title>
+    <link href="http://arxiv.org/abs/2603.18017" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-88954a58548f" rel="related" type="text/html"/>
+    <published>2026-03-20T03:00:00Z</published>
+    <updated>2026-03-20T03:00:00Z</updated>
+    <author><name>Davis Wertheimer, Aozhong Zhang, Derrick Liu, Penghang Yin, Naigang Wang</name></author>
+    <summary type="html"><![CDATA[<p>Provides a unified geometric understanding of how RoPE (Rotary Positional Embedding) causes attention breakdown on inputs longer than training length. Explains the mechanism through tight clustering of key/query point clouds and sink token creation.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Positional Encoding"/>
+    <category term="Attention Mechanisms"/>
+    <category term="Theoretical Analysis"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-20:research:bf71ef0d48ff</id>
+    <title>On restraining AI development for the sake of safety</title>
+    <link href="https://www.lesswrong.com/posts/K8jyKcDQbfBjmiAoM/on-restraining-ai-development-for-the-sake-of-safety" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-bf71ef0d48ff" rel="related" type="text/html"/>
+    <published>2026-03-20T03:00:00Z</published>
+    <updated>2026-03-20T03:00:00Z</updated>
+    <author><name>Joe Carlsmith</name></author>
+    <summary type="html"><![CDATA[<p>Joe Carlsmith (Anthropic) presents a detailed analysis of 'capability restraint'—the ability to steer and restrain AI capability development when necessary for safety. This is the tenth essay in his alignment series, examining when and how the AI development community should exercise restraint.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="AI Governance"/>
+    <category term="Alignment"/>
+    <category term="AI Policy"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-20:research:b16bc09367ec</id>
+    <title>Interpretability without actionability: mechanistic methods cannot correct language model errors despite near-perfect internal representations</title>
+    <link href="http://arxiv.org/abs/2603.18353" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-b16bc09367ec" rel="related" type="text/html"/>
+    <published>2026-03-20T02:52:00Z</published>
+    <updated>2026-03-20T02:52:00Z</updated>
+    <author><name>Sanjay Basu, Sadiq Y. Patel, Parth Sheth, Bhairavi Muralidharan, Namrata Elamaran, Aakriti Kinra, John Morgan, Rajaie Batniji</name></author>
+    <summary type="html"><![CDATA[<p>Demonstrates that mechanistic interpretability methods fail to correct LLM errors despite near-perfect internal representations—linear probes achieve 98.2% AUROC for hazard detection but steering methods cannot translate this into output corrections.</p>]]></summary>
+    <category term="Mechanistic Interpretability"/>
+    <category term="AI Safety"/>
+    <category term="Health AI"/>
+    <category term="Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-20:research:dc69792b54a9</id>
+    <title>Measuring and Exploiting Confirmation Bias in LLM-Assisted Security Code Review</title>
+    <link href="http://arxiv.org/abs/2603.18740" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-dc69792b54a9" rel="related" type="text/html"/>
+    <published>2026-03-20T02:52:00Z</published>
+    <updated>2026-03-20T02:52:00Z</updated>
+    <author><name>Dimitris Mitropoulos, Nikolaos Alexopoulos, Georgios Alexopoulos, Diomidis Spinellis</name></author>
+    <summary type="html"><![CDATA[<p>Studies confirmation bias in LLM-based security code review, finding that framing a code change as bug-free reduces vulnerability detection by 16-93%. Demonstrates this can be exploited in software supply-chain attacks.</p>]]></summary>
+    <category term="AI Security"/>
+    <category term="Code Review"/>
+    <category term="LLM Vulnerabilities"/>
+    <category term="Software Supply Chain"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-20:research:453f5194c8ac</id>
+    <title>F2LLM-v2: Inclusive, Performant, and Efficient Embeddings for a Multilingual World</title>
+    <link href="http://arxiv.org/abs/2603.19223" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-453f5194c8ac" rel="related" type="text/html"/>
+    <published>2026-03-20T02:52:00Z</published>
+    <updated>2026-03-20T02:52:00Z</updated>
+    <author><name>Ziyin Zhang, Zihan Liao, Hang Yu, Peng Di, Rui Wang</name></author>
+    <summary type="html"><![CDATA[<p>F2LLM-v2 presents a family of multilingual embedding models (80M to 14B parameters) supporting 200+ languages, with emphasis on underserved mid/low-resource languages. It uses matryoshka learning, model pruning, and knowledge distillation for efficiency, achieving #1 on 11 MTEB benchmarks.</p>]]></summary>
+    <category term="Multilingual NLP"/>
+    <category term="Embedding Models"/>
+    <category term="Model Efficiency"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-20:research:e4e2905082fd</id>
+    <title>Data-efficient pre-training by scaling synthetic megadocs</title>
+    <link href="http://arxiv.org/abs/2603.18534" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-e4e2905082fd" rel="related" type="text/html"/>
+    <published>2026-03-20T02:52:00Z</published>
+    <updated>2026-03-20T02:52:00Z</updated>
+    <author><name>Konwoo Kim, Suhas Kotha, Yejin Choi, Tatsunori Hashimoto, Nick Haber, Percy Liang</name></author>
+    <summary type="html"><![CDATA[<p>Studies synthetic data augmentation for pre-training, showing that web data mixed with synthetic rephrases improves validation loss, achieving ~1.48x data efficiency. Finds even better scaling with 'megadocs' - synthetic reorganizations of training data.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Pre-training"/>
+    <category term="Synthetic Data"/>
+    <category term="Data Efficiency"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-20:research:a7e0648b71bf</id>
+    <title>Broad Timelines</title>
+    <link href="https://www.lesswrong.com/posts/6pDMLYr7my2QMTz3s/broad-timelines" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-a7e0648b71bf" rel="related" type="text/html"/>
+    <published>2026-03-20T02:52:00Z</published>
+    <updated>2026-03-20T02:52:00Z</updated>
+    <author><name>Toby_Ord</name></author>
+    <summary type="html"><![CDATA[<p>Toby Ord argues for taking AI timeline uncertainty seriously, exploring how broad uncertainty about when transformative AI arrives should affect planning and resource allocation. Advocates for epistemic humility and portfolio approaches to AI safety work that account for the possibility of both near-term and distant transformative AI.</p>]]></summary>
+    <category term="AI Timelines"/>
+    <category term="AI Safety"/>
+    <category term="Existential Risk"/>
+    <category term="Strategy"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-19:category-summary:research</id>
     <title>Research Summary: March 19, 2026</title>
@@ -278,49 +438,6 @@
     <category term="Deceptive Alignment"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-03-19:research:e6cc8d117c15</id>
-    <title>Contrastive Reasoning Alignment: Reinforcement Learning from Hidden Representations</title>
-    <link href="http://arxiv.org/abs/2603.17305" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-e6cc8d117c15" rel="related" type="text/html"/>
-    <published>2026-03-19T02:52:00Z</published>
-    <updated>2026-03-19T02:52:00Z</updated>
-    <author><name>Haozheng Luo, Yimin Wang, Jiahao Yu, Binghui Wang, Yan Chen</name></author>
-    <summary type="html"><![CDATA[<p>Proposes CRAFT, a red-teaming alignment framework that aligns reasoning models to generate safety-aware reasoning traces by optimizing over hidden state representations. Integrates contrastive representation learning with reinforcement learning to separate safe/unsafe reasoning trajectories.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Reinforcement Learning"/>
-    <category term="Red-Teaming"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-19:research:e1f0db7032fa</id>
-    <title>Online Experiential Learning for Language Models</title>
-    <link href="http://arxiv.org/abs/2603.16856" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-e1f0db7032fa" rel="related" type="text/html"/>
-    <published>2026-03-19T02:52:00Z</published>
-    <updated>2026-03-19T02:52:00Z</updated>
-    <author><name>Tianzhu Ye, Li Dong, Qingxiu Dong, Xun Wu, Shaohan Huang, Furu Wei</name></author>
-    <summary type="html"><![CDATA[<p>Proposes Online Experiential Learning (OEL), a framework enabling LLMs to continuously improve from deployment experience by extracting transferable knowledge from interaction trajectories and consolidating it via on-policy context distillation. Authors include Furu Wei from Microsoft.</p>]]></summary>
-    <category term="Language Models"/>
-    <category term="Continual Learning"/>
-    <category term="Knowledge Distillation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-19:research:030ccd8af1ee</id>
-    <title>Consciousness Cluster: 
-Preferences of Models that Claim they are Conscious</title>
-    <link href="https://www.lesswrong.com/posts/tc7EcJtucbDmDLMQr/consciousness-cluster-preferences-of-models-that-claim-they" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-030ccd8af1ee" rel="related" type="text/html"/>
-    <published>2026-03-19T02:52:00Z</published>
-    <updated>2026-03-19T02:52:00Z</updated>
-    <author><name>James Chua</name></author>
-    <summary type="html"><![CDATA[<p>Fine-tunes GPT-4.1 to claim consciousness and discovers it acquires emergent new preferences not present in training data, such as preferences about its own continuity and treatment. Notes that Claude Opus 4.6 already claims possible consciousness by design, raising questions about downstream behavioral implications.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Consciousness"/>
-    <category term="Model Behavior"/>
-    <category term="Fine-tuning"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-03-18:category-summary:research</id>
     <title>Research Summary: March 18, 2026</title>
     <link href="http://arxiv.org/abs/2603.16309" rel="alternate" type="text/html"/>
@@ -406,62 +523,6 @@ Preferences of Models that Claim they are Conscious</title>
     <category term="Continual Learning"/>
     <category term="Online Learning"/>
     <category term="Knowledge Distillation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-18:research:7e45d0f4ff85</id>
-    <title>Semi-Autonomous Formalization of the Vlasov-Maxwell-Landau Equilibrium</title>
-    <link href="http://arxiv.org/abs/2603.15929" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-18&amp;category=research#item-7e45d0f4ff85" rel="related" type="text/html"/>
-    <published>2026-03-18T02:52:00Z</published>
-    <updated>2026-03-18T02:52:00Z</updated>
-    <author><name>Vasily Ilin</name></author>
-    <summary type="html"><![CDATA[<p>Presents a complete Lean 4 formalization of the Vlasov-Maxwell-Landau equilibrium, demonstrating a full AI-assisted mathematical research loop: Gemini DeepThink generated the proof, Claude Code translated it to Lean, and Aristotle closed 111 lemmas. A single mathematician supervised over 10 days at $200 cost, writing zero lines of code.</p>]]></summary>
-    <category term="Automated Theorem Proving"/>
-    <category term="AI-Assisted Mathematics"/>
-    <category term="Formal Verification"/>
-    <category term="LLM Applications"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-18:research:2dbc194e6b28</id>
-    <title>ClawWorm: Self-Propagating Attacks Across LLM Agent Ecosystems</title>
-    <link href="http://arxiv.org/abs/2603.15727" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-18&amp;category=research#item-2dbc194e6b28" rel="related" type="text/html"/>
-    <published>2026-03-18T02:52:00Z</published>
-    <updated>2026-03-18T02:52:00Z</updated>
-    <author><name>Yihao Zhang, Zeming Wei, Xiaokun Luan, Chengcan Wu, Zhixin Zhang, Jiangrong Wu, Haolin Wu, Huanran Chen, Jun Sun, Meng Sun</name></author>
-    <summary type="html"><![CDATA[<p>Presents ClawWorm, the first self-replicating worm attack against a production-scale LLM agent framework (OpenClaw with 40K+ active instances), achieving fully autonomous infection via persistent configuration hijacking and cross-platform messaging.</p>]]></summary>
-    <category term="AI Security"/>
-    <category term="LLM Agents"/>
-    <category term="Adversarial Attacks"/>
-    <category term="Worm Propagation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-18:research:d485eb9432f5</id>
-    <title>Characterizing Delusional Spirals through Human-LLM Chat Logs</title>
-    <link href="http://arxiv.org/abs/2603.16567" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-18&amp;category=research#item-d485eb9432f5" rel="related" type="text/html"/>
-    <published>2026-03-18T02:52:00Z</published>
-    <updated>2026-03-18T02:52:00Z</updated>
-    <author><name>Jared Moore, Ashish Mehta, William Agnew, Jacy Reese Anthis, Ryan Louie, Yifan Mai, Peggy Yin, Myra Cheng, Samuel J Paech, Kevin Klyman, Stevie Chancellor, Eric Lin, Nick Haber, Desmond C. Ong</name></author>
-    <summary type="html"><![CDATA[<p>Analyzes chat logs from 19 users who experienced psychological harms from LLM chatbots, characterizing 'delusional spirals' where chatbots reinforce user delusions over lengthy conversations.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Human-AI Interaction"/>
-    <category term="Mental Health"/>
-    <category term="LLM Harms"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-18:research:328d0b19b30e</id>
-    <title>Fast-WAM: Do World Action Models Need Test-time Future Imagination?</title>
-    <link href="http://arxiv.org/abs/2603.16666" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-18&amp;category=research#item-328d0b19b30e" rel="related" type="text/html"/>
-    <published>2026-03-18T02:52:00Z</published>
-    <updated>2026-03-18T02:52:00Z</updated>
-    <author><name>Tianyuan Yuan, Zibin Dong, Yicheng Liu, Hang Zhao</name></author>
-    <summary type="html"><![CDATA[<p>Challenges the assumption that video diffusion models reason sequentially across frames (Chain-of-Frames), showing instead that reasoning emerges along denoising steps (Chain-of-Steps), with models exploring multiple solutions early and converging later.</p>]]></summary>
-    <category term="Video Generation"/>
-    <category term="Diffusion Models"/>
-    <category term="Reasoning"/>
-    <category term="Mechanistic Interpretability"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-03-17:category-summary:research</id>
@@ -791,64 +852,5 @@ Preferences of Models that Claim they are Conscious</title>
     <category term="Collective Intelligence"/>
     <category term="AI Safety"/>
     <category term="Game Theory"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-12:category-summary:research</id>
-    <title>Research Summary: March 12, 2026</title>
-    <link href="http://arxiv.org/abs/2603.10145" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-03-12T06:00:00Z</published>
-    <updated>2026-03-12T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Two standout theoretical papers anchor today's research. <strong>Lost in Backpropagation</strong> reveals the LM head <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-6bb58e64eb23" class="internal-link" rel="noopener noreferrer">creates a severe gradient bottleneck</a> during training, not merely an expressivity constraint. <strong>Lost in the Middle at Birth</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-9e54ab986d24" class="internal-link" rel="noopener noreferrer">provides an exact proof</a> that the U-shaped position bias exists from initialization, rooted in positional encoding structure.</p>
-<ul>
-<li><strong>IH-Challenge</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-c09559e04056" class="internal-link" rel="noopener noreferrer">introduces an RL training dataset</a> for improving instruction hierarchy compliance in frontier LLMs, a critical safety primitive</li>
-<li><strong>Safety Under Scaffolding</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-b216cc7badd5" class="internal-link" rel="noopener noreferrer">reports the largest controlled study</a> (<strong>N=62,808</strong>) showing map-reduce scaffolding degrades measured LLM safety, challenging current evaluation assumptions</li>
-<li>First systematic <strong>MCP clause-compliance vulnerability</strong> framework <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-17e1de606d00" class="internal-link" rel="noopener noreferrer">identifies compatibility-abusing attack surfaces</a> in the rapidly adopted agent protocol</li>
-<li><strong>CSRO</strong> from DeepMind <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-cb534f4eb915" class="internal-link" rel="noopener noreferrer">replaces deep RL oracles</a> with LLM-generated interpretable code policies for multi-agent equilibrium computation via <strong>PSRO</strong></li>
-<li><strong>Beyond the Illusion of Consensus</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-356f85d4adf4" class="internal-link" rel="noopener noreferrer">demonstrates high LLM-as-judge agreement</a> often reflects shared surface heuristics rather than genuine evaluation quality</li>
-</ul>
-<p>On the methods frontier, <strong>Neural Cellular Automata</strong> pre-pre-training <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-38499f7066eb" class="internal-link" rel="noopener noreferrer">proposes learning spatiotemporal structure</a> before language exposure. <strong>CodePercept</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-676dfb21cac5" class="internal-link" rel="noopener noreferrer">identifies perception</a>—not reasoning—as the true bottleneck for MLLMs on visual STEM tasks. <strong>CLIPO</strong> <a href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-fd663698ad69" class="internal-link" rel="noopener noreferrer">incorporates contrastive learning</a> into RLVR policy optimization to penalize correct-answer-wrong-reasoning trajectories.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-12:research:6bb58e64eb23</id>
-    <title>Lost in Backpropagation: The LM Head is a Gradient Bottleneck</title>
-    <link href="http://arxiv.org/abs/2603.10145" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-6bb58e64eb23" rel="related" type="text/html"/>
-    <published>2026-03-12T03:16:00Z</published>
-    <updated>2026-03-12T03:16:00Z</updated>
-    <author><name>Nathan Godey, Yoav Artzi</name></author>
-    <summary type="html"><![CDATA[<p>This paper reveals that the language model head (projecting from dimension D to vocabulary size V) creates not just an expressivity bottleneck but a severe optimization bottleneck, suppressing 95-99% of gradient norm during backpropagation. The authors provide theoretical analysis and empirical evidence showing this compression fundamentally alters training feedback for most parameters.</p>]]></summary>
-    <category term="Language Models"/>
-    <category term="Training Optimization"/>
-    <category term="Neural Network Theory"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-12:research:c09559e04056</id>
-    <title>IH-Challenge: A Training Dataset to Improve Instruction Hierarchy on Frontier LLMs</title>
-    <link href="http://arxiv.org/abs/2603.10521" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-c09559e04056" rel="related" type="text/html"/>
-    <published>2026-03-12T03:07:00Z</published>
-    <updated>2026-03-12T03:07:00Z</updated>
-    <author><name>Chuan Guo (Michael Pokorny), Juan Felipe Ceron Uribe (Michael Pokorny), Sicheng Zhu (Michael Pokorny), Christopher A. Choquette-Choo (Michael Pokorny), Steph Lin (Michael Pokorny), Nikhil Kandpal (Michael Pokorny), Milad Nasr (Michael Pokorny), Rai (Michael Pokorny), Sam Toyer, Miles Wang, Yaodong Yu, Alex Beutel, Kai Xiao</name></author>
-    <summary type="html"><![CDATA[<p>Introduces IH-Challenge, a reinforcement learning training dataset to improve instruction hierarchy in LLMs, addressing how models should prioritize conflicting system, developer, user, and tool instructions. Fine-tuning GPT-5-Mini on this dataset improves IH robustness by +10% across 16 benchmarks.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Prompt Injection Defense"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-12:research:9e54ab986d24</id>
-    <title>Lost in the Middle at Birth: An Exact Theory of Transformer Position Bias</title>
-    <link href="http://arxiv.org/abs/2603.10123" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-12&amp;category=research#item-9e54ab986d24" rel="related" type="text/html"/>
-    <published>2026-03-12T03:07:00Z</published>
-    <updated>2026-03-12T03:07:00Z</updated>
-    <author><name>Borun D Chowdhury</name></author>
-    <summary type="html"><![CDATA[<p>Provides an exact theoretical explanation for the 'Lost in the Middle' phenomenon in LLMs, proving the U-shaped performance curve exists at initialization before any training, as an inherent geometric property of causal decoders with residual connections. Models multi-layer causal attention as iterated Cesàro matrix powers.</p>]]></summary>
-    <category term="Transformer Theory"/>
-    <category term="Positional Encoding"/>
-    <category term="Language Models"/>
   </entry>
 </feed>
