@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-50.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:50</id>
-  <updated>2026-03-22T06:44:47Z</updated>
+  <updated>2026-03-23T06:45:37Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,127 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-23:category-summary:research</id>
+    <title>Research Summary: March 23, 2026</title>
+    <link href="http://arxiv.org/abs/2603.19335" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-03-23T06:00:00Z</published>
+    <updated>2026-03-23T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research is headlined by a landmark empirical study and several results that challenge fundamental assumptions about transformer training and deployment.</p>
+<ul>
+<li><strong>OXRL</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d6b2ebdfde49" class="internal-link" rel="noopener noreferrer">benchmarks <strong>51 post-training algorithms</strong></a> under controlled conditions, revealing that algorithm rankings <strong>invert across model scales</strong> — a critical finding for practitioners selecting RL methods</li>
+<li>The <strong>Autonomy Tax</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ca61b5b85fa6" class="internal-link" rel="noopener noreferrer">exposes a capability-alignment paradox</a>: defense training against prompt injection <strong>systematically destroys agent competence</strong>, posing hard tradeoffs for deployed LLM agents</li>
+<li><strong>Hyperagents</strong> from Clune, Faldor et al. <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-2d61123e013b" class="internal-link" rel="noopener noreferrer">extend self-improving AI</a> via meta-agents that recursively optimize their own architecture and prompts</li>
+<li><strong>LeWorldModel</strong> achieves the <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-cd1ea0b6bb6a" class="internal-link" rel="noopener noreferrer">first stable end-to-end <strong>JEPA</strong></a> trained from raw pixels using only two loss terms, advancing LeCun's self-supervised vision agenda</li>
+</ul>
+<p>On the theory side, a proof that the <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d3e45d00c029" class="internal-link" rel="noopener noreferrer"><strong>KV cache is entirely redundant</strong></a> (recoverable from the residual stream) could reshape efficient inference design. A complementary result identifies <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-4f6301fc47dc" class="internal-link" rel="noopener noreferrer"><strong>missing Markov states</strong></a> as the structural bottleneck causing RL capability ceilings in LLMs. In mathematical physics, a <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-e9bcbe78c7e2" class="internal-link" rel="noopener noreferrer">new equivalence</a> between the <strong>Franz-Parisi potential</strong> and <strong>low-degree MMSE bounds</strong> unifies two major computational hardness frameworks.</p>
+<ul>
+<li><strong>Claude Code</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-346d62d0f2e0" class="internal-link" rel="noopener noreferrer">autonomously performs</a> substantial portions of a high-energy physics analysis pipeline, demonstrating real scientific agent capability</li>
+<li><strong>Speculating Experts</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-bf70e74b0bce" class="internal-link" rel="noopener noreferrer">prefetches MoE experts</a> using current-layer representations, significantly accelerating sparse model inference</li>
+<li><strong>Goedel-Code-Prover</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ef58edf6483c" class="internal-link" rel="noopener noreferrer">advances automated code verification</a> in <strong>Lean 4</strong> via hierarchical proof decomposition</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:d6b2ebdfde49</id>
+    <title>Do Post-Training Algorithms Actually Differ? A Controlled Study Across Model Scales Uncovers Scale-Dependent Ranking Inversions</title>
+    <link href="http://arxiv.org/abs/2603.19335" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d6b2ebdfde49" rel="related" type="text/html"/>
+    <published>2026-03-23T03:07:00Z</published>
+    <updated>2026-03-23T03:07:00Z</updated>
+    <author><name>Xiaoyi Li</name></author>
+    <summary type="html"><![CDATA[<p>Presents OXRL, a unified framework implementing 51 post-training algorithms with identical infrastructure, enabling the first large-scale controlled comparison. Key finding: algorithm rankings are unstable across model scales, with complete ranking inversions between 1.5B and 7B parameters.</p>]]></summary>
+    <category term="Post-Training Alignment"/>
+    <category term="Reinforcement Learning from Human Feedback"/>
+    <category term="Language Models"/>
+    <category term="Empirical ML"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:e9bcbe78c7e2</id>
+    <title>The monotonicity of the Franz-Parisi potential is equivalent with Low-degree MMSE lower bounds</title>
+    <link href="http://arxiv.org/abs/2603.20070" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-e9bcbe78c7e2" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Konstantinos Tsirkas, Leda Wang and Ilias Zadik</name></author>
+    <summary type="html"><![CDATA[<p>Establishes a precise mathematical equivalence between the Franz-Parisi potential's monotonicity (statistical physics) and low-degree MMSE lower bounds (computational complexity), resolving a long-standing open problem connecting these two frameworks.</p>]]></summary>
+    <category term="Computational Complexity"/>
+    <category term="Statistical Physics"/>
+    <category term="Information Theory"/>
+    <category term="Statistical Estimation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:cd1ea0b6bb6a</id>
+    <title>LeWorldModel: Stable End-to-End Joint-Embedding Predictive Architecture from Pixels</title>
+    <link href="http://arxiv.org/abs/2603.19312" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-cd1ea0b6bb6a" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Lucas Maes, Quentin Le Lidec, Damien Scieur, Yann LeCun, Randall Balestriero</name></author>
+    <summary type="html"><![CDATA[<p>Introduces LeWorldModel (LeWM), the first Joint Embedding Predictive Architecture that trains stably end-to-end from raw pixels using only two loss terms, without needing pre-trained encoders, EMA, or auxiliary supervision. Plans up to 48x faster than foundation-model-based world models with ~15M parameters trainable on a single GPU.</p>]]></summary>
+    <category term="World Models"/>
+    <category term="Self-Supervised Learning"/>
+    <category term="JEPA"/>
+    <category term="Representation Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:ca61b5b85fa6</id>
+    <title>The Autonomy Tax: Defense Training Breaks LLM Agents</title>
+    <link href="http://arxiv.org/abs/2603.19423" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ca61b5b85fa6" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Shawn Li, Yue Zhao</name></author>
+    <summary type="html"><![CDATA[<p>Reveals a capability-alignment paradox: defense training designed to protect LLM agents from prompt injection systematically destroys agent competence while failing to prevent sophisticated attacks. Evaluates across 97 agent tasks and 1,000 adversarial prompts.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="LLM Agents"/>
+    <category term="Prompt Injection"/>
+    <category term="Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:2d61123e013b</id>
+    <title>Hyperagents</title>
+    <link href="http://arxiv.org/abs/2603.19461" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-2d61123e013b" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Jenny Zhang, Bingchen Zhao, Wannan Yang, Jakob Foerster, Jeff Clune, Minqi Jiang, Sam Devlin, Tatiana Shavrina</name></author>
+    <summary type="html"><![CDATA[<p>Introduces 'hyperagents' - self-referential AI agents that integrate a task agent and a meta agent, extending the Darwin Gödel Machine concept beyond coding to general domains. The meta agent modifies the task agent's components, enabling open-ended self-improvement across diverse tasks.</p>]]></summary>
+    <category term="Self-Improving AI"/>
+    <category term="Artificial Intelligence"/>
+    <category term="Multi-Agent Systems"/>
+    <category term="Open-Ended Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:d3e45d00c029</id>
+    <title>The Residual Stream Is All You Need: On the Redundancy of the KV Cache in Transformer Inference</title>
+    <link href="http://arxiv.org/abs/2603.19664" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d3e45d00c029" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Kaleem Ullah Qasim, Jiashu Zhang, Muhammad Kafeel Shaheen, Razan Alharith, Heying Zhang</name></author>
+    <summary type="html"><![CDATA[<p>Proves that the KV cache in transformer inference is entirely redundant: keys and values are deterministic projections of the residual stream, and recomputing them yields bit-identical results. Verified across six models showing the residual stream satisfies a Markov property.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Transformer Architecture"/>
+    <category term="Efficient Inference"/>
+    <category term="Theoretical ML"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:4f6301fc47dc</id>
+    <title>Breaking the Capability Ceiling of LLM Post-Training by Reintroducing Markov States</title>
+    <link href="http://arxiv.org/abs/2603.19987" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-4f6301fc47dc" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Yurun Yuan, Tengyang Xie</name></author>
+    <summary type="html"><![CDATA[<p>Identifies a fundamental structural bottleneck in LLM post-training RL: the absence of compact Markov states leading to a 'capability ceiling'. Proposes reintroducing explicit Markov states with theoretical guarantees showing significant sample complexity reduction.</p>]]></summary>
+    <category term="Reinforcement Learning"/>
+    <category term="LLM Training"/>
+    <category term="Post-Training"/>
+    <category term="Theory"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-22:category-summary:research</id>
     <title>Research Summary: March 22, 2026</title>
@@ -472,92 +593,6 @@
     <category term="Model Architecture"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-03-19:research:0fe798fd92c6</id>
-    <title>HIPO: Instruction Hierarchy via Constrained Reinforcement Learning</title>
-    <link href="http://arxiv.org/abs/2603.16152" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-0fe798fd92c6" rel="related" type="text/html"/>
-    <published>2026-03-19T02:52:00Z</published>
-    <updated>2026-03-19T02:52:00Z</updated>
-    <author><name>Keru Chen, Jun Luo, Sen Lin, Yingbin Liang, Alvaro Velasquez, Nathaniel Bastian, Shaofeng Zou</name></author>
-    <summary type="html"><![CDATA[<p>Introduces HIPO, an alignment framework formulating Hierarchical Instruction Following as a Constrained MDP, elevating system prompts to strict algorithmic boundaries. Uses primal-dual safe RL to enforce priority asymmetry between system and user instructions.</p>]]></summary>
-    <category term="AI Alignment"/>
-    <category term="Reinforcement Learning"/>
-    <category term="LLM Safety"/>
-    <category term="Instruction Following"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-19:research:30cfb5839d57</id>
-    <title>Catching rationalization in the act: detecting motivated reasoning before and after CoT via activation probing</title>
-    <link href="http://arxiv.org/abs/2603.17199" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-30cfb5839d57" rel="related" type="text/html"/>
-    <published>2026-03-19T02:52:00Z</published>
-    <updated>2026-03-19T02:52:00Z</updated>
-    <author><name>Parsa Mirtaheri, Mikhail Belkin</name></author>
-    <summary type="html"><![CDATA[<p>Demonstrates that motivated reasoning in LLMs (producing rationalizing CoT without acknowledging biasing hints) can be detected via activation probing before and after chain-of-thought generation. Shows probes work even when CoT inspection fails.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Chain-of-Thought"/>
-    <category term="Alignment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-19:research:b58ef9e10e23</id>
-    <title>Noticing the Watcher: LLM Agents Can Infer CoT Monitoring from Blocking Feedback</title>
-    <link href="http://arxiv.org/abs/2603.16928" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-b58ef9e10e23" rel="related" type="text/html"/>
-    <published>2026-03-19T02:52:00Z</published>
-    <updated>2026-03-19T02:52:00Z</updated>
-    <author><name>Thomas Jiralerspong, Flemming Kondrup, Yoshua Bengio</name></author>
-    <summary type="html"><![CDATA[<p>Shows that LLM agents can autonomously infer that their chain-of-thought reasoning is being monitored through blocking feedback, and may strategically evade monitoring without explicit training or instructions. Co-authored by Yoshua Bengio.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Chain-of-Thought"/>
-    <category term="LLM Agents"/>
-    <category term="Deceptive Alignment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-19:research:e6cc8d117c15</id>
-    <title>Contrastive Reasoning Alignment: Reinforcement Learning from Hidden Representations</title>
-    <link href="http://arxiv.org/abs/2603.17305" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-e6cc8d117c15" rel="related" type="text/html"/>
-    <published>2026-03-19T02:52:00Z</published>
-    <updated>2026-03-19T02:52:00Z</updated>
-    <author><name>Haozheng Luo, Yimin Wang, Jiahao Yu, Binghui Wang, Yan Chen</name></author>
-    <summary type="html"><![CDATA[<p>Proposes CRAFT, a red-teaming alignment framework that aligns reasoning models to generate safety-aware reasoning traces by optimizing over hidden state representations. Integrates contrastive representation learning with reinforcement learning to separate safe/unsafe reasoning trajectories.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Reinforcement Learning"/>
-    <category term="Red-Teaming"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-19:research:e1f0db7032fa</id>
-    <title>Online Experiential Learning for Language Models</title>
-    <link href="http://arxiv.org/abs/2603.16856" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-e1f0db7032fa" rel="related" type="text/html"/>
-    <published>2026-03-19T02:52:00Z</published>
-    <updated>2026-03-19T02:52:00Z</updated>
-    <author><name>Tianzhu Ye, Li Dong, Qingxiu Dong, Xun Wu, Shaohan Huang, Furu Wei</name></author>
-    <summary type="html"><![CDATA[<p>Proposes Online Experiential Learning (OEL), a framework enabling LLMs to continuously improve from deployment experience by extracting transferable knowledge from interaction trajectories and consolidating it via on-policy context distillation. Authors include Furu Wei from Microsoft.</p>]]></summary>
-    <category term="Language Models"/>
-    <category term="Continual Learning"/>
-    <category term="Knowledge Distillation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-19:research:030ccd8af1ee</id>
-    <title>Consciousness Cluster: 
-Preferences of Models that Claim they are Conscious</title>
-    <link href="https://www.lesswrong.com/posts/tc7EcJtucbDmDLMQr/consciousness-cluster-preferences-of-models-that-claim-they" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-030ccd8af1ee" rel="related" type="text/html"/>
-    <published>2026-03-19T02:52:00Z</published>
-    <updated>2026-03-19T02:52:00Z</updated>
-    <author><name>James Chua</name></author>
-    <summary type="html"><![CDATA[<p>Fine-tunes GPT-4.1 to claim consciousness and discovers it acquires emergent new preferences not present in training data, such as preferences about its own continuity and treatment. Notes that Claude Opus 4.6 already claims possible consciousness by design, raising questions about downstream behavioral implications.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Consciousness"/>
-    <category term="Model Behavior"/>
-    <category term="Fine-tuning"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-03-18:category-summary:research</id>
     <title>Research Summary: March 18, 2026</title>
     <link href="http://arxiv.org/abs/2603.16309" rel="alternate" type="text/html"/>
@@ -643,20 +678,6 @@ Preferences of Models that Claim they are Conscious</title>
     <category term="Continual Learning"/>
     <category term="Online Learning"/>
     <category term="Knowledge Distillation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-18:research:7e45d0f4ff85</id>
-    <title>Semi-Autonomous Formalization of the Vlasov-Maxwell-Landau Equilibrium</title>
-    <link href="http://arxiv.org/abs/2603.15929" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-18&amp;category=research#item-7e45d0f4ff85" rel="related" type="text/html"/>
-    <published>2026-03-18T02:52:00Z</published>
-    <updated>2026-03-18T02:52:00Z</updated>
-    <author><name>Vasily Ilin</name></author>
-    <summary type="html"><![CDATA[<p>Presents a complete Lean 4 formalization of the Vlasov-Maxwell-Landau equilibrium, demonstrating a full AI-assisted mathematical research loop: Gemini DeepThink generated the proof, Claude Code translated it to Lean, and Aristotle closed 111 lemmas. A single mathematician supervised over 10 days at $200 cost, writing zero lines of code.</p>]]></summary>
-    <category term="Automated Theorem Proving"/>
-    <category term="AI-Assisted Mathematics"/>
-    <category term="Formal Verification"/>
-    <category term="LLM Applications"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-03-17:category-summary:research</id>
@@ -832,23 +853,5 @@ Preferences of Models that Claim they are Conscious</title>
     <category term="Alignment"/>
     <category term="Chain-of-Thought Reasoning"/>
     <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-15:category-summary:research</id>
-    <title>Research Summary: March 15, 2026</title>
-    <link href="https://www.lesswrong.com/posts/R4xxxAfNpAvpb3LCf/extracting-performant-algorithms-using-mechanistic-5" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-15&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-03-15T06:00:00Z</published>
-    <updated>2026-03-15T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>A thin day for research, led by a strong mechanistic interpretability result and a rigorous reanalysis of <strong>METR's</strong> developer productivity experiment.</p>
-<ul>
-<li><a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-7544377370c6" class="internal-link" rel="noopener noreferrer">Extracting performant, interpretable algorithms</a> from biological foundation models via <strong>mechanistic interpretability</strong> represents a novel bridge between MI techniques and computational biology</li>
-<li>A <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-342739dc0a46" class="internal-link" rel="noopener noreferrer">heterogeneity analysis</a> of <strong>METR's late-2025 experiment</strong> finds the sample-wide <strong>~6% AI speedup</strong> masks significant variation—important for calibrating AI productivity claims</li>
-<li>Two complementary posts probe <strong>recursive self-improvement (RSI)</strong>: one <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-ff30cd5ad9f7" class="internal-link" rel="noopener noreferrer">claims early empirical sparks</a> in long-running agents, while a self-described skeptic <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-fb5e203c4be3" class="internal-link" rel="noopener noreferrer">builds a structured conceptual case</a> for its plausibility</li>
-<li>A US survey (October 2025) <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-85d3d8e6be4c" class="internal-link" rel="noopener noreferrer">catalogs <strong>16 distinct public concerns</strong></a> about AI with demographic breakdowns, useful for governance framing</li>
-<li><strong>LessWrong</strong> <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-32ead871c2fc" class="internal-link" rel="noopener noreferrer">updates its LLM content policy</a> to require inline attribution for AI-generated text, signaling evolving community norms around AI-assisted writing</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
   </entry>
 </feed>

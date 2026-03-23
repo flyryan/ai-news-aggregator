@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-100.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:100</id>
-  <updated>2026-03-22T06:44:47Z</updated>
+  <updated>2026-03-23T06:45:37Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,184 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-23:category-summary:research</id>
+    <title>Research Summary: March 23, 2026</title>
+    <link href="http://arxiv.org/abs/2603.19335" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-03-23T06:00:00Z</published>
+    <updated>2026-03-23T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research is headlined by a landmark empirical study and several results that challenge fundamental assumptions about transformer training and deployment.</p>
+<ul>
+<li><strong>OXRL</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d6b2ebdfde49" class="internal-link" rel="noopener noreferrer">benchmarks <strong>51 post-training algorithms</strong></a> under controlled conditions, revealing that algorithm rankings <strong>invert across model scales</strong> — a critical finding for practitioners selecting RL methods</li>
+<li>The <strong>Autonomy Tax</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ca61b5b85fa6" class="internal-link" rel="noopener noreferrer">exposes a capability-alignment paradox</a>: defense training against prompt injection <strong>systematically destroys agent competence</strong>, posing hard tradeoffs for deployed LLM agents</li>
+<li><strong>Hyperagents</strong> from Clune, Faldor et al. <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-2d61123e013b" class="internal-link" rel="noopener noreferrer">extend self-improving AI</a> via meta-agents that recursively optimize their own architecture and prompts</li>
+<li><strong>LeWorldModel</strong> achieves the <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-cd1ea0b6bb6a" class="internal-link" rel="noopener noreferrer">first stable end-to-end <strong>JEPA</strong></a> trained from raw pixels using only two loss terms, advancing LeCun's self-supervised vision agenda</li>
+</ul>
+<p>On the theory side, a proof that the <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d3e45d00c029" class="internal-link" rel="noopener noreferrer"><strong>KV cache is entirely redundant</strong></a> (recoverable from the residual stream) could reshape efficient inference design. A complementary result identifies <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-4f6301fc47dc" class="internal-link" rel="noopener noreferrer"><strong>missing Markov states</strong></a> as the structural bottleneck causing RL capability ceilings in LLMs. In mathematical physics, a <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-e9bcbe78c7e2" class="internal-link" rel="noopener noreferrer">new equivalence</a> between the <strong>Franz-Parisi potential</strong> and <strong>low-degree MMSE bounds</strong> unifies two major computational hardness frameworks.</p>
+<ul>
+<li><strong>Claude Code</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-346d62d0f2e0" class="internal-link" rel="noopener noreferrer">autonomously performs</a> substantial portions of a high-energy physics analysis pipeline, demonstrating real scientific agent capability</li>
+<li><strong>Speculating Experts</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-bf70e74b0bce" class="internal-link" rel="noopener noreferrer">prefetches MoE experts</a> using current-layer representations, significantly accelerating sparse model inference</li>
+<li><strong>Goedel-Code-Prover</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ef58edf6483c" class="internal-link" rel="noopener noreferrer">advances automated code verification</a> in <strong>Lean 4</strong> via hierarchical proof decomposition</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:d6b2ebdfde49</id>
+    <title>Do Post-Training Algorithms Actually Differ? A Controlled Study Across Model Scales Uncovers Scale-Dependent Ranking Inversions</title>
+    <link href="http://arxiv.org/abs/2603.19335" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d6b2ebdfde49" rel="related" type="text/html"/>
+    <published>2026-03-23T03:07:00Z</published>
+    <updated>2026-03-23T03:07:00Z</updated>
+    <author><name>Xiaoyi Li</name></author>
+    <summary type="html"><![CDATA[<p>Presents OXRL, a unified framework implementing 51 post-training algorithms with identical infrastructure, enabling the first large-scale controlled comparison. Key finding: algorithm rankings are unstable across model scales, with complete ranking inversions between 1.5B and 7B parameters.</p>]]></summary>
+    <category term="Post-Training Alignment"/>
+    <category term="Reinforcement Learning from Human Feedback"/>
+    <category term="Language Models"/>
+    <category term="Empirical ML"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:e9bcbe78c7e2</id>
+    <title>The monotonicity of the Franz-Parisi potential is equivalent with Low-degree MMSE lower bounds</title>
+    <link href="http://arxiv.org/abs/2603.20070" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-e9bcbe78c7e2" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Konstantinos Tsirkas, Leda Wang and Ilias Zadik</name></author>
+    <summary type="html"><![CDATA[<p>Establishes a precise mathematical equivalence between the Franz-Parisi potential's monotonicity (statistical physics) and low-degree MMSE lower bounds (computational complexity), resolving a long-standing open problem connecting these two frameworks.</p>]]></summary>
+    <category term="Computational Complexity"/>
+    <category term="Statistical Physics"/>
+    <category term="Information Theory"/>
+    <category term="Statistical Estimation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:cd1ea0b6bb6a</id>
+    <title>LeWorldModel: Stable End-to-End Joint-Embedding Predictive Architecture from Pixels</title>
+    <link href="http://arxiv.org/abs/2603.19312" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-cd1ea0b6bb6a" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Lucas Maes, Quentin Le Lidec, Damien Scieur, Yann LeCun, Randall Balestriero</name></author>
+    <summary type="html"><![CDATA[<p>Introduces LeWorldModel (LeWM), the first Joint Embedding Predictive Architecture that trains stably end-to-end from raw pixels using only two loss terms, without needing pre-trained encoders, EMA, or auxiliary supervision. Plans up to 48x faster than foundation-model-based world models with ~15M parameters trainable on a single GPU.</p>]]></summary>
+    <category term="World Models"/>
+    <category term="Self-Supervised Learning"/>
+    <category term="JEPA"/>
+    <category term="Representation Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:ca61b5b85fa6</id>
+    <title>The Autonomy Tax: Defense Training Breaks LLM Agents</title>
+    <link href="http://arxiv.org/abs/2603.19423" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ca61b5b85fa6" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Shawn Li, Yue Zhao</name></author>
+    <summary type="html"><![CDATA[<p>Reveals a capability-alignment paradox: defense training designed to protect LLM agents from prompt injection systematically destroys agent competence while failing to prevent sophisticated attacks. Evaluates across 97 agent tasks and 1,000 adversarial prompts.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="LLM Agents"/>
+    <category term="Prompt Injection"/>
+    <category term="Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:2d61123e013b</id>
+    <title>Hyperagents</title>
+    <link href="http://arxiv.org/abs/2603.19461" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-2d61123e013b" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Jenny Zhang, Bingchen Zhao, Wannan Yang, Jakob Foerster, Jeff Clune, Minqi Jiang, Sam Devlin, Tatiana Shavrina</name></author>
+    <summary type="html"><![CDATA[<p>Introduces 'hyperagents' - self-referential AI agents that integrate a task agent and a meta agent, extending the Darwin Gödel Machine concept beyond coding to general domains. The meta agent modifies the task agent's components, enabling open-ended self-improvement across diverse tasks.</p>]]></summary>
+    <category term="Self-Improving AI"/>
+    <category term="Artificial Intelligence"/>
+    <category term="Multi-Agent Systems"/>
+    <category term="Open-Ended Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:d3e45d00c029</id>
+    <title>The Residual Stream Is All You Need: On the Redundancy of the KV Cache in Transformer Inference</title>
+    <link href="http://arxiv.org/abs/2603.19664" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d3e45d00c029" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Kaleem Ullah Qasim, Jiashu Zhang, Muhammad Kafeel Shaheen, Razan Alharith, Heying Zhang</name></author>
+    <summary type="html"><![CDATA[<p>Proves that the KV cache in transformer inference is entirely redundant: keys and values are deterministic projections of the residual stream, and recomputing them yields bit-identical results. Verified across six models showing the residual stream satisfies a Markov property.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Transformer Architecture"/>
+    <category term="Efficient Inference"/>
+    <category term="Theoretical ML"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:4f6301fc47dc</id>
+    <title>Breaking the Capability Ceiling of LLM Post-Training by Reintroducing Markov States</title>
+    <link href="http://arxiv.org/abs/2603.19987" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-4f6301fc47dc" rel="related" type="text/html"/>
+    <published>2026-03-23T02:52:00Z</published>
+    <updated>2026-03-23T02:52:00Z</updated>
+    <author><name>Yurun Yuan, Tengyang Xie</name></author>
+    <summary type="html"><![CDATA[<p>Identifies a fundamental structural bottleneck in LLM post-training RL: the absence of compact Markov states leading to a 'capability ceiling'. Proposes reintroducing explicit Markov states with theoretical guarantees showing significant sample complexity reduction.</p>]]></summary>
+    <category term="Reinforcement Learning"/>
+    <category term="LLM Training"/>
+    <category term="Post-Training"/>
+    <category term="Theory"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:ef58edf6483c</id>
+    <title>Goedel-Code-Prover: Hierarchical Proof Search for Open State-of-the-Art Code Verification</title>
+    <link href="http://arxiv.org/abs/2603.19329" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ef58edf6483c" rel="related" type="text/html"/>
+    <published>2026-03-23T02:47:00Z</published>
+    <updated>2026-03-23T02:47:00Z</updated>
+    <author><name>Zenan Li, Ziran Yang, Deyuan (Mike) He, Haoyu Zhao, Andrew Zhao, Shange Tang, Kaiyu Yang, Aarti Gupta, Zhendong Su, Chi Jin</name></author>
+    <summary type="html"><![CDATA[<p>Proposes a hierarchical proof search framework for automated code verification in Lean 4 that decomposes complex verification goals into simpler subgoals before tactic-level proving. Trains Goedel-Code-Prover-8B achieving state-of-the-art results on code verification benchmarks.</p>]]></summary>
+    <category term="Formal Verification"/>
+    <category term="Code Generation"/>
+    <category term="Theorem Proving"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:346d62d0f2e0</id>
+    <title>AI Agents Can Already Autonomously Perform Experimental High Energy Physics</title>
+    <link href="http://arxiv.org/abs/2603.20179" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-346d62d0f2e0" rel="related" type="text/html"/>
+    <published>2026-03-23T02:47:00Z</published>
+    <updated>2026-03-23T02:47:00Z</updated>
+    <author><name>Eric A. Moreno, Samuel Bright-Thonney, Andrzej Novak, Dolores Garcia, Philip Harris</name></author>
+    <summary type="html"><![CDATA[<p>Claude Code autonomously performs substantial portions of a high energy physics analysis pipeline including event selection, background estimation, uncertainty quantification, statistical inference, and paper drafting. Authors argue the HEP community is underestimating AI agent capabilities.</p>]]></summary>
+    <category term="AI Agents"/>
+    <category term="Scientific Discovery"/>
+    <category term="Language Models"/>
+    <category term="Physics"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:bf70e74b0bce</id>
+    <title>Speculating Experts Accelerates Inference for Mixture-of-Experts</title>
+    <link href="http://arxiv.org/abs/2603.19289" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-bf70e74b0bce" rel="related" type="text/html"/>
+    <published>2026-03-23T02:43:00Z</published>
+    <updated>2026-03-23T02:43:00Z</updated>
+    <author><name>Vivan Madan, Prajwal Singhania, Abhinav Bhatele, Tom Goldstein, Ashwinee Panda</name></author>
+    <summary type="html"><![CDATA[<p>Proposes an expert prefetching scheme for Mixture-of-Experts models that predicts future expert activations using current internal representations, enabling CPU-GPU memory transfers to overlap with computation. Demonstrates reliable prediction across multiple MoE architectures while maintaining task accuracy.</p>]]></summary>
+    <category term="Efficient Inference"/>
+    <category term="Mixture-of-Experts"/>
+    <category term="Language Models"/>
+    <category term="Systems"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:d1b476e24af6</id>
+    <title>Neural Uncertainty Principle: A Unified View of Adversarial Fragility and LLM Hallucination</title>
+    <link href="http://arxiv.org/abs/2603.19562" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d1b476e24af6" rel="related" type="text/html"/>
+    <published>2026-03-23T02:43:00Z</published>
+    <updated>2026-03-23T02:43:00Z</updated>
+    <author><name>Dong-Xiao Zhang, Hu Lou, Jun-Jie Zhang, Jun Zhu, Deyu Meng</name></author>
+    <summary type="html"><![CDATA[<p>Proposes the Neural Uncertainty Principle (NUP), arguing that adversarial vulnerability in vision and LLM hallucination share a common geometric origin: input and loss gradient are conjugate observables with an irreducible uncertainty bound. Provides theoretical framework and practical probe.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Adversarial Robustness"/>
+    <category term="Hallucination"/>
+    <category term="Theoretical ML"/>
+    <category term="Language Models"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-22:category-summary:research</id>
     <title>Research Summary: March 22, 2026</title>
@@ -305,100 +483,6 @@
     <category term="Reward Modeling"/>
     <category term="Causal Inference"/>
     <category term="Alignment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-20:research:8268d39ec63d</id>
-    <title>From Weak Cues to Real Identities: Evaluating Inference-Driven De-Anonymization in LLM Agents</title>
-    <link href="http://arxiv.org/abs/2603.18382" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-8268d39ec63d" rel="related" type="text/html"/>
-    <published>2026-03-20T02:43:00Z</published>
-    <updated>2026-03-20T02:43:00Z</updated>
-    <author><name>Myeongseob Ko, Jihyun Jeong, Sumiran Singh Thakur, Gyuhak Kim, Ruoxi Jia</name></author>
-    <summary type="html"><![CDATA[<p>Formalizes 'inference-driven linkage' where LLM agents autonomously reconstruct real-world identities from scattered, non-identifying cues. Evaluates across Netflix/AOL datasets and a new controlled benchmark, showing agents can re-identify individuals from sparse information.</p>]]></summary>
-    <category term="Privacy"/>
-    <category term="AI Safety"/>
-    <category term="LLM Agents"/>
-    <category term="De-anonymization"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-20:research:b3b9b42397fd</id>
-    <title>Engineering Verifiable Modularity in Transformers via Per-Layer Supervision</title>
-    <link href="http://arxiv.org/abs/2603.18029" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-b3b9b42397fd" rel="related" type="text/html"/>
-    <published>2026-03-20T02:43:00Z</published>
-    <updated>2026-03-20T02:43:00Z</updated>
-    <author><name>J. Clayton Kerce</name></author>
-    <summary type="html"><![CDATA[<p>Demonstrates that architectural interventions—dual-stream processing, per-layer supervision, and gated attention—can expose hidden modularity in transformers, producing ablation effects 5-23x larger than standard training. Addresses the 'Hydra effect' where ablating components produces minimal behavioral change.</p>]]></summary>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Transformer Architecture"/>
-    <category term="AI Safety"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-20:research:e8572c17a0e8</id>
-    <title>How LLMs Distort Our Written Language</title>
-    <link href="http://arxiv.org/abs/2603.18161" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-e8572c17a0e8" rel="related" type="text/html"/>
-    <published>2026-03-20T02:43:00Z</published>
-    <updated>2026-03-20T02:43:00Z</updated>
-    <author><name>Marwa Abdulhai, Isadora White, Yanming Wan, Ibrahim Qureshi, Joel Leibo, Max Kleiman-Weiner, Natasha Jaques</name></author>
-    <summary type="html"><![CDATA[<p>Demonstrates that LLMs systematically alter the intended meaning of human writing, not just voice and tone. Heavy LLM use led to ~70% increase in essays remaining neutral and users reported less creative, less authentic writing.</p>]]></summary>
-    <category term="AI and Society"/>
-    <category term="Human-AI Interaction"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-20:research:77a56a4b09be</id>
-    <title>When Names Change Verdicts: Intervention Consistency Reveals Systematic Bias in LLM Decision-Making</title>
-    <link href="http://arxiv.org/abs/2603.18530" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-77a56a4b09be" rel="related" type="text/html"/>
-    <published>2026-03-20T02:43:00Z</published>
-    <updated>2026-03-20T02:43:00Z</updated>
-    <author><name>Abhinaba Basu, Pavan Chakraborty</name></author>
-    <summary type="html"><![CDATA[<p>ICE-Guard tests whether LLMs are susceptible to spurious features (demographic, authority, framing) in high-stakes decisions across 3,000 vignettes and 11 models. Finds authority bias (5.8%) and framing bias (5.0%) substantially exceed demographic bias (2.2%), challenging the field's narrow focus on demographics.</p>]]></summary>
-    <category term="AI Bias"/>
-    <category term="AI Safety"/>
-    <category term="LLM Evaluation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-20:research:668b9ba2b9de</id>
-    <title>SpecForge: A Flexible and Efficient Open-Source Training Framework for Speculative Decoding</title>
-    <link href="http://arxiv.org/abs/2603.18567" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-668b9ba2b9de" rel="related" type="text/html"/>
-    <published>2026-03-20T02:43:00Z</published>
-    <updated>2026-03-20T02:43:00Z</updated>
-    <author><name>Shenggui Li, Chao Wang, Yikai Zhu, Yubo Wang, Fan Yin, Shuai Shi, Yefei Chen, Xiaomin Dong, Qiaoling Chen, Jin Pan, Ji Li, Laixin Xie, Yineng Zhang, Lei Yu, Yonggang Wen, Ivor Tsang, Tianwei Zhang</name></author>
-    <summary type="html"><![CDATA[<p>SpecForge is an open-source framework for training speculative decoding draft models with full EAGLE-3 support, achieving up to 9.9x faster training for Qwen3-235B-A22B. Also releases SpecBundle, a suite of pre-trained draft models.</p>]]></summary>
-    <category term="Efficient Inference"/>
-    <category term="Speculative Decoding"/>
-    <category term="Open Source"/>
-    <category term="LLM Infrastructure"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-20:research:650863947792</id>
-    <title>Path-Constrained Mixture-of-Experts</title>
-    <link href="http://arxiv.org/abs/2603.18297" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-650863947792" rel="related" type="text/html"/>
-    <published>2026-03-20T02:43:00Z</published>
-    <updated>2026-03-20T02:43:00Z</updated>
-    <author><name>Zijin Gu, Tatiana Likhomanenko, Vimal Thilak, Jason Ramapuram, Navdeep Jaitly</name></author>
-    <summary type="html"><![CDATA[<p>Path-Constrained MoE (PathMoE) shares router parameters across consecutive layers to constrain the exponentially large expert path space. Shows consistent improvements on 0.9B and 16B models while eliminating auxiliary load balancing losses.</p>]]></summary>
-    <category term="Mixture of Experts"/>
-    <category term="Language Models"/>
-    <category term="Model Architecture"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-20:research:80cecb055462</id>
-    <title>Not All Features Are Created Equal: A Mechanistic Study of Vision-Language-Action Models</title>
-    <link href="http://arxiv.org/abs/2603.19233" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-20&amp;category=research#item-80cecb055462" rel="related" type="text/html"/>
-    <published>2026-03-20T02:43:00Z</published>
-    <updated>2026-03-20T02:43:00Z</updated>
-    <author><name>Bryce Grant, Xijia Zhao, Peng Wang</name></author>
-    <summary type="html"><![CDATA[<p>Applies activation injection, SAEs, and linear probes to six VLA models (80M-7B params) across 394K+ rollout episodes, finding that visual pathways dominate action generation with spatially bound motor programs tied to scene coordinates rather than abstract task representations.</p>]]></summary>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Vision-Language-Action Models"/>
-    <category term="Robot Learning"/>
-    <category term="Model Analysis"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-03-19:category-summary:research</id>
@@ -801,59 +885,6 @@ Preferences of Models that Claim they are Conscious</title>
     <category term="LLM Evaluation"/>
     <category term="Clinical NLP"/>
     <category term="Benchmarks"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-19:research:05bb4e492daa</id>
-    <title>Machines acquire scientific taste from institutional traces</title>
-    <link href="http://arxiv.org/abs/2603.16659" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-05bb4e492daa" rel="related" type="text/html"/>
-    <published>2026-03-19T02:43:00Z</published>
-    <updated>2026-03-19T02:43:00Z</updated>
-    <author><name>Ziqin Gong, Ning Li, Huaikang Zhou</name></author>
-    <summary type="html"><![CDATA[<p>Shows that fine-tuning language models on journal publication decisions recovers evaluative 'scientific taste' that frontier models and human experts lack. Fine-tuned models significantly outperform 11 frontier models that barely exceed chance on quality-tiered research pitches.</p>]]></summary>
-    <category term="Scientific Discovery"/>
-    <category term="Language Models"/>
-    <category term="Evaluation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-19:research:366e654d8e0d</id>
-    <title>FlashSampling: Fast and Memory-Efficient Exact Sampling</title>
-    <link href="http://arxiv.org/abs/2603.15854" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-366e654d8e0d" rel="related" type="text/html"/>
-    <published>2026-03-19T02:43:00Z</published>
-    <updated>2026-03-19T02:43:00Z</updated>
-    <author><name>Tomas Ruiz, Zhen Qin, Yifan Zhang, Xuyang Shen, Yiran Zhong, Mengdi Wang</name></author>
-    <summary type="html"><![CDATA[<p>Presents FlashSampling, which fuses categorical sampling into the LM-head matmul by computing logits tile-by-tile, adding Gumbel noise on-chip without materializing the full logits tensor in HBM. Achieves up to 11.3x speedup on modern GPUs.</p>]]></summary>
-    <category term="LLM Inference"/>
-    <category term="Systems Optimization"/>
-    <category term="GPU Computing"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-19:research:60d31fd06f5d</id>
-    <title>Efficient LLM Serving for Agentic Workflows: A Data Systems Perspective</title>
-    <link href="http://arxiv.org/abs/2603.16104" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-60d31fd06f5d" rel="related" type="text/html"/>
-    <published>2026-03-19T02:43:00Z</published>
-    <updated>2026-03-19T02:43:00Z</updated>
-    <author><name>Noppanat Wadlom, Junyi Shen, Yao Lu</name></author>
-    <summary type="html"><![CDATA[<p>Introduces Helium, a workflow-aware LLM serving framework that models agentic workloads as query plans and treats LLM invocations as first-class operators. Integrates proactive caching and cache-aware scheduling to exploit cross-call redundancy in agentic workflows.</p>]]></summary>
-    <category term="LLM Infrastructure"/>
-    <category term="Agentic AI"/>
-    <category term="Systems Optimization"/>
-    <category term="Efficiency"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-19:research:328d0b19b30e</id>
-    <title>Fast-WAM: Do World Action Models Need Test-time Future Imagination?</title>
-    <link href="http://arxiv.org/abs/2603.16666" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-19&amp;category=research#item-328d0b19b30e" rel="related" type="text/html"/>
-    <published>2026-03-19T02:43:00Z</published>
-    <updated>2026-03-19T02:43:00Z</updated>
-    <author><name>Tianyuan Yuan, Zibin Dong, Yicheng Liu, Hang Zhao</name></author>
-    <summary type="html"><![CDATA[<p>Challenges the assumption that World Action Models need explicit future imagination at test time. Shows that video modeling during training is the key benefit, and proposes Fast-WAM which removes test-time video generation while maintaining action performance.</p>]]></summary>
-    <category term="Embodied AI"/>
-    <category term="World Models"/>
-    <category term="Robotics"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-03-18:category-summary:research</id>
@@ -1522,23 +1553,5 @@ Preferences of Models that Claim they are Conscious</title>
     <category term="Language Models"/>
     <category term="Agent Evaluation"/>
     <category term="Tool-Augmented LLMs"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-15:category-summary:research</id>
-    <title>Research Summary: March 15, 2026</title>
-    <link href="https://www.lesswrong.com/posts/R4xxxAfNpAvpb3LCf/extracting-performant-algorithms-using-mechanistic-5" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-15&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-03-15T06:00:00Z</published>
-    <updated>2026-03-15T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>A thin day for research, led by a strong mechanistic interpretability result and a rigorous reanalysis of <strong>METR's</strong> developer productivity experiment.</p>
-<ul>
-<li><a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-7544377370c6" class="internal-link" rel="noopener noreferrer">Extracting performant, interpretable algorithms</a> from biological foundation models via <strong>mechanistic interpretability</strong> represents a novel bridge between MI techniques and computational biology</li>
-<li>A <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-342739dc0a46" class="internal-link" rel="noopener noreferrer">heterogeneity analysis</a> of <strong>METR's late-2025 experiment</strong> finds the sample-wide <strong>~6% AI speedup</strong> masks significant variation—important for calibrating AI productivity claims</li>
-<li>Two complementary posts probe <strong>recursive self-improvement (RSI)</strong>: one <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-ff30cd5ad9f7" class="internal-link" rel="noopener noreferrer">claims early empirical sparks</a> in long-running agents, while a self-described skeptic <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-fb5e203c4be3" class="internal-link" rel="noopener noreferrer">builds a structured conceptual case</a> for its plausibility</li>
-<li>A US survey (October 2025) <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-85d3d8e6be4c" class="internal-link" rel="noopener noreferrer">catalogs <strong>16 distinct public concerns</strong></a> about AI with demographic breakdowns, useful for governance framing</li>
-<li><strong>LessWrong</strong> <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-32ead871c2fc" class="internal-link" rel="noopener noreferrer">updates its LLM content policy</a> to require inline attribution for AI-generated text, signaling evolving community norms around AI-assisted writing</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
   </entry>
 </feed>

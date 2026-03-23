@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-03-22T06:44:47Z</updated>
+  <updated>2026-03-23T06:45:37Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,43 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-23:category-summary:research</id>
+    <title>Research Summary: March 23, 2026</title>
+    <link href="http://arxiv.org/abs/2603.19335" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-03-23T06:00:00Z</published>
+    <updated>2026-03-23T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research is headlined by a landmark empirical study and several results that challenge fundamental assumptions about transformer training and deployment.</p>
+<ul>
+<li><strong>OXRL</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d6b2ebdfde49" class="internal-link" rel="noopener noreferrer">benchmarks <strong>51 post-training algorithms</strong></a> under controlled conditions, revealing that algorithm rankings <strong>invert across model scales</strong> — a critical finding for practitioners selecting RL methods</li>
+<li>The <strong>Autonomy Tax</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ca61b5b85fa6" class="internal-link" rel="noopener noreferrer">exposes a capability-alignment paradox</a>: defense training against prompt injection <strong>systematically destroys agent competence</strong>, posing hard tradeoffs for deployed LLM agents</li>
+<li><strong>Hyperagents</strong> from Clune, Faldor et al. <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-2d61123e013b" class="internal-link" rel="noopener noreferrer">extend self-improving AI</a> via meta-agents that recursively optimize their own architecture and prompts</li>
+<li><strong>LeWorldModel</strong> achieves the <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-cd1ea0b6bb6a" class="internal-link" rel="noopener noreferrer">first stable end-to-end <strong>JEPA</strong></a> trained from raw pixels using only two loss terms, advancing LeCun's self-supervised vision agenda</li>
+</ul>
+<p>On the theory side, a proof that the <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d3e45d00c029" class="internal-link" rel="noopener noreferrer"><strong>KV cache is entirely redundant</strong></a> (recoverable from the residual stream) could reshape efficient inference design. A complementary result identifies <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-4f6301fc47dc" class="internal-link" rel="noopener noreferrer"><strong>missing Markov states</strong></a> as the structural bottleneck causing RL capability ceilings in LLMs. In mathematical physics, a <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-e9bcbe78c7e2" class="internal-link" rel="noopener noreferrer">new equivalence</a> between the <strong>Franz-Parisi potential</strong> and <strong>low-degree MMSE bounds</strong> unifies two major computational hardness frameworks.</p>
+<ul>
+<li><strong>Claude Code</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-346d62d0f2e0" class="internal-link" rel="noopener noreferrer">autonomously performs</a> substantial portions of a high-energy physics analysis pipeline, demonstrating real scientific agent capability</li>
+<li><strong>Speculating Experts</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-bf70e74b0bce" class="internal-link" rel="noopener noreferrer">prefetches MoE experts</a> using current-layer representations, significantly accelerating sparse model inference</li>
+<li><strong>Goedel-Code-Prover</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ef58edf6483c" class="internal-link" rel="noopener noreferrer">advances automated code verification</a> in <strong>Lean 4</strong> via hierarchical proof decomposition</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-23:research:d6b2ebdfde49</id>
+    <title>Do Post-Training Algorithms Actually Differ? A Controlled Study Across Model Scales Uncovers Scale-Dependent Ranking Inversions</title>
+    <link href="http://arxiv.org/abs/2603.19335" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d6b2ebdfde49" rel="related" type="text/html"/>
+    <published>2026-03-23T03:07:00Z</published>
+    <updated>2026-03-23T03:07:00Z</updated>
+    <author><name>Xiaoyi Li</name></author>
+    <summary type="html"><![CDATA[<p>Presents OXRL, a unified framework implementing 51 post-training algorithms with identical infrastructure, enabling the first large-scale controlled comparison. Key finding: algorithm rankings are unstable across model scales, with complete ranking inversions between 1.5B and 7B parameters.</p>]]></summary>
+    <category term="Post-Training Alignment"/>
+    <category term="Reinforcement Learning from Human Feedback"/>
+    <category term="Language Models"/>
+    <category term="Empirical ML"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-22:category-summary:research</id>
     <title>Research Summary: March 22, 2026</title>
@@ -442,20 +479,6 @@
     <category term="Phase Transitions"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-03-17:research:27f1cfb98176</id>
-    <title>The ARC of Progress towards AGI: A Living Survey of Abstraction and Reasoning</title>
-    <link href="http://arxiv.org/abs/2603.13372" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-17&amp;category=research#item-27f1cfb98176" rel="related" type="text/html"/>
-    <published>2026-03-17T03:00:00Z</published>
-    <updated>2026-03-17T03:00:00Z</updated>
-    <author><name>Sahar Vahdati, Andrei Aioanei, Haridhra Suresh, Jens Lehmann</name></author>
-    <summary type="html"><![CDATA[<p>Comprehensive survey of 82 approaches to the ARC-AGI benchmark across three versions and competitions. Key finding: all paradigms show 2-3x performance drops from ARC-AGI-1 to ARC-AGI-2, while humans maintain near-perfect accuracy. Opus 4.6 reaches 93% on v1 but only 68.8% on v2.</p>]]></summary>
-    <category term="AGI"/>
-    <category term="Benchmarks"/>
-    <category term="Reasoning"/>
-    <category term="Abstraction"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-03-16:category-summary:research</id>
     <title>Research Summary: March 16, 2026</title>
     <link href="http://arxiv.org/abs/2603.12397" rel="alternate" type="text/html"/>
@@ -486,23 +509,5 @@
     <category term="Alignment"/>
     <category term="Chain-of-Thought Reasoning"/>
     <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-15:category-summary:research</id>
-    <title>Research Summary: March 15, 2026</title>
-    <link href="https://www.lesswrong.com/posts/R4xxxAfNpAvpb3LCf/extracting-performant-algorithms-using-mechanistic-5" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-15&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-03-15T06:00:00Z</published>
-    <updated>2026-03-15T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>A thin day for research, led by a strong mechanistic interpretability result and a rigorous reanalysis of <strong>METR's</strong> developer productivity experiment.</p>
-<ul>
-<li><a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-7544377370c6" class="internal-link" rel="noopener noreferrer">Extracting performant, interpretable algorithms</a> from biological foundation models via <strong>mechanistic interpretability</strong> represents a novel bridge between MI techniques and computational biology</li>
-<li>A <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-342739dc0a46" class="internal-link" rel="noopener noreferrer">heterogeneity analysis</a> of <strong>METR's late-2025 experiment</strong> finds the sample-wide <strong>~6% AI speedup</strong> masks significant variation—important for calibrating AI productivity claims</li>
-<li>Two complementary posts probe <strong>recursive self-improvement (RSI)</strong>: one <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-ff30cd5ad9f7" class="internal-link" rel="noopener noreferrer">claims early empirical sparks</a> in long-running agents, while a self-described skeptic <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-fb5e203c4be3" class="internal-link" rel="noopener noreferrer">builds a structured conceptual case</a> for its plausibility</li>
-<li>A US survey (October 2025) <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-85d3d8e6be4c" class="internal-link" rel="noopener noreferrer">catalogs <strong>16 distinct public concerns</strong></a> about AI with demographic breakdowns, useful for governance framing</li>
-<li><strong>LessWrong</strong> <a href="http://localhost:8080/?date=2026-03-15&amp;category=research#item-32ead871c2fc" class="internal-link" rel="noopener noreferrer">updates its LLM content policy</a> to require inline attribution for AI-generated text, signaling evolving community norms around AI-assisted writing</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
   </entry>
 </feed>
