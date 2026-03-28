@@ -34,6 +34,9 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install Playwright browser runtime used by the LessWrong cookie bypass
+RUN python -m playwright install --with-deps chromium
+
 # Copy application code
 COPY agents/ ./agents/
 COPY generators/ ./generators/

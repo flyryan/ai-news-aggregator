@@ -15,9 +15,11 @@ arXiv publishing schedule:
 import asyncio
 import logging
 import re
+import sys
 import time
 from datetime import datetime
 from email.utils import parsedate_to_datetime
+from pathlib import Path
 from typing import List, Optional
 
 import feedparser
@@ -25,6 +27,15 @@ import requests
 
 from ..base import BaseGatherer, CollectedItem
 from .arxiv_oai import ArxivOAIHarvester
+
+SCRIPTS_DIR = Path(__file__).resolve().parents[2] / 'scripts'
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+try:
+    from lesswrong_cookie_fetch import LessWrongClient
+except ImportError:
+    LessWrongClient = None
 
 logger = logging.getLogger(__name__)
 
@@ -445,15 +456,7 @@ class ResearchGatherer(BaseGatherer):
 
         try:
             logger.info(f"Fetching LessWrong posts via GraphQL (coverage: {self.coverage_date})")
-            response = requests.post(
-                'https://www.lesswrong.com/graphql',
-                json={'query': query, 'variables': variables},
-                headers={'Content-Type': 'application/json'},
-                timeout=30
-            )
-            response.raise_for_status()
-
-            data = response.json()
+            data = self._execute_lesswrong_graphql(query, variables)
 
             if 'errors' in data:
                 logger.error(f"LessWrong GraphQL errors: {data['errors']}")
@@ -533,6 +536,29 @@ class ResearchGatherer(BaseGatherer):
             logger.error(f"Error fetching LessWrong GraphQL: {e}")
 
         return posts
+
+    def _execute_lesswrong_graphql(self, query: str, variables: dict) -> dict:
+        """Prefer the cookie-aware client, but keep direct GraphQL as a fallback."""
+        if LessWrongClient is not None:
+            try:
+                logger.info("Using LessWrongClient cookie bypass for LessWrong GraphQL")
+                return LessWrongClient().graphql(query, variables)
+            except Exception as e:
+                logger.warning(
+                    "LessWrongClient failed (%s); falling back to direct GraphQL request",
+                    e,
+                )
+        else:
+            logger.warning("LessWrongClient unavailable; falling back to direct GraphQL request")
+
+        response = requests.post(
+            'https://www.lesswrong.com/graphql',
+            json={'query': query, 'variables': variables},
+            headers={'Content-Type': 'application/json'},
+            timeout=30
+        )
+        response.raise_for_status()
+        return response.json()
 
     def _parse_feed_date(self, date_struct) -> datetime:
         """Parse date from feedparser date structure.
