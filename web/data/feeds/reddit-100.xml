@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=reddit" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/reddit-100.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:reddit:100</id>
-  <updated>2026-03-27T06:46:32Z</updated>
+  <updated>2026-03-28T06:46:40Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,179 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-28:category-summary:reddit</id>
+    <title>Reddit Summary: March 28, 2026</title>
+    <link href="https://reddit.com/r/StableDiffusion/comments/1s582ux/googles_new_ai_algorithm_reduces_memory_6x_and/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit" rel="related" type="text/html"/>
+    <published>2026-03-28T06:00:00Z</published>
+    <updated>2026-03-28T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p><strong>Google's TurboQuant</strong> dominated the day across multiple subreddits, with the core algorithm <a href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-7d9d9deec7dd" class="internal-link" rel="noopener noreferrer">achieving <strong>6x memory reduction and 8x speed increase</strong></a> sparking a cascade of practical implementations. <strong>r/LocalLLaMA</strong> showcased a <a href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-a35b25043725" class="internal-link" rel="noopener noreferrer"><strong>22.8% decode speedup</strong> in llama.cpp</a> by skipping 90% of KV dequant work, and a <a href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-2c41e5a4436a" class="internal-link" rel="noopener noreferrer">stunning demo of <strong>Qwen 3.5-9B</strong></a> running at 20K context on a 16GB MacBook Air. A separate thread extended TurboQuant to <strong>weight quantization with lossless 8-bit residuals</strong>, suggesting the technique's influence is just beginning.</p>
+<ul>
+<li><strong>Anthropic's 'Mythos' model leak</strong> was the biggest industry story — Fortune <a href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-f1e6c53dc1c0" class="internal-link" rel="noopener noreferrer">confirmed a <strong>'step change' in capabilities</strong></a> with <strong>'unprecedented cybersecurity risks'</strong>, accidentally exposed via an unsecured public database. 954 upvotes and intense debate across <strong>r/accelerate</strong>, <strong>r/agi</strong>, and <strong>r/ClaudeAI</strong>.</li>
+<li><strong>GLM 5.1</strong> <a href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-96065d7f4973" class="internal-link" rel="noopener noreferrer">launched from Zhipu AI</a> with 762 upvotes and 204 comments, signaling continued competitive pressure from Chinese labs.</li>
+<li><strong>DeepMind's Aletheia</strong> agent drew attention for conducting <strong>genuine novel mathematical research</strong> on unsolved problems, moving beyond Olympiad-style benchmarks.</li>
+<li><strong>LTX-2.3</strong> <a href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-29e33c0f84bd" class="internal-link" rel="noopener noreferrer"><strong>real-time video generation</strong></a> on a consumer 4090 and <strong>Matrix-Game 3.0's</strong> MIT-licensed <a href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-e6103a417b77" class="internal-link" rel="noopener noreferrer">interactive world models</a> (720p at 40FPS) highlighted rapid progress in <strong>real-time generative media on commodity hardware</strong>.</li>
+<li>A new <strong>LLM Persuasion Benchmark</strong> tested 15 models across 6,296 conversations — <strong>GPT-5.4</strong> proved the strongest persuader, raising safety-relevant questions about model influence capabilities.</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-28:reddit:7d9d9deec7dd</id>
+    <title>Google's new AI algorithm reduces memory 6x and increases speed 8x</title>
+    <link href="https://reddit.com/r/StableDiffusion/comments/1s582ux/googles_new_ai_algorithm_reduces_memory_6x_and/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-7d9d9deec7dd" rel="related" type="text/html"/>
+    <published>2026-03-28T03:40:00Z</published>
+    <updated>2026-03-28T03:40:00Z</updated>
+    <author><name>u/pheonis2</name></author>
+    <summary type="html"><![CDATA[<p>Following our earlier <a href="http://localhost:8080/?date=2026-03-26&amp;category=news#item-b738db472e1a" class="internal-link" rel="noopener noreferrer">News</a> coverage, Google's TurboQuant algorithm achieves 6x memory reduction and 8x speed increase for AI model compression without quality sacrifice. Highly engaged discussion (1094 upvotes, 196 comments).</p>]]></summary>
+    <category term="model_compression"/>
+    <category term="quantization"/>
+    <category term="google_research"/>
+    <category term="consumer_hardware"/>
+    <category term="inference_optimization"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-28:reddit:a35b25043725</id>
+    <title>Skipping 90% of KV dequant work → +22.8% decode at 32K (llama.cpp, TurboQuant)</title>
+    <link href="https://reddit.com/r/LocalLLaMA/comments/1s56g07/skipping_90_of_kv_dequant_work_228_decode_at_32k/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-a35b25043725" rel="related" type="text/html"/>
+    <published>2026-03-28T03:31:00Z</published>
+    <updated>2026-03-28T03:31:00Z</updated>
+    <author><name>u/Pidtom</name></author>
+    <summary type="html"><![CDATA[<p>Continuing our coverage from <a href="http://localhost:8080/?date=2026-03-27&amp;category=reddit#item-2820837785df" class="internal-link" rel="noopener noreferrer">yesterday</a>, Technical deep-dive on optimizing TurboQuant KV cache dequantization in llama.cpp, achieving 22.8% decode speedup at 32K context by skipping 90% of dequant work through exploiting FlashAttention's block structure.</p>]]></summary>
+    <category term="quantization"/>
+    <category term="turboquant"/>
+    <category term="llama_cpp"/>
+    <category term="optimization"/>
+    <category term="local_inference"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-28:reddit:f1e6c53dc1c0</id>
+    <title>Fortune: Anthropic acknowledges testing new AI model representing ‘step change’ in capabilities, after accidental data leak reveals its existence</title>
+    <link href="https://reddit.com/r/accelerate/comments/1s4vbf6/fortune_anthropic_acknowledges_testing_new_ai/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-f1e6c53dc1c0" rel="related" type="text/html"/>
+    <published>2026-03-28T03:31:00Z</published>
+    <updated>2026-03-28T03:31:00Z</updated>
+    <author><name>u/Tolopono</name></author>
+    <summary type="html"><![CDATA[<p>Fortune reports Anthropic confirmed testing 'Mythos', a new model representing a 'step change' in capabilities with dramatically higher coding, reasoning, and cybersecurity scores. Part of new 'Capybara' model series, larger than Opus, currently leading in cyber capabilities.</p>]]></summary>
+    <category term="anthropic"/>
+    <category term="claude-mythos"/>
+    <category term="model-releases"/>
+    <category term="ai-safety"/>
+    <category term="cybersecurity"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-28:reddit:27bfd00ce370</id>
+    <title>Exclusive: Anthropic acknowledges testing new AI model representing ‘step change’ in capabilities, after accidental data leak reveals its existence</title>
+    <link href="https://reddit.com/r/ClaudeAI/comments/1s4ucsu/exclusive_anthropic_acknowledges_testing_new_ai/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-27bfd00ce370" rel="related" type="text/html"/>
+    <published>2026-03-28T03:23:00Z</published>
+    <updated>2026-03-28T03:23:00Z</updated>
+    <author><name>u/Ok_Buddy_9523</name></author>
+    <summary type="html"><![CDATA[<p>Continuing our coverage from <a href="http://localhost:8080/?date=2026-03-27&amp;category=reddit#item-0e8383a636fa" class="internal-link" rel="noopener noreferrer">yesterday</a>, Fortune article about Anthropic confirming Mythos model testing after accidental data leak. Step change in capabilities including coding, reasoning, and cybersecurity. Part of new Capybara series.</p>]]></summary>
+    <category term="anthropic"/>
+    <category term="claude-mythos"/>
+    <category term="model-releases"/>
+    <category term="ai-safety"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-28:reddit:2c41e5a4436a</id>
+    <title>Google TurboQuant running Qwen Locally on MacAir</title>
+    <link href="https://reddit.com/r/LocalLLaMA/comments/1s5kdu0/google_turboquant_running_qwen_locally_on_macair/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-2c41e5a4436a" rel="related" type="text/html"/>
+    <published>2026-03-28T03:16:00Z</published>
+    <updated>2026-03-28T03:16:00Z</updated>
+    <author><name>u/gladkos</name></author>
+    <summary type="html"><![CDATA[<p>Following our earlier <a href="http://localhost:8080/?date=2026-03-26&amp;category=news#item-b738db472e1a" class="internal-link" rel="noopener noreferrer">News</a> coverage, Demonstration of Google's TurboQuant running Qwen 3.5-9B on a MacBook Air M4 with 16GB RAM at 20K context, previously infeasible on this hardware.</p>]]></summary>
+    <category term="quantization"/>
+    <category term="local_inference"/>
+    <category term="turboquant"/>
+    <category term="apple_silicon"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-28:reddit:96065d7f4973</id>
+    <title>Glm 5.1 is out</title>
+    <link href="https://reddit.com/r/LocalLLaMA/comments/1s51id3/glm_51_is_out/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-96065d7f4973" rel="related" type="text/html"/>
+    <published>2026-03-28T03:07:00Z</published>
+    <updated>2026-03-28T03:07:00Z</updated>
+    <author><name>u/Namra_7</name></author>
+    <summary type="html"><![CDATA[<p>Announcement that GLM 5.1 has been released, generating significant community discussion.</p>]]></summary>
+    <category term="model_releases"/>
+    <category term="open_source_models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-28:reddit:7568d8d366e9</id>
+    <title>Fortune reports Anthropic testing a new model that is a “step change” and “poses unprecedented cybersecurity risks”</title>
+    <link href="https://reddit.com/r/singularity/comments/1s4tz0m/fortune_reports_anthropic_testing_a_new_model/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-7568d8d366e9" rel="related" type="text/html"/>
+    <published>2026-03-28T03:00:00Z</published>
+    <updated>2026-03-28T03:00:00Z</updated>
+    <author><name>u/socoolandawesome</name></author>
+    <summary type="html"><![CDATA[<p>Fortune reports Anthropic testing 'Mythos', a new model described as a 'step change' that 'poses unprecedented cybersecurity risks'. Leaked via unsecured data store.</p>]]></summary>
+    <category term="anthropic_leak"/>
+    <category term="new_model"/>
+    <category term="ai_safety"/>
+    <category term="cybersecurity_risks"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-28:reddit:ceb3194ca3b0</id>
+    <title>Exclusive: Anthropic is testing ‘Mythos,’ its ‘most powerful AI model ever developed’</title>
+    <link href="https://reddit.com/r/accelerate/comments/1s5cf6g/exclusive_anthropic_is_testing_mythos_its_most/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-ceb3194ca3b0" rel="related" type="text/html"/>
+    <published>2026-03-28T02:52:00Z</published>
+    <updated>2026-03-28T02:52:00Z</updated>
+    <author><name>u/lovesdogsguy</name></author>
+    <summary type="html"><![CDATA[<p>Anthropic testing 'Mythos' model with new 'Capybara' tier larger than Opus. Described as most powerful model ever developed. Details leaked from public CMS database.</p>]]></summary>
+    <category term="anthropic_leak"/>
+    <category term="new_model"/>
+    <category term="capybara_tier"/>
+    <category term="ai_capabilities"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-28:reddit:9a080f6791b4</id>
+    <title>An open letter to Anthropic: Want to free up compute during peak hours? How about restricting free accounts to off peak hours instead of punishing your paid users</title>
+    <link href="https://reddit.com/r/ClaudeAI/comments/1s5nxwe/an_open_letter_to_anthropic_want_to_free_up/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-9a080f6791b4" rel="related" type="text/html"/>
+    <published>2026-03-28T02:52:00Z</published>
+    <updated>2026-03-28T02:52:00Z</updated>
+    <author><name>u/ureshiidesuka</name></author>
+    <summary type="html"><![CDATA[<p>Open letter to Anthropic criticizing usage limit policies. Argues free tier users should be restricted during peak hours instead of punishing Pro subscribers. Details how 2 standard prompts can burn an entire 5-hour session.</p>]]></summary>
+    <category term="claude-usage-limits"/>
+    <category term="anthropic-criticism"/>
+    <category term="pricing"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-28:reddit:29e33c0f84bd</id>
+    <title>I got LTX-2.3 Running in Real-Time on a 4090</title>
+    <link href="https://reddit.com/r/StableDiffusion/comments/1s5i1vc/i_got_ltx23_running_in_realtime_on_a_4090/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-29e33c0f84bd" rel="related" type="text/html"/>
+    <published>2026-03-28T02:52:00Z</published>
+    <updated>2026-03-28T02:52:00Z</updated>
+    <author><name>u/BuffMcBigHuge</name></author>
+    <summary type="html"><![CDATA[<p>Developer demonstrates running LTX-2.3 video model in real-time on a consumer 4090 GPU using Scope, an open-source real-time AI pipeline tool.</p>]]></summary>
+    <category term="real_time_video_generation"/>
+    <category term="consumer_hardware"/>
+    <category term="open_source"/>
+    <category term="ltx_video"/>
+    <category term="inference_optimization"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-28:reddit:e6103a417b77</id>
+    <title>Matrix-Game 3.0 - Real-time interactive world models</title>
+    <link href="https://reddit.com/r/StableDiffusion/comments/1s59uzh/matrixgame_30_realtime_interactive_world_models/" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-28&amp;category=reddit#item-e6103a417b77" rel="related" type="text/html"/>
+    <published>2026-03-28T02:52:00Z</published>
+    <updated>2026-03-28T02:52:00Z</updated>
+    <author><name>u/3deal</name></author>
+    <summary type="html"><![CDATA[<p>Matrix-Game 3.0 released - real-time interactive world models achieving 720p at 40FPS with a 5B model, MIT licensed, scaling up to 28B MoE. Trained on Unreal + AAA + real-world data with minute-long memory consistency.</p>]]></summary>
+    <category term="world_models"/>
+    <category term="real_time_generation"/>
+    <category term="open_model_releases"/>
+    <category term="gaming_AI"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-27:category-summary:reddit</id>
     <title>Reddit Summary: March 27, 2026</title>
@@ -502,34 +675,6 @@
     <category term="opus_4.6"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-03-26:reddit:8cb81a4b3530</id>
-    <title>How to make Claude not so agreeable?</title>
-    <link href="https://reddit.com/r/ClaudeAI/comments/1s36ctx/how_to_make_claude_not_so_agreeable/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-26&amp;category=reddit#item-8cb81a4b3530" rel="related" type="text/html"/>
-    <published>2026-03-26T02:52:00Z</published>
-    <updated>2026-03-26T02:52:00Z</updated>
-    <author><name>u/Asleep_Butterfly3662</name></author>
-    <summary type="html"><![CDATA[<p>Discussion about Claude's sycophantic/agreeable behavior during research tasks, with 54 comments sharing methods to get more honest, critical responses.</p>]]></summary>
-    <category term="sycophancy"/>
-    <category term="alignment-behavior"/>
-    <category term="prompt-engineering"/>
-    <category term="research-usage"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-26:reddit:581c6c312bfd</id>
-    <title>Postcode/ZIP code is my modelling gold</title>
-    <link href="https://reddit.com/r/datascience/comments/1s357jf/postcodezip_code_is_my_modelling_gold/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-26&amp;category=reddit#item-581c6c312bfd" rel="related" type="text/html"/>
-    <published>2026-03-26T02:52:00Z</published>
-    <updated>2026-03-26T02:52:00Z</updated>
-    <author><name>u/Sweaty-Stop6057</name></author>
-    <summary type="html"><![CDATA[<p>Data scientist shares 8 years of experience using postcode/ZIP-level geographic data (census, crime, transport) as a top-3 predictor across multiple companies. Discusses challenges of building these datasets from fragmented UK sources at different geographic levels.</p>]]></summary>
-    <category term="feature_engineering"/>
-    <category term="geospatial_data"/>
-    <category term="practical_ML"/>
-    <category term="data_engineering"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-03-25:category-summary:reddit</id>
     <title>Reddit Summary: March 25, 2026</title>
     <link href="https://reddit.com/r/OpenAI/comments/1s2onhy/openai_to_discontinue_sora/" rel="alternate" type="text/html"/>
@@ -810,74 +955,6 @@
     <category term="open_source"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-03-25:reddit:69a979360ac0</id>
-    <title>New open weights models: GigaChat-3.1-Ultra-702B and GigaChat-3.1-Lightning-10B-A1.8B</title>
-    <link href="https://reddit.com/r/LocalLLaMA/comments/1s2pkfw/new_open_weights_models_gigachat31ultra702b_and/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-25&amp;category=reddit#item-69a979360ac0" rel="related" type="text/html"/>
-    <published>2026-03-25T02:52:00Z</published>
-    <updated>2026-03-25T02:52:00Z</updated>
-    <author><name>u/netikas</name></author>
-    <summary type="html"><![CDATA[<p>Release of GigaChat-3.1-Ultra (702B MoE) and Lightning (10B A1.8B MoE) open weights models under MIT license from Sber, targeting Russian language and English, pretrained from scratch.</p>]]></summary>
-    <category term="model_release"/>
-    <category term="open_weights"/>
-    <category term="moe"/>
-    <category term="russian_ai"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-25:reddit:54ae5ea9c98e</id>
-    <title>The man who originally coined the acronym "AGI" now says that we’ve achieved it exactly as he envisioned.</title>
-    <link href="https://reddit.com/r/singularity/comments/1s2cfrb/the_man_who_originally_coined_the_acronym_agi_now/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-25&amp;category=reddit#item-54ae5ea9c98e" rel="related" type="text/html"/>
-    <published>2026-03-25T02:52:00Z</published>
-    <updated>2026-03-25T02:52:00Z</updated>
-    <author><name>u/Bizzyguy</name></author>
-    <summary type="html"><![CDATA[<p>The person who originally coined the acronym 'AGI' (Mark Gubrud) says current AI has achieved AGI exactly as he originally envisioned it.</p>]]></summary>
-    <category term="agi"/>
-    <category term="definitions"/>
-    <category term="milestones"/>
-    <category term="ai_capabilities"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-25:reddit:80c510e8587e</id>
-    <title>How is Gemini 3.1 at the top of SWE-bench?</title>
-    <link href="https://reddit.com/r/singularity/comments/1s2b8ue/how_is_gemini_31_at_the_top_of_swebench/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-25&amp;category=reddit#item-80c510e8587e" rel="related" type="text/html"/>
-    <published>2026-03-25T02:52:00Z</published>
-    <updated>2026-03-25T02:52:00Z</updated>
-    <author><name>u/Additional-Alps-8209</name></author>
-    <summary type="html"><![CDATA[<p>User questions why Gemini 3.1 tops SWE-bench despite feeling inferior to Claude Opus 4.6 and GPT 5.4 in real-world coding. Raises benchmark validity concerns.</p>]]></summary>
-    <category term="benchmarks_vs_reality"/>
-    <category term="model_comparison"/>
-    <category term="coding_AI"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-25:reddit:c95654490289</id>
-    <title>For the first time, AI has solved a FrontierMath Open Problem - "a real research problem that mathematicians have tried and failed to solve."</title>
-    <link href="https://reddit.com/r/agi/comments/1s2g4nb/for_the_first_time_ai_has_solved_a_frontiermath/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-25&amp;category=reddit#item-c95654490289" rel="related" type="text/html"/>
-    <published>2026-03-25T02:52:00Z</published>
-    <updated>2026-03-25T02:52:00Z</updated>
-    <author><name>u/MetaKnowing</name></author>
-    <summary type="html"><![CDATA[<p>Continuing our coverage from <a href="http://localhost:8080/?date=2026-03-24&amp;category=reddit#item-cd28f3d2786b" class="internal-link" rel="noopener noreferrer">yesterday</a>, AI solves a FrontierMath open problem for the first time - a genuine unsolved research problem in mathematics.</p>]]></summary>
-    <category term="AI_breakthroughs"/>
-    <category term="mathematics"/>
-    <category term="frontier_capabilities"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-25:reddit:369b372a982c</id>
-    <title>Built a 122K-line trading simulator almost entirely with Claude - what worked and what didn't</title>
-    <link href="https://reddit.com/r/ClaudeAI/comments/1s2lyu2/built_a_122kline_trading_simulator_almost/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-25&amp;category=reddit#item-369b372a982c" rel="related" type="text/html"/>
-    <published>2026-03-25T02:52:00Z</published>
-    <updated>2026-03-25T02:52:00Z</updated>
-    <author><name>u/ScarInternational817</name></author>
-    <summary type="html"><![CDATA[<p>Developer built a 122K-line trading simulator (margincall.io) with Claude, detailing the technical stack including Black-Scholes options pricing, GARCH volatility, and WASM components.</p>]]></summary>
-    <category term="project_showcase"/>
-    <category term="finance"/>
-    <category term="Claude_coding"/>
-    <category term="large_codebase"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-03-24:category-summary:reddit</id>
     <title>Reddit Summary: March 24, 2026</title>
     <link href="https://reddit.com/r/singularity/comments/1s1mix1/jensen_huang_nvidia_claims_agi_has_been_achieved/" rel="alternate" type="text/html"/>
@@ -1022,62 +1099,6 @@
     <category term="ai-math"/>
     <category term="benchmarks"/>
     <category term="gpt-5.4"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-24:reddit:1e300f8b3972</id>
-    <title>Andrej Karpathy's autonomous AI research agent ran 700 experiments in 2 days and gave a glimpse of where AI is heading</title>
-    <link href="https://reddit.com/r/artificial/comments/1s1b1zm/andrej_karpathys_autonomous_ai_research_agent_ran/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-24&amp;category=reddit#item-1e300f8b3972" rel="related" type="text/html"/>
-    <published>2026-03-24T02:52:00Z</published>
-    <updated>2026-03-24T02:52:00Z</updated>
-    <author><name>u/tekz</name></author>
-    <summary type="html"><![CDATA[<p>Discussion of Andrej Karpathy's autonomous AI research agent that ran 700 experiments in 2 days, signaling the direction of automated AI research.</p>]]></summary>
-    <category term="autonomous_research"/>
-    <category term="ai_agents"/>
-    <category term="karpathy"/>
-    <category term="research_automation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-24:reddit:cabb4cc34fc7</id>
-    <title>FlashAttention-4: 1613 TFLOPs/s, 2.7x faster than Triton, written in Python. What it means for inference.</title>
-    <link href="https://reddit.com/r/LocalLLaMA/comments/1s1yw23/flashattention4_1613_tflopss_27x_faster_than/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-24&amp;category=reddit#item-cabb4cc34fc7" rel="related" type="text/html"/>
-    <published>2026-03-24T02:52:00Z</published>
-    <updated>2026-03-24T02:52:00Z</updated>
-    <author><name>u/Sensitive-Two9732</name></author>
-    <summary type="html"><![CDATA[<p>Deep dive on FlashAttention-4 achieving 1613 TFLOPs/s on B200 (71% utilization), 2.7x faster than Triton. Covers vLLM 0.17.0 integration, PyTorch FlexAttention backend, and implications for H100 vs B200 inference.</p>]]></summary>
-    <category term="inference_optimization"/>
-    <category term="flashattention"/>
-    <category term="gpu_performance"/>
-    <category term="infrastructure"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-24:reddit:1ecc22f595f3</id>
-    <title>Tried to vibe coded expert parallelism on Strix Halo — running Qwen3.5 122B-A10B at 9.5 tok/s</title>
-    <link href="https://reddit.com/r/LocalLLaMA/comments/1s1aj2x/tried_to_vibe_coded_expert_parallelism_on_strix/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-24&amp;category=reddit#item-1ecc22f595f3" rel="related" type="text/html"/>
-    <published>2026-03-24T02:52:00Z</published>
-    <updated>2026-03-24T02:52:00Z</updated>
-    <author><name>u/hortasha</name></author>
-    <summary type="html"><![CDATA[<p>Developer implemented expert parallelism across two Strix Halo nodes (128GB unified memory each) in a k8s cluster, running Qwen3.5 122B-A10B at 9.5 tok/s. Used AI assistance for the low-level GPU work.</p>]]></summary>
-    <category term="expert_parallelism"/>
-    <category term="strix_halo"/>
-    <category term="distributed_inference"/>
-    <category term="kubernetes"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-24:reddit:1d7a25db1dc0</id>
-    <title>Yann LeCun Raises $1 Billion to Build [world model, not LLM] AI That Understands the Physical World</title>
-    <link href="https://reddit.com/r/accelerate/comments/1s1pxya/yann_lecun_raises_1_billion_to_build_world_model/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-24&amp;category=reddit#item-1d7a25db1dc0" rel="related" type="text/html"/>
-    <published>2026-03-24T02:52:00Z</published>
-    <updated>2026-03-24T02:52:00Z</updated>
-    <author><name>u/StrategosRisk</name></author>
-    <summary type="html"><![CDATA[<p>Yann LeCun raises $1 billion to build world models (not LLMs) that understand the physical world.</p>]]></summary>
-    <category term="world-models"/>
-    <category term="ai-funding"/>
-    <category term="alternative-approaches"/>
-    <category term="yann-lecun"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-03-23:category-summary:reddit</id>
@@ -1553,22 +1574,5 @@
     <category term="Kimi K2.5"/>
     <category term="AI model licensing"/>
     <category term="IP rights"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-20:category-summary:reddit</id>
-    <title>Reddit Summary: March 20, 2026</title>
-    <link href="https://reddit.com/r/LocalLLaMA/comments/1ryb028/qwen35_best_parameters_collection/" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-20&amp;category=reddit" rel="related" type="text/html"/>
-    <published>2026-03-20T06:00:00Z</published>
-    <updated>2026-03-20T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p><strong>OpenAI's <a href="http://localhost:8080/?date=2026-03-20&amp;category=reddit#item-55a491739ee5" class="internal-link" rel="noopener noreferrer">acquisition of Astral</a></strong> (uv, Ruff, ty) dominated headlines, signaling aggressive consolidation of the Python developer toolchain into its Codex ecosystem. Community reaction mixed concern over open-source stewardship with acknowledgment of strategic logic.</p>
-<ul>
-<li>A passionate <strong>r/LocalLLaMA</strong> debate (136 comments) argued AI labs <a href="http://localhost:8080/?date=2026-03-20&amp;category=reddit#item-0916a6bb4c7c" class="internal-link" rel="noopener noreferrer">prioritize <strong>agentic coding</strong></a> over <strong>knowledge density</strong>, with users frustrated that general knowledge regresses across model generations</li>
-<li>An Australian ML researcher used <strong>ChatGPT + AlphaFold</strong> to <a href="http://localhost:8080/?date=2026-03-20&amp;category=reddit#item-fddc78cd30f1" class="internal-link" rel="noopener noreferrer">design a personalized <strong>mRNA vaccine</strong></a> that shrank 75% of his dog's tumor—a striking democratization-of-science moment (497 upvotes)</li>
-<li><strong>LTX 2.3</strong> video generation on consumer GPUs (8–12GB VRAM) emerged as a breakout theme, with multiple posts showing <a href="http://localhost:8080/?date=2026-03-20&amp;category=reddit#item-7f5dd94fd339" class="internal-link" rel="noopener noreferrer">4K video in ~20 minutes</a> on modest hardware</li>
-</ul>
-<p><strong>Claude Code's ecosystem</strong> matured significantly: a developer pair-programmed <a href="http://localhost:8080/?date=2026-03-20&amp;category=reddit#item-3e2eb13814f3" class="internal-link" rel="noopener noreferrer"><strong>22K lines of C</strong></a> to build TokToken (fixing an 84K-token waste issue), a comprehensive guide covered all <a href="http://localhost:8080/?date=2026-03-20&amp;category=reddit#item-7e4af5894806" class="internal-link" rel="noopener noreferrer"><strong>23 Claude Code hooks</strong></a>, and an elegant <a href="http://localhost:8080/?date=2026-03-20&amp;category=reddit#item-d86a2b0f19e6" class="internal-link" rel="noopener noreferrer"><strong>Haiku-as-gatekeeper</strong> pattern</a> demonstrated ~80% API cost savings. On the research side, a novel finding showed <strong>DPO alignment</strong> <a href="http://localhost:8080/?date=2026-03-20&amp;category=reddit#item-faa8600f9a34" class="internal-link" rel="noopener noreferrer"><strong>silently destroys parameter-space geometry</strong></a> while loss stays flat, detectable via a zero-cost Adam-state probe. <strong>r/LocalLLaMA</strong> crowdsourced <a href="http://localhost:8080/?date=2026-03-20&amp;category=reddit#item-81cdec2b4c12" class="internal-link" rel="noopener noreferrer">optimal <strong>Qwen3.5 parameters</strong></a> across quantizations, and <strong>MiniMax M2.7</strong> <a href="http://localhost:8080/?date=2026-03-20&amp;category=reddit#item-ea5bf9b4b547" class="internal-link" rel="noopener noreferrer">benchmarks revealed</a> strong single-turn performance but weaker agentic capabilities.</p>]]></summary>
-    <category term="daily-summary"/>
   </entry>
 </feed>
