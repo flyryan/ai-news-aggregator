@@ -124,6 +124,23 @@ npm run dev
 # Open http://localhost:5173
 ```
 
+## Utility Scripts
+
+Two standalone helper scripts live in `scripts/` for operational debugging:
+
+```bash
+# Check the latest pipeline log and emit a human-readable summary
+python3 scripts/pipeline_health.py
+
+# Same report as structured JSON
+python3 scripts/pipeline_health.py --json
+
+# Warm a headless browser on LessWrong, cache cookies, and test GraphQL access
+python3 scripts/lesswrong_cookie_fetch.py --after 2026-03-27 --before 2026-03-28
+```
+
+`lesswrong_cookie_fetch.py` exists because direct `requests` calls to LessWrong GraphQL may hit Vercel's bot challenge (HTTP 429), while a real browser context can sometimes pass. The script caches browser cookies in `~/.cache/lesswrong_cookies.json` and retries with those cookies before re-solving.
+
 ### Manual Pipeline Run
 
 ```bash
