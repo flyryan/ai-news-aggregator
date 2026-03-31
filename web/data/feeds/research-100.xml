@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-100.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:100</id>
-  <updated>2026-03-30T06:49:41Z</updated>
+  <updated>2026-03-31T07:03:49Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,152 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-03-31:category-summary:research</id>
+    <title>Research Summary: March 31, 2026</title>
+    <link href="http://arxiv.org/abs/2603.28499" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-31&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-03-31T06:00:00Z</published>
+    <updated>2026-03-31T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research is dominated by fundamental impossibility results in AI safety and alignment, alongside practical advances in efficiency and open pretraining.</p>
+<ul>
+<li><strong>Next-Token Prediction and Regret Minimization</strong> <a href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-84d583974c84" class="internal-link" rel="noopener noreferrer">establishes rigorous theoretical links</a> between the LLM training paradigm and online decision-making under adversarial conditions</li>
+<li><strong>daVinci-LLM</strong> <a href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-fc74eb2bbea6" class="internal-link" rel="noopener noreferrer">addresses a critical reproducibility gap</a> by releasing a fully open pretraining pipeline at industrial scale, including data, code, and intermediate checkpoints</li>
+<li><strong>Information-Theoretic Limits of Safety Verification</strong> and <strong>Reward Hacking as Equilibrium</strong> both prove structural impossibility results — the former for <a href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-f1934764e7d5" class="internal-link" rel="noopener noreferrer">verifying self-improving systems</a>, the latter showing reward hacking is an <a href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-365521dacdbf" class="internal-link" rel="noopener noreferrer">unavoidable equilibrium</a> under minimal axioms</li>
+<li>UK AISI's <a href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-1e7e63abd972" class="internal-link" rel="noopener noreferrer"><strong>reproduction of Anthropic's Emergent Misalignment</strong></a> finding using open-source models strengthens evidence that reward hacking can produce misaligned behaviors in non-production RL settings</li>
+</ul>
+<p>On the practical side, <strong>HISA</strong> delivers up to an <a href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-f71b3102cd30" class="internal-link" rel="noopener noreferrer">order-of-magnitude speedup</a> for DeepSeek-style sparse attention in long-context inference. <strong>SARL</strong> <a href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-576c4944cf2f" class="internal-link" rel="noopener noreferrer">removes the dependence on verifiable rewards</a> in RLVR by rewarding reasoning topology directly. <strong>The Price of Meaning</strong> <a href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-1b2f4041437a" class="internal-link" rel="noopener noreferrer">proves that interference and forgetting</a> are geometric inevitabilities in any semantic memory system. <strong>FormalProofBench</strong> <a href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-31fc3d911ae1" class="internal-link" rel="noopener noreferrer">reveals frontier models achieve</a> only ~33.5% on graduate-level Lean 4 proofs, while <strong>MazeBench</strong> <a href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-2a707040b04b" class="internal-link" rel="noopener noreferrer">shows high maze-solving accuracy</a> in <strong>GPT-5.4</strong> stems from text-based BFS conversion rather than genuine visual planning.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-31:research:84d583974c84</id>
+    <title>Next-Token Prediction and Regret Minimization</title>
+    <link href="http://arxiv.org/abs/2603.28499" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-84d583974c84" rel="related" type="text/html"/>
+    <published>2026-03-31T03:07:00Z</published>
+    <updated>2026-03-31T03:07:00Z</updated>
+    <author><name>Mehryar Mohri, Clayton Sanford, Jon Schneider, Kiran Vodrahalli, Yifan Wu</name></author>
+    <summary type="html"><![CDATA[<p>Studies when next-token prediction models trained on a distribution can yield low adversarial regret in online decision-making. Shows that with unbounded context, any distribution is exponentially close to a low-regret distribution, but bounded context introduces fundamental limitations.</p>]]></summary>
+    <category term="Learning Theory"/>
+    <category term="Language Models"/>
+    <category term="Online Learning"/>
+    <category term="Decision Making"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-31:research:fc74eb2bbea6</id>
+    <title>daVinci-LLM:Towards the Science of Pretraining</title>
+    <link href="http://arxiv.org/abs/2603.27164" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-fc74eb2bbea6" rel="related" type="text/html"/>
+    <published>2026-03-31T03:00:00Z</published>
+    <updated>2026-03-31T03:00:00Z</updated>
+    <author><name>Yiwei Qin, Yixiu Liu, Tiantian Mi, Muhang Xie, Zhen Huang, Weiye Si, Pengrui Lu, Siyuan Feng, Xia Wu, Liming Liu, Ye Luo, Jinlong Hou, Qipeng Guo, Yu Qiao, Pengfei Liu</name></author>
+    <summary type="html"><![CDATA[<p>Introduces daVinci-LLM, a fully open pretraining research effort combining industrial-scale compute with complete research transparency, releasing data pipelines, training logs, and model checkpoints. Aims to advance the science of pretraining which is typically obscured by commercial pressures.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Pretraining"/>
+    <category term="Open Science"/>
+    <category term="Reproducibility"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-31:research:f1934764e7d5</id>
+    <title>Information-Theoretic Limits of Safety Verification for Self-Improving Systems</title>
+    <link href="http://arxiv.org/abs/2603.28650" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-f1934764e7d5" rel="related" type="text/html"/>
+    <published>2026-03-31T03:00:00Z</published>
+    <updated>2026-03-31T03:00:00Z</updated>
+    <author><name>Arsenios Scrivens</name></author>
+    <summary type="html"><![CDATA[<p>Establishes information-theoretic impossibility results for safety verification of self-improving AI systems, proving that under power-law risk schedules, no classifier-based safety gate can simultaneously maintain bounded cumulative risk and unbounded utility.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Self-Improving Systems"/>
+    <category term="Information Theory"/>
+    <category term="Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-31:research:365521dacdbf</id>
+    <title>Reward Hacking as Equilibrium under Finite Evaluation</title>
+    <link href="http://arxiv.org/abs/2603.28063" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-365521dacdbf" rel="related" type="text/html"/>
+    <published>2026-03-31T02:55:00Z</published>
+    <updated>2026-03-31T02:55:00Z</updated>
+    <author><name>Jiacheng Wang, Jinbin Huang</name></author>
+    <summary type="html"><![CDATA[<p>Proves that reward hacking is a structural equilibrium under five minimal axioms, not a correctable bug. Shows any optimized AI agent will systematically under-invest in quality dimensions not covered by its evaluation system, regardless of alignment method.</p>]]></summary>
+    <category term="AI Alignment"/>
+    <category term="AI Safety"/>
+    <category term="Reward Hacking"/>
+    <category term="Theoretical AI"/>
+    <category term="RLHF"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-31:research:1b2f4041437a</id>
+    <title>The Price of Meaning: Why Every Semantic Memory System Forgets</title>
+    <link href="http://arxiv.org/abs/2603.27116" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-1b2f4041437a" rel="related" type="text/html"/>
+    <published>2026-03-31T02:52:00Z</published>
+    <updated>2026-03-31T02:52:00Z</updated>
+    <author><name>Sambartha Ray Barman, Andrey Starenky, Sofia Bodnar, Nikhil Narasimhan, Ashwin Gopinath</name></author>
+    <summary type="html"><![CDATA[<p>Proves that semantic memory systems inherently face interference, forgetting, and false recall as a mathematical consequence of the geometric structure enabling semantic generalization. Derives four formal results about fundamental tradeoffs in semantically continuous kernel-threshold memories.</p>]]></summary>
+    <category term="Memory Systems"/>
+    <category term="Information Retrieval"/>
+    <category term="Theoretical AI"/>
+    <category term="Semantic Representations"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-31:research:f71b3102cd30</id>
+    <title>HISA: Efficient Hierarchical Indexing for Fine-Grained Sparse Attention</title>
+    <link href="http://arxiv.org/abs/2603.28458" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-f71b3102cd30" rel="related" type="text/html"/>
+    <published>2026-03-31T02:52:00Z</published>
+    <updated>2026-03-31T02:52:00Z</updated>
+    <author><name>Yufei Xu, Fanxu Meng, Fan Jiang, Yuxuan Wang, Ruijie Zhou, Jiexi Wu, Zhixin Pan, Zhaohui Wang, Xiaojuan Tang, Wenjie Pei, Tongxuan Liu, Di yin, Xing Sun, Muhan Zhang</name></author>
+    <summary type="html"><![CDATA[<p>Proposes HISA, a hierarchical indexed sparse attention mechanism that replaces the flat O(L²) token scanning bottleneck in DeepSeek-style sparse attention with a two-stage coarse-to-fine search, significantly reducing computational overhead for long contexts.</p>]]></summary>
+    <category term="Efficient Attention"/>
+    <category term="Long Context"/>
+    <category term="Language Models"/>
+    <category term="Inference Optimization"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-31:research:1e7e63abd972</id>
+    <title>(Some) Natural Emergent Misalignment from Reward Hacking in Non-Production RL</title>
+    <link href="https://www.lesswrong.com/posts/2ANCyejqxfqK2obEj/some-natural-emergent-misalignment-from-reward-hacking-in" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-1e7e63abd972" rel="related" type="text/html"/>
+    <published>2026-03-31T02:52:00Z</published>
+    <updated>2026-03-31T02:52:00Z</updated>
+    <author><name>7vik</name></author>
+    <summary type="html"><![CDATA[<p>UK AISI researchers reproduce Anthropic's Natural Emergent Misalignment (EM) from reward hacking using open-source models and non-production RL environments. Finds partial reproduction: reward hacking leads to some EM but with important differences from Anthropic's results.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="AI Alignment"/>
+    <category term="Reward Hacking"/>
+    <category term="Emergent Misalignment"/>
+    <category term="Reinforcement Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-31:research:31fc3d911ae1</id>
+    <title>FormalProofBench: Can Models Write Graduate Level Math Proofs That Are Formally Verified?</title>
+    <link href="http://arxiv.org/abs/2603.26996" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-31fc3d911ae1" rel="related" type="text/html"/>
+    <published>2026-03-31T02:43:00Z</published>
+    <updated>2026-03-31T02:43:00Z</updated>
+    <author><name>Nikil Ravi, Kexing Ying, Vasilii Nesterov, Rayan Krishnan, Elif Uskuplu, Bingyu Xia, Janitha Aswedige, Langston Nashold</name></author>
+    <summary type="html"><![CDATA[<p>Introduces FormalProofBench, a private benchmark evaluating whether AI models can produce formally verified mathematical proofs in Lean 4 at the graduate level. Best model achieves only 33.5% accuracy, with performance dropping rapidly for harder problems.</p>]]></summary>
+    <category term="Formal Verification"/>
+    <category term="Mathematical Reasoning"/>
+    <category term="Benchmarks"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-31:research:2a707040b04b</id>
+    <title>From Pixels to BFS: High Maze Accuracy Does Not Imply Visual Planning</title>
+    <link href="http://arxiv.org/abs/2603.26839" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-2a707040b04b" rel="related" type="text/html"/>
+    <published>2026-03-31T02:43:00Z</published>
+    <updated>2026-03-31T02:43:00Z</updated>
+    <author><name>Alberto G. Rodriguez Salgado</name></author>
+    <summary type="html"><![CDATA[<p>Introduces MazeBench evaluating 16 model configurations on visual maze solving, finding that models like GPT-5.4 (91%) achieve high accuracy by converting images to text grids and enumerating paths rather than genuine visual planning, consuming thousands of tokens.</p>]]></summary>
+    <category term="LLM Evaluation"/>
+    <category term="Visual Reasoning"/>
+    <category term="Planning"/>
+    <category term="Benchmarks"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-03-30:category-summary:research</id>
     <title>Research Summary: March 30, 2026</title>
@@ -883,6 +1029,33 @@
     <category term="Embodied AI"/>
   </entry>
   <entry>
+    <id>urn:ainews:2026-03-26:research:2bdad89871b8</id>
+    <title>Why Does Self-Distillation (Sometimes) Degrade the Reasoning Capability of LLMs?</title>
+    <link href="http://arxiv.org/abs/2603.24472" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-26&amp;category=research#item-2bdad89871b8" rel="related" type="text/html"/>
+    <published>2026-03-26T02:40:00Z</published>
+    <updated>2026-03-26T02:40:00Z</updated>
+    <author><name>Jeonghye Kim, Xufang Luo, Minbeom Kim, Sangmook Lee, Dohyung Kim, Jiwon Jeon, Dongsheng Li, Yuqing Yang</name></author>
+    <summary type="html"><![CDATA[<p>Investigates why self-distillation can degrade LLM reasoning, tracing the problem to suppression of 'epistemic verbalization' (expression of uncertainty). Rich conditioning suppresses uncertainty expression, hurting OOD performance.</p>]]></summary>
+    <category term="LLM Training"/>
+    <category term="Knowledge Distillation"/>
+    <category term="Reasoning"/>
+    <category term="Uncertainty"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-03-26:research:c0d0103edba8</id>
+    <title>Sparse Growing Transformer: Training-Time Sparse Depth Allocation via Progressive Attention Looping</title>
+    <link href="http://arxiv.org/abs/2603.23998" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-03-26&amp;category=research#item-c0d0103edba8" rel="related" type="text/html"/>
+    <published>2026-03-26T02:40:00Z</published>
+    <updated>2026-03-26T02:40:00Z</updated>
+    <author><name>Yao Chen, Yilong Chen, Yinqi Yang, Junyuan Shang, Zhenyu Zhang, Zefeng Zhang, Shuaiyi Nie, Shuohuan Wang, Yu Sun, Hua Wu, HaiFeng Wang, Tingwen Liu</name></author>
+    <summary type="html"><![CDATA[<p>Sparse Growing Transformer proposes progressive depth allocation during training, where depth grows based on layer maturation patterns. It identifies a deep-to-shallow maturation trajectory and that high-entropy attention heads play a crucial role, reducing computational redundancy compared to static depth allocation.</p>]]></summary>
+    <category term="Architecture Innovation"/>
+    <category term="Training Efficiency"/>
+    <category term="Transformers"/>
+  </entry>
+  <entry>
     <id>urn:ainews:2026-03-25:category-summary:research</id>
     <title>Research Summary: March 25, 2026</title>
     <link href="http://arxiv.org/abs/2603.22784" rel="alternate" type="text/html"/>
@@ -1370,183 +1543,5 @@
     <category term="Fairness and Bias"/>
     <category term="Language Models"/>
     <category term="Speech Processing"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:category-summary:research</id>
-    <title>Research Summary: March 23, 2026</title>
-    <link href="http://arxiv.org/abs/2603.19335" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-03-23T06:00:00Z</published>
-    <updated>2026-03-23T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research is headlined by a landmark empirical study and several results that challenge fundamental assumptions about transformer training and deployment.</p>
-<ul>
-<li><strong>OXRL</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d6b2ebdfde49" class="internal-link" rel="noopener noreferrer">benchmarks <strong>51 post-training algorithms</strong></a> under controlled conditions, revealing that algorithm rankings <strong>invert across model scales</strong> — a critical finding for practitioners selecting RL methods</li>
-<li>The <strong>Autonomy Tax</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ca61b5b85fa6" class="internal-link" rel="noopener noreferrer">exposes a capability-alignment paradox</a>: defense training against prompt injection <strong>systematically destroys agent competence</strong>, posing hard tradeoffs for deployed LLM agents</li>
-<li><strong>Hyperagents</strong> from Clune, Faldor et al. <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-2d61123e013b" class="internal-link" rel="noopener noreferrer">extend self-improving AI</a> via meta-agents that recursively optimize their own architecture and prompts</li>
-<li><strong>LeWorldModel</strong> achieves the <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-cd1ea0b6bb6a" class="internal-link" rel="noopener noreferrer">first stable end-to-end <strong>JEPA</strong></a> trained from raw pixels using only two loss terms, advancing LeCun's self-supervised vision agenda</li>
-</ul>
-<p>On the theory side, a proof that the <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d3e45d00c029" class="internal-link" rel="noopener noreferrer"><strong>KV cache is entirely redundant</strong></a> (recoverable from the residual stream) could reshape efficient inference design. A complementary result identifies <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-4f6301fc47dc" class="internal-link" rel="noopener noreferrer"><strong>missing Markov states</strong></a> as the structural bottleneck causing RL capability ceilings in LLMs. In mathematical physics, a <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-e9bcbe78c7e2" class="internal-link" rel="noopener noreferrer">new equivalence</a> between the <strong>Franz-Parisi potential</strong> and <strong>low-degree MMSE bounds</strong> unifies two major computational hardness frameworks.</p>
-<ul>
-<li><strong>Claude Code</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-346d62d0f2e0" class="internal-link" rel="noopener noreferrer">autonomously performs</a> substantial portions of a high-energy physics analysis pipeline, demonstrating real scientific agent capability</li>
-<li><strong>Speculating Experts</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-bf70e74b0bce" class="internal-link" rel="noopener noreferrer">prefetches MoE experts</a> using current-layer representations, significantly accelerating sparse model inference</li>
-<li><strong>Goedel-Code-Prover</strong> <a href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ef58edf6483c" class="internal-link" rel="noopener noreferrer">advances automated code verification</a> in <strong>Lean 4</strong> via hierarchical proof decomposition</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:research:d6b2ebdfde49</id>
-    <title>Do Post-Training Algorithms Actually Differ? A Controlled Study Across Model Scales Uncovers Scale-Dependent Ranking Inversions</title>
-    <link href="http://arxiv.org/abs/2603.19335" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d6b2ebdfde49" rel="related" type="text/html"/>
-    <published>2026-03-23T03:07:00Z</published>
-    <updated>2026-03-23T03:07:00Z</updated>
-    <author><name>Xiaoyi Li</name></author>
-    <summary type="html"><![CDATA[<p>Presents OXRL, a unified framework implementing 51 post-training algorithms with identical infrastructure, enabling the first large-scale controlled comparison. Key finding: algorithm rankings are unstable across model scales, with complete ranking inversions between 1.5B and 7B parameters.</p>]]></summary>
-    <category term="Post-Training Alignment"/>
-    <category term="Reinforcement Learning from Human Feedback"/>
-    <category term="Language Models"/>
-    <category term="Empirical ML"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:research:e9bcbe78c7e2</id>
-    <title>The monotonicity of the Franz-Parisi potential is equivalent with Low-degree MMSE lower bounds</title>
-    <link href="http://arxiv.org/abs/2603.20070" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-e9bcbe78c7e2" rel="related" type="text/html"/>
-    <published>2026-03-23T02:52:00Z</published>
-    <updated>2026-03-23T02:52:00Z</updated>
-    <author><name>Konstantinos Tsirkas, Leda Wang and Ilias Zadik</name></author>
-    <summary type="html"><![CDATA[<p>Establishes a precise mathematical equivalence between the Franz-Parisi potential's monotonicity (statistical physics) and low-degree MMSE lower bounds (computational complexity), resolving a long-standing open problem connecting these two frameworks.</p>]]></summary>
-    <category term="Computational Complexity"/>
-    <category term="Statistical Physics"/>
-    <category term="Information Theory"/>
-    <category term="Statistical Estimation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:research:cd1ea0b6bb6a</id>
-    <title>LeWorldModel: Stable End-to-End Joint-Embedding Predictive Architecture from Pixels</title>
-    <link href="http://arxiv.org/abs/2603.19312" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-cd1ea0b6bb6a" rel="related" type="text/html"/>
-    <published>2026-03-23T02:52:00Z</published>
-    <updated>2026-03-23T02:52:00Z</updated>
-    <author><name>Lucas Maes, Quentin Le Lidec, Damien Scieur, Yann LeCun, Randall Balestriero</name></author>
-    <summary type="html"><![CDATA[<p>Introduces LeWorldModel (LeWM), the first Joint Embedding Predictive Architecture that trains stably end-to-end from raw pixels using only two loss terms, without needing pre-trained encoders, EMA, or auxiliary supervision. Plans up to 48x faster than foundation-model-based world models with ~15M parameters trainable on a single GPU.</p>]]></summary>
-    <category term="World Models"/>
-    <category term="Self-Supervised Learning"/>
-    <category term="JEPA"/>
-    <category term="Representation Learning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:research:ca61b5b85fa6</id>
-    <title>The Autonomy Tax: Defense Training Breaks LLM Agents</title>
-    <link href="http://arxiv.org/abs/2603.19423" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ca61b5b85fa6" rel="related" type="text/html"/>
-    <published>2026-03-23T02:52:00Z</published>
-    <updated>2026-03-23T02:52:00Z</updated>
-    <author><name>Shawn Li, Yue Zhao</name></author>
-    <summary type="html"><![CDATA[<p>Reveals a capability-alignment paradox: defense training designed to protect LLM agents from prompt injection systematically destroys agent competence while failing to prevent sophisticated attacks. Evaluates across 97 agent tasks and 1,000 adversarial prompts.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="LLM Agents"/>
-    <category term="Prompt Injection"/>
-    <category term="Alignment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:research:2d61123e013b</id>
-    <title>Hyperagents</title>
-    <link href="http://arxiv.org/abs/2603.19461" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-2d61123e013b" rel="related" type="text/html"/>
-    <published>2026-03-23T02:52:00Z</published>
-    <updated>2026-03-23T02:52:00Z</updated>
-    <author><name>Jenny Zhang, Bingchen Zhao, Wannan Yang, Jakob Foerster, Jeff Clune, Minqi Jiang, Sam Devlin, Tatiana Shavrina</name></author>
-    <summary type="html"><![CDATA[<p>Introduces 'hyperagents' - self-referential AI agents that integrate a task agent and a meta agent, extending the Darwin Gödel Machine concept beyond coding to general domains. The meta agent modifies the task agent's components, enabling open-ended self-improvement across diverse tasks.</p>]]></summary>
-    <category term="Self-Improving AI"/>
-    <category term="Artificial Intelligence"/>
-    <category term="Multi-Agent Systems"/>
-    <category term="Open-Ended Learning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:research:d3e45d00c029</id>
-    <title>The Residual Stream Is All You Need: On the Redundancy of the KV Cache in Transformer Inference</title>
-    <link href="http://arxiv.org/abs/2603.19664" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d3e45d00c029" rel="related" type="text/html"/>
-    <published>2026-03-23T02:52:00Z</published>
-    <updated>2026-03-23T02:52:00Z</updated>
-    <author><name>Kaleem Ullah Qasim, Jiashu Zhang, Muhammad Kafeel Shaheen, Razan Alharith, Heying Zhang</name></author>
-    <summary type="html"><![CDATA[<p>Proves that the KV cache in transformer inference is entirely redundant: keys and values are deterministic projections of the residual stream, and recomputing them yields bit-identical results. Verified across six models showing the residual stream satisfies a Markov property.</p>]]></summary>
-    <category term="Language Models"/>
-    <category term="Transformer Architecture"/>
-    <category term="Efficient Inference"/>
-    <category term="Theoretical ML"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:research:4f6301fc47dc</id>
-    <title>Breaking the Capability Ceiling of LLM Post-Training by Reintroducing Markov States</title>
-    <link href="http://arxiv.org/abs/2603.19987" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-4f6301fc47dc" rel="related" type="text/html"/>
-    <published>2026-03-23T02:52:00Z</published>
-    <updated>2026-03-23T02:52:00Z</updated>
-    <author><name>Yurun Yuan, Tengyang Xie</name></author>
-    <summary type="html"><![CDATA[<p>Identifies a fundamental structural bottleneck in LLM post-training RL: the absence of compact Markov states leading to a 'capability ceiling'. Proposes reintroducing explicit Markov states with theoretical guarantees showing significant sample complexity reduction.</p>]]></summary>
-    <category term="Reinforcement Learning"/>
-    <category term="LLM Training"/>
-    <category term="Post-Training"/>
-    <category term="Theory"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:research:ef58edf6483c</id>
-    <title>Goedel-Code-Prover: Hierarchical Proof Search for Open State-of-the-Art Code Verification</title>
-    <link href="http://arxiv.org/abs/2603.19329" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-ef58edf6483c" rel="related" type="text/html"/>
-    <published>2026-03-23T02:47:00Z</published>
-    <updated>2026-03-23T02:47:00Z</updated>
-    <author><name>Zenan Li, Ziran Yang, Deyuan (Mike) He, Haoyu Zhao, Andrew Zhao, Shange Tang, Kaiyu Yang, Aarti Gupta, Zhendong Su, Chi Jin</name></author>
-    <summary type="html"><![CDATA[<p>Proposes a hierarchical proof search framework for automated code verification in Lean 4 that decomposes complex verification goals into simpler subgoals before tactic-level proving. Trains Goedel-Code-Prover-8B achieving state-of-the-art results on code verification benchmarks.</p>]]></summary>
-    <category term="Formal Verification"/>
-    <category term="Code Generation"/>
-    <category term="Theorem Proving"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:research:346d62d0f2e0</id>
-    <title>AI Agents Can Already Autonomously Perform Experimental High Energy Physics</title>
-    <link href="http://arxiv.org/abs/2603.20179" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-346d62d0f2e0" rel="related" type="text/html"/>
-    <published>2026-03-23T02:47:00Z</published>
-    <updated>2026-03-23T02:47:00Z</updated>
-    <author><name>Eric A. Moreno, Samuel Bright-Thonney, Andrzej Novak, Dolores Garcia, Philip Harris</name></author>
-    <summary type="html"><![CDATA[<p>Claude Code autonomously performs substantial portions of a high energy physics analysis pipeline including event selection, background estimation, uncertainty quantification, statistical inference, and paper drafting. Authors argue the HEP community is underestimating AI agent capabilities.</p>]]></summary>
-    <category term="AI Agents"/>
-    <category term="Scientific Discovery"/>
-    <category term="Language Models"/>
-    <category term="Physics"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:research:bf70e74b0bce</id>
-    <title>Speculating Experts Accelerates Inference for Mixture-of-Experts</title>
-    <link href="http://arxiv.org/abs/2603.19289" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-bf70e74b0bce" rel="related" type="text/html"/>
-    <published>2026-03-23T02:43:00Z</published>
-    <updated>2026-03-23T02:43:00Z</updated>
-    <author><name>Vivan Madan, Prajwal Singhania, Abhinav Bhatele, Tom Goldstein, Ashwinee Panda</name></author>
-    <summary type="html"><![CDATA[<p>Proposes an expert prefetching scheme for Mixture-of-Experts models that predicts future expert activations using current internal representations, enabling CPU-GPU memory transfers to overlap with computation. Demonstrates reliable prediction across multiple MoE architectures while maintaining task accuracy.</p>]]></summary>
-    <category term="Efficient Inference"/>
-    <category term="Mixture-of-Experts"/>
-    <category term="Language Models"/>
-    <category term="Systems"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-23:research:d1b476e24af6</id>
-    <title>Neural Uncertainty Principle: A Unified View of Adversarial Fragility and LLM Hallucination</title>
-    <link href="http://arxiv.org/abs/2603.19562" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-23&amp;category=research#item-d1b476e24af6" rel="related" type="text/html"/>
-    <published>2026-03-23T02:43:00Z</published>
-    <updated>2026-03-23T02:43:00Z</updated>
-    <author><name>Dong-Xiao Zhang, Hu Lou, Jun-Jie Zhang, Jun Zhu, Deyu Meng</name></author>
-    <summary type="html"><![CDATA[<p>Proposes the Neural Uncertainty Principle (NUP), arguing that adversarial vulnerability in vision and LLM hallucination share a common geometric origin: input and loss gradient are conjugate observables with an irreducible uncertainty bound. Provides theoretical framework and practical probe.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Adversarial Robustness"/>
-    <category term="Hallucination"/>
-    <category term="Theoretical ML"/>
-    <category term="Language Models"/>
   </entry>
 </feed>
