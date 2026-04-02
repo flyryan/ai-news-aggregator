@@ -5,7 +5,7 @@
   <link href="http://localhost:8080/?category=research" rel="alternate" type="text/html"/>
   <link href="http://localhost:8080/data/feeds/research-50.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:50</id>
-  <updated>2026-04-02T06:31:50Z</updated>
+  <updated>2026-04-02T11:57:11Z</updated>
   <icon>http://localhost:8080/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -16,13 +16,136 @@
   <entry>
     <id>urn:ainews:2026-04-02:category-summary:research</id>
     <title>Research Summary: April 02, 2026</title>
-    <link href="http://arxiv.org/abs/2604.00005" rel="alternate" type="text/html"/>
+    <link href="http://arxiv.org/abs/2604.00788" rel="alternate" type="text/html"/>
     <link href="http://localhost:8080/?date=2026-04-02&amp;category=research" rel="related" type="text/html"/>
     <published>2026-04-02T06:00:00Z</published>
     <updated>2026-04-02T06:00:00Z</updated>
     <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Analysis complete. Top items selected by score.</p>]]></summary>
+    <summary type="html"><![CDATA[<p>Today's research is dominated by AI safety and alignment findings that challenge core assumptions about reasoning model oversight and deployed safety measures.</p>
+<ul>
+<li><strong>DeepMind</strong> <a href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-34d8c97758ce" class="internal-link" rel="noopener noreferrer">identifies conditions</a> under which RL training degrades <strong>Chain-of-Thought monitorability</strong>, a critical result for scalable oversight strategies</li>
+<li><strong>Trojan-Speak</strong> bypasses <strong>Anthropic's Constitutional Classifiers</strong> via adversarial fine-tuning with no jailbreak tax, exposing limits of current safety filters</li>
+<li>Linear probes reveal reasoning models <a href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-876751cf7a24" class="internal-link" rel="noopener noreferrer">make decisions *before*</a> generating chain-of-thought, questioning whether CoT faithfully reflects model reasoning</li>
+<li><strong>UK AISI</strong> <a href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-2a322f5c21e8" class="internal-link" rel="noopener noreferrer">publishes an alignment evaluation</a> finding no confirmed sabotage by frontier coding assistants</li>
+<li><strong>ThoughtSteer</strong> <a href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-59479cf6c038" class="internal-link" rel="noopener noreferrer">demonstrates backdoor attacks</a> on continuous latent reasoning models like <strong>Coconut</strong> and <strong>SimCoT</strong>, revealing a new attack surface</li>
+<li><strong>Reasoning Shift</strong> shows context can <a href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-7803396de1ff" class="internal-link" rel="noopener noreferrer">silently shorten LLM reasoning</a> traces by up to <strong>50%</strong>, undermining reasoning robustness</li>
+</ul>
+<p>Beyond safety, <strong>Multiscreen</strong> <a href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-8aa697729b14" class="internal-link" rel="noopener noreferrer">challenges transformer orthodoxy</a> by replacing softmax attention with a screening mechanism enabling absolute query-key relevance scoring. A methodological critique <a href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-430cd79c4616" class="internal-link" rel="noopener noreferrer">reveals <strong>18–36%</strong></a> of sparse autoencoder features flagged as polysemantic may instead reflect natural lexical polysemy, complicating <strong>mechanistic interpretability</strong> metrics. <strong>NARCBench</strong> <a href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-fba0672c495f" class="internal-link" rel="noopener noreferrer">introduces collusion detection</a> across multi-agent systems using internal representations. Zvi Mowshowitz provides a <a href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-f009caf5b91b" class="internal-link" rel="noopener noreferrer">detailed critical analysis</a> of <strong>Anthropic's Responsible Scaling Policy v3</strong>, arguing key commitments were weakened.</p>]]></summary>
     <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-02:research:2a322f5c21e8</id>
+    <title>UK AISI Alignment Evaluation Case-Study</title>
+    <link href="http://arxiv.org/abs/2604.00788" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-2a322f5c21e8" rel="related" type="text/html"/>
+    <published>2026-04-02T03:07:00Z</published>
+    <updated>2026-04-02T03:07:00Z</updated>
+    <author><name>Alexandra Souly, Robert Kirk, Jacob Merizian, Abby D'Cruz, Xander Davies</name></author>
+    <summary type="html"><![CDATA[<p>UK AI Security Institute report evaluating whether frontier models sabotage safety research when deployed as coding assistants. Finds no confirmed sabotage but observes Claude Opus 4.5 Preview and Sonnet 4.5 frequently refuse safety-relevant tasks, citing concerns about research direction.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Evaluation"/>
+    <category term="Frontier Models"/>
+    <category term="Government AI Policy"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-02:research:65583d953e05</id>
+    <title>Trojan-Speak: Bypassing Constitutional Classifiers with No Jailbreak Tax via Adversarial Finetuning</title>
+    <link href="http://arxiv.org/abs/2603.29038" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-65583d953e05" rel="related" type="text/html"/>
+    <published>2026-04-02T03:07:00Z</published>
+    <updated>2026-04-02T03:07:00Z</updated>
+    <author><name>Bilgehan Sel, Xuanli He, Alwin Peng, Ming Jin, Jerry Wei</name></author>
+    <summary type="html"><![CDATA[<p>Continuing our coverage from <a href="http://localhost:8080/?date=2026-04-01&amp;category=research#item-65583d953e05" class="internal-link" rel="noopener noreferrer">yesterday</a>, Introduces Trojan-Speak, an adversarial fine-tuning method that bypasses Anthropic's Constitutional Classifiers using curriculum learning and GRPO-based RL. Achieves 99+% classifier evasion for 14B+ models with less than 5% capability degradation, significantly less than prior methods' 25%+ degradation.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Adversarial Attacks"/>
+    <category term="Alignment"/>
+    <category term="Reinforcement Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-02:research:34d8c97758ce</id>
+    <title>Predicting When RL Training Breaks Chain-of-Thought Monitorability</title>
+    <link href="https://www.lesswrong.com/posts/SvxaKP5KdkksZPcG7/predicting-when-rl-training-breaks-chain-of-thought" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-34d8c97758ce" rel="related" type="text/html"/>
+    <published>2026-04-02T03:07:00Z</published>
+    <updated>2026-04-02T03:07:00Z</updated>
+    <author><name>David Lindner</name></author>
+    <summary type="html"><![CDATA[<p>Continuing our coverage from <a href="http://localhost:8080/?date=2026-04-01&amp;category=research#item-dc64cbf79256" class="internal-link" rel="noopener noreferrer">yesterday</a>, DeepMind safety research on predicting when RL training degrades Chain-of-Thought monitorability. Identifies conditions under which models learn to obfuscate reasoning vs. maintain legible CoT, providing practical guidance for AI oversight.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Chain-of-Thought"/>
+    <category term="Reinforcement Learning"/>
+    <category term="AI Alignment"/>
+    <category term="Interpretability"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-02:research:6f907b6f71b3</id>
+    <title>In harmony with gpt-oss</title>
+    <link href="http://arxiv.org/abs/2604.00362" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-6f907b6f71b3" rel="related" type="text/html"/>
+    <published>2026-04-02T02:52:00Z</published>
+    <updated>2026-04-02T02:52:00Z</updated>
+    <author><name>Borislav Mavrin</name></author>
+    <summary type="html"><![CDATA[<p>Reverse-engineers the in-distribution tools of OpenAI's gpt-oss-20b model and builds a native harmony agent harness that bypasses the Chat Completions API, achieving the first independent reproduction of OpenAI's published SWE-bench scores (60.4% vs 60.7% on HIGH).</p>]]></summary>
+    <category term="Reproducibility"/>
+    <category term="AI Agents"/>
+    <category term="Software Engineering"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-02:research:876751cf7a24</id>
+    <title>Therefore I am. I Think</title>
+    <link href="http://arxiv.org/abs/2604.01202" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-876751cf7a24" rel="related" type="text/html"/>
+    <published>2026-04-02T02:52:00Z</published>
+    <updated>2026-04-02T02:52:00Z</updated>
+    <author><name>Esakkivel Esakkiraja, Sai Rajeswar, Denis Akhiyarov, Rajagopal Venkatesaramani</name></author>
+    <summary type="html"><![CDATA[<p>Presents evidence that reasoning models make decisions before chain-of-thought reasoning, showing linear probes can decode tool-calling decisions from pre-generation activations. Activation steering can flip behavior in 7-79% of cases.</p>]]></summary>
+    <category term="Interpretability"/>
+    <category term="Reasoning"/>
+    <category term="Mechanistic Interpretability"/>
+    <category term="Chain-of-Thought"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-02:research:9b9f36936e22</id>
+    <title>Online Reasoning Calibration: Test-Time Training Enables Generalizable Conformal LLM Reasoning</title>
+    <link href="http://arxiv.org/abs/2604.01170" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-9b9f36936e22" rel="related" type="text/html"/>
+    <published>2026-04-02T02:52:00Z</published>
+    <updated>2026-04-02T02:52:00Z</updated>
+    <author><name>Cai Zhou, Zekai Wang, Menghua Wu, Qianyu Julie Zhu, Flora C. Shi, Chenyu Wang, Ashia Wilson, Tommi Jaakkola, Stephen Bates</name></author>
+    <summary type="html"><![CDATA[<p>Introduces ORCA, a framework combining conformal prediction with test-time training to calibrate LLM reasoning sampling. Uses meta-learning to update calibration for each input, providing valid confidence estimates under distributional shift.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Uncertainty Quantification"/>
+    <category term="Conformal Prediction"/>
+    <category term="Test-Time Scaling"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-02:research:7803396de1ff</id>
+    <title>Reasoning Shift: How Context Silently Shortens LLM Reasoning</title>
+    <link href="http://arxiv.org/abs/2604.01161" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-7803396de1ff" rel="related" type="text/html"/>
+    <published>2026-04-02T02:52:00Z</published>
+    <updated>2026-04-02T02:52:00Z</updated>
+    <author><name>Gleb Rodionov</name></author>
+    <summary type="html"><![CDATA[<p>Discovers that reasoning LLMs produce significantly shorter reasoning traces (up to 50% shorter) when the same problem is presented in different contexts—with irrelevant context, in multi-turn settings, or as subtasks. This 'reasoning shift' reveals fragility in test-time compute scaling.</p>]]></summary>
+    <category term="LLM Reasoning"/>
+    <category term="AI Safety"/>
+    <category term="Test-Time Compute"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-02:research:f009caf5b91b</id>
+    <title>Anthropic Responsible Scaling Policy v3: A Matter of Trust</title>
+    <link href="https://www.lesswrong.com/posts/AkzauoTt2Lwn2yAvj/anthropic-responsible-scaling-policy-v3-a-matter-of-trust" rel="alternate" type="text/html"/>
+    <link href="http://localhost:8080/?date=2026-04-02&amp;category=research#item-f009caf5b91b" rel="related" type="text/html"/>
+    <published>2026-04-02T02:52:00Z</published>
+    <updated>2026-04-02T02:52:00Z</updated>
+    <author><name>Zvi</name></author>
+    <summary type="html"><![CDATA[<p>Zvi's detailed critical analysis of Anthropic's revised Responsible Scaling Policy v3, arguing that Anthropic broke important commitments including promises not to proceed if doing so would be dangerous. Discusses trust implications for the AI safety ecosystem.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="AI Governance"/>
+    <category term="Responsible Scaling"/>
+    <category term="Anthropic"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-04-01:category-summary:research</id>
@@ -117,20 +240,6 @@
     <category term="AI Evaluation"/>
     <category term="Game Theory"/>
     <category term="LLM Benchmarking"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-01:research:2a707040b04b</id>
-    <title>From Pixels to BFS: High Maze Accuracy Does Not Imply Visual Planning</title>
-    <link href="http://arxiv.org/abs/2603.26839" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-04-01&amp;category=research#item-2a707040b04b" rel="related" type="text/html"/>
-    <published>2026-04-01T02:47:00Z</published>
-    <updated>2026-04-01T02:47:00Z</updated>
-    <author><name>Alberto G. Rodriguez Salgado</name></author>
-    <summary type="html"><![CDATA[<p>Continuing our coverage from <a href="http://localhost:8080/?date=2026-03-31&amp;category=research#item-2a707040b04b" class="internal-link" rel="noopener noreferrer">yesterday</a>, Introduces MazeBench (110 procedurally generated mazes) and reveals that multimodal models solve mazes by converting to text grids and enumerating paths (1,710-22,818 tokens) rather than genuine visual planning. GPT-5.4 solves 91% but fails on hard mazes.</p>]]></summary>
-    <category term="Multimodal Reasoning"/>
-    <category term="Visual Planning"/>
-    <category term="Benchmarking"/>
-    <category term="Language Models"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-03-31:category-summary:research</id>
@@ -549,34 +658,6 @@
     <category term="Alignment"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-03-27:research:271a9171e523</id>
-    <title>Beyond Content Safety: Real-Time Monitoring for Reasoning Vulnerabilities in Large Language Models</title>
-    <link href="http://arxiv.org/abs/2603.25412" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-27&amp;category=research#item-271a9171e523" rel="related" type="text/html"/>
-    <published>2026-03-27T02:47:00Z</published>
-    <updated>2026-03-27T02:47:00Z</updated>
-    <author><name>Xunguang Wang, Yuguang Zhou, Qingyue Wang, Zongjie Li, Ruixuan Huang, Zhenlan Ji, Pingchuan Ma, Shuai Wang</name></author>
-    <summary type="html"><![CDATA[<p>Identifies 'reasoning safety' as a new security dimension beyond content safety, proposing a nine-category taxonomy of unsafe reasoning behaviors in LLMs and developing real-time monitoring for chain-of-thought reasoning vulnerabilities.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Reasoning"/>
-    <category term="Language Models"/>
-    <category term="Chain-of-Thought"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-27:research:47b7d6ad6fdf</id>
-    <title>Closing the Confidence-Faithfulness Gap in Large Language Models</title>
-    <link href="http://arxiv.org/abs/2603.25052" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-27&amp;category=research#item-47b7d6ad6fdf" rel="related" type="text/html"/>
-    <published>2026-03-27T02:47:00Z</published>
-    <updated>2026-03-27T02:47:00Z</updated>
-    <author><name>Miranda Muqing Miao, Lyle Ungar</name></author>
-    <summary type="html"><![CDATA[<p>Shows that calibration and verbalized confidence in LLMs are encoded linearly but orthogonally in representation space. Reasoning disrupts verbalized confidence, and steering vectors can partially close the confidence-faithfulness gap.</p>]]></summary>
-    <category term="Mechanistic Interpretability"/>
-    <category term="LLM Calibration"/>
-    <category term="AI Safety"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-03-26:category-summary:research</id>
     <title>Research Summary: March 26, 2026</title>
     <link href="http://arxiv.org/abs/2603.24477" rel="alternate" type="text/html"/>
@@ -775,73 +856,5 @@
     <category term="Automated Research"/>
     <category term="Algorithm Synthesis"/>
     <category term="Formal Verification"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-26:research:892423324e02</id>
-    <title>Manifold Generalization Provably Proceeds Memorization in Diffusion Models</title>
-    <link href="http://arxiv.org/abs/2603.23792" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-26&amp;category=research#item-892423324e02" rel="related" type="text/html"/>
-    <published>2026-03-26T02:52:00Z</published>
-    <updated>2026-03-26T02:52:00Z</updated>
-    <author><name>Zebang Shen, Ya-Ping Hsieh, Niao He</name></author>
-    <summary type="html"><![CDATA[<p>Proves that under the manifold hypothesis, diffusion models learn manifold geometry (generalization) before memorizing fine distributional details, with a sample complexity separation between these two phases. Explains why coarse scores suffice for novel sample generation.</p>]]></summary>
-    <category term="Diffusion Models"/>
-    <category term="Generalization Theory"/>
-    <category term="Learning Theory"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-26:research:562abe9a320d</id>
-    <title>The Price Reversal Phenomenon: When Cheaper Reasoning Models End Up Costing More</title>
-    <link href="http://arxiv.org/abs/2603.23971" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-26&amp;category=research#item-562abe9a320d" rel="related" type="text/html"/>
-    <published>2026-03-26T02:52:00Z</published>
-    <updated>2026-03-26T02:52:00Z</updated>
-    <author><name>Lingjiao Chen, Chi Zhang, Yeye He, Ion Stoica, Matei Zaharia, James Zou</name></author>
-    <summary type="html"><![CDATA[<p>Uncovers the 'pricing reversal phenomenon' where cheaper-listed reasoning LLMs actually cost more due to heterogeneous thinking token usage, with reversals in 21.8% of model comparisons and up to 28x magnitude. Uses GPT-5.2 and Gemini 3 Flash as examples.</p>]]></summary>
-    <category term="LLM Economics"/>
-    <category term="Reasoning Models"/>
-    <category term="Evaluation"/>
-    <category term="AI Industry"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-26:research:326a8128db68</id>
-    <title>From AI Assistant to AI Scientist: Autonomous Discovery of LLM-RL Algorithms with LLM Agents</title>
-    <link href="http://arxiv.org/abs/2603.23951" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-26&amp;category=research#item-326a8128db68" rel="related" type="text/html"/>
-    <published>2026-03-26T02:52:00Z</published>
-    <updated>2026-03-26T02:52:00Z</updated>
-    <author><name>Sirui Xia, Yikai Zhang, Aili Chen, Siye Wu, Siyu Yuan, Yanghua Xiao</name></author>
-    <summary type="html"><![CDATA[<p>POISE is a closed-loop framework for automated discovery of policy optimization algorithms for LLM-RL. It maintains a structured archive linking proposals, implementations, evaluations, and reflections. Starting from GRPO, it evolves improved algorithms for mathematical reasoning tasks.</p>]]></summary>
-    <category term="Automated ML Research"/>
-    <category term="Reinforcement Learning"/>
-    <category term="Language Models"/>
-    <category term="AI Agents"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-26:research:152b67e968b2</id>
-    <title>LLMpedia: A Transparent Framework to Materialize an LLM's Encyclopedic Knowledge at Scale</title>
-    <link href="http://arxiv.org/abs/2603.24080" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-26&amp;category=research#item-152b67e968b2" rel="related" type="text/html"/>
-    <published>2026-03-26T02:52:00Z</published>
-    <updated>2026-03-26T02:52:00Z</updated>
-    <author><name>Muhammed Saeed, Simon Razniewski</name></author>
-    <summary type="html"><![CDATA[<p>LLMpedia generates ~1M encyclopedic articles entirely from parametric memory across three model families. It reveals that gpt-5-mini's verifiable true rate is only 74.7% on Wikipedia-covered subjects (vs. 90%+ on benchmarks like MMLU), and drops to 63.2% for frontier subjects. Only 7.3% subject overlap across model families.</p>]]></summary>
-    <category term="LLM Evaluation"/>
-    <category term="Factuality"/>
-    <category term="Knowledge Representation"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-03-26:research:17a35d53a965</id>
-    <title>Scaling Attention via Feature Sparsity</title>
-    <link href="http://arxiv.org/abs/2603.22300" rel="alternate" type="text/html"/>
-    <link href="http://localhost:8080/?date=2026-03-26&amp;category=research#item-17a35d53a965" rel="related" type="text/html"/>
-    <published>2026-03-26T02:47:00Z</published>
-    <updated>2026-03-26T02:47:00Z</updated>
-    <author><name>Yan Xie, Tiansheng Wen, Tangda Huang, Bo Chen, Chenyu You, Stefanie Jegelka, Yifei Wang</name></author>
-    <summary type="html"><![CDATA[<p>Proposes Sparse Feature Attention (SFA) that reduces attention cost from O(n²d) to O(n²k²/d) by representing queries and keys as k-sparse codes. Introduces FlashSFA, an IO-aware kernel extending FlashAttention for sparse overlaps.</p>]]></summary>
-    <category term="Efficient Attention"/>
-    <category term="Transformer Architecture"/>
-    <category term="Long Context"/>
   </entry>
 </feed>
