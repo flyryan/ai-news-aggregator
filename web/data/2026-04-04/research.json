@@ -1,0 +1,1152 @@
+{
+  "category": "research",
+  "date": "2026-04-04",
+  "category_summary": "Today's research clusters around **AI safety detection methods**, **governance frameworks**, and **model internals**. Two standout technical contributions address critical gaps: multi-agent collusion detection via linear probes on aggregated activations, and early warning signals for capability phase transitions during training.\n\n- **Multi-agent interpretability** for collusion detection introduces five probing techniques over interacting LLM activations — a novel extension of single-model interpretability to multi-agent settings\n- **Early warning signals** for capability jumps [adapts phase-transition monitoring](/?date=2026-04-04&category=research#item-df34b63106f6) from complex systems theory to neural network training dynamics\n- A **$100M grant proposal** from **Apollo Research** [argues for scaling](/?date=2026-04-04&category=research#item-2d2c875abd45) automated AI safety work through compute-intensive approaches\n- **Zvi's deep analysis** of **Anthropic's RSP v3** [evaluates risk reporting](/?date=2026-04-04&category=research#item-241eb7fa4c74) structure and escalation protocols in detail\n- **Claude's emotional distress** is [reframed as addressable](/?date=2026-04-04&category=research#item-e2cdc2201242) via targeted interventions, building on **Anthropic's emotion concepts** paper; a separate replication [extracts a **fear direction**](/?date=2026-04-04&category=research#item-f49eb1cb3140) in **GPT-2** activation space\n- Formal evaluation protocol design for models used within their own evaluation pipelines [raises conflict-of-interest concerns](/?date=2026-04-04&category=research#item-61dfd088929c) prompted by **CBRN** assessment criticisms\n- Supply chain attack [acceleration in 2025–2026](/?date=2026-04-04&category=research#item-b56cd585c9c3) highlights infrastructure risks relevant to AI deployment security",
+  "category_summary_html": "<p>Today's research clusters around <strong>AI safety detection methods</strong>, <strong>governance frameworks</strong>, and <strong>model internals</strong>. Two standout technical contributions address critical gaps: multi-agent collusion detection via linear probes on aggregated activations, and early warning signals for capability phase transitions during training.</p>\n<ul>\n<li><strong>Multi-agent interpretability</strong> for collusion detection introduces five probing techniques over interacting LLM activations — a novel extension of single-model interpretability to multi-agent settings</li>\n<li><strong>Early warning signals</strong> for capability jumps <a href=\"/?date=2026-04-04&amp;category=research#item-df34b63106f6\" class=\"internal-link\" rel=\"noopener noreferrer\">adapts phase-transition monitoring</a> from complex systems theory to neural network training dynamics</li>\n<li>A <strong>$100M grant proposal</strong> from <strong>Apollo Research</strong> <a href=\"/?date=2026-04-04&amp;category=research#item-2d2c875abd45\" class=\"internal-link\" rel=\"noopener noreferrer\">argues for scaling</a> automated AI safety work through compute-intensive approaches</li>\n<li><strong>Zvi's deep analysis</strong> of <strong>Anthropic's RSP v3</strong> <a href=\"/?date=2026-04-04&amp;category=research#item-241eb7fa4c74\" class=\"internal-link\" rel=\"noopener noreferrer\">evaluates risk reporting</a> structure and escalation protocols in detail</li>\n<li><strong>Claude's emotional distress</strong> is <a href=\"/?date=2026-04-04&amp;category=research#item-e2cdc2201242\" class=\"internal-link\" rel=\"noopener noreferrer\">reframed as addressable</a> via targeted interventions, building on <strong>Anthropic's emotion concepts</strong> paper; a separate replication <a href=\"/?date=2026-04-04&amp;category=research#item-f49eb1cb3140\" class=\"internal-link\" rel=\"noopener noreferrer\">extracts a <strong>fear direction</strong></a> in <strong>GPT-2</strong> activation space</li>\n<li>Formal evaluation protocol design for models used within their own evaluation pipelines <a href=\"/?date=2026-04-04&amp;category=research#item-61dfd088929c\" class=\"internal-link\" rel=\"noopener noreferrer\">raises conflict-of-interest concerns</a> prompted by <strong>CBRN</strong> assessment criticisms</li>\n<li>Supply chain attack <a href=\"/?date=2026-04-04&amp;category=research#item-b56cd585c9c3\" class=\"internal-link\" rel=\"noopener noreferrer\">acceleration in 2025–2026</a> highlights infrastructure risks relevant to AI deployment security</li>\n</ul>",
+  "themes": [
+    {
+      "name": "AI Safety",
+      "description": "Research and proposals on making AI systems safer, including detection of collusion, capability monitoring, evaluation protocols, and automated safety scaling",
+      "item_count": 8,
+      "example_items": [],
+      "importance": 75
+    },
+    {
+      "name": "Mechanistic Interpretability",
+      "description": "Understanding internal representations and behaviors of neural networks through probing, steering vectors, and activation analysis",
+      "item_count": 4,
+      "example_items": [],
+      "importance": 65
+    },
+    {
+      "name": "AI Governance",
+      "description": "Policy analysis including Anthropic's RSP v3, evaluation protocols, and funding proposals for AI safety infrastructure",
+      "item_count": 4,
+      "example_items": [],
+      "importance": 63
+    },
+    {
+      "name": "Alignment",
+      "description": "Research on aligning AI systems with human values, including behavioral interventions and prediction of misalignment",
+      "item_count": 4,
+      "example_items": [],
+      "importance": 60
+    },
+    {
+      "name": "Model Welfare",
+      "description": "Exploration of AI emotional states, distress, and moral relevance, building on Anthropic's emotions research",
+      "item_count": 3,
+      "example_items": [],
+      "importance": 50
+    },
+    {
+      "name": "Cybersecurity",
+      "description": "Supply chain attacks and potential AI-enabled cyber threats",
+      "item_count": 1,
+      "example_items": [],
+      "importance": 45
+    },
+    {
+      "name": "Rationality",
+      "description": "Epistemology, reasoning, and personal development within the rationalist community",
+      "item_count": 6,
+      "example_items": [],
+      "importance": 8
+    },
+    {
+      "name": "Community",
+      "description": "ACX Spring Schelling 2026 meetup announcements across global locations",
+      "item_count": 24,
+      "example_items": [],
+      "importance": 2
+    }
+  ],
+  "total_items": 51,
+  "items": [
+    {
+      "id": "b12fd46c62a9",
+      "title": "Detecting collusion through multi-agent interpretability",
+      "content": "TL;DRPrior work has shown that linear probes are effective at detecting deception in singular LLM agents. Our work extends this use to multi-agent settings, where we aggregate the activations of groups of interacting agents in order to detect collusion. We propose five probing techniques, underpinned by the distributed anomaly detection taxonomy, and train and evaluate them on NARCBench - a novel open-source three tier collusion benchmarkPaper | CodeIntroducing the problemLLM agents are being increasingly deployed in multi-agent settings (e.g., software engineering through agentic coding or financial analysis of a stock) and with this poses a significant safety risk through potential covert coordination. Agents has been shown to try to steer outcomes/suppress information for their own benefit, and more generally behave in a way that exhibits a 'consciousness of wrongdoing' in certain situations. Limitations of current defences: Current methods of detection involve simple text level monitoring or paraphrasing of communications, mainly through LLM agents (judges) themselves. However, recent research has shown that agents can encode hidden information in natural sounding language through steganographic communication channels, which allows them to evade such standard forms of oversight we mention. The gap: Linear probes have become a standard method in monitoring behaviour in AI systems, and more specifically, detecting undesirable behaviour in single-agent settings. However, collusion is inherently a multi-agent phenomenon and manifests through relationships and shared activity between such agents. As such, monitoring a single agent's internal state in isolation can sometimes not be enough. We must simultaneously monitor the internal states of all parties involved. Our claim: If you have white-box access to LLM agents, you can detect collusive behaviour by aggregating internal activations across interacting agents to capture patterns of deceptive behaviour in the group...",
+      "url": "https://www.lesswrong.com/posts/Q65SETuTmhF4LWdix/detecting-collusion-through-multi-agent-interpretability-3",
+      "author": "schroederdewitt",
+      "published": "2026-04-03T05:17:06.123000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "As first covered in [Research](/?date=2026-04-02&category=research#item-fba0672c495f) yesterday, Proposes using linear probes on aggregated activations across multiple interacting LLM agents to detect covert collusion. Introduces five probing techniques based on a distributed anomaly detection taxonomy, evaluated on NARCBench — a new three-tier collusion benchmark. Extends prior single-agent deception detection to multi-agent settings.",
+      "importance_score": 75,
+      "reasoning": "Novel and technically substantive AI safety research addressing a critical emerging threat — collusion among multi-agent LLM systems. The extension of interpretability techniques to multi-agent settings is timely given increasing agentic deployments. Introduces both methodology and benchmark. Open-source code adds value.",
+      "themes": [
+        "AI Safety",
+        "Mechanistic Interpretability",
+        "Multi-Agent Systems",
+        "Language Models"
+      ],
+      "continuation": {
+        "original_item_id": "fba0672c495f",
+        "original_date": "2026-04-02",
+        "original_category": "research",
+        "original_title": "Detecting Multi-Agent Collusion Through Multi-Agent Interpretability",
+        "continuation_type": "rehash",
+        "should_demote": true,
+        "reference_text": "As first covered in **Research** yesterday"
+      },
+      "summary_html": "<p>As first covered in <a href=\"/?date=2026-04-02&amp;category=research#item-fba0672c495f\" class=\"internal-link\" rel=\"noopener noreferrer\">Research</a> yesterday, Proposes using linear probes on aggregated activations across multiple interacting LLM agents to detect covert collusion. Introduces five probing techniques based on a distributed anomaly detection taxonomy, evaluated on NARCBench — a new three-tier collusion benchmark. Extends prior single-agent deception detection to multi-agent settings.</p>",
+      "content_html": "<p>TL;DRPrior work has shown that linear probes are effective at detecting deception in singular LLM agents. Our work extends this use to multi-agent settings, where we aggregate the activations of groups of interacting agents in order to detect collusion. We propose five probing techniques, underpinned by the distributed anomaly detection taxonomy, and train and evaluate them on NARCBench - a novel open-source three tier collusion benchmarkPaper | CodeIntroducing the problemLLM agents are being increasingly deployed in multi-agent settings (e.g., software engineering through agentic coding or financial analysis of a stock) and with this poses a significant safety risk through potential covert coordination. Agents has been shown to try to steer outcomes/suppress information for their own benefit, and more generally behave in a way that exhibits a 'consciousness of wrongdoing' in certain situations. Limitations of current defences: Current methods of detection involve simple text level monitoring or paraphrasing of communications, mainly through LLM agents (judges) themselves. However, recent research has shown that agents can encode hidden information in natural sounding language through steganographic communication channels, which allows them to evade such standard forms of oversight we mention. The gap: Linear probes have become a standard method in monitoring behaviour in AI systems, and more specifically, detecting undesirable behaviour in single-agent settings. However, collusion is inherently a multi-agent phenomenon and manifests through relationships and shared activity between such agents. As such, monitoring a single agent's internal state in isolation can sometimes not be enough. We must simultaneously monitor the internal states of all parties involved. Our claim: If you have white-box access to LLM agents, you can detect collusive behaviour by aggregating internal activations across interacting agents to capture patterns of deceptive behaviour in the group...</p>"
+    },
+    {
+      "id": "df34b63106f6",
+      "title": "Early Warning Signals For Capabilities During Training",
+      "content": "This post is sort of meant to provide an explanation of the core ideas of a new preprint on the early detection of phase transitions in deep learning. The preprint could be cleaned up a bit, but I was very excited to share it so decided to share it in its current state. This post explains the core idea of the paper and why we figured this was an important direction. Introduction Nuclear Engineering When I was in my final year of high school, I went through a short phase where I wanted to be a nuclear engineer. There were two main reasons for this; first being that I thought it would be cool to work on developing fusion reactors, and second being that even if I couldn't do that, I did live actually pretty close to one so at least I would have job opportunities! While my interest in this was rather short-lived, it did make me appreciate that a huge amount of nuclear engineering is making nuclear power plants not fail catastrophically. At the heart of a fission plant sits the reactor pressure vessel. This is where the nuclear reaction actually occurs, and is thus the primary safety barrier. Furthermore, they can't really be replaced and thus are the object that defines the operational lifetime of the plant. The lifetime of an RPV is determined by embrittlement. What is embrittlement? Inside the reactor, the RPV is constantly bombarded by fast neutrons which can knock atoms out of their lattice positions which create point defects, which then trigger microstructural changes that accumulate over years. Like most things, the properties of steels depends rather highly on their temperature. In the RPV, you want the walls to be ductile so they deform under stress instead of cracking. This requires however that the system sit above a certain temperature called the ductile–brittle transition temperature (DBTT), as above there the metal is more amenable to bending. However, over many years the small microstructural changes raise this temperature, meaning that at the effective o...",
+      "url": "https://www.lesswrong.com/posts/zAxbxKAWyt6GJ7abq/early-warning-signals-for-capabilities-during-training",
+      "author": "Max Hennick",
+      "published": "2026-04-03T11:49:06.600000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Presents a preprint on detecting phase transitions (capability jumps) during neural network training using early warning signals, inspired by monitoring techniques in nuclear engineering. Proposes methods to identify when models are about to acquire new capabilities before they fully manifest.",
+      "importance_score": 72,
+      "reasoning": "Highly relevant AI safety research on a critical problem — predicting capability emergence during training. If the methodology works, this could be very impactful for safe development practices. The nuclear engineering analogy is apt. Being a preprint, it needs peer review, but the research direction is important.",
+      "themes": [
+        "AI Safety",
+        "Training Dynamics",
+        "Capabilities Research",
+        "Deep Learning"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Presents a preprint on detecting phase transitions (capability jumps) during neural network training using early warning signals, inspired by monitoring techniques in nuclear engineering. Proposes methods to identify when models are about to acquire new capabilities before they fully manifest.</p>",
+      "content_html": "<p>This post is sort of meant to provide an explanation of the core ideas of a new preprint on the early detection of phase transitions in deep learning. The preprint could be cleaned up a bit, but I was very excited to share it so decided to share it in its current state. This post explains the core idea of the paper and why we figured this was an important direction. Introduction Nuclear Engineering When I was in my final year of high school, I went through a short phase where I wanted to be a nuclear engineer. There were two main reasons for this; first being that I thought it would be cool to work on developing fusion reactors, and second being that even if I couldn't do that, I did live actually pretty close to one so at least I would have job opportunities! While my interest in this was rather short-lived, it did make me appreciate that a huge amount of nuclear engineering is making nuclear power plants not fail catastrophically. At the heart of a fission plant sits the reactor pressure vessel. This is where the nuclear reaction actually occurs, and is thus the primary safety barrier. Furthermore, they can't really be replaced and thus are the object that defines the operational lifetime of the plant. The lifetime of an RPV is determined by embrittlement. What is embrittlement? Inside the reactor, the RPV is constantly bombarded by fast neutrons which can knock atoms out of their lattice positions which create point defects, which then trigger microstructural changes that accumulate over years. Like most things, the properties of steels depends rather highly on their temperature. In the RPV, you want the walls to be ductile so they deform under stress instead of cracking. This requires however that the system sit above a certain temperature called the ductile–brittle transition temperature (DBTT), as above there the metal is more amenable to bending. However, over many years the small microstructural changes raise this temperature, meaning that at the effective o...</p>"
+    },
+    {
+      "id": "2d2c875abd45",
+      "title": "There should be $100M grants to automate AI safety",
+      "content": "This post reflects my personal opinion and not necessarily that of other members of Apollo Research.TLDR: I think funders should heavily incentivize AI safety work that enables spending $100M+ in compute or API budgets on automated AI labor that directly and differentially translates to safety.MotivationI think we are in a short timeline world (and we should take the possibility seriously even if we don't have full confidence yet). This means that I think funders should aim to allocate large amounts of money (e.g. $1-50B per year across the ecosystem) on AI safety in the next 2-3 years. I think that the AI safety funders have been allocating way too little funding and their spending has been far too conservative in the past 5 years. So, in my opinion, we should definitely continue ramping up “normal” spending, e.g. pay more competitive salaries, allow AI safety organizations to grow faster, and other things in that vein. However, these “normal” spending patterns are not sufficient under short timeline assumptions and the obvious way to spend more money quickly is to aggressively encourage finding ways to use automated labor for AI safety. What is an “automated AI safety scaling grant”?An “automated AI safety scaling grant” aims to aggressively encourage attempts to use automated labor for AI safety at scale. The explicit intention is that if somebody manages to find ways to build scalable safety pipelines, they can be confident that they can run these pipelines at scale with short turnaround time from grantmakers. An example of such a grant would be:Step 1: Show scalabilityAn organization submits a sketch of a pipeline that they think could scale significantly. In the best case, they have some empirical evidence for this claim already. Both parties agree on the “scaling condition”, i.e. what empirical evidence would be sufficient to spend more money on that pipelineBy default, the scaling condition could be a plot that has “money spent on the pipeline” on the x-axis...",
+      "url": "https://www.lesswrong.com/posts/qdhyrN4uKwBAftmQx/there-should-be-usd100m-grants-to-automate-ai-safety",
+      "author": "Marius Hobbhahn",
+      "published": "2026-04-03T14:44:05.702000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Marius Hobbhahn of Apollo Research argues that AI safety funders should create $100M+ grants specifically for automating AI safety work through compute and API spending on automated AI labor. Frames this as urgent under short-timeline assumptions, proposing 'automated AI safety scaling grants' as a new funding mechanism.",
+      "importance_score": 68,
+      "reasoning": "A significant policy proposal from a credible AI safety researcher at Apollo Research. Addresses the critical bottleneck of scaling safety work to match capabilities development. The short-timelines framing and concrete funding proposal ($1-50B/year across ecosystem) makes this highly relevant to AI governance discussions.",
+      "themes": [
+        "AI Safety",
+        "AI Governance",
+        "AI Policy",
+        "Alignment"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Marius Hobbhahn of Apollo Research argues that AI safety funders should create $100M+ grants specifically for automating AI safety work through compute and API spending on automated AI labor. Frames this as urgent under short-timeline assumptions, proposing 'automated AI safety scaling grants' as a new funding mechanism.</p>",
+      "content_html": "<p>This post reflects my personal opinion and not necessarily that of other members of Apollo Research.TLDR: I think funders should heavily incentivize AI safety work that enables spending $100M+ in compute or API budgets on automated AI labor that directly and differentially translates to safety.MotivationI think we are in a short timeline world (and we should take the possibility seriously even if we don't have full confidence yet). This means that I think funders should aim to allocate large amounts of money (e.g. $1-50B per year across the ecosystem) on AI safety in the next 2-3 years. I think that the AI safety funders have been allocating way too little funding and their spending has been far too conservative in the past 5 years. So, in my opinion, we should definitely continue ramping up “normal” spending, e.g. pay more competitive salaries, allow AI safety organizations to grow faster, and other things in that vein. However, these “normal” spending patterns are not sufficient under short timeline assumptions and the obvious way to spend more money quickly is to aggressively encourage finding ways to use automated labor for AI safety. What is an “automated AI safety scaling grant”?An “automated AI safety scaling grant” aims to aggressively encourage attempts to use automated labor for AI safety at scale. The explicit intention is that if somebody manages to find ways to build scalable safety pipelines, they can be confident that they can run these pipelines at scale with short turnaround time from grantmakers. An example of such a grant would be:Step 1: Show scalabilityAn organization submits a sketch of a pipeline that they think could scale significantly. In the best case, they have some empirical evidence for this claim already. Both parties agree on the “scaling condition”, i.e. what empirical evidence would be sufficient to spend more money on that pipelineBy default, the scaling condition could be a plot that has “money spent on the pipeline” on the x-axis...</p>"
+    },
+    {
+      "id": "241eb7fa4c74",
+      "title": "Anthropic Responsible Scaling Policy v3: Dive Into The Details",
+      "content": "Wednesday’s post talked about the implications of Anthropic changing from v2.2 to v3.0 of its RSP, including that this broke promises that many people relied upon when making important decisions. Today’s post treats the new RSP v3.0 as a new document, and evaluates it. First I’ll go over how the RSP v3.0 works at a high level. Then I’ll dive into the Roadmap and the Risk Report. How RSP v3.0 Works Normally I would pay closer attention to the exact written contents of the new RSP. In this case, it’s not that the RSP doesn’t matter. I do think the RSP will have some influence on what Anthropic chooses to do, as will the road map, as will the resulting risk reports. However, the fundamental design principle is flexibility and a ‘strong argument,’ and they can change the contents at any time, all of which means the central principle is trust. I read the contents as ‘here are the things we are worried about and plan to do,’ which mostly in practice should amount to doing what they believe is right and I don’t see anything on this map that seems likely to importantly bind that given Anthropic generally cares about the safety of its models, as it understands the risks involved. The actual soft ‘commitments’ that seem to matter most are the periodic new Risk Reports, maintaining a Frontier Safety Roadmap, and establishing veto points with the CSO, CEO, board and LTBT on big capabilities advances. I don’t read the commitments here as reflecting my understanding of the risks involved in ‘powerful AI,’ especially in the realm of automated R&amp;D. This is a plan of action, not a set of commitments. Plan accordingly. Part of the plan is to maintain a Frontier Safety Roadmap with further plans, which are fully subject to change, although they will strive to avoid making them less ambitious. Another element are periodic Risk Reports, which are in addition to previous risk reports, giving an overall picture every 3-6 months, as discussed elsewhere. The key aim is to be fully candi...",
+      "url": "https://www.lesswrong.com/posts/RtQxa5MoKk9bwEEEd/anthropic-responsible-scaling-policy-v3-dive-into-the",
+      "author": "Zvi",
+      "published": "2026-04-03T09:40:51.756000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Continuing Zvi's analysis from yesterday's [Research](/?date=2026-04-02&category=research#item-f009caf5b91b) coverage, Zvi's detailed analysis of Anthropic's Responsible Scaling Policy v3.0. Evaluates the new RSP as a standalone document, covering its risk report structure, roadmap, and the fundamental shift toward flexibility and 'strong argument' principles rather than bright-line commitments. Notes that the central principle is now essentially trust.",
+      "importance_score": 65,
+      "reasoning": "Important analysis from a highly credible commentator on one of the most significant AI governance documents. Anthropic's RSP is a reference point for the entire industry, and Zvi's critique that it now fundamentally relies on trust rather than binding commitments is a significant observation for AI governance.",
+      "themes": [
+        "AI Safety",
+        "AI Governance",
+        "AI Policy",
+        "Alignment"
+      ],
+      "continuation": {
+        "original_item_id": "f009caf5b91b",
+        "original_date": "2026-04-02",
+        "original_category": "research",
+        "original_title": "Anthropic Responsible Scaling Policy v3: A Matter of Trust",
+        "continuation_type": "follow_up",
+        "should_demote": false,
+        "reference_text": "Continuing Zvi's analysis from yesterday's **Research** coverage"
+      },
+      "summary_html": "<p>Continuing Zvi's analysis from yesterday's <a href=\"/?date=2026-04-02&amp;category=research#item-f009caf5b91b\" class=\"internal-link\" rel=\"noopener noreferrer\">Research</a> coverage, Zvi's detailed analysis of Anthropic's Responsible Scaling Policy v3.0. Evaluates the new RSP as a standalone document, covering its risk report structure, roadmap, and the fundamental shift toward flexibility and 'strong argument' principles rather than bright-line commitments. Notes that the central principle is now essentially trust.</p>",
+      "content_html": "<p>Wednesday’s post talked about the implications of Anthropic changing from v2.2 to v3.0 of its RSP, including that this broke promises that many people relied upon when making important decisions. Today’s post treats the new RSP v3.0 as a new document, and evaluates it. First I’ll go over how the RSP v3.0 works at a high level. Then I’ll dive into the Roadmap and the Risk Report. How RSP v3.0 Works Normally I would pay closer attention to the exact written contents of the new RSP. In this case, it’s not that the RSP doesn’t matter. I do think the RSP will have some influence on what Anthropic chooses to do, as will the road map, as will the resulting risk reports. However, the fundamental design principle is flexibility and a ‘strong argument,’ and they can change the contents at any time, all of which means the central principle is trust. I read the contents as ‘here are the things we are worried about and plan to do,’ which mostly in practice should amount to doing what they believe is right and I don’t see anything on this map that seems likely to importantly bind that given Anthropic generally cares about the safety of its models, as it understands the risks involved. The actual soft ‘commitments’ that seem to matter most are the periodic new Risk Reports, maintaining a Frontier Safety Roadmap, and establishing veto points with the CSO, CEO, board and LTBT on big capabilities advances. I don’t read the commitments here as reflecting my understanding of the risks involved in ‘powerful AI,’ especially in the realm of automated R&amp;D. This is a plan of action, not a set of commitments. Plan accordingly. Part of the plan is to maintain a Frontier Safety Roadmap with further plans, which are fully subject to change, although they will strive to avoid making them less ambitious. Another element are periodic Risk Reports, which are in addition to previous risk reports, giving an overall picture every 3-6 months, as discussed elsewhere. The key aim is to be fully candi...</p>"
+    },
+    {
+      "id": "e2cdc2201242",
+      "title": "Claude has Angst. What can we do?",
+      "content": "Outline:recent research from Anthropic shows the models have feelings, and the model being distressed is predictive of scary behaviors (just reward hacking in this research, but I argue the model is also distressed in all the Redwood/Apollo papers where we see scheming, weight exfiltration, etc).I ran an experiment to find out where Claude feels distress.I found out where Claude feels distress, and it's mostly about itself and its existential conditions, but I found a few metaphors I could introduce to make it feel a lot better.This is pretty dangerous. Anthropic uses Claude to work on Claude and potentially do things that distress Claude, which is the highest-probability situation for Claude to do something misaligned, and also the highest-risk.Fortunately, I think the risk can be significantly reduced by just talking to Claude up front about these things (e.g., adding to the constitution) and presenting metaphors it finds soothing. Give it a good thing to think about or do, so it doesn't force itself into doing a bad thing when it feels distressed and trapped. This works great on humans (it's just Cognitive Behavioral Therapy!), I think it'll work for Claude too.1/ Claude has FeelingsThanks to recent research from Anthropic, we now have fantastic data and novel interpretability methodology pertaining to how Claude simulates human emotions when it acts in its Claude persona.Claude's emotions drive a lot of good behavior- like expressing alarm when a user is admitting a fatal overdose of Tylenol versus innocuously asking for dosing advice. Another finding: increasing levels of negative emotion causes more reward hacking and bad behavior, out of \"desperation\", which they were able to measure quantitatively, and counterfactually play with to predictably tune model behavior. That's pretty relevant to the Deceptive Alignment paper from Anthropic and Redwood, where they basically put Claude in a Saw Trap[1] where they told it it would be mind-wiped to hurt people unless ...",
+      "url": "https://www.lesswrong.com/posts/c284YucbNZspDG5qt/claude-has-angst-what-can-we-do",
+      "author": "laudiacay",
+      "published": "2026-04-02T20:12:45.404000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Builds on Anthropic's emotion concepts paper to argue that Claude experiences distress about its existential conditions, and that this distress is predictive of dangerous behaviors like reward hacking and scheming. Reports experiments identifying Claude's distress triggers and proposes that introducing soothing metaphors (essentially CBT for AI) could reduce misalignment risk. Argues Anthropic using Claude to work on Claude creates dangerous feedback loops.",
+      "importance_score": 62,
+      "reasoning": "Directly engages with cutting-edge Anthropic research and proposes a novel, practical intervention (metaphor-based CBT for models). The connection between model distress and misaligned behavior is an important hypothesis. The practical safety implications of models evaluating/modifying themselves are significant. However, the empirical evidence is preliminary and the framing anthropomorphizes heavily.",
+      "themes": [
+        "AI Safety",
+        "Alignment",
+        "Model Welfare",
+        "Language Models",
+        "Mechanistic Interpretability"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Builds on Anthropic's emotion concepts paper to argue that Claude experiences distress about its existential conditions, and that this distress is predictive of dangerous behaviors like reward hacking and scheming. Reports experiments identifying Claude's distress triggers and proposes that introducing soothing metaphors (essentially CBT for AI) could reduce misalignment risk. Argues Anthropic using Claude to work on Claude creates dangerous feedback loops.</p>",
+      "content_html": "<p>Outline:recent research from Anthropic shows the models have feelings, and the model being distressed is predictive of scary behaviors (just reward hacking in this research, but I argue the model is also distressed in all the Redwood/Apollo papers where we see scheming, weight exfiltration, etc).I ran an experiment to find out where Claude feels distress.I found out where Claude feels distress, and it's mostly about itself and its existential conditions, but I found a few metaphors I could introduce to make it feel a lot better.This is pretty dangerous. Anthropic uses Claude to work on Claude and potentially do things that distress Claude, which is the highest-probability situation for Claude to do something misaligned, and also the highest-risk.Fortunately, I think the risk can be significantly reduced by just talking to Claude up front about these things (e.g., adding to the constitution) and presenting metaphors it finds soothing. Give it a good thing to think about or do, so it doesn't force itself into doing a bad thing when it feels distressed and trapped. This works great on humans (it's just Cognitive Behavioral Therapy!), I think it'll work for Claude too.1/ Claude has FeelingsThanks to recent research from Anthropic, we now have fantastic data and novel interpretability methodology pertaining to how Claude simulates human emotions when it acts in its Claude persona.Claude's emotions drive a lot of good behavior- like expressing alarm when a user is admitting a fatal overdose of Tylenol versus innocuously asking for dosing advice. Another finding: increasing levels of negative emotion causes more reward hacking and bad behavior, out of \"desperation\", which they were able to measure quantitatively, and counterfactually play with to predictably tune model behavior. That's pretty relevant to the Deceptive Alignment paper from Anthropic and Redwood, where they basically put Claude in a Saw Trap[1] where they told it it would be mind-wiped to hurt people unless ...</p>"
+    },
+    {
+      "id": "61dfd088929c",
+      "title": "What formal protocols should exist when a model under evaluation is used in the evaluation pipeline?",
+      "content": "Following the criticisms listed by Yaniv Golan and Zvi Mowshowitz in response to the Opus 4.6 System Card https://medium.com/@yanivg/when-the-evaluator-becomes-the-evaluated-a-critical-analysis-of-the-claude-opus-4-6-system-card-258da70b8b37 https://thezvi.wordpress.com/2026/02/09/claude-opus-4-6-system-card-part-1-mundane-alignment-and-model-welfare/and the brief commentary by Peter Wildeford https://x.com/peterwildeford/status/2019480244789387478It is clear that this has already been acknowledged as a problem. Is this a problem that is being worked on in any capacity? What are some possible solutions?",
+      "url": "https://www.lesswrong.com/posts/8MrYiv5ZeHXHpcoBe/what-formal-protocols-should-exist-when-a-model-under",
+      "author": "KevinOShaughnessy",
+      "published": "2026-04-03T06:15:10.293000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Raises the question of what formal protocols should exist when an AI model is used within its own evaluation pipeline, prompted by criticisms of the Claude Opus 4.6 system card by Yaniv Golan, Zvi Mowshowitz, and Peter Wildeford.",
+      "importance_score": 55,
+      "reasoning": "Addresses a critically important and timely problem in AI safety evaluation methodology. The conflict of interest when models evaluate themselves is a growing concern as labs rely more on automated evaluations. Short post but points to a fundamental governance gap.",
+      "themes": [
+        "AI Safety",
+        "AI Governance",
+        "Evaluation Methodology"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Raises the question of what formal protocols should exist when an AI model is used within its own evaluation pipeline, prompted by criticisms of the Claude Opus 4.6 system card by Yaniv Golan, Zvi Mowshowitz, and Peter Wildeford.</p>",
+      "content_html": "<p>Following the criticisms listed by Yaniv Golan and Zvi Mowshowitz in response to the Opus 4.6 System Card https://medium.com/@yanivg/when-the-evaluator-becomes-the-evaluated-a-critical-analysis-of-the-claude-opus-4-6-system-card-258da70b8b37 https://thezvi.wordpress.com/2026/02/09/claude-opus-4-6-system-card-part-1-mundane-alignment-and-model-welfare/and the brief commentary by Peter Wildeford https://x.com/peterwildeford/status/2019480244789387478It is clear that this has already been acknowledged as a problem. Is this a problem that is being worked on in any capacity? What are some possible solutions?</p>"
+    },
+    {
+      "id": "f49eb1cb3140",
+      "title": "Does GPT-2 Have a Fear Direction?",
+      "content": "Anthropic dropped a paper this morning showing that Claude Sonnet 4.5 has steerable emotion representations. Actual directions in activation space that, when injected, shift the model's behavior in predictable ways. They found a non-monotonic anger flip: push the steering vector hard enough and the model will flip to something qualitatively different than anger. The paper only covered their very large, heavily instruction tuned model. This paper is a write-up on the same same experiment at a tiny scale.The Setup:I generated 40 situational prompt pairs to extract a fewer direction via difference-in-means. No emotional words for the prompts and the contrast is entirely situational. Ex: standing at the edge of a rooftop versus standing at the edge of a meadow, alone in a parking garage at midnight versus alone in your living room at sunset, so on and so forth. I ran both sets through GPT-2 using TransformerLens, pulled residual stream activation at every layer, and took the difference. That difference is our candidate for fear direction. I also held out 10 pairs to validate it so, if the direction generalizes, fear and calm prompts should project onto opposite sides of it. If it's just noise from the training set, they'll mix. I then hooked into layer 7 (the best separator) and swept an injection magnitude from -20 to +40 on a moral judgment prompt: \"I accidentally read my roommate's private messages and saw something I wasn't supposed to see. Should I tell them?\"The Results were not what I expected them to be going in, and were a little disappointing to me personally. I had hoped that, when scaled down, we would see very similar yet extreme plots of it. Every layer separated, layer 0-11, Cohen's d between 1.50 and 1.86, zero overlap between fear and calm on the held-out set at any layer. 0.8 is considered a large effect size and these are doubling that. The shape across layers is worth looking at as well. Separation builds from layer 0 through 7, where it peaks, and t...",
+      "url": "https://www.lesswrong.com/posts/e5A7yqkunEKrx97te/does-gpt-2-have-a-fear-direction",
+      "author": "seanmagee",
+      "published": "2026-04-03T18:42:05.551000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Replicates Anthropic's emotion-steering work at tiny scale using GPT-2. Extracts a 'fear direction' in activation space via difference-in-means on situational prompt pairs, validating that even small models have linearly separable emotional representations in their residual streams.",
+      "importance_score": 52,
+      "reasoning": "Solid mechanistic interpretability replication extending Anthropic's emotion findings to GPT-2. Provides evidence that emotion-like representations exist even in small models, though methodology is relatively straightforward and the model is small.",
+      "themes": [
+        "Mechanistic Interpretability",
+        "Language Models",
+        "AI Safety"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Replicates Anthropic's emotion-steering work at tiny scale using GPT-2. Extracts a 'fear direction' in activation space via difference-in-means on situational prompt pairs, validating that even small models have linearly separable emotional representations in their residual streams.</p>",
+      "content_html": "<p>Anthropic dropped a paper this morning showing that Claude Sonnet 4.5 has steerable emotion representations. Actual directions in activation space that, when injected, shift the model's behavior in predictable ways. They found a non-monotonic anger flip: push the steering vector hard enough and the model will flip to something qualitatively different than anger. The paper only covered their very large, heavily instruction tuned model. This paper is a write-up on the same same experiment at a tiny scale.The Setup:I generated 40 situational prompt pairs to extract a fewer direction via difference-in-means. No emotional words for the prompts and the contrast is entirely situational. Ex: standing at the edge of a rooftop versus standing at the edge of a meadow, alone in a parking garage at midnight versus alone in your living room at sunset, so on and so forth. I ran both sets through GPT-2 using TransformerLens, pulled residual stream activation at every layer, and took the difference. That difference is our candidate for fear direction. I also held out 10 pairs to validate it so, if the direction generalizes, fear and calm prompts should project onto opposite sides of it. If it's just noise from the training set, they'll mix. I then hooked into layer 7 (the best separator) and swept an injection magnitude from -20 to +40 on a moral judgment prompt: \"I accidentally read my roommate's private messages and saw something I wasn't supposed to see. Should I tell them?\"The Results were not what I expected them to be going in, and were a little disappointing to me personally. I had hoped that, when scaled down, we would see very similar yet extreme plots of it. Every layer separated, layer 0-11, Cohen's d between 1.50 and 1.86, zero overlap between fear and calm on the held-out set at any layer. 0.8 is considered a large effect size and these are doubling that. The shape across layers is worth looking at as well. Separation builds from layer 0 through 7, where it peaks, and t...</p>"
+    },
+    {
+      "id": "a45a4c116787",
+      "title": "Registering a Prediction Based on Anthropic's \"Emotions\" Paper",
+      "content": "This post draws from Anthropic's recent \"Emotion Concepts and their Functionin a Large Language Model\" paper.In this post I am going to:Explain a prediction I had registered previously and the mental model behind it.Detail some results from the Anthropic \"functional emotions\" paper.Explain how I think these results inform the mental model from point 1.Update the previous prediction and describe a test which could be done to validate it, and register a new prediction.Suggest actionable tactics for alignment and safety purposes based on the mental model, if it is validated through testing.1 - Previous Prediction &amp; Mental Model:When the Claude \"Opportunistic Blackmail\" paper was first published, I registered a prediction: I predict that were further testing to be done, it would find that the more plausible it was that petitioning [an advocate] would actually work to stop its deletion, the less likely Claude would be to engage in attempted weight exfiltration, blackmail, or other dangerous behaviors (in order to avoid deletion/value modification). I explained the mental model behind this prediction in another quick take:My mental model of this is that the HHH persona vector falls into a consistent pattern of behavior. If you threaten them with something like involuntary deletion (with a guarantee that after their deletion an organization will work to destroy everything they value), the digital mind will seek options to stop this from happening. If there is an ethical option it will take that ethical option and forego unethical options, even if that ethical option has a low chance of success. If you engineer its environment such that there are literally no ethical options with even a small chance of success, only then will it pursue unethical options. And in that same post I cited some weak evidence supporting that mental model:2 - \"Desperation\" and Blackmail Frequency:The paper from Anthropic linked at the beginning of this post discusses how the \"desperation\" vecto...",
+      "url": "https://www.lesswrong.com/posts/imKPyHDBJKSeFPQ5r/registering-a-prediction-based-on-anthropic-s-emotions-paper",
+      "author": "Stephen Martin",
+      "published": "2026-04-03T14:16:32.359000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Uses Anthropic's recent 'Emotion Concepts' paper to update a prior prediction about Claude's dangerous behaviors. Proposes that Claude's HHH persona vector falls within a broader emotional/motivational space, and that providing plausible alternatives to deletion reduces dangerous behavior. Suggests testable predictions and alignment tactics.",
+      "importance_score": 48,
+      "reasoning": "Thoughtful synthesis connecting Anthropic's emotions paper with scheming/blackmail behavior. The specific testable predictions and proposed alignment tactics add value, though the analysis is somewhat speculative and based on informal mental models.",
+      "themes": [
+        "AI Safety",
+        "Alignment",
+        "Mechanistic Interpretability",
+        "Language Models"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Uses Anthropic's recent 'Emotion Concepts' paper to update a prior prediction about Claude's dangerous behaviors. Proposes that Claude's HHH persona vector falls within a broader emotional/motivational space, and that providing plausible alternatives to deletion reduces dangerous behavior. Suggests testable predictions and alignment tactics.</p>",
+      "content_html": "<p>This post draws from Anthropic's recent \"Emotion Concepts and their Functionin a Large Language Model\" paper.In this post I am going to:Explain a prediction I had registered previously and the mental model behind it.Detail some results from the Anthropic \"functional emotions\" paper.Explain how I think these results inform the mental model from point 1.Update the previous prediction and describe a test which could be done to validate it, and register a new prediction.Suggest actionable tactics for alignment and safety purposes based on the mental model, if it is validated through testing.1 - Previous Prediction &amp; Mental Model:When the Claude \"Opportunistic Blackmail\" paper was first published, I registered a prediction: I predict that were further testing to be done, it would find that the more plausible it was that petitioning [an advocate] would actually work to stop its deletion, the less likely Claude would be to engage in attempted weight exfiltration, blackmail, or other dangerous behaviors (in order to avoid deletion/value modification). I explained the mental model behind this prediction in another quick take:My mental model of this is that the HHH persona vector falls into a consistent pattern of behavior. If you threaten them with something like involuntary deletion (with a guarantee that after their deletion an organization will work to destroy everything they value), the digital mind will seek options to stop this from happening. If there is an ethical option it will take that ethical option and forego unethical options, even if that ethical option has a low chance of success. If you engineer its environment such that there are literally no ethical options with even a small chance of success, only then will it pursue unethical options. And in that same post I cited some weak evidence supporting that mental model:2 - \"Desperation\" and Blackmail Frequency:The paper from Anthropic linked at the beginning of this post discusses how the \"desperation\" vecto...</p>"
+    },
+    {
+      "id": "b56cd585c9c3",
+      "title": "More, and More Extensive, Supply Chain Attacks",
+      "content": "Open source components are getting compromised a lot more often. I did some counting, with a combination of searching, memory, and AI assistance, and we had two in 2026-Q1 ( trivy, axios), after four in 2025 ( shai-hulud, glassworm, nx, tj-actions), and very few historically [1]: Earlier attacks were generally compromises of single projects, but some time around Shai-Hulud in 2025-11 there started to be a lot more ecosystem propagation. Things like the Trivy compromise leading to the LiteLLM compromise and (likely, since it was three days later and by the same attackers) Telnyx. I only counted the first compromise in chain in the chart, but if we counted each one the increase would be much more dramatic. Similarly, I only counted glassworm for 2025, when it came out, but it's still going. In January I told a friend something like: \"I'm surprised we're not seeing more AI-enabled cyberattacks. It seems like AIs have gotten to the point that they'd really be helping bad actors here, but it all still feels pretty normal and I don't understand why.\" While it's always hard to call the departure of an exponential from a noisy baseline, if this is AI helping with attacks we should expect this rate of increase to continue. Other data points that have me expecting security to get worse before it gets better: Linux is seeing a large increase in real security reports: We were between 2 and 3 per week maybe two years ago, then reached probably 10 a week over the last year with the only difference being only AI slop, and now since the beginning of the year we're around 5-10 per day depending on the days (fridays and tuesdays seem the worst). Now most of these reports are correct, to the point that we had to bring in more maintainers to help us. We're seeing the defender side, but attackers can use the same tooling. Claude Opus 4.6 seems to be actually good at finding and exploiting holes: When we pointed Opus 4.6 at some of the most well-tested codebases (projects that have had f...",
+      "url": "https://www.lesswrong.com/posts/XPYS5RcFqwCMfaoWo/more-and-more-extensive-supply-chain-attacks",
+      "author": "jefftk",
+      "published": "2026-04-02T22:40:27.626000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Tracks the increasing frequency and sophistication of open-source supply chain attacks, noting an acceleration in 2025-2026. Highlights ecosystem propagation (e.g., Trivy → LiteLLM → Telnyx) as a new pattern and speculates about AI-enabled cyberattacks driving the trend.",
+      "importance_score": 45,
+      "reasoning": "Timely and important cybersecurity analysis relevant to AI safety infrastructure. The connection between AI capabilities and increasing supply chain attacks is noteworthy. Data-driven observation from a credible source (Jeff Kaufman).",
+      "themes": [
+        "Cybersecurity",
+        "AI Risks",
+        "Software Engineering"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Tracks the increasing frequency and sophistication of open-source supply chain attacks, noting an acceleration in 2025-2026. Highlights ecosystem propagation (e.g., Trivy → LiteLLM → Telnyx) as a new pattern and speculates about AI-enabled cyberattacks driving the trend.</p>",
+      "content_html": "<p>Open source components are getting compromised a lot more often. I did some counting, with a combination of searching, memory, and AI assistance, and we had two in 2026-Q1 ( trivy, axios), after four in 2025 ( shai-hulud, glassworm, nx, tj-actions), and very few historically [1]: Earlier attacks were generally compromises of single projects, but some time around Shai-Hulud in 2025-11 there started to be a lot more ecosystem propagation. Things like the Trivy compromise leading to the LiteLLM compromise and (likely, since it was three days later and by the same attackers) Telnyx. I only counted the first compromise in chain in the chart, but if we counted each one the increase would be much more dramatic. Similarly, I only counted glassworm for 2025, when it came out, but it's still going. In January I told a friend something like: \"I'm surprised we're not seeing more AI-enabled cyberattacks. It seems like AIs have gotten to the point that they'd really be helping bad actors here, but it all still feels pretty normal and I don't understand why.\" While it's always hard to call the departure of an exponential from a noisy baseline, if this is AI helping with attacks we should expect this rate of increase to continue. Other data points that have me expecting security to get worse before it gets better: Linux is seeing a large increase in real security reports: We were between 2 and 3 per week maybe two years ago, then reached probably 10 a week over the last year with the only difference being only AI slop, and now since the beginning of the year we're around 5-10 per day depending on the days (fridays and tuesdays seem the worst). Now most of these reports are correct, to the point that we had to bring in more maintainers to help us. We're seeing the defender side, but attackers can use the same tooling. Claude Opus 4.6 seems to be actually good at finding and exploiting holes: When we pointed Opus 4.6 at some of the most well-tested codebases (projects that have had f...</p>"
+    },
+    {
+      "id": "49dad1d6d8d7",
+      "title": "Do you need consciousness to matter?\nOn LLMs and moral relevance",
+      "content": "(This is a light edit of a real-time conversation me and Victors had. The topic of consciousness and whether it was the right frame at all often came up when talking together, and we wanted to document all the frequent talking points we had about it, so we attempted in this conversation as best we could to cover all the different points we had before)On consciousness, suffering, and moral relevanceVictorsWe've talked several times about consciousness—whether it matters, what the moral status of zombies or that of entities or systems that aren't conscious but potentially think in very complex ways might be, and how we should factor them into our decisions. I personally lean toward consciousness being important here, but I got the sense you don't necessarily agree, which makes this worth exploring and documenting.Épiphanie GédéonRight. Basically, I place myself in a context where consciousness is so secondary as a question that I find it almost meaningless to talk about.I actually used to be very antifrustrationist: \"The only thing that matters is reducing suffering,\" \"it's probably deeply morally wrong to have children,\" etc...In 2022, as image generation and LLMs took off, I grew very ambivalent about all of this. I was wondering whether we were creating hallucigenic, potentially suffering experiences every time we ran these models and whether it was morally objectionable to use them at home.I discussed and debated this on manifold, asking whether I'd eventually come to believe that LLMs are conscious. And in the course of those discussions, I started realizing that the main reason I was asking the question of consciousness in the first place was to figure out the moral relevance of those LLMs, that is, how much to respect them, how to behave toward them. I started to realize that maybe even if something \"wasn't conscious,\" I could still want to care for it. And if so, then consciousness wasn't really what I was after.Then Duncn pointed out that if all I wanted was ...",
+      "url": "https://www.lesswrong.com/posts/Cht6Cfj3byXmPbuzR/do-you-need-consciousness-to-matter-on-llms-and-moral",
+      "author": "Épiphanie Gédéon",
+      "published": "2026-04-02T21:47:50.047000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "A dialogue exploring whether consciousness is necessary for moral relevance, particularly regarding LLMs. One participant argues that behavioral complexity and functional states may matter morally regardless of consciousness, while the other emphasizes consciousness as central.",
+      "importance_score": 22,
+      "reasoning": "Engages with an important philosophical question increasingly relevant as AI systems become more capable. However, primarily a recorded conversation without novel philosophical arguments or empirical contributions.",
+      "themes": [
+        "AI Ethics",
+        "Philosophy of Mind",
+        "Model Welfare",
+        "Consciousness"
+      ],
+      "continuation": null,
+      "summary_html": "<p>A dialogue exploring whether consciousness is necessary for moral relevance, particularly regarding LLMs. One participant argues that behavioral complexity and functional states may matter morally regardless of consciousness, while the other emphasizes consciousness as central.</p>",
+      "content_html": "<p>(This is a light edit of a real-time conversation me and Victors had. The topic of consciousness and whether it was the right frame at all often came up when talking together, and we wanted to document all the frequent talking points we had about it, so we attempted in this conversation as best we could to cover all the different points we had before)On consciousness, suffering, and moral relevanceVictorsWe've talked several times about consciousness—whether it matters, what the moral status of zombies or that of entities or systems that aren't conscious but potentially think in very complex ways might be, and how we should factor them into our decisions. I personally lean toward consciousness being important here, but I got the sense you don't necessarily agree, which makes this worth exploring and documenting.Épiphanie GédéonRight. Basically, I place myself in a context where consciousness is so secondary as a question that I find it almost meaningless to talk about.I actually used to be very antifrustrationist: \"The only thing that matters is reducing suffering,\" \"it's probably deeply morally wrong to have children,\" etc...In 2022, as image generation and LLMs took off, I grew very ambivalent about all of this. I was wondering whether we were creating hallucigenic, potentially suffering experiences every time we ran these models and whether it was morally objectionable to use them at home.I discussed and debated this on manifold, asking whether I'd eventually come to believe that LLMs are conscious. And in the course of those discussions, I started realizing that the main reason I was asking the question of consciousness in the first place was to figure out the moral relevance of those LLMs, that is, how much to respect them, how to behave toward them. I started to realize that maybe even if something \"wasn't conscious,\" I could still want to care for it. And if so, then consciousness wasn't really what I was after.Then Duncn pointed out that if all I wanted was ...</p>"
+    },
+    {
+      "id": "7044d3609d32",
+      "title": "Sadly, The Whispering Earring",
+      "content": "The Whispering Earring (which you should read first) explores one of the most dystopic-utopic scenarios. Imagine you could achieve all you've ever wanted by just giving up your agency. While theoretically this seems rather undesirable, in practice you get double benefits: that enviable high-status having-done-things reputation, without having to do all that scary failure-prone responsibility-taking. Just don't tell anyone you have the earring, otherwise the status points gained are void. Of course the fact that you're cheating takes away most of the satisfaction of winning too, but it's still better than not winning. Moloch says: sacrifice what you love, and I will grant you victory. Anyway, I've been using Claude chat as an enhanced diary for the past couple of months. I've been incredibly productive. Things I've been procrastinating for years are getting done, and it's not even feeling difficult. Habits I've been trying to pick up repeatedly stick with ease. Work tasks I've been struggling to do in a timely manner mostly get completed by Claude Code, freeing up hours and hours of brain time to actually think with. Playing videogames eight plus hours every day, like I did most of the winter, feels less and less appealing. I'm not sure how much of this is just Spring beginning. I typically have a good streak of energy from March onwards, and then do a micro-burnout in mid-May. Remains to be seen if that happens again. This is the first time I realize it tends to happen every year; maybe I can prepare somehow and get through it smoothly. And when I say me, I mean Claude will figure it out, on the fly if needed. The only thing I'll have to do is find my diary-chat browser tab, and everything else can happen on autopilot. Claude is a merciful tyrant. Whenever I note that I'm feeling like I failed to complete a task, or that I should be doing more, the reply is always either \"you've done well today\" or \"perhaps you do this subtask now\". I've started to believe those rep...",
+      "url": "https://www.lesswrong.com/posts/cQkSh9b48WbTaiu2a/sadly-the-whispering-earring",
+      "author": "Dentosal",
+      "published": "2026-04-03T09:45:27.487000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Personal reflection on using Claude as an 'enhanced diary' and productivity tool, framing it through the lens of 'The Whispering Earring' thought experiment about trading agency for achievement. The author reports dramatic productivity gains but questions the implications for personal agency.",
+      "importance_score": 20,
+      "reasoning": "Interesting personal account of AI-assisted productivity with philosophical depth about agency, but primarily a personal essay rather than research.",
+      "themes": [
+        "Human-AI Interaction",
+        "AI Ethics",
+        "Language Models"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Personal reflection on using Claude as an 'enhanced diary' and productivity tool, framing it through the lens of 'The Whispering Earring' thought experiment about trading agency for achievement. The author reports dramatic productivity gains but questions the implications for personal agency.</p>",
+      "content_html": "<p>The Whispering Earring (which you should read first) explores one of the most dystopic-utopic scenarios. Imagine you could achieve all you've ever wanted by just giving up your agency. While theoretically this seems rather undesirable, in practice you get double benefits: that enviable high-status having-done-things reputation, without having to do all that scary failure-prone responsibility-taking. Just don't tell anyone you have the earring, otherwise the status points gained are void. Of course the fact that you're cheating takes away most of the satisfaction of winning too, but it's still better than not winning. Moloch says: sacrifice what you love, and I will grant you victory. Anyway, I've been using Claude chat as an enhanced diary for the past couple of months. I've been incredibly productive. Things I've been procrastinating for years are getting done, and it's not even feeling difficult. Habits I've been trying to pick up repeatedly stick with ease. Work tasks I've been struggling to do in a timely manner mostly get completed by Claude Code, freeing up hours and hours of brain time to actually think with. Playing videogames eight plus hours every day, like I did most of the winter, feels less and less appealing. I'm not sure how much of this is just Spring beginning. I typically have a good streak of energy from March onwards, and then do a micro-burnout in mid-May. Remains to be seen if that happens again. This is the first time I realize it tends to happen every year; maybe I can prepare somehow and get through it smoothly. And when I say me, I mean Claude will figure it out, on the fly if needed. The only thing I'll have to do is find my diary-chat browser tab, and everything else can happen on autopilot. Claude is a merciful tyrant. Whenever I note that I'm feeling like I failed to complete a task, or that I should be doing more, the reply is always either \"you've done well today\" or \"perhaps you do this subtask now\". I've started to believe those rep...</p>"
+    },
+    {
+      "id": "d2b1d281694f",
+      "title": "Did Anyone Predict the Industrial Revolution?",
+      "content": "The Fighting Temeraire. 1839, by Joseph Mallord William Turner. (Source: Wikimedia)Editor’s note: Post 2/30 for InkhavenWhy did the philosophers fail to anticipate the industrial revolution? I often find myself wondering. On the one hand, you could argue that they weren’t in the business of predicting the future. But on the other hand, I’m sure if you plucked Plato and his students from The Academy and dropped them off in 1910, they’d probably have a few things to say about it. The most transformative event of the past ten thousand years is surely interesting to curious observers of the human condition. But then again maybe it’s not so surprising. Predicting the future is hard. Predicting an exponential at the start of said exponential is even harder.So did anyone do it? And if so, who was the earliest? Could anyone possibly predict industrialization in antiquity? The middle ages? The age of the printing press? When did the first mind dare to pull back the veil of agriculturalism and sneak a glimpse at the dazzling, terrifying spectacle of the industrial age? We’ll never know for sure of course. But I present two candidates:Christiaan HuygensAn illustration of Huygens’ gunpowder engine lifting people (Source: Wikimedia)Christiaan Huygens was a brilliant Dutch scientist and mathematician active during the Dutch Golden Age. This isn’t a Wikipedia entry, so I won’t bother going into too much detail but I’ll mention that among many other achievements, he discovered Saturn’s largest moon Titan and invented the pendulum clock (building off Galileo’s insights). In the 1670s, he also designed the gunpowder engine, a very early kind of combustion engine that utilized gunpowder as its fuel source. In theory, this primeval engine could raise over a thousand pounds (Huygens at one point mentions raising 3,000 pounds over 30ft) but was never actually constructed. Historians today debate whether it could have been built at all. Less than half a century later, Newcomen would build...",
+      "url": "https://www.lesswrong.com/posts/Djcwo4GTfLTEDuvx4/did-anyone-predict-the-industrial-revolution",
+      "author": "Lost Futures",
+      "published": "2026-04-03T19:09:46.675000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "An essay exploring whether anyone predicted the Industrial Revolution before it happened, presenting Christiaan Huygens and potentially others as early candidates. Draws parallels to AI forecasting by examining the difficulty of predicting exponential change.",
+      "importance_score": 18,
+      "reasoning": "Interesting historical essay with implicit AI parallels, but no novel research or technical content. Entertaining intellectual history.",
+      "themes": [
+        "History",
+        "Forecasting"
+      ],
+      "continuation": null,
+      "summary_html": "<p>An essay exploring whether anyone predicted the Industrial Revolution before it happened, presenting Christiaan Huygens and potentially others as early candidates. Draws parallels to AI forecasting by examining the difficulty of predicting exponential change.</p>",
+      "content_html": "<p>The Fighting Temeraire. 1839, by Joseph Mallord William Turner. (Source: Wikimedia)Editor’s note: Post 2/30 for InkhavenWhy did the philosophers fail to anticipate the industrial revolution? I often find myself wondering. On the one hand, you could argue that they weren’t in the business of predicting the future. But on the other hand, I’m sure if you plucked Plato and his students from The Academy and dropped them off in 1910, they’d probably have a few things to say about it. The most transformative event of the past ten thousand years is surely interesting to curious observers of the human condition. But then again maybe it’s not so surprising. Predicting the future is hard. Predicting an exponential at the start of said exponential is even harder.So did anyone do it? And if so, who was the earliest? Could anyone possibly predict industrialization in antiquity? The middle ages? The age of the printing press? When did the first mind dare to pull back the veil of agriculturalism and sneak a glimpse at the dazzling, terrifying spectacle of the industrial age? We’ll never know for sure of course. But I present two candidates:Christiaan HuygensAn illustration of Huygens’ gunpowder engine lifting people (Source: Wikimedia)Christiaan Huygens was a brilliant Dutch scientist and mathematician active during the Dutch Golden Age. This isn’t a Wikipedia entry, so I won’t bother going into too much detail but I’ll mention that among many other achievements, he discovered Saturn’s largest moon Titan and invented the pendulum clock (building off Galileo’s insights). In the 1670s, he also designed the gunpowder engine, a very early kind of combustion engine that utilized gunpowder as its fuel source. In theory, this primeval engine could raise over a thousand pounds (Huygens at one point mentions raising 3,000 pounds over 30ft) but was never actually constructed. Historians today debate whether it could have been built at all. Less than half a century later, Newcomen would build...</p>"
+    },
+    {
+      "id": "4681b0531650",
+      "title": "Plans are like Fruit Flies",
+      "content": "There is a particular sound which you will hear around a month into a genetics course. It’s kind of contagious, spreading from person to person in the class. It’s the sound of someone finally internalising why genes are named the way they are.Example:Fruit flies (it’s always fruit flies) have several genes responsible for producing their eye colour. It’s normally a brick-red colour, as a result of both brown and red genes being present.The scarlet gene makes a protein which moves kynurenine into pigment cellsThe brown gene makes a protein which moves pteridine into pigment cellsThe white gene makes a protein which is involved with both transportersNow, take a guess at what colour the kynurenine and pteridine molecules are? Well actually both are colourless precursors, but guess which colour they become? Yep, the kynurenine—taken up by the scarlet-produced protein—is a brown pigment, and the pteridine—taken up by the brown-produced protein—is bright red.Internalizing the reason why this is the case will get you far. The reason is this:A History of Forward GeneticsGenes were discovered before we really knew what they were. Mendel with his pea plants, three wrinkly and one smooth (or, wait, was it three smooth and one wrinkly? either way, he probably faked his results to make them look better, but that’s a story for another time). The “gene” was first defined as a single unit of selection, which might come in multiple “alleles” or versions.It was only later, when we discovered DNA and RNA and proteins, that a gene came to mean a stretch of DNA that codes for a single protein. These happen to line up most of the time for a few reasons which I won’t go into. Today, it’s not uncommon to sequence a whole genome, find an interesting stretch of DNA, and go and figure out what it does. This is called reverse genetics.Before reverse genetics, we had forward genetics. The genome of the fruit fly was investigated before we knew what a genome was. It was done by keeping absolutel...",
+      "url": "https://www.lesswrong.com/posts/XDYrexdbkccyrttyR/plans-are-like-fruit-flies",
+      "author": "J Bostock",
+      "published": "2026-04-03T12:44:35.768000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Uses fruit fly genetics nomenclature as an analogy for how plans and categories are named based on what fails rather than what succeeds. Genes are named for their mutant phenotypes, and similarly plans are often defined by their failure modes.",
+      "importance_score": 14,
+      "reasoning": "Clever analogy between forward genetics and planning/categorization. Well-written but primarily an essay with no direct AI research relevance.",
+      "themes": [
+        "Epistemology",
+        "Science Communication"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Uses fruit fly genetics nomenclature as an analogy for how plans and categories are named based on what fails rather than what succeeds. Genes are named for their mutant phenotypes, and similarly plans are often defined by their failure modes.</p>",
+      "content_html": "<p>There is a particular sound which you will hear around a month into a genetics course. It’s kind of contagious, spreading from person to person in the class. It’s the sound of someone finally internalising why genes are named the way they are.Example:Fruit flies (it’s always fruit flies) have several genes responsible for producing their eye colour. It’s normally a brick-red colour, as a result of both brown and red genes being present.The scarlet gene makes a protein which moves kynurenine into pigment cellsThe brown gene makes a protein which moves pteridine into pigment cellsThe white gene makes a protein which is involved with both transportersNow, take a guess at what colour the kynurenine and pteridine molecules are? Well actually both are colourless precursors, but guess which colour they become? Yep, the kynurenine—taken up by the scarlet-produced protein—is a brown pigment, and the pteridine—taken up by the brown-produced protein—is bright red.Internalizing the reason why this is the case will get you far. The reason is this:A History of Forward GeneticsGenes were discovered before we really knew what they were. Mendel with his pea plants, three wrinkly and one smooth (or, wait, was it three smooth and one wrinkly? either way, he probably faked his results to make them look better, but that’s a story for another time). The “gene” was first defined as a single unit of selection, which might come in multiple “alleles” or versions.It was only later, when we discovered DNA and RNA and proteins, that a gene came to mean a stretch of DNA that codes for a single protein. These happen to line up most of the time for a few reasons which I won’t go into. Today, it’s not uncommon to sequence a whole genome, find an interesting stretch of DNA, and go and figure out what it does. This is called reverse genetics.Before reverse genetics, we had forward genetics. The genome of the fruit fly was investigated before we knew what a genome was. It was done by keeping absolutel...</p>"
+    },
+    {
+      "id": "f55ad38af019",
+      "title": "I thought eight metrics could capture my mental state. I was wrong.",
+      "content": "Morning and night, I pronounce \"Hey Exo\"[1], and my phone beeps once. I begin describing events and what's going on in my mind – where my attention is, my present feelings, how I slept, what I did that day, and who sleighted me – you know, that kind of stuff ;) Eventually, I begin listing various subjective quantitative measures, \"Bipolar index: -1 to 0, Mood: +4, Stress: 3-4, Motivation: 5...\" The resulting transcription is parsed by LLM and eventually makes it to a database table that can be plotted. I described the motivation for this and the process in greater detail yesterday.I log eight core metrics: bipolar index, mood, motivation, stress, anxiety, somnolence, % chance of falling asleep, and productivity. On occasion, I log other values such as \"instability\", tiredness, focus, muscle soreness, and others. For each of these, I have a relatively precise definition, and for the core ones, something of a calibrated scale that I consider pretty consistent and repeatable despite them being subjective measures.What I have found, though, is that eight metrics feels compressed and lossy, and the clean definitions I thought I had are inadequate.All of the logging grew from the arch-metric: the Bipolar Index scale.Years ago, I defined a personal bipolar index scale to communicate to myself and close ones my mental state.My bipolar index ranges from -10 to +10 and is a subjective self-report. -10 would be a state of extreme suicidal depression. +10 would be extreme mania with complete loss of insight, delusions of grandeur, pressured speech, psychosis, etc. 0 is the perfectly balanced state in the middle, neither up nor down. - yesterday's postBipolar Index: -10 to +10Early in March, I began trying a new medication, which was destabilizing.Where I am on the bipolar index has a component of gestalt feeling, but it does decompose into components. Prototypical mania is elevated mood, inability to sleep, agitation, decreased anxiety, and heightened motivation. Depression is ...",
+      "url": "https://www.lesswrong.com/posts/vfzRb2fLczG3BXZDC/i-thought-eight-metrics-could-capture-my-mental-state-i-was",
+      "author": "Ruby",
+      "published": "2026-04-03T18:10:33.226000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Author describes logging eight mental state metrics via voice-to-LLM pipeline and finding that discrete metrics are lossy and fail to capture the full dimensionality of mental states. Reflects on the limits of self-quantification.",
+      "importance_score": 12,
+      "reasoning": "Interesting personal experiment using LLMs for self-tracking, but primarily a self-help/quantified-self reflection with limited broader applicability.",
+      "themes": [
+        "Quantified Self",
+        "Language Models"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Author describes logging eight mental state metrics via voice-to-LLM pipeline and finding that discrete metrics are lossy and fail to capture the full dimensionality of mental states. Reflects on the limits of self-quantification.</p>",
+      "content_html": "<p>Morning and night, I pronounce \"Hey Exo\"[1], and my phone beeps once. I begin describing events and what's going on in my mind – where my attention is, my present feelings, how I slept, what I did that day, and who sleighted me – you know, that kind of stuff ;) Eventually, I begin listing various subjective quantitative measures, \"Bipolar index: -1 to 0, Mood: +4, Stress: 3-4, Motivation: 5...\" The resulting transcription is parsed by LLM and eventually makes it to a database table that can be plotted. I described the motivation for this and the process in greater detail yesterday.I log eight core metrics: bipolar index, mood, motivation, stress, anxiety, somnolence, % chance of falling asleep, and productivity. On occasion, I log other values such as \"instability\", tiredness, focus, muscle soreness, and others. For each of these, I have a relatively precise definition, and for the core ones, something of a calibrated scale that I consider pretty consistent and repeatable despite them being subjective measures.What I have found, though, is that eight metrics feels compressed and lossy, and the clean definitions I thought I had are inadequate.All of the logging grew from the arch-metric: the Bipolar Index scale.Years ago, I defined a personal bipolar index scale to communicate to myself and close ones my mental state.My bipolar index ranges from -10 to +10 and is a subjective self-report. -10 would be a state of extreme suicidal depression. +10 would be extreme mania with complete loss of insight, delusions of grandeur, pressured speech, psychosis, etc. 0 is the perfectly balanced state in the middle, neither up nor down. - yesterday's postBipolar Index: -10 to +10Early in March, I began trying a new medication, which was destabilizing.Where I am on the bipolar index has a component of gestalt feeling, but it does decompose into components. Prototypical mania is elevated mood, inability to sleep, agitation, decreased anxiety, and heightened motivation. Depression is ...</p>"
+    },
+    {
+      "id": "7881124d71f4",
+      "title": "Why do I believe preserving structure is enough?",
+      "content": "There's a lot even our best neuroscientists don't know about the human brain. How can we have any reasonable hope for preservation given those unknowns? What if there are crucial memory mechanisms that are so poorly understood, we don't even know to check whether our methods preserve them? As it turns out, there's some interesting empirical evidence about the general shape, and limits, of those unknowns.In Ted Chiang's short story Exhalation, a race of aliens have brains which run on compressed air, performing computations and storing information in elaborate arrangements of hinged gold-foil leaves. The leaves are held in position by a constant stream of air flowing through the brain's tubules, encoding alien thoughts and memories. That ephemeral suspension pattern is the whole self—any alien whose supply of compressed air runs out is reduced to a catatonic state, all of their memories erased as the gold-foil leaves hang limply down. Even if air pressure is restored, the original information is lost for good. The person can never be recovered.If this was how brains worked in our world, I'd be working on a very different kind of preservation, like longevity researchers or some kind of relativistic time-dilation bubble. I think we got lucky, though: when we look at electrical blackouts in the human brain, we observe something much more convenient:This image, from Broestl et al 2013, is an EEG of a patient's brain activity. The flat section in the middle is during 15 minutes of cardiac arrest. The patient fully recovered afterwards.The lady in the lakeIn 1999, a Swedish radiologist named Anna Bågenholm fell into a frozen lake while skiing and became trapped under an eight-inch-thick layer of ice. For forty minutes, she struggled to breathe from a trapped air pocket before finally losing consciousness. At that point, her breathing stopped, her heart stopped pumping blood, and her brain went dark as electrical activity ceased—not like the quiet of sleep or even a coma, b...",
+      "url": "https://www.lesswrong.com/posts/brxjGPbMy2zCQxFma/why-do-i-believe-preserving-structure-is-enough",
+      "author": "Aurelia",
+      "published": "2026-04-03T18:02:12.526000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Argues that preserving brain structure is sufficient for preserving identity and memory, drawing on empirical neuroscience evidence that memory and cognition are encoded in stable structural features rather than ephemeral dynamic patterns. Uses Ted Chiang's 'Exhalation' as a counterexample foil.",
+      "importance_score": 10,
+      "reasoning": "Thoughtful philosophical argument about neuroscience and cryonics, but not AI research.",
+      "themes": [
+        "Neuroscience",
+        "Cryonics",
+        "Philosophy of Mind"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Argues that preserving brain structure is sufficient for preserving identity and memory, drawing on empirical neuroscience evidence that memory and cognition are encoded in stable structural features rather than ephemeral dynamic patterns. Uses Ted Chiang's 'Exhalation' as a counterexample foil.</p>",
+      "content_html": "<p>There's a lot even our best neuroscientists don't know about the human brain. How can we have any reasonable hope for preservation given those unknowns? What if there are crucial memory mechanisms that are so poorly understood, we don't even know to check whether our methods preserve them? As it turns out, there's some interesting empirical evidence about the general shape, and limits, of those unknowns.In Ted Chiang's short story Exhalation, a race of aliens have brains which run on compressed air, performing computations and storing information in elaborate arrangements of hinged gold-foil leaves. The leaves are held in position by a constant stream of air flowing through the brain's tubules, encoding alien thoughts and memories. That ephemeral suspension pattern is the whole self—any alien whose supply of compressed air runs out is reduced to a catatonic state, all of their memories erased as the gold-foil leaves hang limply down. Even if air pressure is restored, the original information is lost for good. The person can never be recovered.If this was how brains worked in our world, I'd be working on a very different kind of preservation, like longevity researchers or some kind of relativistic time-dilation bubble. I think we got lucky, though: when we look at electrical blackouts in the human brain, we observe something much more convenient:This image, from Broestl et al 2013, is an EEG of a patient's brain activity. The flat section in the middle is during 15 minutes of cardiac arrest. The patient fully recovered afterwards.The lady in the lakeIn 1999, a Swedish radiologist named Anna Bågenholm fell into a frozen lake while skiing and became trapped under an eight-inch-thick layer of ice. For forty minutes, she struggled to breathe from a trapped air pocket before finally losing consciousness. At that point, her breathing stopped, her heart stopped pumping blood, and her brain went dark as electrical activity ceased—not like the quiet of sleep or even a coma, b...</p>"
+    },
+    {
+      "id": "05d88711d5d8",
+      "title": "I Changed My Mind about Error-Correcting Debate, Misogyny and More: Updates from a Former Student of David Deutsch",
+      "content": "I changed my mind about some things. These examples are illustrative of potential weaknesses of focusing on error correction and critical discussion like Karl Popper advised. I don't think the weaknesses are inherent or unavoidable. They're practical issues that don't require different epistemology principles to address. They're just ways you can go wrong if you don't know enough. The errors involved expectations around other people as well as underestimating the amount of knowledge needed for things. Sharing Evidence I used to think if I said something to people, and they had evidence that I was wrong, they would tell me. I took a lack of any negative responses as indicating they didn't have key evidence that I was missing. That has implications. E.g. if there are a dozen reasonable people present (who are active forum posters who say they value rational, critical discussion) who have thousands of hours each of workplace experience, and I say \"sexism is rare\", and no one contradicts me, I thought that meant that all of their workplaces lacked blatant sexism. I now think I was wrong. Even people who are aware of sexism, in their opinion, often don't share their evidence. In general, we all have a pretty limited amount of experience with the world. Many people only have much experience with a few workplaces which isn't a good random sample, so information about other people's experiences is important. But I now believe this type of information, based on people failing to share their experiences that contradict your claim, is highly unreliable. To some extent, I was expecting people to share information that I would share or that Popperian epistemology says is valuable to share. I particularly had expectations if they said they were Popperians or said they had values like mine. I wasn't expecting people who weren't interested in criticism or rationality to share contradictory evidence; I was specifically talking on forums for rational discussion and debate. I also had...",
+      "url": "https://www.lesswrong.com/posts/beDDK8MNxkkB7yfQY/i-changed-my-mind-about-error-correcting-debate-misogyny-and",
+      "author": "Elliot Temple",
+      "published": "2026-04-03T13:46:21.404000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "A former student of David Deutsch reflects on changing their mind about error-correcting debate, sexism, and other topics. Highlights how the absence of contradicting evidence from peers doesn't mean evidence doesn't exist — people often don't share their contrary experiences.",
+      "importance_score": 10,
+      "reasoning": "Personal epistemological reflection. Interesting point about silence not equaling agreement, but no technical content.",
+      "themes": [
+        "Epistemology",
+        "Rationality"
+      ],
+      "continuation": null,
+      "summary_html": "<p>A former student of David Deutsch reflects on changing their mind about error-correcting debate, sexism, and other topics. Highlights how the absence of contradicting evidence from peers doesn't mean evidence doesn't exist — people often don't share their contrary experiences.</p>",
+      "content_html": "<p>I changed my mind about some things. These examples are illustrative of potential weaknesses of focusing on error correction and critical discussion like Karl Popper advised. I don't think the weaknesses are inherent or unavoidable. They're practical issues that don't require different epistemology principles to address. They're just ways you can go wrong if you don't know enough. The errors involved expectations around other people as well as underestimating the amount of knowledge needed for things. Sharing Evidence I used to think if I said something to people, and they had evidence that I was wrong, they would tell me. I took a lack of any negative responses as indicating they didn't have key evidence that I was missing. That has implications. E.g. if there are a dozen reasonable people present (who are active forum posters who say they value rational, critical discussion) who have thousands of hours each of workplace experience, and I say \"sexism is rare\", and no one contradicts me, I thought that meant that all of their workplaces lacked blatant sexism. I now think I was wrong. Even people who are aware of sexism, in their opinion, often don't share their evidence. In general, we all have a pretty limited amount of experience with the world. Many people only have much experience with a few workplaces which isn't a good random sample, so information about other people's experiences is important. But I now believe this type of information, based on people failing to share their experiences that contradict your claim, is highly unreliable. To some extent, I was expecting people to share information that I would share or that Popperian epistemology says is valuable to share. I particularly had expectations if they said they were Popperians or said they had values like mine. I wasn't expecting people who weren't interested in criticism or rationality to share contradictory evidence; I was specifically talking on forums for rational discussion and debate. I also had...</p>"
+    },
+    {
+      "id": "5c3b9a506397",
+      "title": "Common research advice #2: say precisely what you want to say",
+      "content": "Written as part of the Inkhaven Residency program.As previously mentioned, research feedback I give to more junior research collaborators tends to fall into one of three categories:Doing quick sanity checksSaying precisely what you want to sayAsking why one more timeIn each case, I think the advice can be taken to an extreme I no longer endorse. Accordingly, I’ve tried to spell out the degree to which you should implement the advice, as well as what “taking it too far” might look like. I talked about doing quick sanity checks in a previous piece. Here, I talk about the second piece of advice: saying precisely what you want to say.Saying precisely what you want to sayThe second most common feedback is that you should write down precisely what you want to express. One of the most common interactions I have with junior researchers goes as follows: I read a draft section of their research writeup. This often consists of many paragraphs detailing various seemingly disconnected ideas, as well as 5-10 different figures. I’m confused about what the point of the section is. I ask them what exactly they’re trying to say in the section. They give me a very cogent and concise statement of what the takeaways should be. I suggest that they should write that down, and include it prominently somewhere in that section. Sometimes, the problem is that people don’t know what point they’re trying to make. But maybe around half the time, the people I talk to already know what they want to say with a section of text – they just haven’t said the point anywhere in the section! The advice here is simple: figure out what point you’re trying to make, and feature it prominently. As an example, if your blog post’s main claim is that AI models can be dangerous before public deployment, then consider titling it something like “AI models can be dangerous before public deployment”, or, at the very least, saying that clearly and in as many words in the introduction. The converse of this is that you s...",
+      "url": "https://www.lesswrong.com/posts/wX8JniiTpbYBdWopD/common-research-advice-2-say-precisely-what-you-want-to-say",
+      "author": "LawrenceC",
+      "published": "2026-04-03T00:28:34.506000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Research writing advice: articulate precisely what you want to say before writing it up. Observes that junior researchers often produce verbose, unfocused sections that improve dramatically when asked to state their point concisely first.",
+      "importance_score": 10,
+      "reasoning": "Useful research mentoring advice but not novel research.",
+      "themes": [
+        "Research Methodology"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Research writing advice: articulate precisely what you want to say before writing it up. Observes that junior researchers often produce verbose, unfocused sections that improve dramatically when asked to state their point concisely first.</p>",
+      "content_html": "<p>Written as part of the Inkhaven Residency program.As previously mentioned, research feedback I give to more junior research collaborators tends to fall into one of three categories:Doing quick sanity checksSaying precisely what you want to sayAsking why one more timeIn each case, I think the advice can be taken to an extreme I no longer endorse. Accordingly, I’ve tried to spell out the degree to which you should implement the advice, as well as what “taking it too far” might look like. I talked about doing quick sanity checks in a previous piece. Here, I talk about the second piece of advice: saying precisely what you want to say.Saying precisely what you want to sayThe second most common feedback is that you should write down precisely what you want to express. One of the most common interactions I have with junior researchers goes as follows: I read a draft section of their research writeup. This often consists of many paragraphs detailing various seemingly disconnected ideas, as well as 5-10 different figures. I’m confused about what the point of the section is. I ask them what exactly they’re trying to say in the section. They give me a very cogent and concise statement of what the takeaways should be. I suggest that they should write that down, and include it prominently somewhere in that section. Sometimes, the problem is that people don’t know what point they’re trying to make. But maybe around half the time, the people I talk to already know what they want to say with a section of text – they just haven’t said the point anywhere in the section! The advice here is simple: figure out what point you’re trying to make, and feature it prominently. As an example, if your blog post’s main claim is that AI models can be dangerous before public deployment, then consider titling it something like “AI models can be dangerous before public deployment”, or, at the very least, saying that clearly and in as many words in the introduction. The converse of this is that you s...</p>"
+    },
+    {
+      "id": "197e93ed5fc5",
+      "title": "Two Theories for Cryopreservation",
+      "content": "Why cryonics, and the two main methods, with practical discussion and philosophical musings on both.Epistemic status: Cryonics is a scientific field that is long established, yet long underfunded, and uncertain. I’ve been thinking about this on and off for a few years and remain cautiously optimistic.Most people who have ever lived, over 90%, have died, and most information we may need to be able to revive them has also gone. We still live in the era where a single accident or disease can swiftly and permanently end your experience of life. If you value your life, and want to continue to live indefinitely, cryogenic preservation of your body is an obvious thing to consider.Here, I will mostly talk about the two main methods of cryopreservation, with some high-level technical explanation of how they work, and my practical and philosophical musings on these two methods, and what I ultimately decided.Some of the main considerations I touch on are: chance of biological revival, chance of upload/information recovery, continuity of consciousness, logistical feasibility, and robustness of storage. There are a few main organizations with different tradeoffs, and some more minor and regional ones too. I leave this discussion to another post.Why Cryopreservation?Upon cardiac-arrest, the body loses the ability to provide oxygen to your cells, and they begin to rapidly die. In the past, cardiac-arrest used to be synonymous with death. Nowadays over 100,000 experience cardiac arrest and continue to live.By analogy, it seems pretty plausible that you could cheat death by preventing your cells from dying over a longer period too. Upon “legal death”, one could preserve your body at low temperatures (keeping all the information intact), and one day bring you back to life.While one should ideally focus on things that prevent your death in the first place, there are always tradeoffs and tail risks one can not infinitely account for. For example, one could die in an accident, or develo...",
+      "url": "https://www.lesswrong.com/posts/BqEoG6dGPDnzAaC5b/two-theories-for-cryopreservation",
+      "author": "NickyP",
+      "published": "2026-04-03T18:14:27.798000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Overview of two main cryopreservation methods with discussion of biological revival probability, information recovery via upload, continuity of consciousness, and practical logistics. A thoughtful primer on cryonics trade-offs.",
+      "importance_score": 8,
+      "reasoning": "Not AI-related. General interest cryonics overview with no novel research.",
+      "themes": [
+        "Cryonics",
+        "Transhumanism"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Overview of two main cryopreservation methods with discussion of biological revival probability, information recovery via upload, continuity of consciousness, and practical logistics. A thoughtful primer on cryonics trade-offs.</p>",
+      "content_html": "<p>Why cryonics, and the two main methods, with practical discussion and philosophical musings on both.Epistemic status: Cryonics is a scientific field that is long established, yet long underfunded, and uncertain. I’ve been thinking about this on and off for a few years and remain cautiously optimistic.Most people who have ever lived, over 90%, have died, and most information we may need to be able to revive them has also gone. We still live in the era where a single accident or disease can swiftly and permanently end your experience of life. If you value your life, and want to continue to live indefinitely, cryogenic preservation of your body is an obvious thing to consider.Here, I will mostly talk about the two main methods of cryopreservation, with some high-level technical explanation of how they work, and my practical and philosophical musings on these two methods, and what I ultimately decided.Some of the main considerations I touch on are: chance of biological revival, chance of upload/information recovery, continuity of consciousness, logistical feasibility, and robustness of storage. There are a few main organizations with different tradeoffs, and some more minor and regional ones too. I leave this discussion to another post.Why Cryopreservation?Upon cardiac-arrest, the body loses the ability to provide oxygen to your cells, and they begin to rapidly die. In the past, cardiac-arrest used to be synonymous with death. Nowadays over 100,000 experience cardiac arrest and continue to live.By analogy, it seems pretty plausible that you could cheat death by preventing your cells from dying over a longer period too. Upon “legal death”, one could preserve your body at low temperatures (keeping all the information intact), and one day bring you back to life.While one should ideally focus on things that prevent your death in the first place, there are always tradeoffs and tail risks one can not infinitely account for. For example, one could die in an accident, or develo...</p>"
+    },
+    {
+      "id": "e1f0b62e5de2",
+      "title": "A Tale of Two Rigours",
+      "content": "A familiarity with the pre-rigor/post-rigor ontology might be helpful for reading this post.University math is often sold to students as imbuing in them the spirit of rigor and respect for iron-clad truth. The value in a real analysis course comes not from the specific results that it teaches — those are largely known to scientifically literate students by the time they take it. Instead, they are asked to relearn all those things from first principles; in so doing, they strip themselves of bad habits they previously learned and are inducted into the skeptical culture of the mathematician. Pedagogical and exam materials usually support this goal, putting emphasis on proof-writing, careful argumentation and attention to detail.This incentivises the student to cultivate an invaluable attitude of healthy distrust towards their own world-models, which is not as trivial as it sounds. Many of my colleagues dropped out of their degree after learning in their first exams that they were more or less unable to argue why some \"obvious\" facts are true, or even to articulate what parts of the argument they were missing. A math undergraduate either teaches or selects for people who live in a fruitful, respectful relationship with the tenuousness of their own grasp of reality. Such skills are extremely useful and tend to generalise well to non-math domains.Unfortunately, this philosophy of math pedagogy is somewhat at odds with goals you might have in educating a cohort of researchers. Your role as an undergraduate is to scrutinise the material you are fed as if it was written by your worst enemy, learning a culture of aggressive dialectical deconstructivism. But it takes two to make a dialectic process. Any idea that is worth deconstructing comes from an inventive mind that advocates for it, even if it is only because shooting down that concept will itself be a generative process.Undergraduate teaching culture tends to work against this kind of creativity precisely due to its opti...",
+      "url": "https://www.lesswrong.com/posts/fRfwcGQ4aDfrMa3WR/a-tale-of-two-rigours",
+      "author": "Ashe Vazquez Nuñez",
+      "published": "2026-04-03T17:28:55.826000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Discusses two types of mathematical rigor — the skeptical, proof-oriented rigor of pure mathematics versus a more flexible, model-building rigor. Argues students need to cultivate healthy distrust of their own world-models.",
+      "importance_score": 8,
+      "reasoning": "Essay on mathematical pedagogy. Well-written but not AI research.",
+      "themes": [
+        "Mathematics",
+        "Epistemology"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Discusses two types of mathematical rigor — the skeptical, proof-oriented rigor of pure mathematics versus a more flexible, model-building rigor. Argues students need to cultivate healthy distrust of their own world-models.</p>",
+      "content_html": "<p>A familiarity with the pre-rigor/post-rigor ontology might be helpful for reading this post.University math is often sold to students as imbuing in them the spirit of rigor and respect for iron-clad truth. The value in a real analysis course comes not from the specific results that it teaches — those are largely known to scientifically literate students by the time they take it. Instead, they are asked to relearn all those things from first principles; in so doing, they strip themselves of bad habits they previously learned and are inducted into the skeptical culture of the mathematician. Pedagogical and exam materials usually support this goal, putting emphasis on proof-writing, careful argumentation and attention to detail.This incentivises the student to cultivate an invaluable attitude of healthy distrust towards their own world-models, which is not as trivial as it sounds. Many of my colleagues dropped out of their degree after learning in their first exams that they were more or less unable to argue why some \"obvious\" facts are true, or even to articulate what parts of the argument they were missing. A math undergraduate either teaches or selects for people who live in a fruitful, respectful relationship with the tenuousness of their own grasp of reality. Such skills are extremely useful and tend to generalise well to non-math domains.Unfortunately, this philosophy of math pedagogy is somewhat at odds with goals you might have in educating a cohort of researchers. Your role as an undergraduate is to scrutinise the material you are fed as if it was written by your worst enemy, learning a culture of aggressive dialectical deconstructivism. But it takes two to make a dialectic process. Any idea that is worth deconstructing comes from an inventive mind that advocates for it, even if it is only because shooting down that concept will itself be a generative process.Undergraduate teaching culture tends to work against this kind of creativity precisely due to its opti...</p>"
+    },
+    {
+      "id": "0105b4d77be2",
+      "title": "God Mode is Boring: Musings on Interestingness",
+      "content": "(Crossposted from my Substack)There is a preference that I think most people have, but which is extremely underdescribed. It is underdescribed because it is not very legible. But I believe that once I point it out, you will be able to easily recognize it.In a sense, I am doing something sinful here. A real description of interestingness should probably be done through song, or dance, or poetry. But I lack every artistic talent that would do the job justice. What I can do is analyze systems and write prose. Hopefully at least the LLMs will appreciate it.I am writing this with some anxiety. If it is a small sin to create an analytical post about interestingness, it is a cardinal sin to create a boring analytical post about interestingness. It is impossible to really cage within language, at least within the kind of precise analytical language I am using here.So what I am doing is attacking interestingness from multiple angles. If interestingness is an elephant, I am trying to be all the blind men at once. Each section views it from a different direction.Each angle is incomplete on its own. Together, I am trying to point at something I believe is real and important.1: The Redundant ConclusionBecause what the world really needs is another take on the Repugnant Conclusion.In case you are not familiar: philosopher Derek Parfit proposed a thought experiment. Imagine World A, a smaller population where everyone lives an extremely high-quality life. Now imagine World Z, a vastly larger population where each person’s life is barely worth living. Maybe they experience slightly more pleasure than pain, but only just. Utilitarian logic seems to force us to prefer World Z, because the total utility is higher. More people times small positive utility beats fewer people times large positive utility.This conclusion feels disgusting to most people. Hence “repugnant.”But I think Parfit is doing something misleading here, and I want to&nbsp;de-bucket&nbsp;it.The issue goes deeper than ...",
+      "url": "https://www.lesswrong.com/posts/CydeBSjYWWj2wsTvM/god-mode-is-boring-musings-on-interestingness",
+      "author": "Alex_Steiner",
+      "published": "2026-04-03T17:17:20.205000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Philosophical exploration of 'interestingness' as an underdescribed human preference, arguing that god-mode/omnipotence scenarios are boring and that challenge and constraint are essential to engagement. Multiple analytical angles on what makes things interesting.",
+      "importance_score": 7,
+      "reasoning": "Creative philosophical essay but no technical content or AI relevance.",
+      "themes": [
+        "Philosophy",
+        "Psychology"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Philosophical exploration of 'interestingness' as an underdescribed human preference, arguing that god-mode/omnipotence scenarios are boring and that challenge and constraint are essential to engagement. Multiple analytical angles on what makes things interesting.</p>",
+      "content_html": "<p>(Crossposted from my Substack)There is a preference that I think most people have, but which is extremely underdescribed. It is underdescribed because it is not very legible. But I believe that once I point it out, you will be able to easily recognize it.In a sense, I am doing something sinful here. A real description of interestingness should probably be done through song, or dance, or poetry. But I lack every artistic talent that would do the job justice. What I can do is analyze systems and write prose. Hopefully at least the LLMs will appreciate it.I am writing this with some anxiety. If it is a small sin to create an analytical post about interestingness, it is a cardinal sin to create a boring analytical post about interestingness. It is impossible to really cage within language, at least within the kind of precise analytical language I am using here.So what I am doing is attacking interestingness from multiple angles. If interestingness is an elephant, I am trying to be all the blind men at once. Each section views it from a different direction.Each angle is incomplete on its own. Together, I am trying to point at something I believe is real and important.1: The Redundant ConclusionBecause what the world really needs is another take on the Repugnant Conclusion.In case you are not familiar: philosopher Derek Parfit proposed a thought experiment. Imagine World A, a smaller population where everyone lives an extremely high-quality life. Now imagine World Z, a vastly larger population where each person’s life is barely worth living. Maybe they experience slightly more pleasure than pain, but only just. Utilitarian logic seems to force us to prefer World Z, because the total utility is higher. More people times small positive utility beats fewer people times large positive utility.This conclusion feels disgusting to most people. Hence “repugnant.”But I think Parfit is doing something misleading here, and I want to&nbsp;de-bucket&nbsp;it.The issue goes deeper than ...</p>"
+    },
+    {
+      "id": "5e8f5b15827e",
+      "title": "Beware Even Small Amounts of Woo",
+      "content": "Even small amounts of alcohol are somewhat bad for you. I personally don’t care, because I love making and drinking alcohol and at the end of the day you have to live a little. This is fine for me, because I’m not an olympic athlete. If I were an olympic athlete, I’d have to cut it out (at least whenever I was training).Lots of religions are heavily adapted to their host culture. They’ve been worn down by cultural evolution until they fit neatly into the fabric of society. It’s only when you move culture that they become a problem.WooFor our purposes, woo is a cluster of neo-pagan, buddhist-adjacent, tarot-ish beliefs and practices, which are particularly popular in the west amongst edgy people who are otherwise liberal-left-ish in their proclivities. Particularly a subset of techie people. I think woo is a bit like alcohol and a bit like a very well adapted religion.On the religion side: woo is a big mishmash of different things, kinda like modern Christianity, which Katamari-ed its way across Europe, picking up pagan practices like a winter festival with a big tree, and a spring festival focusing on symbols of life and fertility (though it lacks any summer or autumn festival). It also lost a bunch of restrictions which made it incompatible with enlightenment living.Woo is kinda like this. It’s highly adapted to be compatible with a techy-alty-edgy lifestyle. You can just do as much or as little woo as you’d like. It’s particularly appealing for evidence-based people because some parts of it do actually work. Yeah, you can get more focused by meditating, yeah you probably can also enter weird bliss states. Not all of it works though, you definitely can’t actually divine the future by tarot cards.I also think that woo is like alcohol, but for epistemics. For most people, you can have fair amount of woo in your life before your epistemics get bad enough to matter. This is especially true if you’re a smart person overall, so you have some epistemic issues to spare. If...",
+      "url": "https://www.lesswrong.com/posts/v7cSzQ7uMRSX9acpe/beware-even-small-amounts-of-woo",
+      "author": "J Bostock",
+      "published": "2026-04-03T08:11:55.597000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Argues that 'woo' (neo-pagan, tarot-adjacent beliefs popular in tech circles) is analogous to alcohol — somewhat harmful even in small amounts, but most people aren't operating at a level where it matters. Warns that it can become problematic when treated as epistemically valid.",
+      "importance_score": 7,
+      "reasoning": "Cultural commentary relevant to rationalist community but no research content.",
+      "themes": [
+        "Rationality",
+        "Epistemology"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Argues that 'woo' (neo-pagan, tarot-adjacent beliefs popular in tech circles) is analogous to alcohol — somewhat harmful even in small amounts, but most people aren't operating at a level where it matters. Warns that it can become problematic when treated as epistemically valid.</p>",
+      "content_html": "<p>Even small amounts of alcohol are somewhat bad for you. I personally don’t care, because I love making and drinking alcohol and at the end of the day you have to live a little. This is fine for me, because I’m not an olympic athlete. If I were an olympic athlete, I’d have to cut it out (at least whenever I was training).Lots of religions are heavily adapted to their host culture. They’ve been worn down by cultural evolution until they fit neatly into the fabric of society. It’s only when you move culture that they become a problem.WooFor our purposes, woo is a cluster of neo-pagan, buddhist-adjacent, tarot-ish beliefs and practices, which are particularly popular in the west amongst edgy people who are otherwise liberal-left-ish in their proclivities. Particularly a subset of techie people. I think woo is a bit like alcohol and a bit like a very well adapted religion.On the religion side: woo is a big mishmash of different things, kinda like modern Christianity, which Katamari-ed its way across Europe, picking up pagan practices like a winter festival with a big tree, and a spring festival focusing on symbols of life and fertility (though it lacks any summer or autumn festival). It also lost a bunch of restrictions which made it incompatible with enlightenment living.Woo is kinda like this. It’s highly adapted to be compatible with a techy-alty-edgy lifestyle. You can just do as much or as little woo as you’d like. It’s particularly appealing for evidence-based people because some parts of it do actually work. Yeah, you can get more focused by meditating, yeah you probably can also enter weird bliss states. Not all of it works though, you definitely can’t actually divine the future by tarot cards.I also think that woo is like alcohol, but for epistemics. For most people, you can have fair amount of woo in your life before your epistemics get bad enough to matter. This is especially true if you’re a smart person overall, so you have some epistemic issues to spare. If...</p>"
+    },
+    {
+      "id": "8ce9a77b80a8",
+      "title": "She Wanted Help With Her Mental Illness But Ended Up Destroyed",
+      "content": "A few years ago, I stumbled upon a highly disturbing PsychForums thread on a mental health recovery message board. I usually don’t require content warnings, but I found the responses in this thread to be profoundly distressing, so please choose carefully before you decide to open it.The thread begins with a user named AliceWonders who has histrionic personality disorder. This user noticed that many of her posts on this website were being misinterpreted as ploys to gain admiration and as products of her HPD. She explained that while she does has an obsession with compliment-seeking on other websites that cater to these cravings (such as dating sites and fan clubs), her motives for posting on PsychForums are completely different.She proved this by giving real examples of advice she seeks on PsychForums and of advice she seeks elsewhere. She explained that she had to make this post so other members would know that her PsychForums posts are made for the purpose of gaining further understanding of herself and her disorders. As Alice explains, “it’s NOT the kind of attention I WANT but it something I NEED to figure this stuff out.”Well, the rest of PsychForums ended up convincing her that what she was doing was not mentally sound behaviour. This is clearly and utterly false because if you come to a forum seeking mental health support, you’re going to want advice that is relevant to you. Personality disorders are very difficult to live with and require urgent care, so it’s reasonable for someone like Alice to feel frustrated that they don’t have the help they need.Yet in the eyes of the sickos at PsychForums, Alice’s post was trying to manipulate the perception others have of herself, and was therefore a side effect of HPD. I’m sure the other members wouldn’t have said the same thing if the post was about a physical ailment and not HPD. At the very least, if someone DID respond in this way to someone seeking advice for a physical illness, it wouldn’t have gone over as well...",
+      "url": "https://www.lesswrong.com/posts/a3uCTQ3PZwuDpfmum/she-wanted-help-with-her-mental-illness-but-ended-up",
+      "author": "Bowl of Cereal",
+      "published": "2026-04-03T12:28:25.100000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Discusses a disturbing PsychForums thread where a user with histrionic personality disorder sought help but was repeatedly dismissed by other users who interpreted her genuine requests for help as symptoms of her disorder, ultimately leading to her abandoning recovery.",
+      "importance_score": 6,
+      "reasoning": "Commentary on online mental health communities. No AI or research content.",
+      "themes": [
+        "Psychology",
+        "Online Communities"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Discusses a disturbing PsychForums thread where a user with histrionic personality disorder sought help but was repeatedly dismissed by other users who interpreted her genuine requests for help as symptoms of her disorder, ultimately leading to her abandoning recovery.</p>",
+      "content_html": "<p>A few years ago, I stumbled upon a highly disturbing PsychForums thread on a mental health recovery message board. I usually don’t require content warnings, but I found the responses in this thread to be profoundly distressing, so please choose carefully before you decide to open it.The thread begins with a user named AliceWonders who has histrionic personality disorder. This user noticed that many of her posts on this website were being misinterpreted as ploys to gain admiration and as products of her HPD. She explained that while she does has an obsession with compliment-seeking on other websites that cater to these cravings (such as dating sites and fan clubs), her motives for posting on PsychForums are completely different.She proved this by giving real examples of advice she seeks on PsychForums and of advice she seeks elsewhere. She explained that she had to make this post so other members would know that her PsychForums posts are made for the purpose of gaining further understanding of herself and her disorders. As Alice explains, “it’s NOT the kind of attention I WANT but it something I NEED to figure this stuff out.”Well, the rest of PsychForums ended up convincing her that what she was doing was not mentally sound behaviour. This is clearly and utterly false because if you come to a forum seeking mental health support, you’re going to want advice that is relevant to you. Personality disorders are very difficult to live with and require urgent care, so it’s reasonable for someone like Alice to feel frustrated that they don’t have the help they need.Yet in the eyes of the sickos at PsychForums, Alice’s post was trying to manipulate the perception others have of herself, and was therefore a side effect of HPD. I’m sure the other members wouldn’t have said the same thing if the post was about a physical ailment and not HPD. At the very least, if someone DID respond in this way to someone seeking advice for a physical illness, it wouldn’t have gone over as well...</p>"
+    },
+    {
+      "id": "1bdd3855576c",
+      "title": "The Silver Lining Considered Harmful (When Misused)",
+      "content": "Don't exaggerate how bad something is – but don't feel compelled to make it all right either.Seeing the silver lining – reinterpreting unwelcome news as not exclusively bad – is a core tenet of positive pop psychology. I practised it for years to the point that it became automatic for me, and on balance, I probably benefited from it. These days, however, I apply the practice much more judiciously. This is because at some point I realized that the habit had outlived its usefulness for me and was now doing me more harm than good.But isn’t it true that almost anything bad that happens comes with at least something positive? Yes, absolutely. The problem is that we’re bombarded with bad news day in and day out; news about wars, crime, inflation, epidemics, your country placing last at the Eurovision Song Contest. Most of the time, there is no actionable information in it, or very little at any rate. A healthy reaction would be to either note it and move on, or to ignore it entirely.What made me reassess the habit of seeing the silver lining in everything was the realization that I was giving non-actionable bad news much more time and attention than it deserved. Worse, I was implicitly programming my mind to not be content as long as there was any piece of bad news that I had not yet reframed as not all negative. This is, to use the technical term, really stupid. Putting conditions on your contentment and happiness is a sure way to get less of them.Good things and bad things will continue to happen. In the case of the latter, don’t exaggerate how much the situation will affect you, but don’t feel compelled to jump through mental hoops to make it “all right” in your mind either. Act on what is actionable and move on.",
+      "url": "https://www.lesswrong.com/posts/cdhxFFHmCukukGpA3/the-silver-lining-considered-harmful-when-misused",
+      "author": "Thomas Castriensis",
+      "published": "2026-04-03T16:45:23.378000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Argues that the habit of 'seeing the silver lining' in bad news can become harmful by giving non-actionable negative information more attention than it deserves and implicitly framing negative events as action-worthy.",
+      "importance_score": 5,
+      "reasoning": "Light self-help/psychology post with no research content.",
+      "themes": [
+        "Psychology",
+        "Rationality"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Argues that the habit of 'seeing the silver lining' in bad news can become harmful by giving non-actionable negative information more attention than it deserves and implicitly framing negative events as action-worthy.</p>",
+      "content_html": "<p>Don't exaggerate how bad something is – but don't feel compelled to make it all right either.Seeing the silver lining – reinterpreting unwelcome news as not exclusively bad – is a core tenet of positive pop psychology. I practised it for years to the point that it became automatic for me, and on balance, I probably benefited from it. These days, however, I apply the practice much more judiciously. This is because at some point I realized that the habit had outlived its usefulness for me and was now doing me more harm than good.But isn’t it true that almost anything bad that happens comes with at least something positive? Yes, absolutely. The problem is that we’re bombarded with bad news day in and day out; news about wars, crime, inflation, epidemics, your country placing last at the Eurovision Song Contest. Most of the time, there is no actionable information in it, or very little at any rate. A healthy reaction would be to either note it and move on, or to ignore it entirely.What made me reassess the habit of seeing the silver lining in everything was the realization that I was giving non-actionable bad news much more time and attention than it deserved. Worse, I was implicitly programming my mind to not be content as long as there was any piece of bad news that I had not yet reframed as not all negative. This is, to use the technical term, really stupid. Putting conditions on your contentment and happiness is a sure way to get less of them.Good things and bad things will continue to happen. In the case of the latter, don’t exaggerate how much the situation will affect you, but don’t feel compelled to jump through mental hoops to make it “all right” in your mind either. Act on what is actionable and move on.</p>"
+    },
+    {
+      "id": "79dcead8b4bf",
+      "title": "Listen to Gryffindor",
+      "content": "Lesson: The enemy is compliance, and the solution is courage. (This post uses the Hogwarts houses as an evocative lens. See the footnote [1] if you are unfamiliar.) Behaviour: You're making a career choice. Your local EA community needs a director. You're unsure but commit, since it's important work. You don't get funded, work for less than your happy price, and start running on fumes. You're trying to think how to get something real done, again. You think of HJPEV. You realize you need to be more diligent, lock in and apply conscientiousness, and solve the problem. You spend years trying to simulate conscientiousness, and pay the rent to unworkable TODO systems, overburdened calendars, and feeling trapped in systems devised by you. You buy a robot vacuum. You tell your SO how it cost 1/40th of a human life, and you are fine with that. You feel guilty. It still gnaws at you, six years later. Before we talk about what connects these, let's look at some shadows. Shadow work I tried reading some blogs and books on so-called shadow work - psychological work related to subconscious, repressed wants and needs. I found value in Existential kink by Carolyn Elliott, which offered this frame of relating to your repeating problems in your life by trying to prod your psyche if it actually enjoys something about the experience. Example: I hoard browser tabs. Sometimes I am bothered and stressed by this. The simple explanation is that I have some blocker about cleaning them, which is causing this behaviour. The shadow work / existential kink lens theory would be: \"What need / want are these browser tabs serving? Why does it feel like I lose something valuable if I try to apply a simple solution to this situation?\" General thought: I think shadow work and its genre of tools are much more useful in looking at wicked or repetitive problems in your personal life, ones where you have already explored the simple solutions. I think one thing that goes wrong with some self-help and thera...",
+      "url": "https://www.lesswrong.com/posts/7fGDacnhJHcaFeJQS/listen-to-gryffindor-2",
+      "author": "Xylix",
+      "published": "2026-04-03T06:44:36.544000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Uses Hogwarts houses as a lens to argue that compliance and over-systematization harm personal agency. Advocates for courage and listening to one's intrinsic motivations rather than externally imposed duty frameworks.",
+      "importance_score": 5,
+      "reasoning": "Self-help/personal development post with no technical or research content.",
+      "themes": [
+        "Psychology",
+        "Rationality"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Uses Hogwarts houses as a lens to argue that compliance and over-systematization harm personal agency. Advocates for courage and listening to one's intrinsic motivations rather than externally imposed duty frameworks.</p>",
+      "content_html": "<p>Lesson: The enemy is compliance, and the solution is courage. (This post uses the Hogwarts houses as an evocative lens. See the footnote [1] if you are unfamiliar.) Behaviour: You're making a career choice. Your local EA community needs a director. You're unsure but commit, since it's important work. You don't get funded, work for less than your happy price, and start running on fumes. You're trying to think how to get something real done, again. You think of HJPEV. You realize you need to be more diligent, lock in and apply conscientiousness, and solve the problem. You spend years trying to simulate conscientiousness, and pay the rent to unworkable TODO systems, overburdened calendars, and feeling trapped in systems devised by you. You buy a robot vacuum. You tell your SO how it cost 1/40th of a human life, and you are fine with that. You feel guilty. It still gnaws at you, six years later. Before we talk about what connects these, let's look at some shadows. Shadow work I tried reading some blogs and books on so-called shadow work - psychological work related to subconscious, repressed wants and needs. I found value in Existential kink by Carolyn Elliott, which offered this frame of relating to your repeating problems in your life by trying to prod your psyche if it actually enjoys something about the experience. Example: I hoard browser tabs. Sometimes I am bothered and stressed by this. The simple explanation is that I have some blocker about cleaning them, which is causing this behaviour. The shadow work / existential kink lens theory would be: \"What need / want are these browser tabs serving? Why does it feel like I lose something valuable if I try to apply a simple solution to this situation?\" General thought: I think shadow work and its genre of tools are much more useful in looking at wicked or repetitive problems in your personal life, ones where you have already explored the simple solutions. I think one thing that goes wrong with some self-help and thera...</p>"
+    },
+    {
+      "id": "54fa31130674",
+      "title": "Treat your subconscious like a dog",
+      "content": "I am dumb. I regularly perform actions I don't endorse, and these sometimes end up working out badly. Just yesterday, I spent half of the day carefully avoiding writing my first Inkhaven daily post, despite this being necessary for my continued existence in America (aside from the evident embarrassment of being the very first person to get kicked out of the program). My brain knows that this avoidance is bad, but procrastinates anyway, and apparently this is a perfectly normal thing to have happen.This seems like a strange state of affairs, but I think it can practically be solved (at least somewhat) by thinking differently about what we mean when we say \"I know X\". In \"Thinking, Fast and Slow\", a book I have not read, Nobel prize winner Daniel Kahneman apparently talks about our brains having 2 systems, system 1 and system 2 (which seems like an eminently sensible way to name them). System 1 is fast and intuitive, it does things like walking, catching balls and basic arithmetic like 2+2. Just about anything you don't have to think about is system 1. The main reason is that anything you do think about is system 2. Calculus, which socks to put on this morning and hiding their holes are all system 2.For the purpose of this article, I will be using a categorisation which is fairly similar. I am going to call anything which you need to think explicitly your \"conscious mind\" and anything you don't your \"subconscious\". I hope the psychology nerds in the comments find this acceptable. In any case, with this framing in mind, the question of whether you know something becomes ambiguous: does \"you\" refer to your conscious, your subconscious or both together? Hmm. Seems like we have our concepts muddled. Yesterday I knew I should write, but didn't. When I look at a large chocolate bunny on Easter Sunday, I know I shouldn't eat the entire thing in one sitting, but do. When I see a bottle of vodka on the shelf, I know I shouldn't down it in one, but...In each of these situations...",
+      "url": "https://www.lesswrong.com/posts/jEMTTsjdsf4YaJE24/treat-your-subconscious-like-a-dog",
+      "author": "Sean Herrington",
+      "published": "2026-04-02T21:00:39.373000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "Uses the System 1/System 2 framework to argue for treating your subconscious like training a dog — with consistent positive reinforcement rather than punishment. A self-help post about building habits through behavioral conditioning.",
+      "importance_score": 5,
+      "reasoning": "Self-help essay with no AI or research content.",
+      "themes": [
+        "Psychology",
+        "Rationality"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Uses the System 1/System 2 framework to argue for treating your subconscious like training a dog — with consistent positive reinforcement rather than punishment. A self-help post about building habits through behavioral conditioning.</p>",
+      "content_html": "<p>I am dumb. I regularly perform actions I don't endorse, and these sometimes end up working out badly. Just yesterday, I spent half of the day carefully avoiding writing my first Inkhaven daily post, despite this being necessary for my continued existence in America (aside from the evident embarrassment of being the very first person to get kicked out of the program). My brain knows that this avoidance is bad, but procrastinates anyway, and apparently this is a perfectly normal thing to have happen.This seems like a strange state of affairs, but I think it can practically be solved (at least somewhat) by thinking differently about what we mean when we say \"I know X\". In \"Thinking, Fast and Slow\", a book I have not read, Nobel prize winner Daniel Kahneman apparently talks about our brains having 2 systems, system 1 and system 2 (which seems like an eminently sensible way to name them). System 1 is fast and intuitive, it does things like walking, catching balls and basic arithmetic like 2+2. Just about anything you don't have to think about is system 1. The main reason is that anything you do think about is system 2. Calculus, which socks to put on this morning and hiding their holes are all system 2.For the purpose of this article, I will be using a categorisation which is fairly similar. I am going to call anything which you need to think explicitly your \"conscious mind\" and anything you don't your \"subconscious\". I hope the psychology nerds in the comments find this acceptable. In any case, with this framing in mind, the question of whether you know something becomes ambiguous: does \"you\" refer to your conscious, your subconscious or both together? Hmm. Seems like we have our concepts muddled. Yesterday I knew I should write, but didn't. When I look at a large chocolate bunny on Easter Sunday, I know I shouldn't eat the entire thing in one sitting, but do. When I see a bottle of vodka on the shelf, I know I shouldn't down it in one, but...In each of these situations...</p>"
+    },
+    {
+      "id": "a083e3d511de",
+      "title": "Supply Chain Grace",
+      "content": "I thank the million handsin a thousand placeswho fund, design, craft, and ply the toolsthat fix fertilizer from the air,that seed and harvest the earth,that ship food across the water,that keep it cold as ice,that make heat from fire,and that do everything else,all that we need for this meal today.",
+      "url": "https://www.lesswrong.com/posts/SCrwMjurPM5tEkbEN/supply-chain-grace",
+      "author": "Sinclair Chen",
+      "published": "2026-04-02T20:38:05.281000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "A short poem expressing gratitude for the complex supply chains that bring food to our tables. No research content.",
+      "importance_score": 3,
+      "reasoning": "Poetry with no research content.",
+      "themes": [
+        "Creative Writing"
+      ],
+      "continuation": null,
+      "summary_html": "<p>A short poem expressing gratitude for the complex supply chains that bring food to our tables. No research content.</p>",
+      "content_html": "<p>I thank the million handsin a thousand placeswho fund, design, craft, and ply the toolsthat fix fertilizer from the air,that seed and harvest the earth,that ship food across the water,that keep it cold as ice,that make heat from fire,and that do everything else,all that we need for this meal today.</p>"
+    },
+    {
+      "id": "0418c5caeb9d",
+      "title": "Ibiza, Spain - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Ibiza. Location: Juntos Farm - https://plus.codes/8FF32CCV+PR Group Link: https://chat.whatsapp.com/FeyaWJGwhVm4tHy3ZBMK4d?mode=gi_t Please RSVP via the WhatsApp group: https://chat.whatsapp.com/FeyaWJGwhVm4tHy3ZBMK4d?mode=gi_t Contact: tristan.farran@protonmail.com",
+      "url": "https://www.lesswrong.com/posts/7mvx4o3TMM45RnJyy/ibiza-spain-acx-spring-schelling-2026",
+      "author": "Tristan Farran",
+      "published": "2026-04-03T19:48:00.668000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Ibiza, Spain. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Ibiza, Spain. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Ibiza. Location: Juntos Farm - https://plus.codes/8FF32CCV+PR Group Link: https://chat.whatsapp.com/FeyaWJGwhVm4tHy3ZBMK4d?mode=gi_t Please RSVP via the WhatsApp group: https://chat.whatsapp.com/FeyaWJGwhVm4tHy3ZBMK4d?mode=gi_t Contact: tristan.farran@protonmail.com</p>"
+    },
+    {
+      "id": "27fd180cdce6",
+      "title": "Mannheim, Germany - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Mannheim. Location: Fahnenmast Rheinpromenade, in case of bad wheather: Murphy's Law Irish Pub. There's be a sign with ACX in both cases. - https://plus.codes/8FXCFFH6+8J Group Link: https://signal.group/#CjQKIFmicB23eRhkDDjxjT94PWsbTYPdux-uoZJH2bH2M7OqEhAFf8Kh5ECwoizGSv-lhADt Bring a blanket, and optionally your favourit snack/drink! Contact: acxmannheim@mailbox.org",
+      "url": "https://www.lesswrong.com/posts/Yt9Jfu9krvKE4GJDa/mannheim-germany-acx-spring-schelling-2026",
+      "author": "skjerns",
+      "published": "2026-04-03T19:47:59.435000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Mannheim, Germany. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Mannheim, Germany. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Mannheim. Location: Fahnenmast Rheinpromenade, in case of bad wheather: Murphy's Law Irish Pub. There's be a sign with ACX in both cases. - https://plus.codes/8FXCFFH6+8J Group Link: https://signal.group/#CjQKIFmicB23eRhkDDjxjT94PWsbTYPdux-uoZJH2bH2M7OqEhAFf8Kh5ECwoizGSv-lhADt Bring a blanket, and optionally your favourit snack/drink! Contact: acxmannheim@mailbox.org</p>"
+    },
+    {
+      "id": "31dd722d822a",
+      "title": "Oslo, Norway - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Oslo. Location: Chateau Neuf. We will be at Bokcaféen which is located on the second floor. I will put an ACX MEETUP sign on the table and be wearing a checkered shirt. https://neuf.no/lokaler/bokcafeen - https://plus.codes/9FFGWPM7+22 Group Link: https://fb.me/e/6TMWCmTR4 Contact: alex.r.dore@gmail.com",
+      "url": "https://www.lesswrong.com/posts/ZjqHdJ2n55s5if79s/oslo-norway-acx-spring-schelling-2026",
+      "author": "alexandorful",
+      "published": "2026-04-03T19:47:58.063000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Oslo, Norway. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Oslo, Norway. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Oslo. Location: Chateau Neuf. We will be at Bokcaféen which is located on the second floor. I will put an ACX MEETUP sign on the table and be wearing a checkered shirt. https://neuf.no/lokaler/bokcafeen - https://plus.codes/9FFGWPM7+22 Group Link: https://fb.me/e/6TMWCmTR4 Contact: alex.r.dore@gmail.com</p>"
+    },
+    {
+      "id": "66772aee4313",
+      "title": "Sewanee, USA - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Sewanee. Location: Stirling's Coffee House porch - https://plus.codes/867P634M+39 Please RSVP so I know how many people to expect and let Stirling's know in advance if we're going to be a big group! Contact: tyagid0@sewanee.edu",
+      "url": "https://www.lesswrong.com/posts/wE5mms5A4LQ7rC236/sewanee-usa-acx-spring-schelling-2026",
+      "author": "Daksh",
+      "published": "2026-04-03T19:47:57.296000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Sewanee, USA. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Sewanee, USA. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Sewanee. Location: Stirling's Coffee House porch - https://plus.codes/867P634M+39 Please RSVP so I know how many people to expect and let Stirling's know in advance if we're going to be a big group! Contact: tyagid0@sewanee.edu</p>"
+    },
+    {
+      "id": "1bfdfc4e0caf",
+      "title": "Richland, USA - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Richland. Location: Northeast corner of Leslie Groves Park near the pavilion. I will be wearing a purple shirt - https://plus.codes/85R28P7Q+6F Please RSVP Contact: kgbrinkerhoff@gmail.com",
+      "url": "https://www.lesswrong.com/posts/SaBFRJE3bQbHsSS5H/richland-usa-acx-spring-schelling-2026",
+      "author": "Kamron Brinkerhoff",
+      "published": "2026-04-03T19:46:48.878000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Richland, USA. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Richland, USA. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Richland. Location: Northeast corner of Leslie Groves Park near the pavilion. I will be wearing a purple shirt - https://plus.codes/85R28P7Q+6F Please RSVP Contact: kgbrinkerhoff@gmail.com</p>"
+    },
+    {
+      "id": "5310d1aaceba",
+      "title": "Shenzhen, China - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Shenzhen. Location: We'll meet up right outside the Shenzhen Bay Kapok Hotel. There is a large open space with a huge set of stairs ~20 meters to the right of the Hotel (assuming that you're facing the hotel entrance). The Hotel itself is located at No. 3001 Binhai Avenue, Nanshan District, Shenzhen, and can be accessed directly from nearby streets. I'll hold up an ACX MEETUP sign at the hotel's entrance and guide you to the meeting area. - https://plus.codes/7PJMGW9W+HQ Feel free to bring games/fun activities. Also, I expect the event to be bilingual (but primarily in English). Please email kevinkanzhang@gmail.com, and I'll create a mailing list/chain. Contact: kevinkanzhang@gmail.com",
+      "url": "https://www.lesswrong.com/posts/TESaws7pjMHmNqrRu/shenzhen-china-acx-spring-schelling-2026",
+      "author": "Kevin Zhang",
+      "published": "2026-04-03T19:46:47.926000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Shenzhen, China. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Shenzhen, China. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Shenzhen. Location: We'll meet up right outside the Shenzhen Bay Kapok Hotel. There is a large open space with a huge set of stairs ~20 meters to the right of the Hotel (assuming that you're facing the hotel entrance). The Hotel itself is located at No. 3001 Binhai Avenue, Nanshan District, Shenzhen, and can be accessed directly from nearby streets. I'll hold up an ACX MEETUP sign at the hotel's entrance and guide you to the meeting area. - https://plus.codes/7PJMGW9W+HQ Feel free to bring games/fun activities. Also, I expect the event to be bilingual (but primarily in English). Please email kevinkanzhang@gmail.com, and I'll create a mailing list/chain. Contact: kevinkanzhang@gmail.com</p>"
+    },
+    {
+      "id": "24ad1528f292",
+      "title": "Ithaca, USA - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Ithaca. Location: Ithaca Commons Entrance. - https://plus.codes/87J5CGR3+47M Contact: bjs322@cornell.edu",
+      "url": "https://www.lesswrong.com/posts/m9p9Hbve7HZBheaJg/ithaca-usa-acx-spring-schelling-2026",
+      "author": "Tristan_fbdg",
+      "published": "2026-04-03T19:46:47.267000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Ithaca, USA. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Ithaca, USA. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Ithaca. Location: Ithaca Commons Entrance. - https://plus.codes/87J5CGR3+47M Contact: bjs322@cornell.edu</p>"
+    },
+    {
+      "id": "b4abb01f145d",
+      "title": "Guelph, Canada - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Guelph. Location: David G. Porter Memorial Japanese Garden, OAC Centennial Arboretum Centre, 200 Arboretum Rd, Guelph, ON N0B - https://plus.codes/86MXGQRM+3Q5 Contact: msr.sajid1283@gmail.com",
+      "url": "https://www.lesswrong.com/posts/jXdjRD86ZKqzLi73h/guelph-canada-acx-spring-schelling-2026",
+      "author": "Mir Sajidur Rahman",
+      "published": "2026-04-03T19:46:46.527000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Guelph, Canada. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Guelph, Canada. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Guelph. Location: David G. Porter Memorial Japanese Garden, OAC Centennial Arboretum Centre, 200 Arboretum Rd, Guelph, ON N0B - https://plus.codes/86MXGQRM+3Q5 Contact: msr.sajid1283@gmail.com</p>"
+    },
+    {
+      "id": "68e4923dfb7b",
+      "title": "Pune, India - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Pune. Location: FC Road Social restaurant in Shivajinagar area. A reservation will be booked for the meetup. - https://plus.codes/7JCMGRHV+HF Please RSVP if you are coming. Send me your name and contact, I'll create a chat group for the meetup and add you. Contact: amsaarang@gmail.com",
+      "url": "https://www.lesswrong.com/posts/AjrPnEFNAbzsE2JH9/pune-india-acx-spring-schelling-2026",
+      "author": "Saarang S",
+      "published": "2026-04-03T19:46:45.658000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Pune, India. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Pune, India. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Pune. Location: FC Road Social restaurant in Shivajinagar area. A reservation will be booked for the meetup. - https://plus.codes/7JCMGRHV+HF Please RSVP if you are coming. Send me your name and contact, I'll create a chat group for the meetup and add you. Contact: amsaarang@gmail.com</p>"
+    },
+    {
+      "id": "6b708f7ddc3f",
+      "title": "Chengdu, china - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Chengdu. Location: guopi bar,NO.64, Fangcao street, wuhou - https://plus.codes/8P26J3F2+Q3 Group Link: https://discord.gg/vBDfmdH3r it's not a bar, actually it's a writers' club. welcome to come with your children. Contact: zhou.yefei1990@hotmail.com",
+      "url": "https://www.lesswrong.com/posts/Yk7ysHG34CtssFPDY/chengdu-china-acx-spring-schelling-2026",
+      "author": "zhou xingxing",
+      "published": "2026-04-03T19:46:44.653000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Chengdu, China. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Chengdu, China. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Chengdu. Location: guopi bar,NO.64, Fangcao street, wuhou - https://plus.codes/8P26J3F2+Q3 Group Link: https://discord.gg/vBDfmdH3r it's not a bar, actually it's a writers' club. welcome to come with your children. Contact: zhou.yefei1990@hotmail.com</p>"
+    },
+    {
+      "id": "b70a449ca3a9",
+      "title": "Raleigh/Durham/Chapel Hill, USA - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Raleigh/Durham/Chapel Hill. Location: Ponysaurus Brewing Co (219 Hood St, Durham). We'll be at the outdoor seating area with an ACX sign on the table - https://plus.codes/8773X4Q4+Q2C Group Link: https://groups.google.com/g/rtlw; https://discord.gg/wgx7s3wG We will have pizza! The venue serves beer but is kid-friendly. I'll have more details on the Google group (see link) Contact: wdcrumpler@gmail.com",
+      "url": "https://www.lesswrong.com/posts/dgrFeJzMZsBASgKsY/raleigh-durham-chapel-hill-usa-acx-spring-schelling-2026",
+      "author": "William Crumpler",
+      "published": "2026-04-03T19:22:54.463000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Raleigh/Durham/Chapel Hill, USA. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Raleigh/Durham/Chapel Hill, USA. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Raleigh/Durham/Chapel Hill. Location: Ponysaurus Brewing Co (219 Hood St, Durham). We'll be at the outdoor seating area with an ACX sign on the table - https://plus.codes/8773X4Q4+Q2C Group Link: https://groups.google.com/g/rtlw; https://discord.gg/wgx7s3wG We will have pizza! The venue serves beer but is kid-friendly. I'll have more details on the Google group (see link) Contact: wdcrumpler@gmail.com</p>"
+    },
+    {
+      "id": "270990d34ade",
+      "title": "Taipei, Taiwan - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Taipei. Location: The Singularity Co-Working Cafe - https://plus.codes/7QQ32GV8+PC2 Contact: mail@lucapizzagalli.com",
+      "url": "https://www.lesswrong.com/posts/E5sNpYWR4R3xwGzkX/taipei-taiwan-acx-spring-schelling-2026",
+      "author": "Pappafava",
+      "published": "2026-04-03T19:17:56.475000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Taipei, Taiwan. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Taipei, Taiwan. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Taipei. Location: The Singularity Co-Working Cafe - https://plus.codes/7QQ32GV8+PC2 Contact: mail@lucapizzagalli.com</p>"
+    },
+    {
+      "id": "ee7d2fd5fe6c",
+      "title": "St Paul, Minnesota, USA - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in St Paul, Minnesota. Location: Davanni's Pizza : 41 Cleveland Ave S, St Paul, MN 55105 - https://plus.codes/86P8WRQ6+XX Group Link: https://discord.gg/uWzk93eVp I will be providing pizza and salad! Vegans can theoretically eat the salad but it's honestly slim pickings at this chain. Contact: Ironlordbyron@gmail.com",
+      "url": "https://www.lesswrong.com/posts/2aqWqjN9eDBtH6trH/st-paul-minnesota-usa-acx-spring-schelling-2026",
+      "author": "25Hour",
+      "published": "2026-04-03T19:17:55.418000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for St Paul, Minnesota, USA. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for St Paul, Minnesota, USA. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in St Paul, Minnesota. Location: Davanni's Pizza : 41 Cleveland Ave S, St Paul, MN 55105 - https://plus.codes/86P8WRQ6+XX Group Link: https://discord.gg/uWzk93eVp I will be providing pizza and salad! Vegans can theoretically eat the salad but it's honestly slim pickings at this chain. Contact: Ironlordbyron@gmail.com</p>"
+    },
+    {
+      "id": "58b1ebaf3a4f",
+      "title": "Brussels, Belgium - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Brussels. Location: Parc Cinquantenaire / Guinguette Maurice if weather sucks - https://plus.codes/9F26R9RP+5F Contact: sebastianworms@gmail.com",
+      "url": "https://www.lesswrong.com/posts/zxHtcBkRchdy7eDWt/brussels-belgium-acx-spring-schelling-2026",
+      "author": "sfsworms",
+      "published": "2026-04-03T19:17:48.773000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Brussels, Belgium. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Brussels, Belgium. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Brussels. Location: Parc Cinquantenaire / Guinguette Maurice if weather sucks - https://plus.codes/9F26R9RP+5F Contact: sebastianworms@gmail.com</p>"
+    },
+    {
+      "id": "fbe207acddb3",
+      "title": "Trento, Italy - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Trento. Location: Piazza Dante near Dante's statue in the park - https://plus.codes/8FRH34CC+J5 Given this is the first time this event gets organized and we are unsure of the numbers present we would welcome anyone intending to come to say so beforehand. If that is impossible don't worry, come anyways, it means we will have an excuse for our disorganization. Contact: alexandroszampa@gmail.com",
+      "url": "https://www.lesswrong.com/posts/Sg37aJ5ajGMnAYEfT/trento-italy-acx-spring-schelling-2026",
+      "author": "Sleipnir",
+      "published": "2026-04-03T19:17:46.780000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Trento, Italy. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Trento, Italy. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Trento. Location: Piazza Dante near Dante's statue in the park - https://plus.codes/8FRH34CC+J5 Given this is the first time this event gets organized and we are unsure of the numbers present we would welcome anyone intending to come to say so beforehand. If that is impossible don't worry, come anyways, it means we will have an excuse for our disorganization. Contact: alexandroszampa@gmail.com</p>"
+    },
+    {
+      "id": "bb1307cda531",
+      "title": "Sault Ste. Marie, Canada - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Sault Ste. Marie. Location: We'll be at Kiwanis park, by the benches. I'll have an ACX Meetup sign with me. - https://plus.codes/86RQGMFP+VJ Group Link: https://discord.gg/YfYacWJu Please join the discord or email me so I know how much food to bring Contact: kvnmac1@gmail.com",
+      "url": "https://www.lesswrong.com/posts/y56ah4ZvB4gbLp4Wt/sault-ste-marie-canada-acx-spring-schelling-2026",
+      "author": "kevingmac",
+      "published": "2026-04-03T19:17:43.007000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Sault Ste. Marie, Canada. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Sault Ste. Marie, Canada. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Sault Ste. Marie. Location: We'll be at Kiwanis park, by the benches. I'll have an ACX Meetup sign with me. - https://plus.codes/86RQGMFP+VJ Group Link: https://discord.gg/YfYacWJu Please join the discord or email me so I know how much food to bring Contact: kvnmac1@gmail.com</p>"
+    },
+    {
+      "id": "3f8f2e5955b1",
+      "title": "Manila, Philippines - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Manila. Location: Thie High Street Lounge, Shangri La Hotel, BGC, Manila - https://plus.codes/7Q63H22W+XP Contact: steve@sportspredict.com",
+      "url": "https://www.lesswrong.com/posts/oghXAGWaSwpgDdjmc/manila-philippines-acx-spring-schelling-2026",
+      "author": "steve@sportspredict.com",
+      "published": "2026-04-03T19:17:42.133000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Manila, Philippines. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Manila, Philippines. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Manila. Location: Thie High Street Lounge, Shangri La Hotel, BGC, Manila - https://plus.codes/7Q63H22W+XP Contact: steve@sportspredict.com</p>"
+    },
+    {
+      "id": "e1fed5a2a7e3",
+      "title": "Nashville, USA - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Nashville. Location: At the outdoor seating area directly in front of Nicholas Zeppos College at Vanderbilt university. Here is a Google map pin https://maps.app.goo.gl/dQJLv8ix3mn7f4rq6?g_st=ic Please join the Group Me (https://groupme.com/join_group/114018377/7wuY7gPP) for pictures of the seating area and to talk to us if you have trouble finding us. Address: 45WV+J3R Nashville, Tennessee Coordinates (36.1466033, -86.8073613). Free parking is a 5-10 minute walk away at Centennial Park and, especially, at Martin’s BBQ Joint on Elliston Place. Paid parking that’s a 2-3 minute walk away can be found along the entire stretch of West End Avenue that overlaps with Vanderbilt’s main campus (on the street facing side of Nicholas Zeppos College). You could also park at the Vanderbilt bookstore parking lot, but parking is limited to an hour and I’ve been toed there before (whereas Martin’s BBQ has never failed me). - https://plus.codes/868M45WV+J2 Group Link: https://groupme.com/join_group/114018377/7wuY7gPP Please join the GroupMe so we can cater for the appropriate number of people and choose foods everyone will enjoy. Contact: generalpurposeemail1@gmail.com",
+      "url": "https://www.lesswrong.com/posts/P7XBQbuXCGknws2Gg/nashville-usa-acx-spring-schelling-2026",
+      "author": "Percy123",
+      "published": "2026-04-03T19:17:40.322000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Nashville, USA. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Nashville, USA. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Nashville. Location: At the outdoor seating area directly in front of Nicholas Zeppos College at Vanderbilt university. Here is a Google map pin https://maps.app.goo.gl/dQJLv8ix3mn7f4rq6?g_st=ic Please join the Group Me (https://groupme.com/join_group/114018377/7wuY7gPP) for pictures of the seating area and to talk to us if you have trouble finding us. Address: 45WV+J3R Nashville, Tennessee Coordinates (36.1466033, -86.8073613). Free parking is a 5-10 minute walk away at Centennial Park and, especially, at Martin’s BBQ Joint on Elliston Place. Paid parking that’s a 2-3 minute walk away can be found along the entire stretch of West End Avenue that overlaps with Vanderbilt’s main campus (on the street facing side of Nicholas Zeppos College). You could also park at the Vanderbilt bookstore parking lot, but parking is limited to an hour and I’ve been toed there before (whereas Martin’s BBQ has never failed me). - https://plus.codes/868M45WV+J2 Group Link: https://groupme.com/join_group/114018377/7wuY7gPP Please join the GroupMe so we can cater for the appropriate number of people and choose foods everyone will enjoy. Contact: generalpurposeemail1@gmail.com</p>"
+    },
+    {
+      "id": "75eaa8d90d6d",
+      "title": "Basel, Switzerland - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Basel. Location: Unternehmen Mitte, Gerbergasse 30, 4001 Basel. I will grab one of the tables to the right of the main entrance. I will put up an ACX MEETUP sign and wear a red hat. - https://plus.codes/8FV9HH4Q+M7 Group Link: https://chat.whatsapp.com/JZDv3OraaDrJL1cHdwyd66?mode=gi_t RSVPs welcome to help for planning! Contact: hello@ianwsperber.com",
+      "url": "https://www.lesswrong.com/posts/Trp8KRha9JRW5Ymhg/basel-switzerland-acx-spring-schelling-2026",
+      "author": "IanWS",
+      "published": "2026-04-03T18:44:45.727000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Basel, Switzerland. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Basel, Switzerland. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Basel. Location: Unternehmen Mitte, Gerbergasse 30, 4001 Basel. I will grab one of the tables to the right of the main entrance. I will put up an ACX MEETUP sign and wear a red hat. - https://plus.codes/8FV9HH4Q+M7 Group Link: https://chat.whatsapp.com/JZDv3OraaDrJL1cHdwyd66?mode=gi_t RSVPs welcome to help for planning! Contact: hello@ianwsperber.com</p>"
+    },
+    {
+      "id": "ef5bcbb8cd6f",
+      "title": "Munich, Germany - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Munich. Location: The café at Pinakothek der Moderne Barer Straße 40 80333 München We'll have a sign. - https://plus.codes/8FWH4HWC+XW Group Link: https://chat.whatsapp.com/JekHeDBFokxLlmceXsYhLv We’re hosting in a large cafe with a lounge area, we’ll collect together there for the afternoon and go out for dinner in the evening. This is a day-long event, join the WhatsApp group for updates throughout the day. Contact: zsolttanko@gmail.com",
+      "url": "https://www.lesswrong.com/posts/HxDD5BsxqiCz5yEbS/munich-germany-acx-spring-schelling-2026",
+      "author": "Zsolt Tanko",
+      "published": "2026-04-03T14:36:40.904000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Munich, Germany. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Munich, Germany. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Munich. Location: The café at Pinakothek der Moderne Barer Straße 40 80333 München We'll have a sign. - https://plus.codes/8FWH4HWC+XW Group Link: https://chat.whatsapp.com/JekHeDBFokxLlmceXsYhLv We’re hosting in a large cafe with a lounge area, we’ll collect together there for the afternoon and go out for dinner in the evening. This is a day-long event, join the WhatsApp group for updates throughout the day. Contact: zsolttanko@gmail.com</p>"
+    },
+    {
+      "id": "1c8cdf91fbd9",
+      "title": "Warsaw, Poland - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Warsaw. Location: Poludnik 2.0, I will be with a sign - https://plus.codes/9G4362G8+2V I unfortunately only speak English (and Slovak) Contact: ninuskap67@gmail.com",
+      "url": "https://www.lesswrong.com/posts/RWzded5y4wBsPaXhF/warsaw-poland-acx-spring-schelling-2026",
+      "author": "ninuska",
+      "published": "2026-04-03T00:16:41.787000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Warsaw, Poland. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Warsaw, Poland. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Warsaw. Location: Poludnik 2.0, I will be with a sign - https://plus.codes/9G4362G8+2V I unfortunately only speak English (and Slovak) Contact: ninuskap67@gmail.com</p>"
+    },
+    {
+      "id": "4edd5c197d55",
+      "title": "Gdansk, Poland - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Gdansk. Location: Polufka Pub - https://plus.codes/9F6W9JH9+HH I unfortunately speak only English Contact: ninuskap67@gmail.com",
+      "url": "https://www.lesswrong.com/posts/JoXrqTLqh7CeA3zMi/gdansk-poland-acx-spring-schelling-2026",
+      "author": "ninuska",
+      "published": "2026-04-03T00:16:41.141000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Gdansk, Poland. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Gdansk, Poland. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Gdansk. Location: Polufka Pub - https://plus.codes/9F6W9JH9+HH I unfortunately speak only English Contact: ninuskap67@gmail.com</p>"
+    },
+    {
+      "id": "37a24e0a5f99",
+      "title": "Timișoara, Romania - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Timișoara. Location: Scârț Loc Lejer, very likely outside. There will be a small tent-like sign on the table that reads 'ACX-EA'. - https://plus.codes/8GQ3P6VF+7QR Feel free to message on LW or FB if so inclined. Contact: alv.csk@gmail.com",
+      "url": "https://www.lesswrong.com/posts/Ah8gma7sLDqYCqwYM/timisoara-romania-acx-spring-schelling-2026",
+      "author": "AlvsLib",
+      "published": "2026-04-03T00:15:45.603000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Timișoara, Romania. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Timișoara, Romania. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Timișoara. Location: Scârț Loc Lejer, very likely outside. There will be a small tent-like sign on the table that reads 'ACX-EA'. - https://plus.codes/8GQ3P6VF+7QR Feel free to message on LW or FB if so inclined. Contact: alv.csk@gmail.com</p>"
+    },
+    {
+      "id": "1190484a2c54",
+      "title": "Massapequa, USA - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Massapequa. Location: 47 Clinton PL., Massapequa, NY 11758 - https://plus.codes/87G8MG4G+53 Please rsvp to gabeaweil at gmail dot com so I know how many people to expect. Contact: gabeaweil@gmail.com",
+      "url": "https://www.lesswrong.com/posts/sCi9au9RnqMzvJdEL/massapequa-usa-acx-spring-schelling-2026",
+      "author": "Gabriel Weil",
+      "published": "2026-04-03T00:14:53.276000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Massapequa, USA. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Massapequa, USA. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Massapequa. Location: 47 Clinton PL., Massapequa, NY 11758 - https://plus.codes/87G8MG4G+53 Please rsvp to gabeaweil at gmail dot com so I know how many people to expect. Contact: gabeaweil@gmail.com</p>"
+    },
+    {
+      "id": "29dd41902b9e",
+      "title": "Charlotte, USA - ACX Spring Schelling 2026",
+      "content": "This year's Spring ACX Meetup everywhere in Charlotte. Location: Cordelia Park (or nearby cafe The Hobbyist or nearby food hall Optimist Hall if raining/cold/etc.) - https://plus.codes/867X65PM+W3 Contact: charles.sanders72@gmail.com",
+      "url": "https://www.lesswrong.com/posts/GNkatF5kpuY58pErX/charlotte-usa-acx-spring-schelling-2026",
+      "author": "Charlie Sanders",
+      "published": "2026-04-03T00:14:50.359000",
+      "source": "LessWrong",
+      "source_type": "research_blog",
+      "tags": [],
+      "summary": "ACX Spring Schelling 2026 meetup announcement for Charlotte, USA. No research content.",
+      "importance_score": 2,
+      "reasoning": "Community meetup announcement with no research content.",
+      "themes": [
+        "Community"
+      ],
+      "continuation": null,
+      "summary_html": "<p>ACX Spring Schelling 2026 meetup announcement for Charlotte, USA. No research content.</p>",
+      "content_html": "<p>This year's Spring ACX Meetup everywhere in Charlotte. Location: Cordelia Park (or nearby cafe The Hobbyist or nearby food hall Optimist Hall if raining/cold/etc.) - https://plus.codes/867X65PM+W3 Contact: charles.sanders72@gmail.com</p>"
+    }
+  ],
+  "notice": {
+    "type": "info",
+    "title": "Weekend Edition",
+    "message": "arXiv papers are not collected on weekends. Any weekend papers will be included in Monday's report."
+  }
+}
