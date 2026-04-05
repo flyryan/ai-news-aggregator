@@ -118,13 +118,13 @@ class FeedGenerator:
         Args:
             output_dir: Base output directory (typically web/)
             rolling_window_days: Number of days to include in feeds
-            base_url: Base URL for feed links (defaults to http://localhost:8080)
+            base_url: Base URL for feed links (defaults to https://news.aatf.ai)
         """
         self.output_dir = output_dir
         self.data_dir = os.path.join(output_dir, 'data')
         self.feeds_dir = os.path.join(self.data_dir, 'feeds')
         self.rolling_window_days = rolling_window_days
-        self.base_url = (base_url or "http://localhost:8080").rstrip('/')
+        self.base_url = (base_url or "https://news.aatf.ai").rstrip('/')
 
         os.makedirs(self.feeds_dir, exist_ok=True)
         logger.info(f"FeedGenerator initialized with {rolling_window_days}-day window, base_url={self.base_url}")

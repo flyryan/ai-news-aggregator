@@ -5,17 +5,21 @@
 import type { DataIndex, DaySummary, CategoryData, Category } from '$lib/types';
 
 const cache = new Map<string, unknown>();
+type LoadIndexOptions = {
+	forceRefresh?: boolean;
+};
 
 /**
  * Load the main data index
  */
-export async function loadIndex(): Promise<DataIndex> {
+export async function loadIndex({ forceRefresh = false }: LoadIndexOptions = {}): Promise<DataIndex> {
 	const cacheKey = 'index';
-	if (cache.has(cacheKey)) {
+	if (!forceRefresh && cache.has(cacheKey)) {
 		return cache.get(cacheKey) as DataIndex;
 	}
 
-	const response = await fetch('/data/index.json');
+	const indexUrl = forceRefresh ? `/data/index.json?t=${Date.now()}` : '/data/index.json';
+	const response = await fetch(indexUrl, forceRefresh ? { cache: 'no-store' } : undefined);
 	if (!response.ok) {
 		throw new Error(`Failed to load data index: ${response.status}`);
 	}
@@ -23,6 +27,13 @@ export async function loadIndex(): Promise<DataIndex> {
 	const data = await response.json();
 	cache.set(cacheKey, data);
 	return data;
+}
+
+/**
+ * Force-refresh the main data index
+ */
+export async function refreshIndex(): Promise<DataIndex> {
+	return loadIndex({ forceRefresh: true });
 }
 
 /**
@@ -66,9 +77,9 @@ export async function loadCategoryData(date: string, category: Category): Promis
 /**
  * Get the latest available date
  */
-export async function getLatestDate(): Promise<string | null> {
+export async function getLatestDate(forceRefresh: boolean = false): Promise<string | null> {
 	try {
-		const index = await loadIndex();
+		const index = await loadIndex({ forceRefresh });
 		return index.latestDate;
 	} catch {
 		return null;
@@ -78,9 +89,9 @@ export async function getLatestDate(): Promise<string | null> {
 /**
  * Get all available dates
  */
-export async function getAvailableDates(): Promise<string[]> {
+export async function getAvailableDates(forceRefresh: boolean = false): Promise<string[]> {
 	try {
-		const index = await loadIndex();
+		const index = await loadIndex({ forceRefresh });
 		return index.dates.map((d) => d.date);
 	} catch {
 		return [];

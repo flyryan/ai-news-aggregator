@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { goto, afterNavigate } from '$app/navigation';
 	import { tick } from 'svelte';
-	import { currentDate, availableDates, isLoading as storeLoading } from '$lib/stores/dateStore';
+	import { currentDate, isLoading as storeLoading, resolveLatestDate } from '$lib/stores/dateStore';
 	import { loadDaySummary, loadCategoryData, preloadAdjacentDates } from '$lib/services/dataLoader';
 	import { parseDate } from '$lib/services/dateUtils';
 	import type { DaySummary, CategoryData, Category } from '$lib/types';
@@ -21,43 +21,37 @@
 	let categoryData: CategoryData | null = null;
 	let dataLoading = false;
 	let error: string | null = null;
+	let activeLoadId = 0;
+	let lastHandledRouteKey = '';
 
 	const validCategories: Category[] = ['news', 'research', 'social', 'reddit'];
 
 	// Read query params
 	$: dateParam = $page.url.searchParams.get('date');
-	$: categoryParam = $page.url.searchParams.get('category') as Category | null;
+	$: rawCategoryParam = $page.url.searchParams.get('category');
+	$: categoryParam =
+		rawCategoryParam && validCategories.includes(rawCategoryParam as Category)
+			? (rawCategoryParam as Category)
+			: null;
+	$: hasExplicitDate = dateParam !== null;
+	$: routeKey = `${dateParam ?? 'latest'}|${rawCategoryParam ?? ''}`;
 
 	// Validate params
-	$: isValidDate = dateParam && parseDate(dateParam) !== null;
-	$: isValidCategory = !categoryParam || validCategories.includes(categoryParam);
+	$: isValidDate = !hasExplicitDate || parseDate(dateParam) !== null;
+	$: effectiveDate = hasExplicitDate ? (isValidDate ? dateParam : null) : ($currentDate || null);
+	$: overviewHref = hasExplicitDate && effectiveDate ? `/?date=${effectiveDate}` : '/';
+	$: categoryHref = (category: Category) =>
+		hasExplicitDate && effectiveDate
+			? `/?date=${effectiveDate}&category=${category}`
+			: `/?category=${category}`;
 
-	// Redirect to latest date if no date param (after store is loaded)
-	$: if (!dateParam && !$storeLoading && $availableDates.length > 0) {
-		goto(`/?date=${$availableDates[0]}`, { replaceState: true });
-	}
-
-	// Redirect invalid category to date overview
-	$: if (dateParam && categoryParam && !isValidCategory) {
-		goto(`/?date=${dateParam}`, { replaceState: true });
-	}
-
-	// Sync store with URL param
-	$: if (dateParam && isValidDate && dateParam !== $currentDate) {
-		currentDate.set(dateParam);
+	$: if (!$storeLoading && routeKey !== lastHandledRouteKey) {
+		lastHandledRouteKey = routeKey;
+		void handleRouteChange(dateParam, rawCategoryParam);
 	}
 
 	// Show loading when store is initializing OR when data is loading
 	$: loading = $storeLoading || dataLoading;
-
-	// Load data when params change
-	$: if (dateParam && isValidDate) {
-		if (categoryParam && isValidCategory) {
-			loadCategoryView(dateParam, categoryParam);
-		} else if (!categoryParam) {
-			loadOverview(dateParam);
-		}
-	}
 
 	// Get category config for category view
 	$: config = categoryParam ? CATEGORY_CONFIG[categoryParam] : null;
@@ -90,51 +84,85 @@
 		}
 	}
 
-	async function loadOverview(date: string) {
-		dataLoading = true;
-		error = null;
-		categoryData = null;
-
-		try {
-			summary = await loadDaySummary(date);
-			preloadAdjacentDates(date);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load data';
-			summary = null;
-		} finally {
-			dataLoading = false;
+	async function handleRouteChange(rawDate: string | null, rawCategory: string | null) {
+		if (rawCategory && !validCategories.includes(rawCategory as Category)) {
+			const fallbackUrl = rawDate && parseDate(rawDate) ? `/?date=${rawDate}` : '/';
+			goto(fallbackUrl, { replaceState: true });
+			return;
 		}
+
+		if (rawDate && parseDate(rawDate) === null) {
+			const fallbackUrl = rawCategory ? `/?category=${rawCategory}` : '/';
+			goto(fallbackUrl, { replaceState: true });
+			return;
+		}
+
+		const loadId = ++activeLoadId;
+		error = null;
+
+		const resolvedCategory = rawCategory as Category | null;
+		const resolvedDate = rawDate ?? (await resolveLatestDate(true));
+		if (loadId !== activeLoadId) {
+			return;
+		}
+
+		if (!resolvedDate) {
+			summary = null;
+			categoryData = null;
+			error = 'No reports available yet.';
+			return;
+		}
+
+		currentDate.set(resolvedDate);
+		await loadRouteData(resolvedDate, resolvedCategory, loadId);
 	}
 
-	async function loadCategoryView(date: string, category: Category) {
+	async function loadRouteData(date: string, category: Category | null, loadId: number) {
 		dataLoading = true;
 		error = null;
 		summary = null;
+		categoryData = null;
 
 		try {
-			// Load both summary (for coverage date) and category data
-			const [summaryData, catData] = await Promise.all([
-				loadDaySummary(date),
-				loadCategoryData(date, category)
-			]);
-			summary = summaryData;
-			categoryData = catData;
+			if (category) {
+				const [summaryData, catData] = await Promise.all([
+					loadDaySummary(date),
+					loadCategoryData(date, category)
+				]);
+
+				if (loadId !== activeLoadId) {
+					return;
+				}
+
+				summary = summaryData;
+				categoryData = catData;
+			} else {
+				const summaryData = await loadDaySummary(date);
+				if (loadId !== activeLoadId) {
+					return;
+				}
+
+				summary = summaryData;
+				preloadAdjacentDates(date);
+			}
 		} catch (e) {
+			if (loadId !== activeLoadId) {
+				return;
+			}
+
 			error = e instanceof Error ? e.message : 'Failed to load data';
+			summary = null;
 			categoryData = null;
 		} finally {
-			dataLoading = false;
+			if (loadId === activeLoadId) {
+				dataLoading = false;
+			}
 		}
 	}
 
 	function retry() {
-		if (dateParam && isValidDate) {
-			if (categoryParam && isValidCategory) {
-				loadCategoryView(dateParam, categoryParam);
-			} else {
-				loadOverview(dateParam);
-			}
-		}
+		lastHandledRouteKey = '';
+		void handleRouteChange(dateParam, rawCategoryParam);
 	}
 
 	// Format executive summary for display
@@ -150,7 +178,7 @@
 
 <svelte:head>
 	{#if categoryParam && config}
-		<title>{config.title} - {dateParam} | AATF AI News Aggregator</title>
+		<title>{config.title} - {effectiveDate || 'Latest'} | AATF AI News Aggregator</title>
 	{:else}
 		<title>AATF AI News Aggregator</title>
 	{/if}
@@ -165,7 +193,7 @@
 		>
 			<div class="flex items-center gap-3 mb-2">
 				<a
-					href="/?date={dateParam}"
+					href={overviewHref}
 					class="text-white/80 hover:text-white transition-colors"
 				>
 					&larr; Back
@@ -173,7 +201,7 @@
 			</div>
 			<h1 class="text-2xl font-bold">{config.title}</h1>
 			{#if categoryData}
-				<p class="text-white/80 mt-1">{categoryData.total_items} items for {dateParam}</p>
+				<p class="text-white/80 mt-1">{categoryData.total_items} items for {effectiveDate}</p>
 			{/if}
 		</div>
 	{/if}
@@ -221,7 +249,7 @@
 		{#if categoryData.items.length === 0}
 			<EmptyState
 				title="No {config?.title.toLowerCase()} found"
-				message="No items in this category for {dateParam}."
+				message="No items in this category for {effectiveDate}."
 			/>
 		{:else}
 			<!-- Category Summary -->
@@ -262,7 +290,7 @@
 				<h2 class="font-semibold text-trend-gray-800 dark:text-trend-gray-100 mb-6">
 					All Items ({categoryData.items.length})
 				</h2>
-				<NewsList items={categoryData.items} category={categoryParam} date={dateParam} />
+				<NewsList items={categoryData.items} category={categoryParam} date={effectiveDate || ''} />
 			</section>
 		{/if}
 	{:else if summary}
@@ -328,14 +356,14 @@
 							</span>
 						</div>
 						<a
-							href="/?date={$currentDate}&category={category}"
+							href={categoryHref(category)}
 							class="text-sm font-medium text-trend-red hover:text-guardian-red transition-colors"
 						>
 							View All &rarr;
 						</a>
 					</div>
 
-					<NewsList items={catSummary.top_items} {category} date={dateParam} limit={5} totalCount={catSummary.count} />
+					<NewsList items={catSummary.top_items} {category} date={effectiveDate || ''} limit={5} totalCount={catSummary.count} />
 				</section>
 			{/if}
 		{/each}

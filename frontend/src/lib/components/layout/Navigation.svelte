@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
-	import { currentDate } from '$lib/stores/dateStore';
 	import { CATEGORY_CONFIG, type Category } from '$lib/types';
 
 	const categories: Category[] = ['news', 'research', 'social', 'reddit'];
@@ -10,15 +9,21 @@
 	$: pathname = $page.url.pathname;
 	$: dateParam = browser ? $page.url.searchParams.get('date') : null;
 	$: categoryParam = browser ? $page.url.searchParams.get('category') : null;
-	$: date = dateParam || $currentDate;
+	$: hasExplicitDate = !!dateParam;
 
 	// Explicit active state computations
-	$: homeActive = pathname === '/' && !!dateParam && !categoryParam;
+	$: homeActive = pathname === '/' && !categoryParam;
 	$: archiveActive = pathname === '/archive';
 	$: aboutActive = pathname === '/about';
 
 	function isCategoryActive(cat: string): boolean {
 		return categoryParam === cat;
+	}
+
+	function getCategoryHref(category: Category): string {
+		return hasExplicitDate && dateParam
+			? `/?date=${dateParam}&category=${category}`
+			: `/?category=${category}`;
 	}
 </script>
 
@@ -30,7 +35,7 @@
 				<!-- Home: icon on mobile (no bg), text+bg on desktop -->
 				<li>
 					<a
-						href={date ? `/?date=${date}` : '/'}
+						href="/"
 						class="nav-link whitespace-nowrap hover:bg-transparent sm:hover:bg-trend-gray-200 {homeActive ? 'text-trend-red sm:bg-trend-red/10' : ''}"
 						aria-label="Home"
 					>
@@ -51,9 +56,8 @@
 				{#each categories as category}
 					<li>
 						<a
-							href={date ? `/?date=${date}&category=${category}` : '#'}
-							class="nav-link whitespace-nowrap {isCategoryActive(category) ? 'nav-link-active' : ''} {!date ? 'opacity-50 pointer-events-none' : ''}"
-							aria-disabled={!date}
+							href={getCategoryHref(category)}
+							class="nav-link whitespace-nowrap {isCategoryActive(category) ? 'nav-link-active' : ''}"
 						>
 							<span
 								class="w-2 h-2 rounded-full inline-block mr-1"
