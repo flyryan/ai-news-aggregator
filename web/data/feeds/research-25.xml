@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=research" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-04-08T12:09:15Z</updated>
+  <updated>2026-04-09T06:51:15Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,113 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-04-09:category-summary:research</id>
+    <title>Research Summary: April 09, 2026</title>
+    <link href="http://arxiv.org/abs/2604.05081" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-09&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-04-09T06:00:00Z</published>
+    <updated>2026-04-09T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research spotlights fundamental limitations in LLM reasoning and agentic RL, alongside major applied contributions in medical AI and efficient architectures.</p>
+<ul>
+<li><strong>RAGEN-2</strong> (Fei-Fei Li, Yejin Choi et al.) <a href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-2102bc63caab" class="internal-link" rel="noopener noreferrer">identifies <strong>template collapse</strong></a> in RL-trained multi-turn agents—models produce input-agnostic reasoning that mimics diversity but fails to condition on observations</li>
+<li><strong>The Depth Ceiling</strong> <a href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-4c0bce400206" class="internal-link" rel="noopener noreferrer">tests <strong>GPT-5.4</strong> and frontier models</a> on latent multi-step planning, finding hard limits on reasoning depth without supervision</li>
+<li><strong>The Detection-Extraction Gap</strong> <a href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-6a5c2c76a9d6" class="internal-link" rel="noopener noreferrer">reveals <strong>52–88%</strong></a> of chain-of-thought tokens are generated after the answer is already internally recoverable, quantifying massive reasoning inefficiency</li>
+<li><strong>The Illusion of Stochasticity</strong> demonstrates LLMs <a href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-c1cf19d02470" class="internal-link" rel="noopener noreferrer">fundamentally cannot perform</a> reliable stochastic sampling, a critical failure mode for agent deployment</li>
+</ul>
+<p><strong>MedGemma 1.5</strong> from Google extends medical AI to 3D imaging (CT/MRI volumes, whole-slide histopathology). The <strong>ATOM Report</strong> <a href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-0e54c9d1993d" class="internal-link" rel="noopener noreferrer">documents Chinese open models</a> (<strong>Qwen</strong>, <strong>DeepSeek</strong>) overtaking US models in global adoption. <strong>PoM (Polynomial Mixer)</strong> proposes a linear-complexity attention replacement with universal approximation guarantees.</p>
+<ul>
+<li><strong>LLM Spirals of Delusion</strong> <a href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-f15ae669311b" class="internal-link" rel="noopener noreferrer">reveals significant safety behavioral differences</a> between API and chat interfaces—a critical methodological warning for evaluators</li>
+<li><strong>Fast-dVLM</strong> <a href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-e00822255299" class="internal-link" rel="noopener noreferrer">converts autoregressive VLMs</a> to block-diffusion models for KV-cache-free parallel generation on edge devices</li>
+<li><strong>TraceSafe</strong> <a href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-f44d0b92cd97" class="internal-link" rel="noopener noreferrer">introduces the first benchmark</a> evaluating safety guardrails on intermediate steps of multi-step tool-calling agent trajectories</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-09:research:1af4635066ea</id>
+    <title>MedGemma 1.5 Technical Report</title>
+    <link href="http://arxiv.org/abs/2604.05081" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-1af4635066ea" rel="related" type="text/html"/>
+    <published>2026-04-09T03:16:00Z</published>
+    <updated>2026-04-09T03:16:00Z</updated>
+    <author><name>Andrew Sellergren, Chufan Gao, Fereshteh Mahvar, Timo Kohlberger, Fayaz Jamil, Madeleine Traverse, Alberto Tono, Bashir Sadjad, Lin Yang, Charles Lau, Liron Yatziv, Tiffany Chen, Bram Sterling, Kenneth Philbrick, Richa Tiwari, Yun Liu, Madhuram Jajoo, Chandrashekar Sankarapu, Swapnil Vispute, Harshad Purandare, Abhishek Bijay Mishra, Sam Schmidgall, Tao Tu, Anil Palepu, Chunjong Park, Tim Strother, Rahul Thapa, Yong Cheng, Preeti Singh, Kat Black, Yossi Matias, Katherine Chou, Avinatan Hassidim, Kavi Goel, Joelle Barral, Tris Warkentin, Shravya Shetty, Dale Webster, Sunny Virmani, David F. Steiner, Can Kirmizibayrak, Daniel Golden</name></author>
+    <summary type="html"><![CDATA[<p>As covered in <a href="https://news.aatf.ai/?date=2026-04-08&amp;category=research#item-1af4635066ea" class="internal-link" rel="noopener noreferrer">Research</a> yesterday, Introduces MedGemma 1.5 4B from Google, expanding on MedGemma 1 with capabilities for 3D medical imaging (CT/MRI volumes, histopathology WSIs), anatomical localization via bounding boxes, multi-timepoint chest X-ray analysis, and medical document understanding. Shows significant gains including 11% improvement in 3D MRI classification.</p>]]></summary>
+    <category term="Medical AI"/>
+    <category term="Multimodal Models"/>
+    <category term="Google"/>
+    <category term="Computer Vision"/>
+    <category term="Healthcare"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-09:research:2102bc63caab</id>
+    <title>RAGEN-2: Reasoning Collapse in Agentic RL</title>
+    <link href="http://arxiv.org/abs/2604.06268" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-2102bc63caab" rel="related" type="text/html"/>
+    <published>2026-04-09T03:16:00Z</published>
+    <updated>2026-04-09T03:16:00Z</updated>
+    <author><name>Zihan Wang, Chi Gui, Xing Jin, Qineng Wang, Licheng Liu, Kangrui Wang, Shiqi Chen, Linjie Li, Zhengyuan Yang, Pingyue Zhang, Yiping Lu, Jiajun Wu, Li Fei-Fei, Lijuan Wang, Yejin Choi, Manling Li</name></author>
+    <summary type="html"><![CDATA[<p>Identifies 'template collapse' in RL-trained multi-turn LLM agents, where models produce input-agnostic reasoning that looks diverse but doesn't actually respond to different inputs. Proposes mutual information proxies to diagnose this failure mode that entropy metrics miss entirely.</p>]]></summary>
+    <category term="LLM Agents"/>
+    <category term="Reinforcement Learning"/>
+    <category term="AI Safety"/>
+    <category term="Reasoning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-09:research:4c0bce400206</id>
+    <title>The Depth Ceiling: On the Limits of Large Language Models in Discovering Latent Planning</title>
+    <link href="http://arxiv.org/abs/2604.06427" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-4c0bce400206" rel="related" type="text/html"/>
+    <published>2026-04-09T03:07:00Z</published>
+    <updated>2026-04-09T03:07:00Z</updated>
+    <author><name>Yi Xu, Philipp Jettkant, Laura Ruis</name></author>
+    <summary type="html"><![CDATA[<p>Studies limits of latent reasoning in LLMs by testing whether models can discover multi-step planning strategies without supervision. Finds a 'depth ceiling': tiny transformers manage 3 latent steps, fine-tuned GPT-4o reaches 5, and GPT-5.4 reaches 7.</p>]]></summary>
+    <category term="LLM Reasoning"/>
+    <category term="AI Safety"/>
+    <category term="Chain of Thought"/>
+    <category term="Latent Reasoning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-09:research:0e54c9d1993d</id>
+    <title>The ATOM Report: Measuring the Open Language Model Ecosystem</title>
+    <link href="http://arxiv.org/abs/2604.07190" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-0e54c9d1993d" rel="related" type="text/html"/>
+    <published>2026-04-09T03:07:00Z</published>
+    <updated>2026-04-09T03:07:00Z</updated>
+    <author><name>Nathan Lambert, Florian Brand</name></author>
+    <summary type="html"><![CDATA[<p>The ATOM Report provides a comprehensive adoption analysis of ~1.5K open language models, documenting that Chinese models (Qwen, DeepSeek) overtook US counterparts in summer 2025 and widened the gap, using HuggingFace downloads, derivatives, inference market share, and performance metrics.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Open Source AI"/>
+    <category term="AI Policy"/>
+    <category term="Ecosystem Analysis"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-09:research:ba3c7a2581ef</id>
+    <title>PoM: A Linear-Time Replacement for Attention with the Polynomial Mixer</title>
+    <link href="http://arxiv.org/abs/2604.06129" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-ba3c7a2581ef" rel="related" type="text/html"/>
+    <published>2026-04-09T03:00:00Z</published>
+    <updated>2026-04-09T03:00:00Z</updated>
+    <author><name>David Picard, Nicolas Dufour, Lucas Degeorge, Arijit Ghosh, Davide Allegro, Tom Ravaud, Yohann Perron, Corentin Sautier, Zeynep Sonat Baltaci, Fei Meng, Syrine Kalleli, Marta L\'opez-Rauhut, Thibaut Loiseau, S\'egol\`ene Albouy, Raphael Baena, Elliot Vincent, Loic Landrieu</name></author>
+    <summary type="html"><![CDATA[<p>As covered in <a href="https://news.aatf.ai/?date=2026-04-08&amp;category=research#item-ba3c7a2581ef" class="internal-link" rel="noopener noreferrer">Research</a> yesterday, Introduces the Polynomial Mixer (PoM), a linear-complexity token mixing mechanism that replaces self-attention while maintaining universal approximation properties, demonstrated across five domains including text, images, and 3D modeling.</p>]]></summary>
+    <category term="Architecture"/>
+    <category term="Efficient Transformers"/>
+    <category term="Linear Attention"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-09:research:f15ae669311b</id>
+    <title>LLM Spirals of Delusion: A Benchmarking Audit Study of AI Chatbot Interfaces</title>
+    <link href="http://arxiv.org/abs/2604.06188" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-09&amp;category=research#item-f15ae669311b" rel="related" type="text/html"/>
+    <published>2026-04-09T03:00:00Z</published>
+    <updated>2026-04-09T03:00:00Z</updated>
+    <author><name>Peter Kirgis, Ben Hawriluk, Sherrie Feng, Aslan Bilimer, Sam Paech, Zeynep Tufekci</name></author>
+    <summary type="html"><![CDATA[<p>Audits how LLMs handle delusional/conspiratorial conversations, critically comparing API outputs to actual chat interfaces. Finds significant differences between API and interface behavior in escalating harmful beliefs.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="LLM Evaluation"/>
+    <category term="Harmful Content"/>
+    <category term="Mental Health"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-04-08:category-summary:research</id>
     <title>Research Summary: April 08, 2026</title>
@@ -178,47 +285,6 @@
     <category term="Multimodal Learning"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-04-07:research:f7fb025a3e2f</id>
-    <title>QED-Nano: Teaching a Tiny Model to Prove Hard Theorems</title>
-    <link href="http://arxiv.org/abs/2604.04898" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-07&amp;category=research#item-f7fb025a3e2f" rel="related" type="text/html"/>
-    <published>2026-04-07T03:00:00Z</published>
-    <updated>2026-04-07T03:00:00Z</updated>
-    <author><name>LM-Provers, Yuxiao Qu, Amrith Setlur, Jasper Dekoninck, Edward Beeching, Jia Li, Ian Wu, Lewis Tunstall, Aviral Kumar</name></author>
-    <summary type="html"><![CDATA[<p>QED-Nano is a 4B parameter model post-trained for Olympiad-level mathematical proofs using a three-stage recipe: supervised fine-tuning, reinforcement learning, and curriculum learning. It demonstrates that small, open models can achieve competitive reasoning on hard mathematical problems.</p>]]></summary>
-    <category term="Mathematical Reasoning"/>
-    <category term="Language Models"/>
-    <category term="Theorem Proving"/>
-    <category term="Model Efficiency"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-07:research:ad6f310eb62e</id>
-    <title>How Alignment Routes: Localizing, Scaling, and Controlling Policy Circuits in Language Models</title>
-    <link href="http://arxiv.org/abs/2604.04385" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-07&amp;category=research#item-ad6f310eb62e" rel="related" type="text/html"/>
-    <published>2026-04-07T03:00:00Z</published>
-    <updated>2026-04-07T03:00:00Z</updated>
-    <author><name>Gregory N. Frank</name></author>
-    <summary type="html"><![CDATA[<p>Identifies a sparse routing mechanism in alignment-trained LLMs where gate attention heads detect content and trigger amplifier heads for refusal, validated across 9 models from 6 labs with rigorous statistical tests.</p>]]></summary>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Alignment"/>
-    <category term="AI Safety"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-07:research:8768210e43ea</id>
-    <title>Your Agent, Their Asset: A Real-World Safety Analysis of OpenClaw</title>
-    <link href="http://arxiv.org/abs/2604.04759" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-07&amp;category=research#item-8768210e43ea" rel="related" type="text/html"/>
-    <published>2026-04-07T03:00:00Z</published>
-    <updated>2026-04-07T03:00:00Z</updated>
-    <author><name>Zijun Wang, Haoqin Tu, Letian Zhang, Hardy Chen, Juncheng Wu, Xiangyan Liu, Zhenlong Yuan, Tianyu Pang, Michael Qizhe Shieh, Fengze Liu, Zeyu Zheng, Huaxiu Yao, Yuyin Zhou, Cihang Xie</name></author>
-    <summary type="html"><![CDATA[<p>Presents the first real-world safety evaluation of OpenClaw, a widely deployed personal AI agent in early 2026, introducing the CIK taxonomy (Capability, Identity, Knowledge) and testing 12 attack scenarios across four backbone models including Claude Sonnet 4.5 and Opus 4.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="AI Agents"/>
-    <category term="Security"/>
-    <category term="Red Teaming"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-04-06:category-summary:research</id>
     <title>Research Summary: April 06, 2026</title>
     <link href="http://arxiv.org/abs/2604.03071" rel="alternate" type="text/html"/>
@@ -264,20 +330,6 @@
     <category term="Reinforcement Learning"/>
     <category term="Multi-Agent Systems"/>
     <category term="Code Generation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-06:research:21d96dde802d</id>
-    <title>Poison Once, Exploit Forever: Environment-Injected Memory Poisoning Attacks on Web Agents</title>
-    <link href="http://arxiv.org/abs/2604.02623" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-06&amp;category=research#item-21d96dde802d" rel="related" type="text/html"/>
-    <published>2026-04-06T03:00:00Z</published>
-    <updated>2026-04-06T03:00:00Z</updated>
-    <author><name>Wei Zou, Mingwen Dong, Miguel Romero Calvo, Wei Zou, Shuaichen Chang, Jiang Guo, Dongkyu Lee, Xing Niu, Xiaofei Ma, Yanjun Qi, Jiarong Jiang</name></author>
-    <summary type="html"><![CDATA[<p>Introduces eTAMP, the first attack achieving cross-session, cross-site compromise of LLM-based web agents through environmental observation alone (e.g., viewing a manipulated product page). A single contaminated observation poisons the agent's memory and activates during future tasks on different sites.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Agent Security"/>
-    <category term="LLM Agents"/>
-    <category term="Adversarial Attacks"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-04-05:category-summary:research</id>
@@ -330,20 +382,6 @@
 <li>Supply chain attack <a href="https://news.aatf.ai/?date=2026-04-04&amp;category=research#item-b56cd585c9c3" class="internal-link" rel="noopener noreferrer">acceleration in 2025–2026</a> highlights infrastructure risks relevant to AI deployment security</li>
 </ul>]]></summary>
     <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-04:research:b12fd46c62a9</id>
-    <title>Detecting collusion through multi-agent interpretability</title>
-    <link href="https://www.lesswrong.com/posts/Q65SETuTmhF4LWdix/detecting-collusion-through-multi-agent-interpretability-3" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-04&amp;category=research#item-b12fd46c62a9" rel="related" type="text/html"/>
-    <published>2026-04-04T03:00:00Z</published>
-    <updated>2026-04-04T03:00:00Z</updated>
-    <author><name>schroederdewitt</name></author>
-    <summary type="html"><![CDATA[<p>As first covered in <a href="https://news.aatf.ai/?date=2026-04-02&amp;category=research#item-fba0672c495f" class="internal-link" rel="noopener noreferrer">Research</a> yesterday, Proposes using linear probes on aggregated activations across multiple interacting LLM agents to detect covert collusion. Introduces five probing techniques based on a distributed anomaly detection taxonomy, evaluated on NARCBench — a new three-tier collusion benchmark. Extends prior single-agent deception detection to multi-agent settings.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Multi-Agent Systems"/>
-    <category term="Language Models"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-04-03:category-summary:research</id>
@@ -486,30 +524,5 @@
     <category term="Reinforcement Learning"/>
     <category term="AI Alignment"/>
     <category term="Interpretability"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-01:category-summary:research</id>
-    <title>Research Summary: April 01, 2026</title>
-    <link href="http://arxiv.org/abs/2603.29038" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-01&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-04-01T06:00:00Z</published>
-    <updated>2026-04-01T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Analysis complete. Top items selected by score.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-01:research:65583d953e05</id>
-    <title>Trojan-Speak: Bypassing Constitutional Classifiers with No Jailbreak Tax via Adversarial Finetuning</title>
-    <link href="http://arxiv.org/abs/2603.29038" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-01&amp;category=research#item-65583d953e05" rel="related" type="text/html"/>
-    <published>2026-04-01T03:07:00Z</published>
-    <updated>2026-04-01T03:07:00Z</updated>
-    <author><name>Bilgehan Sel, Xuanli He, Alwin Peng, Ming Jin, Jerry Wei</name></author>
-    <summary type="html"><![CDATA[<p>Introduces Trojan-Speak, an adversarial fine-tuning method that bypasses Anthropic's Constitutional Classifiers with 99+% evasion while maintaining &lt;5% capability degradation, compared to &gt;25% in prior work. Uses curriculum learning and GRPO-based hybrid RL.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Adversarial Attacks"/>
-    <category term="Alignment"/>
-    <category term="Red Teaming"/>
   </entry>
 </feed>
