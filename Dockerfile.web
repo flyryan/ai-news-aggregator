@@ -1,0 +1,38 @@
+# Lightweight web-only image for serving the frontend on AWS.
+# The full pipeline (scrapers, LLM agents, Playwright) runs on duffplex
+# and pushes data via git.  AWS just needs nginx + the static site.
+#
+# Usage:
+#   docker-compose -f docker-compose.web.yml up -d --build
+
+# Stage 1: Build the Svelte frontend
+FROM node:20-alpine AS frontend-builder
+
+WORKDIR /frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+# Stage 2: Serve with nginx (no Python, no Playwright, no scraper deps)
+FROM nginx:alpine
+
+# Remove default nginx site
+RUN rm -f /etc/nginx/conf.d/default.conf
+
+# Copy the built frontend
+COPY --from=frontend-builder /frontend/../web /app/web
+
+# Copy nginx config (server block)
+COPY nginx.conf /etc/nginx/conf.d/ai-news.conf
+
+# Mount points for pipeline-generated data (volumes in docker-compose)
+RUN mkdir -p /app/web/data /app/web/assets /app/logs
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
+  CMD wget -qO- http://localhost/ || exit 1
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

@@ -124,6 +124,26 @@ npm run dev
 # Open http://localhost:5173
 ```
 
+
+### Option C: Web-Only Docker (Recommended for AWS / VPS)
+
+If you only need to **serve the frontend** (pipeline runs elsewhere and pushes data via git), use the lightweight web-only image. It skips Python, Playwright, and all scraper dependencies — resulting in a ~50 MB image instead of ~2 GB.
+
+```bash
+# Clone the repository
+git clone https://github.com/flyryan/ai-news-aggregator.git
+cd ai-news-aggregator
+
+# Build and run (web-only)
+docker-compose -f docker-compose.web.yml up -d --build
+```
+
+The web-only image uses `nginx:alpine` and mounts `web/data` and `web/assets` as volumes so a `git pull` on the host picks up new pipeline data automatically.
+
+Open [http://localhost:7100](http://localhost:7100)
+
+---
+
 ## Utility Scripts
 
 Two standalone helper scripts live in `scripts/` for operational debugging:

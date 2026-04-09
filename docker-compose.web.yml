@@ -1,0 +1,31 @@
+# Lightweight compose file for AWS web-only deployment.
+# Uses Dockerfile.web (nginx + static frontend) instead of the full
+# pipeline image.  Pipeline runs on duffplex and pushes data via git;
+# volumes mount the git-managed data/assets directories.
+#
+# Usage:
+#   docker-compose -f docker-compose.web.yml up -d --build
+
+version: "3.8"
+
+services:
+  ai-news-aggregator:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: ai-news-aggregator
+    ports:
+      - "7100:80"
+    volumes:
+      - ./web/data:/app/web/data
+      - ./web/assets:/app/web/assets
+      - ./logs:/app/logs
+    environment:
+      - TZ=${TZ:-America/New_York}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
