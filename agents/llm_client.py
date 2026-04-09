@@ -132,7 +132,7 @@ class AnthropicClient:
         # Create Anthropic client with custom http client
         self._client = anthropic.Anthropic(
             base_url=self.base_url,
-            api_key="dummy",  # Required by SDK but overridden by custom auth
+            api_key=self.api_key,  # SDK sends this as x-api-key header
             http_client=self._http_client
         )
 
@@ -424,7 +424,7 @@ class AsyncAnthropicClient:
         # Create async Anthropic client
         self._client = anthropic.AsyncAnthropic(
             base_url=self.base_url,
-            api_key="dummy",
+            api_key=self.api_key,  # SDK sends this as x-api-key header
             http_client=self._http_client
         )
 
