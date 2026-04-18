@@ -266,9 +266,10 @@ class AnthropicClient:
         use_adaptive = _uses_adaptive_thinking(self.model)
 
         # max_tokens must be greater than budget_tokens
-        # Use larger buffer (32768) to avoid JSON truncation in complex outputs (75-item batches)
+        # Use larger buffer (49152) to avoid JSON truncation in dense batches
+        # (e.g. 75-item research batches can produce 30k-40k tokens of JSON).
         if max_tokens is None:
-            max_tokens = budget_tokens + 32768
+            max_tokens = budget_tokens + 49152
         elif max_tokens <= budget_tokens:
             max_tokens = budget_tokens + 16384
 
@@ -517,9 +518,10 @@ class AsyncAnthropicClient:
         original_budget = budget_tokens
         use_adaptive = _uses_adaptive_thinking(self.model)
 
-        # Use larger buffer (32768) to avoid JSON truncation in complex outputs (75-item batches)
+        # Use larger buffer (49152) to avoid JSON truncation in dense batches
+        # (e.g. 75-item research batches can produce 30k-40k tokens of JSON).
         if max_tokens is None:
-            max_tokens = budget_tokens + 32768
+            max_tokens = budget_tokens + 49152
         elif max_tokens <= budget_tokens:
             max_tokens = budget_tokens + 16384
 

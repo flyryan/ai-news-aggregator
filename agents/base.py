@@ -26,6 +26,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class TruncatedJSONError(Exception):
+    """Raised when an LLM JSON response was cut off before completion.
+
+    Distinct from a JSON response that is well-formed but empty, or from
+    a response that contains no JSON at all. Callers (notably
+    ``_analyze_batch``) react to this by splitting the input batch and
+    retrying, since the root cause is output-token exhaustion.
+    """
+
+
 @dataclass
 class CollectedItem:
     """Standardized item from any gatherer."""
@@ -416,61 +426,97 @@ class BaseAnalyzer(ABC):
         self,
         batch_items: List[CollectedItem],
         batch_index: int,
-        total_batches: int
+        total_batches: int,
+        sub_label: str = "",
     ) -> BatchResult:
         """
         MAP phase: Analyze a single batch of items.
 
         Uses STANDARD thinking for quality per-item analysis.
+
+        When the LLM response is truncated (``stop_reason == 'max_tokens'``
+        or the JSON was cut off mid-token), the batch is split in half and
+        each half is analyzed recursively; results are then merged. This
+        recovers transparently from dense batches that overflow the
+        response token budget instead of silently dropping them.
+
+        Args:
+            batch_items: Items to analyze.
+            batch_index: Zero-based batch index (used in prompts and logs).
+            total_batches: Total batch count for the map phase.
+            sub_label: Suffix appended to the label during recursive splits
+                (e.g. "a", "b", "ab"); purely cosmetic for logging.
         """
         items_context = self._build_items_context(batch_items, max_items=len(batch_items))
         prompt = self._get_batch_analysis_prompt(items_context, batch_index, total_batches)
+
+        label = f"{batch_index + 1}{sub_label}/{total_batches}"
+        caller_suffix = f"{batch_index}{sub_label}"
 
         try:
             response = await self.async_client.call_with_thinking(
                 messages=[{"role": "user", "content": prompt}],
                 system=self.grounding_context,  # Inject ecosystem grounding
                 budget_tokens=ThinkingLevel.STANDARD,  # Quality batch processing
-                caller=f"{self.category}_analyzer.batch_{batch_index}"
+                caller=f"{self.category}_analyzer.batch_{caller_suffix}"
             )
 
-            result = self._parse_json_response(response.content)
+            if response.stop_reason == "max_tokens":
+                return await self._handle_truncated_batch(
+                    batch_items, batch_index, total_batches, sub_label
+                )
+
+            try:
+                result = self._parse_json_response(response.content)
+            except TruncatedJSONError:
+                return await self._handle_truncated_batch(
+                    batch_items, batch_index, total_batches, sub_label
+                )
 
             batch_themes = result.get('themes', result.get('category_themes', []))
-            batch_items = result.get('items', [])
-            logger.info(f"  {self.category} map {batch_index + 1}/{total_batches}: {len(batch_items)} items, {len(batch_themes)} themes")
+            parsed_items = result.get('items', [])
+            logger.info(f"  {self.category} map {label}: {len(parsed_items)} items, {len(batch_themes)} themes")
 
             return BatchResult(
                 batch_index=batch_index,
-                item_analyses=batch_items,
+                item_analyses=parsed_items,
                 batch_themes=batch_themes,
                 cross_signals=result.get('cross_signals', []),
                 thinking=response.thinking
             )
         except Exception as e:
-            logger.error(f"Batch {batch_index} analysis failed: {e}")
-            # Retry once with backoff
+            logger.error(f"Batch {label} analysis failed: {e}")
+            # Retry once with backoff for transient failures (network, 5xx, etc.)
             try:
                 await asyncio.sleep(5)
                 response = await self.async_client.call_with_thinking(
                     messages=[{"role": "user", "content": prompt}],
                     system=self.grounding_context,  # Inject ecosystem grounding
                     budget_tokens=ThinkingLevel.STANDARD,
-                    caller=f"{self.category}_analyzer.batch_{batch_index}_retry"
+                    caller=f"{self.category}_analyzer.batch_{caller_suffix}_retry"
                 )
-                result = self._parse_json_response(response.content)
+                if response.stop_reason == "max_tokens":
+                    return await self._handle_truncated_batch(
+                        batch_items, batch_index, total_batches, sub_label
+                    )
+                try:
+                    result = self._parse_json_response(response.content)
+                except TruncatedJSONError:
+                    return await self._handle_truncated_batch(
+                        batch_items, batch_index, total_batches, sub_label
+                    )
                 batch_themes = result.get('themes', result.get('category_themes', []))
-                batch_items = result.get('items', [])
-                logger.info(f"  {self.category} map {batch_index + 1}/{total_batches}: {len(batch_items)} items, {len(batch_themes)} themes (retry)")
+                parsed_items = result.get('items', [])
+                logger.info(f"  {self.category} map {label}: {len(parsed_items)} items, {len(batch_themes)} themes (retry)")
                 return BatchResult(
                     batch_index=batch_index,
-                    item_analyses=batch_items,
+                    item_analyses=parsed_items,
                     batch_themes=batch_themes,
                     cross_signals=result.get('cross_signals', []),
                     thinking=response.thinking
                 )
             except Exception as retry_e:
-                logger.error(f"  {self.category} map {batch_index + 1}/{total_batches}: FAILED")
+                logger.error(f"  {self.category} map {label}: FAILED")
                 return BatchResult(
                     batch_index=batch_index,
                     item_analyses=[],
@@ -478,6 +524,58 @@ class BaseAnalyzer(ABC):
                     cross_signals=[],
                     thinking=f"Error: {e}, Retry error: {retry_e}"
                 )
+
+    async def _handle_truncated_batch(
+        self,
+        batch_items: List[CollectedItem],
+        batch_index: int,
+        total_batches: int,
+        sub_label: str,
+    ) -> BatchResult:
+        """Recover from a truncated LLM response by splitting the batch.
+
+        Runs each half through ``_analyze_batch`` in parallel and merges
+        the results. When a single-item batch still truncates there is
+        nothing further to split, so the item is dropped with a loud
+        ERROR (the same user-visible outcome as the old silent-drop path,
+        but only after exhausting recovery attempts).
+        """
+        label = f"{batch_index + 1}{sub_label}/{total_batches}"
+        if len(batch_items) <= 1:
+            logger.error(
+                f"  {self.category} map {label}: TRUNCATED with "
+                f"{len(batch_items)} item(s); cannot split further, dropping"
+            )
+            return BatchResult(
+                batch_index=batch_index,
+                item_analyses=[],
+                batch_themes=[],
+                cross_signals=[],
+                thinking=f"Error: response truncated with {len(batch_items)} item(s); cannot split further"
+            )
+
+        mid = len(batch_items) // 2
+        left_items, right_items = batch_items[:mid], batch_items[mid:]
+        logger.warning(
+            f"  {self.category} map {label}: truncated, splitting "
+            f"{len(batch_items)} items into {len(left_items)}+{len(right_items)} sub-batches"
+        )
+
+        left_result, right_result = await asyncio.gather(
+            self._analyze_batch(left_items, batch_index, total_batches, sub_label + "a"),
+            self._analyze_batch(right_items, batch_index, total_batches, sub_label + "b"),
+        )
+
+        thinkings = [t for t in (left_result.thinking, right_result.thinking) if t]
+        merged_thinking = "\n\n".join(thinkings) if thinkings else None
+
+        return BatchResult(
+            batch_index=batch_index,
+            item_analyses=left_result.item_analyses + right_result.item_analyses,
+            batch_themes=left_result.batch_themes + right_result.batch_themes,
+            cross_signals=left_result.cross_signals + right_result.cross_signals,
+            thinking=merged_thinking,
+        )
 
     def _get_batch_analysis_prompt(
         self,
@@ -857,12 +955,20 @@ class BaseAnalyzer(ABC):
                         break
 
         # Check for truncation: depth > 0 means JSON is incomplete
-        if depth > 0:
+        truncated = depth > 0
+        if truncated:
             logger.warning(f"JSON appears truncated (unclosed depth={depth}). Last 100 chars: ...{content[-100:]}")
 
         try:
             return json.loads(content)
         except json.JSONDecodeError as e:
+            # If the brace-walk left the object unclosed, the decode failure
+            # is almost certainly truncation rather than malformed JSON.
+            # Surface that to the caller so it can split-and-retry instead
+            # of silently dropping the batch.
+            if truncated:
+                logger.error(f"Truncated JSON (parse failed at {e}); last 100 chars: ...{content[-100:]}")
+                raise TruncatedJSONError(str(e)) from e
             logger.error(f"Failed to parse JSON: {e}")
             logger.error(f"Content was: {content[:500]}...")
             return {}
