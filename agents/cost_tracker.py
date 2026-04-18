@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class ModelPricing(Enum):
     """Pricing per million tokens (MTok) for different models."""
 
-    # Claude Opus 4.6 pricing (USD per million tokens)
+    # Claude Opus pricing (USD per million tokens) — identical between 4.6 and 4.7
     OPUS_4_6_INPUT = 5.00
     OPUS_4_6_OUTPUT = 25.00
     OPUS_4_6_CACHE_WRITE_5MIN = 6.25
@@ -46,7 +46,7 @@ class APICallRecord:
     output_tokens: int
     cache_creation_tokens: int = 0
     cache_read_tokens: int = 0
-    model: str = "claude-4.6-opus-aws"
+    model: str = "claude-opus-4-7"
     duration_seconds: float = 0.0
 
     @property
@@ -84,7 +84,7 @@ class CostTracker:
         print(tracker.get_summary())
     """
 
-    def __init__(self, model: str = "claude-4.6-opus-aws"):
+    def __init__(self, model: str = "claude-opus-4-7"):
         self.model = model
         self.calls: List[APICallRecord] = []
         self.start_time: Optional[datetime] = None
@@ -270,7 +270,7 @@ class CostTracker:
 
         lines.extend([
             "",
-            "PRICING (Claude Opus 4.6):",
+            "PRICING (Claude Opus 4.7):",
             f"  Input:  ${self.input_price:.2f}/MTok",
             f"  Output: ${self.output_price:.2f}/MTok",
             "=" * 60
@@ -339,7 +339,7 @@ def get_tracker() -> CostTracker:
     return _global_tracker
 
 
-def reset_tracker(model: str = "claude-4.6-opus-aws") -> CostTracker:
+def reset_tracker(model: str = "claude-opus-4-7") -> CostTracker:
     """Reset and return a new global tracker."""
     global _global_tracker
     _global_tracker = CostTracker(model)

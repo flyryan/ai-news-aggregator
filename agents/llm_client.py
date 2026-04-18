@@ -9,6 +9,7 @@ This module provides a wrapper around the Anthropic SDK that:
 """
 
 import os
+import re
 import json
 import logging
 import time
@@ -34,6 +35,33 @@ class ThinkingLevel(IntEnum):
     STANDARD = 8192    # Normal analysis
     DEEP = 16000       # Complex ranking
     ULTRATHINK = 32000 # Cross-category synthesis
+
+
+# Map legacy token budgets to Opus 4.7+ effort levels. Effort is a behavioral
+# signal, not a token budget, so we key on the caller's original intent rather
+# than on any max_tokens-adjusted value.
+BUDGET_TO_EFFORT = {
+    ThinkingLevel.QUICK: "high",
+    ThinkingLevel.STANDARD: "xhigh",
+    ThinkingLevel.DEEP: "max",
+    ThinkingLevel.ULTRATHINK: "max",
+}
+
+
+def _uses_adaptive_thinking(model: str) -> bool:
+    """True if model requires adaptive thinking (Opus 4.7 and later).
+
+    Opus 4.7 removed manual extended thinking (`type: enabled` + budget_tokens)
+    and sampling parameters. Opus 4.6 and earlier still accept manual thinking,
+    so we keep the legacy path for them. Regex is permissive to handle the
+    alias space: claude-opus-4-7, claude-4.7-opus, claude-opus-4-7-20260416,
+    claude-4.6-opus-aws, etc.
+    """
+    match = re.search(r'(\d+)[-.](\d+)', model.lower())
+    if not match:
+        return False
+    major, minor = int(match.group(1)), int(match.group(2))
+    return major > 4 or (major == 4 and minor >= 7)
 
 
 # Default model max token limit (can be overridden via config or constructor)
@@ -105,7 +133,7 @@ class AnthropicClient:
         """
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
-        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.6-opus-aws')
+        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-opus-4-7')
         self.timeout = timeout
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
@@ -172,7 +200,7 @@ class AnthropicClient:
             messages: List of message dicts with 'role' and 'content'.
             system: Optional system prompt.
             max_tokens: Maximum tokens in response.
-            temperature: Sampling temperature.
+            temperature: Sampling temperature (ignored on Opus 4.7+).
 
         Returns:
             LLMResponse with content, no thinking.
@@ -180,9 +208,13 @@ class AnthropicClient:
         kwargs = {
             "model": self.model,
             "max_tokens": max_tokens,
-            "temperature": temperature,
             "messages": messages
         }
+
+        # Opus 4.7+ rejects any non-default sampling parameter with 400.
+        # Omit temperature entirely on that path.
+        if not _uses_adaptive_thinking(self.model):
+            kwargs["temperature"] = temperature
 
         if system:
             kwargs["system"] = system
@@ -227,6 +259,12 @@ class AnthropicClient:
         Returns:
             LLMResponse with content and thinking blocks.
         """
+        # Preserve the caller's original intent before any max_tokens capping
+        # adjusts budget_tokens — effort is a behavioral signal that shouldn't
+        # be reduced just because the response buffer is tight.
+        original_budget = budget_tokens
+        use_adaptive = _uses_adaptive_thinking(self.model)
+
         # max_tokens must be greater than budget_tokens
         # Use larger buffer (32768) to avoid JSON truncation in complex outputs (75-item batches)
         if max_tokens is None:
@@ -240,30 +278,40 @@ class AnthropicClient:
             max_tokens = self.max_output_tokens
 
         # If capping pushed max_tokens below budget_tokens, reduce budget too
+        # (only meaningful on the manual-thinking path)
         if max_tokens <= budget_tokens:
             budget_tokens = max(max_tokens - 8192, max_tokens // 2)
             logger.info(f"Reduced thinking budget to {budget_tokens} to fit within {self.max_output_tokens} token limit")
 
-        # Temperature must be 1.0 for thinking
-        if temperature != 1.0:
-            logger.warning("Temperature must be 1.0 for thinking mode, overriding")
-            temperature = 1.0
-
         kwargs = {
             "model": self.model,
             "max_tokens": max_tokens,
-            "temperature": temperature,
-            "thinking": {
-                "type": "enabled",
-                "budget_tokens": budget_tokens
-            },
             "messages": messages
         }
+
+        if use_adaptive:
+            # Opus 4.7+ path: adaptive thinking with effort. Manual thinking
+            # and non-default sampling parameters return 400 on these models.
+            # `output_config` isn't a typed SDK param in anthropic<=0.75.x, so
+            # both new fields go through extra_body as a passthrough.
+            effort = BUDGET_TO_EFFORT.get(original_budget, "high")
+            kwargs["extra_body"] = {
+                "thinking": {"type": "adaptive", "display": "summarized"},
+                "output_config": {"effort": effort},
+            }
+            logger.debug(f"Calling with adaptive thinking: effort={effort}, max_tokens={max_tokens}")
+        else:
+            # Opus 4.6 and earlier: manual thinking with an explicit token budget.
+            if temperature != 1.0:
+                logger.warning("Temperature must be 1.0 for thinking mode, overriding")
+                temperature = 1.0
+            kwargs["temperature"] = temperature
+            kwargs["thinking"] = {"type": "enabled", "budget_tokens": budget_tokens}
+            logger.debug(f"Calling with manual thinking: budget={budget_tokens}, max_tokens={max_tokens}")
 
         if system:
             kwargs["system"] = system
 
-        logger.debug(f"Calling with thinking: budget={budget_tokens}, max_tokens={max_tokens}")
         response = self._client.messages.create(**kwargs)
 
         # Log stop_reason for diagnostics (helps debug proxy behavior)
@@ -283,8 +331,12 @@ class AnthropicClient:
             elif block.type == "text":
                 text_blocks.append(block.text)
 
-        # Validate thinking blocks are present when expected
-        if budget_tokens > 0 and not thinking_blocks:
+        # On the manual path, absent thinking blocks historically signaled a
+        # proxy misconfiguration (e.g. LiteLLM routing through the wrong
+        # endpoint). On the adaptive path, thinking blocks are often absent
+        # legitimately — the proxy may strip them, or the model may skip
+        # thinking for simple prompts — so we skip this guard there.
+        if not use_adaptive and budget_tokens > 0 and not thinking_blocks:
             error_msg = (
                 f"Extended thinking requested (budget_tokens={budget_tokens}) but no thinking "
                 f"blocks returned. This is required for quality analysis.\n\n"
@@ -397,7 +449,7 @@ class AsyncAnthropicClient:
     ):
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
-        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.6-opus-aws')
+        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-opus-4-7')
         self.timeout = timeout
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
@@ -460,6 +512,11 @@ class AsyncAnthropicClient:
         caller: Optional[str] = None
     ) -> LLMResponse:
         """Async version of call_with_thinking."""
+        # Preserve the caller's original intent before any capping shrinks
+        # budget_tokens — effort mapping keys on what the caller asked for.
+        original_budget = budget_tokens
+        use_adaptive = _uses_adaptive_thinking(self.model)
+
         # Use larger buffer (32768) to avoid JSON truncation in complex outputs (75-item batches)
         if max_tokens is None:
             max_tokens = budget_tokens + 32768
@@ -472,23 +529,31 @@ class AsyncAnthropicClient:
             max_tokens = self.max_output_tokens
 
         # If capping pushed max_tokens below budget_tokens, reduce budget too
+        # (only meaningful on the manual-thinking path)
         if max_tokens <= budget_tokens:
             budget_tokens = max(max_tokens - 8192, max_tokens // 2)
             logger.info(f"Reduced thinking budget to {budget_tokens} to fit within {self.max_output_tokens} token limit")
 
-        if temperature != 1.0:
-            temperature = 1.0
-
         kwargs = {
             "model": self.model,
             "max_tokens": max_tokens,
-            "temperature": temperature,
-            "thinking": {
-                "type": "enabled",
-                "budget_tokens": budget_tokens
-            },
             "messages": messages
         }
+
+        if use_adaptive:
+            # Opus 4.7+ path: adaptive thinking with effort. See the sync
+            # method for the extra_body rationale.
+            effort = BUDGET_TO_EFFORT.get(original_budget, "high")
+            kwargs["extra_body"] = {
+                "thinking": {"type": "adaptive", "display": "summarized"},
+                "output_config": {"effort": effort},
+            }
+        else:
+            # Opus 4.6 and earlier: manual thinking with an explicit budget.
+            if temperature != 1.0:
+                temperature = 1.0
+            kwargs["temperature"] = temperature
+            kwargs["thinking"] = {"type": "enabled", "budget_tokens": budget_tokens}
 
         if system:
             kwargs["system"] = system
@@ -513,8 +578,9 @@ class AsyncAnthropicClient:
             elif block.type == "text":
                 text_blocks.append(block.text)
 
-        # Validate thinking blocks are present when expected
-        if budget_tokens > 0 and not thinking_blocks:
+        # Only enforce thinking-block presence on the manual path; see
+        # the sync method for rationale.
+        if not use_adaptive and budget_tokens > 0 and not thinking_blocks:
             error_msg = (
                 f"Extended thinking requested (budget_tokens={budget_tokens}) but no thinking "
                 f"blocks returned. This is required for quality analysis.\n\n"
@@ -544,13 +610,14 @@ class AsyncAnthropicClient:
         if hasattr(response.usage, 'cache_read_input_tokens'):
             usage["cache_read_input_tokens"] = response.usage.cache_read_input_tokens or 0
 
-        # Track cost
+        # Track cost — label by the caller's original intent (not any
+        # capped-down value) so the cost report stays legible.
         thinking_name = {
             ThinkingLevel.QUICK: "QUICK",
             ThinkingLevel.STANDARD: "STANDARD",
             ThinkingLevel.DEEP: "DEEP",
             ThinkingLevel.ULTRATHINK: "ULTRATHINK"
-        }.get(budget_tokens, str(budget_tokens))
+        }.get(original_budget, str(original_budget))
 
         get_tracker().record_call(
             caller=caller or "async_call_with_thinking",
@@ -580,9 +647,12 @@ class AsyncAnthropicClient:
         kwargs = {
             "model": self.model,
             "max_tokens": max_tokens,
-            "temperature": temperature,
             "messages": messages
         }
+
+        # Opus 4.7+ rejects any non-default sampling parameter with 400.
+        if not _uses_adaptive_thinking(self.model):
+            kwargs["temperature"] = temperature
 
         if system:
             kwargs["system"] = system

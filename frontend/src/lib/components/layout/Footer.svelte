@@ -14,7 +14,7 @@
 				<div>
 					<p class="font-medium">AATF AI News Aggregator</p>
 					<p class="text-sm text-trend-gray-400">
-						Powered by Claude Opus 4.6
+						Powered by Claude Opus 4.7
 					</p>
 				</div>
 			</div>
