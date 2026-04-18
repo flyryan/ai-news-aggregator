@@ -733,25 +733,8 @@ post_processing:
     2. Link the ACTION/EVENT phrase, NOT the leading company/entity name
        - BAD: "[Google DeepMind](/...) announced robots"
        - GOOD: "Google DeepMind [announced Atlas robots](/...)"
-    3. Add one link per distinct story, not one link per sentence or bullet.
-       A single sentence or bullet often mentions several distinct
-       developments — give each of them its own link.
-       - BAD (only the first story is linked):
-         "Anthropic [shipped Opus 4.7](/...#item-AAA) with community
-          benchmarks showing a Thematic Generalization drop and worse MRCR
-          long-context."
-       - GOOD (each distinct story gets a link):
-         "Anthropic [shipped Opus 4.7](/...#item-AAA) with community
-          benchmarks showing a [Thematic Generalization drop](/...#item-BBB)
-          and [worse MRCR long-context](/...#item-CCC)."
-       REQUIRED COVERAGE: every distinct story mentioned in the text
-       should receive a link. Before concluding no item matches a story,
-       scan the available items list thoroughly — match on company name,
-       product name, event keywords, and paraphrases. Only skip linking
-       when you are confident no item covers the story; unlinked stories
-       should be rare.
-    4. Link to the item that most specifically covers that story. If
-       multiple items cover it, prefer the highest-ranked / most-detailed one.
+    3. ONE link per distinct story/development in the text
+    4. Link to the HIGHEST-RANKED item that covers that story (items are ordered by importance)
     5. Bold markers (**text**) CAN appear inside links - just don't start the link with a bold entity name
     6. Preserve ALL original formatting exactly (headers, bullets, bold, etc.)
     7. For bullet points, link the key action/event after the entity prefix
