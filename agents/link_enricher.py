@@ -154,15 +154,36 @@ class LinkEnricher:
 
         return enriched_exec, enriched_categories, enriched_topics
 
+    # How many items per category to expose to the link-enrichment LLM.
+    # The executive summary is generated with visibility into category summaries
+    # and cross-category topics, so it often mentions stories beyond each
+    # category's top 10. Passing a wider slice (ranked by importance_score)
+    # gives the enricher a realistic chance of finding matches.
+    ITEMS_PER_CATEGORY = 30
+
     def _build_item_list(self, category_reports: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Build a simplified list of all items for LLM context."""
+        """Build a simplified list of items for LLM context.
+
+        Prefer ``all_items`` (sorted by importance_score descending) so the
+        pool isn't capped at the per-category top-10 ranked list. This lets
+        the enricher match stories the executive summary pulled in from
+        cross-category context. Fall back to ``top_items`` if ``all_items``
+        isn't populated on the report.
+        """
         items = []
 
         for category, report in category_reports.items():
-            # Get top items from report
-            top_items = report.top_items if hasattr(report, 'top_items') else report.get('top_items', [])
+            # Prefer all_items (already sorted by importance_score desc in the
+            # reduce phase) so we can take a wider slice. Fall back to
+            # top_items for backward compatibility with older checkpoints.
+            source_items = None
+            if hasattr(report, 'all_items'):
+                source_items = report.all_items or report.top_items
+            elif isinstance(report, dict):
+                source_items = report.get('all_items') or report.get('top_items', [])
+            source_items = source_items or []
 
-            for analyzed_item in top_items:
+            for analyzed_item in source_items[:self.ITEMS_PER_CATEGORY]:
                 # Handle both object and dict formats
                 if hasattr(analyzed_item, 'item'):
                     item = analyzed_item.item
@@ -207,8 +228,10 @@ class LinkEnricher:
         if not text or not items:
             return text
 
-        # Build items context (limit to top items to keep prompt manageable)
-        items_json = json.dumps(items[:40], indent=2, ensure_ascii=False)
+        # Build items context. Cap is 4 categories * ITEMS_PER_CATEGORY plus
+        # headroom; kept generous so the LLM sees enough candidates to link
+        # every story mentioned by the executive summary.
+        items_json = json.dumps(items[:140], indent=2, ensure_ascii=False)
 
         if self.prompt_accessor:
             prompt = self.prompt_accessor.get_post_processing_prompt(
@@ -228,8 +251,23 @@ LINKING STRATEGY (CRITICAL):
 2. Link the ACTION/EVENT phrase, NOT the leading company/entity name
    - BAD: "[Google DeepMind](/...) announced robots"
    - GOOD: "Google DeepMind [announced Atlas robots](/...)"
-3. ONE link per distinct story/development in the text
-4. Link to the HIGHEST-RANKED item that covers that story (items are ordered by importance)
+3. Add one link per distinct story, not one link per sentence or bullet.
+   A single sentence or bullet often mentions several distinct developments —
+   give each of them its own link.
+   - BAD (only the first story is linked):
+     "Anthropic [shipped Opus 4.7](/...#item-AAA) with community benchmarks
+      showing a Thematic Generalization drop and worse MRCR long-context."
+   - GOOD (each distinct story gets a link):
+     "Anthropic [shipped Opus 4.7](/...#item-AAA) with community benchmarks
+      showing a [Thematic Generalization drop](/...#item-BBB) and
+      [worse MRCR long-context](/...#item-CCC)."
+   REQUIRED COVERAGE: every distinct story mentioned in the text should
+   receive a link. Before concluding no item matches a story, scan the
+   available items list thoroughly — match on company name, product name,
+   event keywords, and paraphrases. Only skip linking when you are
+   confident no item covers the story; unlinked stories should be rare.
+4. Link to the item that most specifically covers that story. If multiple
+   items cover it, prefer the highest-ranked / most-detailed one.
 5. Bold markers (**text**) CAN appear inside links - just don't start the link with a bold entity name
 6. Preserve ALL original formatting exactly (headers, bullets, bold, etc.)
 7. For bullet points, link the key action/event after the entity prefix
