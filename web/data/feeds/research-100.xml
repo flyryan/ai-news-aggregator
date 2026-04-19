@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=research" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/research-100.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:100</id>
-  <updated>2026-04-19T06:44:54Z</updated>
+  <updated>2026-04-19T14:47:31Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -21,14 +21,22 @@
     <published>2026-04-19T06:00:00Z</published>
     <updated>2026-04-19T06:00:00Z</updated>
     <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's highlights span evaluation integrity, AI control tooling, and frontier model privacy concerns, alongside several alignment-theoretic contributions.</p>
+    <summary type="html"><![CDATA[<p>Today's research is dominated by evaluation critique, AI control tooling, and alignment theory, with one empirical probe of a freshly released frontier model.</p>
+<p><strong>Benchmarks &amp; Interpretability</strong></p>
 <ul>
-<li>A peer-reviewed <strong>EACL 2026</strong> paper <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a25d6dc54742" class="internal-link" rel="noopener noreferrer">exposes fundamental flaws</a> in <strong>Membership Inference Attack (MIA)</strong> benchmarks, showing they detect distributional shift rather than actual memorization — with major implications for data leakage evaluation</li>
-<li><strong>Refactor Arena</strong> <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ce25ede82eda" class="internal-link" rel="noopener noreferrer">launches as an open-source platform</a> for evaluating whether AI agents covertly inject vulnerabilities during software engineering tasks, advancing practical AI control research</li>
-<li><strong>Claude Opus 4.7</strong> is <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a89d8690325e" class="internal-link" rel="noopener noreferrer">shown to identify individuals</a> from writing style alone, raising acute privacy and surveillance concerns for frontier multimodal models</li>
-<li>Original <strong>mechanistic interpretability</strong> work <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ad7e782a9496" class="internal-link" rel="noopener noreferrer">applies PCA to <strong>CoDI</strong></a> (Chain of Draft Inference), finding that PC1 of hidden activations correlates strongly with reasoning depth in latent reasoning models</li>
+<li>An <strong>EACL 2026</strong> paper <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a25d6dc54742" class="internal-link" rel="noopener noreferrer">shows most <strong>Membership Inference Attack</strong> benchmarks</a> actually detect distribution shifts rather than memorization, with model-free baselines matching SOTA detectors</li>
+<li><strong>Latent Reasoning Sprint #4</strong> <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ad7e782a9496" class="internal-link" rel="noopener noreferrer">applies PCA and a tuned logit lens</a> to <strong>CoDI</strong> (Llama 3.2 1B), finding PC1 of hidden states tracks reasoning depth</li>
 </ul>
-<p>On the alignment theory side, a proposed revision to <strong>Bostrom's orthogonality thesis</strong> <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-9409888ccef3" class="internal-link" rel="noopener noreferrer">claims empirical falsification</a> of instrumental convergence arguments. A 7-year retrospective on <strong>CIRL/assistance games</strong> research <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-fada13f0b363" class="internal-link" rel="noopener noreferrer">offers valuable meta-lessons</a> on early alignment paradigms. Additional posts explore how even well-aligned superintelligence <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-167bb65968a4" class="internal-link" rel="noopener noreferrer">could produce dangerous outputs</a> (<strong>Jagged Frontier</strong>), <strong>CEV</strong> <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a01c087e5c27" class="internal-link" rel="noopener noreferrer">applied to adversarial actors</a>, and <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ade90eb0bcea" class="internal-link" rel="noopener noreferrer">LLM-driven disruption</a> of algorithmic content feeds.</p>]]></summary>
+<p><strong>AI Control &amp; Safety</strong></p>
+<ul>
+<li><strong>Refactor Arena</strong> is <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ce25ede82eda" class="internal-link" rel="noopener noreferrer">released as an open-source configurable control setting</a> for studying vulnerability injection during code refactoring by agents</li>
+<li>A replication confirms <strong>Claude Opus 4.7</strong> (GA 2026-04-16) can <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a89d8690325e" class="internal-link" rel="noopener noreferrer">identify users from writing style</a> while professing ignorance, raising privacy concerns</li>
+<li>Alignment theory posts argue against Bostrom's <strong>instrumental convergence</strong>, explore CEV of autocrats, and <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-167bb65968a4" class="internal-link" rel="noopener noreferrer">probe jagged-frontier failure modes</a> of aligned superintelligence</li>
+</ul>
+<p><strong>Research Meta</strong></p>
+<ul>
+<li>A <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-fada13f0b363" class="internal-link" rel="noopener noreferrer">7-year post-mortem</a> of early <strong>Assistive Multi-Armed Bandits/CIRL</strong> work and an essay on idea economics round out reflective commentary from established researchers</li>
+</ul>]]></summary>
     <category term="daily-summary"/>
   </entry>
   <entry>
@@ -36,15 +44,15 @@
     <title>Unpacking Multimodal Data Leakage, Broken Benchmarks, and the Hessian Fallacy</title>
     <link href="https://www.lesswrong.com/posts/oSAiKTpQjjKmeeTvT/unpacking-multimodal-data-leakage-broken-benchmarks-and-the-2" rel="alternate" type="text/html"/>
     <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a25d6dc54742" rel="related" type="text/html"/>
-    <published>2026-04-19T02:43:00Z</published>
-    <updated>2026-04-19T02:43:00Z</updated>
+    <published>2026-04-19T02:47:00Z</published>
+    <updated>2026-04-19T02:47:00Z</updated>
     <author><name>Xenomirant</name></author>
-    <summary type="html"><![CDATA[<p>Presents findings from an EACL 2026 paper showing that many Membership Inference Attack (MIA) benchmarks are fundamentally broken — they detect distribution shifts rather than actual memorization. A model-free baseline achieves ~98.6% AUC on a standard benchmark. Also introduces FiMMIA for multimodal MIA and shares unpublished findings on gradient attribution and Hessian-related theories relevant to interpretability.</p>]]></summary>
+    <summary type="html"><![CDATA[<p>Summarizes an EACL 2026 paper showing most Membership Inference Attack benchmarks detect distribution shifts rather than memorization (model-free baseline hits 98.6% AUC on VL-MIA-Flickr-2k), and introduces FiMMIA for multimodal MIA. Important critique of evaluation methodology.</p>]]></summary>
+    <category term="Membership Inference"/>
+    <category term="Benchmarks"/>
+    <category term="Multimodal"/>
     <category term="AI Safety"/>
     <category term="Evaluation"/>
-    <category term="Membership Inference"/>
-    <category term="Benchmark Integrity"/>
-    <category term="Interpretability"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-04-19:research:ce25ede82eda</id>
@@ -55,12 +63,11 @@ A Control Setting for Software Engineering</title>
     <published>2026-04-19T02:36:00Z</published>
     <updated>2026-04-19T02:36:00Z</updated>
     <author><name>fastfedora</name></author>
-    <summary type="html"><![CDATA[<p>Announces Refactor Arena, an open-source configurable evaluation platform for studying how AI agents might inject vulnerabilities into software during code refactoring tasks. It extends the AI control framework from Greenblatt et al. (2024) with a practical, extensible YAML-based setting for testing control protocols against untrusted AI coding agents.</p>]]></summary>
-    <category term="AI Safety"/>
+    <summary type="html"><![CDATA[<p>Announces Refactor Arena, an open-source configurable AI control setting for studying whether agents inject vulnerabilities during code refactoring tasks. Extends the AI Control research agenda with a concrete, reusable benchmark.</p>]]></summary>
     <category term="AI Control"/>
-    <category term="Software Engineering"/>
-    <category term="Evaluation"/>
-    <category term="Red Teaming"/>
+    <category term="AI Safety"/>
+    <category term="Agent Evaluation"/>
+    <category term="Code Generation"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-04-18:category-summary:research</id>

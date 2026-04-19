@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=reddit" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/reddit-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:reddit:25</id>
-  <updated>2026-04-19T06:44:54Z</updated>
+  <updated>2026-04-19T14:47:31Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -16,62 +16,78 @@
   <entry>
     <id>urn:ainews:2026-04-19:category-summary:reddit</id>
     <title>Reddit Summary: April 19, 2026</title>
-    <link href="https://reddit.com/r/LocalLLaMA/comments/1soq1es/qwen36_performance_jump_is_real_just_make_sure/" rel="alternate" type="text/html"/>
+    <link href="https://reddit.com/r/LocalLLaMA/comments/1sor55y/rtx_5070_ti_9800x3d_running_qwen3635ba3b_at_79_ts/" rel="alternate" type="text/html"/>
     <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit" rel="related" type="text/html"/>
     <published>2026-04-19T06:00:00Z</published>
     <updated>2026-04-19T06:00:00Z</updated>
     <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p><strong>r/LocalLLaMA</strong> dominated the day with <strong>Qwen 3.6-35B-A3B</strong> consuming nearly every top thread. Multiple posts <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-9d5de55efa34" class="internal-link" rel="noopener noreferrer">validated its performance jump</a> with specific hardware configs—<strong>RTX 5070 Ti <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-c436ea59e6ec" class="internal-link" rel="noopener noreferrer">at 79 t/s</a></strong> using the critical `--n-cpu-moe` flag, and <strong>M5 Max 128GB</strong> <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-590d1470f7ff" class="internal-link" rel="noopener noreferrer">matching Claude for coding</a>. A novel <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-db266d11684b" class="internal-link" rel="noopener noreferrer"><strong>Wasserstein-metric GGUF</strong> fix</a> addressed quantization drift nobody else had documented.</p>
+    <summary type="html"><![CDATA[<p><strong>r/LocalLLaMA</strong> is dominated by the <strong>Qwen3.6-35B-A3B</strong> launch, with the community racing to benchmark, quantize, and tune it against frontier closed models. Meanwhile, <strong>r/ClaudeAI</strong> is processing a turbulent <strong>Claude Opus 4.7</strong> release marked by regressions and hallucinations.</p>
 <ul>
-<li><strong>Claude Opus 4.7</strong> reception was turbulent: a viral post exposed it <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-557b21cd688f" class="internal-link" rel="noopener noreferrer">fabricating <strong>real commit hashes</strong></a> with wrong content, a dangerous new hallucination failure mode</li>
-<li><strong>DeepMind's Alexander Lerchner</strong> sparked 800+ comments <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-5ee46ec70a9b" class="internal-link" rel="noopener noreferrer">arguing LLMs can never achieve consciousness</a>—the 'Abstraction Fallacy' paper divided the community sharply</li>
-<li><strong>Bloomberg</strong> reported AI vulnerability discovery (via <strong>Anthropic Mythos</strong> and similar tools) is <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-dd34b4529523" class="internal-link" rel="noopener noreferrer">outpacing open-source teams'</a> ability to patch, raising systemic security concerns</li>
-<li>Deep practical guides emerged for <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-838f0a55f7c3" class="internal-link" rel="noopener noreferrer"><strong>Claude Code</strong> power-user setups</a> and <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-cd0cf904a74b" class="internal-link" rel="noopener noreferrer"><strong>Gemma-4</strong> fine-tuning pitfalls</a>, plus an undocumented <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-713574c6ff4d" class="internal-link" rel="noopener noreferrer"><strong>SSM cache gotcha</strong></a> cutting TTFT from 22s to 2s on Qwen3.5-397B</li>
+<li><strong>Qwen3.6-35B-A3B</strong> is the hero model: users on <strong>M5 Max 128GB</strong> via <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-590d1470f7ff" class="internal-link" rel="noopener noreferrer">OpenCode claim Claude-parity</a> and <strong>RTX 5070 Ti + 9800X3D</strong> (<a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-c436ea59e6ec" class="internal-link" rel="noopener noreferrer">79 t/s at 128K</a> via `--n-cpu-moe`) for daily coding</li>
+<li>Quantization drama: a developer <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-db266d11684b" class="internal-link" rel="noopener noreferrer">fixes <strong>ssm_conv1d tensor drift</strong></a> in GGUFs using a <strong>Wasserstein metric</strong>, releasing an uncensored variant</li>
+<li>Practical tuning wins: <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-713574c6ff4d" class="internal-link" rel="noopener noreferrer">prefix caching cuts TTFT from 22s→2s</a> on <strong>Qwen3.5-397B</strong> Mac Studio, plus an undocumented SSM cache gotcha</li>
+</ul>
+<ul>
+<li><strong>Claude Opus 4.7</strong> reception is mixed-to-negative: concrete reports of <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-557b21cd688f" class="internal-link" rel="noopener noreferrer">fabricated commit hashes</a>, <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-8f9585f69e39" class="internal-link" rel="noopener noreferrer">conversational coherence regressions vs 4.6</a>, and Anthropic quietly <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-d9f8592f4ed4" class="internal-link" rel="noopener noreferrer">replacing <strong>Extended Thinking</strong> with <strong>Adaptive Thinking</strong></a> (fixed `budget_tokens` now ignored)</li>
+<li><strong>DeepMind's Lerchner</strong> sparked heavy philosophical debate with his <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-5ee46ec70a9b" class="internal-link" rel="noopener noreferrer">'Abstraction Fallacy' argument</a> that LLMs can never achieve consciousness</li>
+<li>Macro sentiment: AI datacenter spending now <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-b184a62e3de2" class="internal-link" rel="noopener noreferrer">exceeds <strong>Manhattan Project + Marshall Plan + ISS + Apollo combined</strong></a>, fueling bubble-vs-revolution arguments</li>
+<li>High-signal practitioner content: a detailed <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-838f0a55f7c3" class="internal-link" rel="noopener noreferrer"><strong>Claude Code</strong> setup guide</a> (context discipline, MCPs, subagents) became a reference post</li>
 </ul>]]></summary>
     <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-19:reddit:9d5de55efa34</id>
-    <title>qwen3.6 performance jump is real, just make sure you have it properly configured</title>
-    <link href="https://reddit.com/r/LocalLLaMA/comments/1soq1es/qwen36_performance_jump_is_real_just_make_sure/" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-9d5de55efa34" rel="related" type="text/html"/>
-    <published>2026-04-19T03:31:00Z</published>
-    <updated>2026-04-19T03:31:00Z</updated>
-    <author><name>u/onil_gova</name></author>
-    <summary type="html"><![CDATA[<p>Following yesterday's <a href="https://news.aatf.ai/?date=2026-04-18&amp;category=news#item-d29c023c1e70" class="internal-link" rel="noopener noreferrer">News</a> coverage, Top post confirming Qwen 3.6's performance jump is real, emphasizing importance of proper configuration with preserve_thinking enabled. Reports running on M5 Max 128GB.</p>]]></summary>
-    <category term="qwen3.6"/>
-    <category term="configuration"/>
-    <category term="apple-silicon"/>
-    <category term="performance-optimization"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-04-19:reddit:c436ea59e6ec</id>
     <title>RTX 5070 Ti + 9800X3D running Qwen3.6-35B-A3B at 79 t/s with 128K context, the --n-cpu-moe flag is the most important part.</title>
     <link href="https://reddit.com/r/LocalLLaMA/comments/1sor55y/rtx_5070_ti_9800x3d_running_qwen3635ba3b_at_79_ts/" rel="alternate" type="text/html"/>
     <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-c436ea59e6ec" rel="related" type="text/html"/>
+    <published>2026-04-19T03:31:00Z</published>
+    <updated>2026-04-19T03:31:00Z</updated>
+    <author><name>u/marlang</name></author>
+    <summary type="html"><![CDATA[<p>Continuing our <a href="https://news.aatf.ai/?date=2026-04-17&amp;category=reddit#item-cc267bf9521d" class="internal-link" rel="noopener noreferrer">Reddit</a> coverage of Qwen3.6, Detailed tuning guide for Qwen3.6-35B-A3B on RTX 5070 Ti using --n-cpu-moe flag for 79 t/s at 128K context, with Claude Opus 4.7 doing the optimization autonomously.</p>]]></summary>
+    <category term="Qwen3.6"/>
+    <category term="Performance Tuning"/>
+    <category term="llama.cpp"/>
+    <category term="Consumer Hardware"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:reddit:590d1470f7ff</id>
+    <title>I'm running qwen3.6-35b-a3b with 8 bit quant and 64k context thru OpenCode on my mbp m5 max 128gb and it's as good as claude</title>
+    <link href="https://reddit.com/r/LocalLLaMA/comments/1spdvpo/im_running_qwen3635ba3b_with_8_bit_quant_and_64k/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-590d1470f7ff" rel="related" type="text/html"/>
     <published>2026-04-19T03:23:00Z</published>
     <updated>2026-04-19T03:23:00Z</updated>
-    <author><name>u/marlang</name></author>
-    <summary type="html"><![CDATA[<p>Following yesterday's <a href="https://news.aatf.ai/?date=2026-04-18&amp;category=news#item-d29c023c1e70" class="internal-link" rel="noopener noreferrer">News</a> coverage, Detailed benchmark and configuration guide for running Qwen3.6-35B-A3B on RTX 5070 Ti + 9800X3D at 79 t/s with 128K context, highlighting the critical --n-cpu-moe flag.</p>]]></summary>
-    <category term="qwen3.6"/>
-    <category term="hardware-optimization"/>
-    <category term="rtx-5070ti"/>
-    <category term="llama-cpp"/>
-    <category term="benchmarks"/>
+    <author><name>u/Medical_Lengthiness6</name></author>
+    <summary type="html"><![CDATA[<p>Continuing our <a href="https://news.aatf.ai/?date=2026-04-17&amp;category=reddit#item-cc267bf9521d" class="internal-link" rel="noopener noreferrer">Reddit</a> coverage of Qwen3.6, User runs Qwen3.6-35B-A3B at 8bit with 64k context on M5 Max 128GB via OpenCode, finds it rivals Claude for daily use.</p>]]></summary>
+    <category term="Qwen3.6"/>
+    <category term="Apple Silicon"/>
+    <category term="Local Coding"/>
+    <category term="OpenCode"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-04-19:reddit:5ee46ec70a9b</id>
     <title>Google DeepMind's Senior Scientist Alexander Lerchner challenges the idea that large language models can ever achieve consciousness(not even in 100years), calling it the 'Abstraction Fallacy.'</title>
     <link href="https://reddit.com/r/singularity/comments/1sotz9t/google_deepminds_senior_scientist_alexander/" rel="alternate" type="text/html"/>
     <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-5ee46ec70a9b" rel="related" type="text/html"/>
+    <published>2026-04-19T03:23:00Z</published>
+    <updated>2026-04-19T03:23:00Z</updated>
+    <author><name>u/Worldly_Evidence9113</name></author>
+    <summary type="html"><![CDATA[<p>DeepMind scientist Alexander Lerchner argues LLMs can never achieve consciousness via 'Abstraction Fallacy'</p>]]></summary>
+    <category term="consciousness"/>
+    <category term="AI philosophy"/>
+    <category term="DeepMind"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:reddit:9d5de55efa34</id>
+    <title>qwen3.6 performance jump is real, just make sure you have it properly configured</title>
+    <link href="https://reddit.com/r/LocalLLaMA/comments/1soq1es/qwen36_performance_jump_is_real_just_make_sure/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=reddit#item-9d5de55efa34" rel="related" type="text/html"/>
     <published>2026-04-19T03:16:00Z</published>
     <updated>2026-04-19T03:16:00Z</updated>
-    <author><name>u/Worldly_Evidence9113</name></author>
-    <summary type="html"><![CDATA[<p>Google DeepMind senior scientist Alexander Lerchner published a paper arguing LLMs can never achieve consciousness, calling beliefs otherwise the 'Abstraction Fallacy'. Claims this holds even in 100 years.</p>]]></summary>
-    <category term="ai_consciousness"/>
-    <category term="philosophy_of_mind"/>
-    <category term="deepmind"/>
-    <category term="llm_limitations"/>
+    <author><name>u/onil_gova</name></author>
+    <summary type="html"><![CDATA[<p>Continuing our <a href="https://news.aatf.ai/?date=2026-04-17&amp;category=reddit#item-cc267bf9521d" class="internal-link" rel="noopener noreferrer">Reddit</a> coverage of Qwen3.6, Confirmation that Qwen3.6 is genuinely impressive when properly configured with preserve_thinking enabled.</p>]]></summary>
+    <category term="Qwen3.6"/>
+    <category term="Configuration"/>
+    <category term="Apple Silicon"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-04-18:category-summary:reddit</id>
@@ -220,19 +236,6 @@
     <category term="ai_policy"/>
     <category term="anthropic_mythos"/>
     <category term="government_ai"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-17:reddit:01b0996e2e9c</id>
-    <title>PSA: Opus 4.7 is much worse at MRCR Long Context than 4.6</title>
-    <link href="https://reddit.com/r/ClaudeAI/comments/1sn6eyd/psa_opus_47_is_much_worse_at_mrcr_long_context/" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-17&amp;category=reddit#item-01b0996e2e9c" rel="related" type="text/html"/>
-    <published>2026-04-17T03:16:00Z</published>
-    <updated>2026-04-17T03:16:00Z</updated>
-    <author><name>u/Craig_VG</name></author>
-    <summary type="html"><![CDATA[<p>Building on <a href="https://news.aatf.ai/?date=2026-04-15&amp;category=reddit#item-78a713a7b0d6" class="internal-link" rel="noopener noreferrer">Reddit</a> buzz from earlier this week, PSA with evidence that Opus 4.7 performs much worse than 4.6 on MRCR (Multi-Round Context Recall) long context benchmarks.</p>]]></summary>
-    <category term="Opus 4.7 regression"/>
-    <category term="long context"/>
-    <category term="benchmarks"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-04-16:category-summary:reddit</id>
