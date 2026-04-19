@@ -893,7 +893,13 @@ Return your analysis as JSON:
 }}
 ```
 
-Focus on genuinely cross-cutting themes representing the day's most significant AI developments."""
+Focus on genuinely cross-cutting themes representing the day's most significant AI developments.
+
+RELEASE-DATE GROUNDING (mandatory check for any topic that names or implies a model release):
+- For every model named in a candidate topic, look up the model in the AI ECOSYSTEM GROUNDING section at the top of your system prompt.
+- If the model's GA date is more than 7 days before the coverage date, do NOT frame the topic as a "release", "launch", "strategic shift", "historically significant move", "major upgrade", or similar. Such items are coverage, tutorials, or follow-up discussion of an existing model — frame the topic accordingly (e.g., "Local inference tooling for GPT-OSS" rather than "Open-Weight Models & Local Inference: a strategic shift").
+- A "release" topic must center on a model whose GA date is on or within ~7 days of the coverage date.
+- Continuation/follow-up topics about a model that was already covered as a release in the prior 1-3 days should be downweighted (importance ≤ 65) unless there is a genuinely new development beyond initial coverage."""
 
         try:
             response = await self.async_client.call_with_thinking(

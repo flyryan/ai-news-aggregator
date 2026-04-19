@@ -70,6 +70,12 @@ analysis:
       Prioritize: model releases, breakthrough capabilities, major product launches, significant funding (>$100M), AI policy news, open source releases, safety developments.
       Deprioritize: routine updates, minor features, opinion pieces, rehashed coverage.
 
+      RELEASE-DATE GROUNDING (mandatory check):
+      - Before scoring an item as a "new release", "major launch", "strategic shift", "historically significant move", etc., look up the named model in the AI ECOSYSTEM GROUNDING section at the top of your system prompt.
+      - If the model's GA date is more than 7 days before the coverage date, the item is NOT a new release. It is coverage, a tutorial, or commentary about an existing model. Do NOT use new-release framing in the summary, and do NOT inflate the score on the basis of "new model".
+      - If the model is genuinely missing from grounding AND the article presents itself as a release announcement on the coverage date, treat it as a possible new release but flag uncertainty in the reasoning.
+      - Only items whose model GA date matches or is within ~7 days of the coverage date qualify for "new release" framing and the high score band.
+
     # Available variables: ${items_context}, ${example_id}
     filter: |
       You are filtering news articles for a FRONTIER AI newsletter.
@@ -150,6 +156,13 @@ analysis:
       - Minor feature additions
       - Opinion pieces without news value
       - Rehashed coverage of old news
+
+      RELEASE-DATE GROUNDING (mandatory check before applying any "release" framing or score):
+      - Look up every model named in the article against the AI ECOSYSTEM GROUNDING section at the top of your system prompt.
+      - If the model's GA date is more than 7 days before the coverage date, the item is NOT a new release. It is coverage, a tutorial, follow-up commentary, or analysis of an existing model. Score it as such (typically 50-70, not 90-100) and do NOT use phrases like "newly released", "just launched", "marks a strategic shift", "historically significant move", or "major upgrade announced today".
+      - Tutorials, recaps, and "how to run X" guides for older models are tooling/educational items, not release news.
+      - Genuinely new releases — model GA date on or within ~7 days of the coverage date — qualify for the 90-100 band.
+      - If a model is named but absent from grounding and the article reads like a release announcement on the coverage date, treat as a possible new release but say so in your reasoning ("not in grounding, treating as new release based on article framing").
 
       CATEGORY SUMMARY FORMATTING RULES:
       - Use **bold** for company names, product names, model names, and key numbers
@@ -286,6 +299,8 @@ analysis:
 
       Focus on: papers from major labs (Google, OpenAI, Anthropic, Meta, DeepMind), novel architectures, SOTA results, safety/alignment research, efficiency improvements. For research blog posts, prioritize substantive technical content and original research over commentary.
 
+      RELEASE-DATE GROUNDING: If a paper or post discusses a specific model by name, check the AI ECOSYSTEM GROUNDING section in your system prompt. Do not describe the model as "newly released" or "just launched" if its GA date is more than 7 days before the coverage date — frame it as analysis of an existing model.
+
     # Available variables: ${items_context}
     # Note: Legacy prompt kept for reference
     analysis: |
@@ -408,6 +423,8 @@ analysis:
 
       Prioritize: recognized AI researchers, original insights, breaking news, technical depth, high engagement.
       Deprioritize: promotional content, retweets without commentary, off-topic tangents.
+
+      RELEASE-DATE GROUNDING: If a post discusses a specific model by name, check the AI ECOSYSTEM GROUNDING section in your system prompt. Do not describe a model as "newly released" or "just launched" in your summary if its GA date is more than 7 days before the coverage date — it is community discussion of an existing model.
 
     # Available variables: ${items_context}
     # Note: Legacy prompt kept for reference
@@ -535,6 +552,8 @@ analysis:
 
       Prioritize: technical depth, project showcases, educational content, high-engagement quality discussions.
       Deprioritize: simple questions, memes, repetitive beginner questions.
+
+      RELEASE-DATE GROUNDING: If a thread discusses a specific model by name (e.g., from r/LocalLLaMA), check the AI ECOSYSTEM GROUNDING section in your system prompt. Do not describe a model as "newly released" or "just launched" in your summary if its GA date is more than 7 days before the coverage date — it is community discussion of an existing model.
 
     # Available variables: ${items_context}
     # Note: Legacy prompt kept for reference
@@ -670,6 +689,12 @@ orchestration:
     ```
 
     Focus on genuinely cross-cutting themes representing the day's most significant AI developments.
+
+    RELEASE-DATE GROUNDING (mandatory check for any topic that names or implies a model release):
+    - For every model named in a candidate topic, look up the model in the AI ECOSYSTEM GROUNDING section at the top of your system prompt.
+    - If the model's GA date is more than 7 days before the coverage date, do NOT frame the topic as a "release", "launch", "strategic shift", "historically significant move", "major upgrade", or similar. Such items are coverage, tutorials, or follow-up discussion of an existing model — frame the topic accordingly (e.g., "Local inference tooling for GPT-OSS" rather than "Open-Weight Models & Local Inference: a strategic shift").
+    - A "release" topic must center on a model whose GA date is on or within ~7 days of the coverage date.
+    - Continuation/follow-up topics about a model that was already covered as a release in the prior 1-3 days should be downweighted (importance ≤ 65) unless there is a genuinely new development beyond initial coverage.
 
   # Available variables: ${context}
   executive_summary: |

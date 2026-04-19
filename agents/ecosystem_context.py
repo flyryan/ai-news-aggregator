@@ -171,6 +171,10 @@ class EcosystemContextManager:
         - Curated GA dates always take precedence
         - OpenRouter provides API dates (when model became available via API)
         - OpenRouter also provides model discovery (finds new models not in curated list)
+        - INVARIANT: Curated entries are NEVER dropped. The MAX_MODELS_PER_PROVIDER
+          cap only trims OpenRouter-discovered (non-curated) entries. If curated
+          alone exceeds the cap, all curated still ship and OpenRouter additions
+          for that provider are skipped.
 
         Args:
             openrouter_data: Parsed OpenRouter API response
@@ -178,32 +182,28 @@ class EcosystemContextManager:
         Returns:
             Merged context with both GA and API dates
         """
-        merged_models: Dict[str, List[Dict[str, Any]]] = {}
-
-        # Start with curated releases
+        # Build curated and OpenRouter lists separately so we can apply the
+        # cap only to the discovery side and never silently drop a hand-picked
+        # entry (which is what's grounding the LLM against hallucinations).
+        curated_by_provider: Dict[str, List[Dict[str, Any]]] = {}
         for provider, models in self.releases.items():
-            if provider not in merged_models:
-                merged_models[provider] = []
-
-            for model_name, dates in models.items():
-                merged_models[provider].append({
+            curated_by_provider[provider] = [
+                {
                     'name': model_name,
                     'ga_date': dates.get('ga_date', 'unknown'),
                     'api_date': dates.get('api_date', 'unknown'),
-                })
+                }
+                for model_name, dates in models.items()
+            ]
 
-        # Add any OpenRouter models not in curated list (new models)
+        discovered_by_provider: Dict[str, List[Dict[str, Any]]] = {}
         openrouter_models = openrouter_data.get('models', {})
         for provider, model_list in openrouter_models.items():
-            if provider not in merged_models:
-                merged_models[provider] = []
-
-            # Get existing model names for this provider (normalized for comparison)
             existing_names = {
                 self._normalize_model_name(m['name'])
-                for m in merged_models[provider]
+                for m in curated_by_provider.get(provider, [])
             }
-
+            discovered: List[Dict[str, Any]] = []
             for model in model_list:
                 model_name = model.get('name', '')
                 normalized_name = self._normalize_model_name(model_name)
@@ -224,24 +224,45 @@ class EcosystemContextManager:
                 if is_duplicate:
                     continue
 
-                # Add new model from OpenRouter (API date only)
-                merged_models[provider].append({
+                discovered.append({
                     'name': model_name,
                     'ga_date': 'unknown',  # Not in curated list
                     'api_date': model.get('released', 'unknown'),
                 })
+            discovered_by_provider[provider] = discovered
 
-        # Sort each provider's models by GA date (newest first), then API date
-        for provider in merged_models:
-            merged_models[provider].sort(
-                key=lambda m: (
-                    m.get('ga_date', '1970-01-01') if m.get('ga_date') != 'unknown' else '1970-01-01',
-                    m.get('api_date', '1970-01-01') if m.get('api_date') != 'unknown' else '1970-01-01'
-                ),
-                reverse=True
-            )
-            # Cap at max models
-            merged_models[provider] = merged_models[provider][:self.MAX_MODELS_PER_PROVIDER]
+        sort_key = lambda m: (
+            m.get('ga_date', '1970-01-01') if m.get('ga_date') != 'unknown' else '1970-01-01',
+            m.get('api_date', '1970-01-01') if m.get('api_date') != 'unknown' else '1970-01-01'
+        )
+
+        merged_models: Dict[str, List[Dict[str, Any]]] = {}
+        all_providers = set(curated_by_provider) | set(discovered_by_provider)
+        for provider in all_providers:
+            curated = sorted(curated_by_provider.get(provider, []), key=sort_key, reverse=True)
+            discovered = sorted(discovered_by_provider.get(provider, []), key=sort_key, reverse=True)
+
+            if len(curated) >= self.MAX_MODELS_PER_PROVIDER:
+                if discovered:
+                    logger.info(
+                        f"Ecosystem grounding: '{provider}' has {len(curated)} curated "
+                        f"entries (cap {self.MAX_MODELS_PER_PROVIDER}); skipping "
+                        f"{len(discovered)} OpenRouter-discovered entries"
+                    )
+                provider_models = curated
+            else:
+                room = self.MAX_MODELS_PER_PROVIDER - len(curated)
+                trimmed = discovered[:room]
+                if len(discovered) > room:
+                    logger.debug(
+                        f"Ecosystem grounding: '{provider}' kept {len(curated)} curated "
+                        f"+ {len(trimmed)}/{len(discovered)} OpenRouter entries"
+                    )
+                provider_models = curated + trimmed
+
+            # Final sort so render order is newest-first across the merged list
+            provider_models.sort(key=sort_key, reverse=True)
+            merged_models[provider] = provider_models
 
         return {
             'metadata': {
@@ -255,6 +276,10 @@ class EcosystemContextManager:
     def _curated_to_context(self) -> Dict[str, Any]:
         """
         Convert curated releases to context format (fallback when OpenRouter unavailable).
+
+        INVARIANT: All curated entries are preserved (no MAX cap). Curated is the
+        hand-picked source of truth for grounding; dropping entries silently
+        causes the LLM to mis-frame old releases as new (see _merge_with_curated).
 
         Returns:
             Context dict with models from curated releases only

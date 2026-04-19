@@ -307,16 +307,47 @@ class ContinuityCoordinator:
 
         return category_reports
 
+    # When the curator marks a continuation as should_demote, lower the
+    # importance score so downstream consumers (cross-category topic
+    # detection, executive summary, hero image, etc.) all see the demoted
+    # ranking — not just top_items membership.
+    DEMOTED_SCORE_CAP = 59  # keep below the 60 "noteworthy" threshold
+
     def _filter_demoted_items(
         self,
         category_reports: Dict[str, CategoryReport]
     ) -> Dict[str, CategoryReport]:
         """
-        Filter demoted items from top_items (but keep in all_items).
+        Demote continuation items in two ways:
+          1. Lower their importance_score across all_items AND top_items so
+             downstream phases (topic detection, hero, exec summary) see the
+             demoted ranking.
+          2. Filter them out of top_items, backfilling from non-demoted items.
 
-        Backfills from all_items if top_items becomes too small.
+        Filtering alone isn't enough because backfill can re-introduce a
+        demoted item, and other phases read all_items / top_items by score.
         """
         for category, report in category_reports.items():
+            # Step 1: lower scores in place across the full population so
+            # backfilled items and downstream consumers see the new ranking.
+            seen_ids = set()
+            for item in list(report.all_items) + list(report.top_items):
+                if item.item.id in seen_ids:
+                    continue
+                seen_ids.add(item.item.id)
+                if item.continuation and item.continuation.should_demote:
+                    original = item.importance_score
+                    if original > self.DEMOTED_SCORE_CAP:
+                        item.importance_score = min(
+                            self.DEMOTED_SCORE_CAP,
+                            int(original * 0.5)
+                        )
+                        logger.debug(
+                            f"{category}: Demoted '{item.item.title[:60]}' "
+                            f"score {original} -> {item.importance_score}"
+                        )
+
+            # Step 2: filter demoted items out of top_items, with backfill.
             original_top = report.top_items
             filtered_top = [
                 item for item in original_top
@@ -329,16 +360,26 @@ class ContinuityCoordinator:
 
                 # Backfill if needed
                 if len(filtered_top) < 10:
-                    # Get items not already in filtered_top
+                    # Get items not already in filtered_top, sorted by the
+                    # (now-updated) importance score so backfill picks the
+                    # genuinely strongest replacements.
                     filtered_ids = {item.item.id for item in filtered_top}
-                    remaining = [
-                        item for item in report.all_items
-                        if item.item.id not in filtered_ids
-                        and not (item.continuation and item.continuation.should_demote)
-                    ]
+                    remaining = sorted(
+                        (
+                            item for item in report.all_items
+                            if item.item.id not in filtered_ids
+                            and not (item.continuation and item.continuation.should_demote)
+                        ),
+                        key=lambda i: i.importance_score,
+                        reverse=True,
+                    )
                     needed = 10 - len(filtered_top)
                     filtered_top.extend(remaining[:needed])
 
+                # Re-sort top_items by the (possibly-updated) score so demoted
+                # items that survived (because there were no replacements) sink
+                # to the bottom of the list rather than staying in #1.
+                filtered_top.sort(key=lambda i: i.importance_score, reverse=True)
                 report.top_items = filtered_top
 
         return category_reports
