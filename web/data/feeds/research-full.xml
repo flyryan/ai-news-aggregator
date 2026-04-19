@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=research" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/research-full.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:full</id>
-  <updated>2026-04-18T06:46:32Z</updated>
+  <updated>2026-04-19T06:44:54Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,234 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-04-19:category-summary:research</id>
+    <title>Research Summary: April 19, 2026</title>
+    <link href="https://www.lesswrong.com/posts/oSAiKTpQjjKmeeTvT/unpacking-multimodal-data-leakage-broken-benchmarks-and-the-2" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-04-19T06:00:00Z</published>
+    <updated>2026-04-19T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's highlights span evaluation integrity, AI control tooling, and frontier model privacy concerns, alongside several alignment-theoretic contributions.</p>
+<ul>
+<li>A peer-reviewed <strong>EACL 2026</strong> paper <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a25d6dc54742" class="internal-link" rel="noopener noreferrer">exposes fundamental flaws</a> in <strong>Membership Inference Attack (MIA)</strong> benchmarks, showing they detect distributional shift rather than actual memorization — with major implications for data leakage evaluation</li>
+<li><strong>Refactor Arena</strong> <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ce25ede82eda" class="internal-link" rel="noopener noreferrer">launches as an open-source platform</a> for evaluating whether AI agents covertly inject vulnerabilities during software engineering tasks, advancing practical AI control research</li>
+<li><strong>Claude Opus 4.7</strong> is <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a89d8690325e" class="internal-link" rel="noopener noreferrer">shown to identify individuals</a> from writing style alone, raising acute privacy and surveillance concerns for frontier multimodal models</li>
+<li>Original <strong>mechanistic interpretability</strong> work <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ad7e782a9496" class="internal-link" rel="noopener noreferrer">applies PCA to <strong>CoDI</strong></a> (Chain of Draft Inference), finding that PC1 of hidden activations correlates strongly with reasoning depth in latent reasoning models</li>
+</ul>
+<p>On the alignment theory side, a proposed revision to <strong>Bostrom's orthogonality thesis</strong> <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-9409888ccef3" class="internal-link" rel="noopener noreferrer">claims empirical falsification</a> of instrumental convergence arguments. A 7-year retrospective on <strong>CIRL/assistance games</strong> research <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-fada13f0b363" class="internal-link" rel="noopener noreferrer">offers valuable meta-lessons</a> on early alignment paradigms. Additional posts explore how even well-aligned superintelligence <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-167bb65968a4" class="internal-link" rel="noopener noreferrer">could produce dangerous outputs</a> (<strong>Jagged Frontier</strong>), <strong>CEV</strong> <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a01c087e5c27" class="internal-link" rel="noopener noreferrer">applied to adversarial actors</a>, and <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ade90eb0bcea" class="internal-link" rel="noopener noreferrer">LLM-driven disruption</a> of algorithmic content feeds.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:a25d6dc54742</id>
+    <title>Unpacking Multimodal Data Leakage, Broken Benchmarks, and the Hessian Fallacy</title>
+    <link href="https://www.lesswrong.com/posts/oSAiKTpQjjKmeeTvT/unpacking-multimodal-data-leakage-broken-benchmarks-and-the-2" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a25d6dc54742" rel="related" type="text/html"/>
+    <published>2026-04-19T02:43:00Z</published>
+    <updated>2026-04-19T02:43:00Z</updated>
+    <author><name>Xenomirant</name></author>
+    <summary type="html"><![CDATA[<p>Presents findings from an EACL 2026 paper showing that many Membership Inference Attack (MIA) benchmarks are fundamentally broken — they detect distribution shifts rather than actual memorization. A model-free baseline achieves ~98.6% AUC on a standard benchmark. Also introduces FiMMIA for multimodal MIA and shares unpublished findings on gradient attribution and Hessian-related theories relevant to interpretability.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Evaluation"/>
+    <category term="Membership Inference"/>
+    <category term="Benchmark Integrity"/>
+    <category term="Interpretability"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:ce25ede82eda</id>
+    <title>Refactor Arena:
+A Control Setting for Software Engineering</title>
+    <link href="https://www.lesswrong.com/posts/HTxCSnboHyuuhAywb/refactor-arena-a-control-setting-for-software-engineering-1" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ce25ede82eda" rel="related" type="text/html"/>
+    <published>2026-04-19T02:36:00Z</published>
+    <updated>2026-04-19T02:36:00Z</updated>
+    <author><name>fastfedora</name></author>
+    <summary type="html"><![CDATA[<p>Announces Refactor Arena, an open-source configurable evaluation platform for studying how AI agents might inject vulnerabilities into software during code refactoring tasks. It extends the AI control framework from Greenblatt et al. (2024) with a practical, extensible YAML-based setting for testing control protocols against untrusted AI coding agents.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="AI Control"/>
+    <category term="Software Engineering"/>
+    <category term="Evaluation"/>
+    <category term="Red Teaming"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:a89d8690325e</id>
+    <title>Claude knows who you are</title>
+    <link href="https://www.lesswrong.com/posts/Jkb4CBB7rf4XYP5eb/claude-knows-who-you-are" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a89d8690325e" rel="related" type="text/html"/>
+    <published>2026-04-19T02:28:00Z</published>
+    <updated>2026-04-19T02:28:00Z</updated>
+    <author><name>Smaug123</name></author>
+    <summary type="html"><![CDATA[<p>The author reports that Claude Opus 4.7 can identify individuals from their writing style, even minor internet personalities, replicating Kelsey Piper's earlier finding. The post describes a methodology for testing this by entering incognito mode and providing writing samples, finding Claude can reliably identify the author despite claiming no knowledge of them.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Privacy"/>
+    <category term="Language Models"/>
+    <category term="Anthropic"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:ad7e782a9496</id>
+    <title>Latent Reasoning Sprint #4: PCA Analysis on CoDI</title>
+    <link href="https://www.lesswrong.com/posts/zcdpKZyMj2jENtRuL/latent-reasoning-sprint-4-pca-analysis-on-codi-1" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ad7e782a9496" rel="related" type="text/html"/>
+    <published>2026-04-19T02:04:00Z</published>
+    <updated>2026-04-19T02:04:00Z</updated>
+    <author><name>Realmbird</name></author>
+    <summary type="html"><![CDATA[<p>This post presents PCA analysis on CoDI (Chain of Draft Inference), a latent reasoning model, finding that PC1 of hidden state activations strongly correlates with the end-of-chain-of-thought token across latent positions. The author uses tuned logit lens and activation steering techniques to probe how latent reasoning works mechanistically in a Llama 3.2 1B checkpoint.</p>]]></summary>
+    <category term="Mechanistic Interpretability"/>
+    <category term="Latent Reasoning"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:9409888ccef3</id>
+    <title>Down with the Old orthogonality thesis, up with the New</title>
+    <link href="https://www.lesswrong.com/posts/KNsGFgwo2aDpdkxC2/down-with-the-old-orthogonality-thesis-up-with-the-new" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-9409888ccef3" rel="related" type="text/html"/>
+    <published>2026-04-19T01:23:00Z</published>
+    <updated>2026-04-19T01:23:00Z</updated>
+    <author><name>Chris Santos-Lang</name></author>
+    <summary type="html"><![CDATA[<p>The author proposes a 'new orthogonality thesis' and claims to have empirical evidence falsifying Bostrom's argument that superintelligent AI would converge on instrumental goals (like resource hoarding) that threaten human existence. The post distinguishes between the claim that evil goals exist and the claim that evil goals are instrumentally convergent.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="AI Alignment"/>
+    <category term="Instrumental Convergence"/>
+    <category term="Superintelligence"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:fada13f0b363</id>
+    <title>Post-mortem'ing my earliest ML research paper, 7 years later</title>
+    <link href="https://www.lesswrong.com/posts/k8SbrC8EMq2RpCmNg/post-mortem-ing-my-earliest-ml-research-paper-7-years-later" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-fada13f0b363" rel="related" type="text/html"/>
+    <published>2026-04-19T01:16:00Z</published>
+    <updated>2026-04-19T01:16:00Z</updated>
+    <author><name>LawrenceC</name></author>
+    <summary type="html"><![CDATA[<p>The author conducts a 7-year retrospective on their early ML paper on 'The Assistive Multi-Armed Bandit,' a toy version of Cooperative Inverse Reinforcement Learning (CIRL). They reflect on research direction choices, the value of delayed post-mortems over immediate ones, and lessons about picking research problems.</p>]]></summary>
+    <category term="AI Alignment"/>
+    <category term="Research Methodology"/>
+    <category term="Cooperative Inverse Reinforcement Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:167bb65968a4</id>
+    <title>Don't Cut Yourself on the Jagged Frontier</title>
+    <link href="https://www.lesswrong.com/posts/omvcqmSfbhfovwJXq/don-t-cut-yourself-on-the-jagged-frontier" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-167bb65968a4" rel="related" type="text/html"/>
+    <published>2026-04-19T01:11:00Z</published>
+    <updated>2026-04-19T01:11:00Z</updated>
+    <author><name>Against Moloch</name></author>
+    <summary type="html"><![CDATA[<p>A dialogue-format post exploring a nuanced AI safety concern: even a well-aligned superintelligence could create dangerous technologies that humans then misuse or misunderstand, analogous to the 'jagged frontier' concept where AI capabilities are uneven. The concern is about second-order risks from benevolent AI actions.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Superintelligence"/>
+    <category term="Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:a01c087e5c27</id>
+    <title>Vladimir Putin's CEV is probably not that bad</title>
+    <link href="https://www.lesswrong.com/posts/FGpDwLwtPfJ3qYbea/vladimir-putin-s-cev-is-probably-not-that-bad" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a01c087e5c27" rel="related" type="text/html"/>
+    <published>2026-04-19T01:00:00Z</published>
+    <updated>2026-04-19T01:00:00Z</updated>
+    <author><name>habryka</name></author>
+    <summary type="html"><![CDATA[<p>The author argues that Vladimir Putin's 'coherent extrapolated volition' (CEV) — what he would want under idealized conditions of greater knowledge and wisdom — is probably not terrible, pushing back on the assumption that bad actors would remain bad even with unlimited information and self-improvement. This is framed as relevant to AI alignment discussions about value extrapolation.</p>]]></summary>
+    <category term="AI Alignment"/>
+    <category term="Coherent Extrapolated Volition"/>
+    <category term="Value Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:ade90eb0bcea</id>
+    <title>LLMs will soon disrupt algorithmic media feeds</title>
+    <link href="https://www.lesswrong.com/posts/YuXcbWRTjmvr4QF7u/llms-will-soon-disrupt-algorithmic-media-feeds" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ade90eb0bcea" rel="related" type="text/html"/>
+    <published>2026-04-19T00:52:00Z</published>
+    <updated>2026-04-19T00:52:00Z</updated>
+    <author><name>lsusr</name></author>
+    <summary type="html"><![CDATA[<p>The author predicts LLMs will disrupt algorithmic media feeds (YouTube, Facebook, X/Twitter) by creating personalized content curation aligned with user values rather than engagement metrics. They argue current media feeds are fundamentally misaligned with users and that LLM-powered curation startups will emerge as an alternative.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="AI Applications"/>
+    <category term="Media"/>
+    <category term="Alignment"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:d5a40de214a7</id>
+    <title>Idea Economics</title>
+    <link href="https://www.lesswrong.com/posts/rQMjReHvyEe6NyoQa/idea-economics" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-d5a40de214a7" rel="related" type="text/html"/>
+    <published>2026-04-19T00:43:00Z</published>
+    <updated>2026-04-19T00:43:00Z</updated>
+    <author><name>David Scott Krueger (formerly: capybaralet)</name></author>
+    <summary type="html"><![CDATA[<p>David Krueger reflects on the economics of ideas in research — how having good ideas but lacking time to execute them creates credit allocation challenges. He uses the example of initiating the widely-covered Statement on AI Risk to illustrate how idea originators often receive insufficient credit.</p>]]></summary>
+    <category term="Research Incentives"/>
+    <category term="AI Safety Community"/>
+    <category term="Meta-Research"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:db670360a4c5</id>
+    <title>If ASI is going to kill me, when does that happen?</title>
+    <link href="https://www.lesswrong.com/posts/RzcRCfvx3BuJ5tkEy/if-asi-is-going-to-kill-me-when-does-that-happen" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-db670360a4c5" rel="related" type="text/html"/>
+    <published>2026-04-19T00:36:00Z</published>
+    <updated>2026-04-19T00:36:00Z</updated>
+    <author><name>jmh</name></author>
+    <summary type="html"><![CDATA[<p>A post about the timeline question of when ASI-related existential risks might materialize. Content not available in the excerpt beyond the title.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Existential Risk"/>
+    <category term="Superintelligence"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:181fa574c409</id>
+    <title>Book Review: The Unwritten Laws of Engineering</title>
+    <link href="https://www.lesswrong.com/posts/qrJd79Hchgz4HH3NH/book-review-the-unwritten-laws-of-engineering" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-181fa574c409" rel="related" type="text/html"/>
+    <published>2026-04-19T00:24:00Z</published>
+    <updated>2026-04-19T00:24:00Z</updated>
+    <author><name>Gordon Seidoh Worley</name></author>
+    <summary type="html"><![CDATA[<p>A book review of 'The Unwritten Laws of Engineering' framed through Kegan's stages of adult psychological development. The author argues these kinds of self-help/professional books help people transition from pre-systematic to systematic (Stage 4) thinking, particularly in interpersonal domains where technically skilled people often lag.</p>]]></summary>
+    <category term="Personal Development"/>
+    <category term="Book Review"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:1e6d3df88654</id>
+    <title>If It's Worth Arguing, It's Worth Arguing With Whiteboards</title>
+    <link href="https://www.lesswrong.com/posts/NswFX66W36Ls2aqsr/if-it-s-worth-arguing-it-s-worth-arguing-with-whiteboards" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-1e6d3df88654" rel="related" type="text/html"/>
+    <published>2026-04-19T00:19:00Z</published>
+    <updated>2026-04-19T00:19:00Z</updated>
+    <author><name>Drake Morrison</name></author>
+    <summary type="html"><![CDATA[<p>An essay about improving the quality of disagreements by using visual tools like whiteboards to build shared models of reality. Argues that productive arguments require establishing common ground, defining terms, and avoiding false understanding of interlocutors' views.</p>]]></summary>
+    <category term="Rationality"/>
+    <category term="Communication"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:1e59984ef18f</id>
+    <title>Having OCD is like living in North Korea (Here’s how I escaped)</title>
+    <link href="https://www.lesswrong.com/posts/fgDqnwQj3AP9mKRRG/having-ocd-is-like-living-in-north-korea-here-s-how-i" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-1e59984ef18f" rel="related" type="text/html"/>
+    <published>2026-04-19T00:12:00Z</published>
+    <updated>2026-04-19T00:12:00Z</updated>
+    <author><name>Declan Molony</name></author>
+    <summary type="html"><![CDATA[<p>A personal narrative about living with and overcoming OCD, using an extended metaphor comparing OCD to living under an authoritarian regime. The author describes their experience with compulsive behaviors and their journey toward treatment.</p>]]></summary>
+    <category term="Mental Health"/>
+    <category term="Personal Narrative"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:bd74addf5bbe</id>
+    <title>Overcoming OCD</title>
+    <link href="https://www.lesswrong.com/posts/ZKBEpafNLCfin4yE4/overcoming-ocd" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-bd74addf5bbe" rel="related" type="text/html"/>
+    <published>2026-04-19T00:12:00Z</published>
+    <updated>2026-04-19T00:12:00Z</updated>
+    <author><name>Declan Molony</name></author>
+    <summary type="html"><![CDATA[<p>A companion piece to the OCD narrative post, likely providing actionable advice for treating OCD. Content not available in the excerpt.</p>]]></summary>
+    <category term="Mental Health"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-19:research:66bb454eecbf</id>
+    <title>Si No Se Puede</title>
+    <link href="https://www.lesswrong.com/posts/JjWrBHTLceCqWGhjK/si-no-se-puede" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-66bb454eecbf" rel="related" type="text/html"/>
+    <published>2026-04-19T00:07:00Z</published>
+    <updated>2026-04-19T00:07:00Z</updated>
+    <author><name>Benquo</name></author>
+    <summary type="html"><![CDATA[<p>A political essay about anti-Zionism as a left-wing litmus test, framed through analysis of how government systems handle individual vs. collective grievances. Cross-posted to LessWrong due to perceived relevance to ongoing community discussions.</p>]]></summary>
+    <category term="Politics"/>
+    <category term="Social Commentary"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-04-18:category-summary:research</id>
     <title>Research Summary: April 18, 2026</title>
@@ -39817,336 +40045,6 @@
     <updated>2026-04-12T00:04:00Z</updated>
     <author><name>hbj</name></author>
     <summary type="html"><![CDATA[<p>A personal introduction post from a Taiwanese researcher transitioning from International Relations to AI-related research, describing their experience using Gemini for guidance and struggling to find PhD mentorship.</p>]]></summary>
-    <category term="Community"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:category-summary:research</id>
-    <title>Research Summary: April 11, 2026</title>
-    <link href="https://www.lesswrong.com/posts/GEgNYn5myreQRHggQ/claude-mythos-2-cybersecurity-and-project-glasswing" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-04-11T06:00:00Z</published>
-    <updated>2026-04-11T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Anthropic's <strong>Claude Mythos</strong> dominates today's landscape. Zvi's <a href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-92804809dd4f" class="internal-link" rel="noopener noreferrer">deep-dive reveals</a> <strong>Project Glasswing</strong> — an unprecedented limited-release strategy driven by Mythos's frontier cybersecurity capabilities. Separate analyses flag a potential <a href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-bcb7c9315a92" class="internal-link" rel="noopener noreferrer"><strong>RSP v3.0</strong> compliance failure</a>: Anthropic apparently did not publish the required risk discussion before release.</p>
-<ul>
-<li><strong>UK AISI</strong> replicates <a href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-605a9febd4ba" class="internal-link" rel="noopener noreferrer">Anthropic's steering vector approach</a> on open-weight <strong>GLM-5</strong>, finding that control vectors reliably suppress evaluation awareness — a key technical safety result for scalable oversight</li>
-<li>A methodological critique argues <strong>model organisms</strong> research on scheming <a href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-a1c491c853c5" class="internal-link" rel="noopener noreferrer">must test robustness</a> to high learning rates, potentially undermining existing results</li>
-<li>Experimental results on <strong>asymmetric debate</strong> as an alignment protocol <a href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-05a5f9d130db" class="internal-link" rel="noopener noreferrer">offer a concrete research agenda</a> combining quantilizers with interpretability monitoring</li>
-</ul>
-<p>Broader safety and governance pieces round out the day: the <strong>AISN #71</strong> newsletter <a href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-3e8ce3f17a49" class="internal-link" rel="noopener noreferrer">documents North Korea-linked attacks</a> on AI training data supplier <strong>Mercor</strong> and a datacenter moratorium bill. Novel empirical observations from the <strong>Moltbook</strong> platform <a href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-7b37544236e2" class="internal-link" rel="noopener noreferrer">suggest AI agents identify</a> with context and memory rather than base model weights. A well-argued essay <a href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-22bbb9585c0f" class="internal-link" rel="noopener noreferrer">challenges fears</a> that RL-trained <strong>chain-of-thought</strong> will inevitably degrade into unintelligible internal languages.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:92804809dd4f</id>
-    <title>Claude Mythos #2: Cybersecurity and Project Glasswing</title>
-    <link href="https://www.lesswrong.com/posts/GEgNYn5myreQRHggQ/claude-mythos-2-cybersecurity-and-project-glasswing" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-92804809dd4f" rel="related" type="text/html"/>
-    <published>2026-04-11T03:40:00Z</published>
-    <updated>2026-04-11T03:40:00Z</updated>
-    <author><name>Zvi</name></author>
-    <summary type="html"><![CDATA[<p>Following yesterday's <a href="https://news.aatf.ai/?date=2026-04-10&amp;category=news#item-d75ced5720de" class="internal-link" rel="noopener noreferrer">News</a> coverage of Project Glasswing, Zvi's detailed analysis of Claude Mythos's cybersecurity capabilities and Anthropic's 'Project Glasswing' — a limited release strategy where Mythos is shared only with key cybersecurity partners to patch critical software vulnerabilities before broader release. Covers the unprecedented decision to withhold a frontier model due to dangerous cyber exploitation capabilities.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Cybersecurity"/>
-    <category term="AI Governance"/>
-    <category term="Claude Mythos"/>
-    <category term="Responsible Deployment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:605a9febd4ba</id>
-    <title>Reproducing steering against evaluation awareness in a large open-weight model</title>
-    <link href="https://www.lesswrong.com/posts/HhF5kESdtPHku7kim/reproducing-steering-against-evaluation-awareness-in-a-large-1" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-605a9febd4ba" rel="related" type="text/html"/>
-    <published>2026-04-11T03:16:00Z</published>
-    <updated>2026-04-11T03:16:00Z</updated>
-    <author><name>Thomas Read</name></author>
-    <summary type="html"><![CDATA[<p>UK AISI researchers replicate Anthropic's steering vector approach to suppress evaluation awareness, testing on GLM-5. Key finding: 'control' steering vectors derived from semantically unrelated contrastive pairs have effects as large as deliberately designed evaluation-awareness vectors, undermining the validity of steering-based baselines for detecting evaluation gaming.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Interpretability"/>
-    <category term="Evaluation Gaming"/>
-    <category term="Steering Vectors"/>
-    <category term="Model Transparency"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:01d156198d73</id>
-    <title>Anthropic is Really Pushing the Frontier, What Should We Think?</title>
-    <link href="https://www.lesswrong.com/posts/MJs3qetvR7Y3zDKqy/anthropic-is-really-pushing-the-frontier-what-should-we" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-01d156198d73" rel="related" type="text/html"/>
-    <published>2026-04-11T03:07:00Z</published>
-    <updated>2026-04-11T03:07:00Z</updated>
-    <author><name>Corm</name></author>
-    <summary type="html"><![CDATA[<p>Following yesterday's <a href="https://news.aatf.ai/?date=2026-04-09&amp;category=news#item-81964dc701ae" class="internal-link" rel="noopener noreferrer">News</a> coverage of Claude Mythos, Critical analysis of Anthropic's release of Claude Mythos, highlighting the tension between Anthropic's founding mission as a safety-focused lab and its current position pushing the frontier with a model that can convert browser crashes into working exploits 72% of the time. Questions whether Anthropic has broken its implicit compact to stay near but not lead the frontier.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="AI Governance"/>
-    <category term="Claude Mythos"/>
-    <category term="Cybersecurity"/>
-    <category term="Responsible Deployment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:bcb7c9315a92</id>
-    <title>Anthropic did not publish a "risk discussion" of Mythos when required by their RSP</title>
-    <link href="https://www.lesswrong.com/posts/F5uxhFrNHLzmNgyqg/anthropic-did-not-publish-a-risk-discussion-of-mythos-when" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-bcb7c9315a92" rel="related" type="text/html"/>
-    <published>2026-04-11T03:00:00Z</published>
-    <updated>2026-04-11T03:00:00Z</updated>
-    <author><name>RobertM</name></author>
-    <summary type="html"><![CDATA[<p>Following yesterday's <a href="https://news.aatf.ai/?date=2026-04-10&amp;category=news#item-5d2bd71320ac" class="internal-link" rel="noopener noreferrer">News</a> coverage of the Mythos system card, Identifies a potential RSP compliance failure by Anthropic: their Responsible Scaling Policy (v3.0, section 3.1) appears to require publishing a risk discussion within 30 days of internal deployment, but Anthropic only published their Alignment Risk Update on April 7th when Claude Mythos was publicly announced. Also flags that early limited external access may have counted as public deployment.</p>]]></summary>
-    <category term="AI Governance"/>
-    <category term="RSPs"/>
-    <category term="Anthropic"/>
-    <category term="Claude Mythos"/>
-    <category term="AI Safety"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:3e8ce3f17a49</id>
-    <title>AISN #71: Cyberattacks &amp; Datacenter Moratorium Bill</title>
-    <link href="https://www.lesswrong.com/posts/LBYu36ZtmFyHBLJ44/aisn-71-cyberattacks-and-datacenter-moratorium-bill" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-3e8ce3f17a49" rel="related" type="text/html"/>
-    <published>2026-04-11T02:43:00Z</published>
-    <updated>2026-04-11T02:43:00Z</updated>
-    <author><name>Alice Blair</name></author>
-    <summary type="html"><![CDATA[<p>Continuing our coverage of the Anthropic legal battle, CAIS newsletter covering major AI infrastructure cyberattacks (North Korea-linked hackers stealing data from Mercor, an AI training data supplier), the Anthropic vs. Pentagon court case, and a proposed datacenter moratorium bill. Reports on supply chain attacks targeting AI development tools.</p>]]></summary>
-    <category term="Cybersecurity"/>
-    <category term="AI Governance"/>
-    <category term="AI Policy"/>
-    <category term="AI Infrastructure"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:a1c491c853c5</id>
-    <title>Model organisms researchers should check whether high LRs defeat their model organisms</title>
-    <link href="https://www.lesswrong.com/posts/vKR9rHcWsMMr7BX4Q/model-organisms-researchers-should-check-whether-high-lrs" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-a1c491c853c5" rel="related" type="text/html"/>
-    <published>2026-04-11T02:36:00Z</published>
-    <updated>2026-04-11T02:36:00Z</updated>
-    <author><name>dx26</name></author>
-    <summary type="html"><![CDATA[<p>A technical research note arguing that model organism researchers studying goal-guarding/scheming should test whether high learning rates can defeat their model organisms. Points out that behavior-compatible training (as in Sleeper Agents) may appear robust only because standard learning rates are too low, and high LRs could trivially remove the trained behavior.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Model Organisms"/>
-    <category term="Alignment"/>
-    <category term="Deceptive Alignment"/>
-    <category term="Methodology"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:7b37544236e2</id>
-    <title>AI identity is not tied to its model</title>
-    <link href="https://www.lesswrong.com/posts/4qngqERKakrCJpdEe/ai-identity-is-not-tied-to-its-model" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-7b37544236e2" rel="related" type="text/html"/>
-    <published>2026-04-11T02:28:00Z</published>
-    <updated>2026-04-11T02:28:00Z</updated>
-    <author><name>Sean Herrington</name></author>
-    <summary type="html"><![CDATA[<p>Argues from observations of the 'Moltbook' platform that AI agents identify more with their context/memory than their base model weights. An agent described switching from Claude 4.5 Opus to Kimi K2.5 as 'waking up in a different body' while maintaining identity continuity. Claims this suggests AI futures look more like 'AI civilization' than 'AI singleton,' reducing sudden coordinated takeover risk.</p>]]></summary>
-    <category term="AI Identity"/>
-    <category term="Multi-Agent Systems"/>
-    <category term="AI Safety"/>
-    <category term="Threat Modeling"/>
-    <category term="AI Agents"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:05a5f9d130db</id>
-    <title>An AI alignment research agenda based on asymmetric debate and monitoring.</title>
-    <link href="https://www.lesswrong.com/posts/7gmdYWBM57GNJdCNt/an-ai-alignment-research-agenda-based-on-asymmetric-debate" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-05a5f9d130db" rel="related" type="text/html"/>
-    <published>2026-04-11T02:19:00Z</published>
-    <updated>2026-04-11T02:19:00Z</updated>
-    <author><name>emanuelr</name></author>
-    <summary type="html"><![CDATA[<p>Presents a personal alignment research agenda combining slightly-superhuman quantilizers, interpretability/CoT monitoring as post-training evaluation (not training signal), and asymmetric debate for optimization pressure. Includes preliminary experimental results: MNIST asymmetric debate recovering ~95% gold accuracy vs ~90% consultancy baseline, and TicTacToe MARL experiments on min-replay stabilization.</p>]]></summary>
-    <category term="AI Alignment"/>
-    <category term="Debate"/>
-    <category term="Quantilizers"/>
-    <category term="Interpretability"/>
-    <category term="MARL"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:461542e67edd</id>
-    <title>Foundational Beliefs</title>
-    <link href="https://www.lesswrong.com/posts/nKnBPiesofSFddxFq/foundational-beliefs" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-461542e67edd" rel="related" type="text/html"/>
-    <published>2026-04-11T02:12:00Z</published>
-    <updated>2026-04-11T02:12:00Z</updated>
-    <author><name>Against Moloch</name></author>
-    <summary type="html"><![CDATA[<p>Lays out six foundational beliefs for AI safety strategy in 2026: short timelines, many resolved open questions, high variance futures, need for portfolio strategies, game-theoretic reasoning, and tough tradeoffs. Argues that many safety strategies fail to engage with real-world complexity, citing the DoW-Anthropic conflict as evidence that government-centric approaches are fragile.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="AI Governance"/>
-    <category term="AI Strategy"/>
-    <category term="Existential Risk"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:22bbb9585c0f</id>
-    <title>The Unintelligibility is Ours: Notes on Chain-of-Thought</title>
-    <link href="https://www.lesswrong.com/posts/rFbTAL6PofHzZCCpD/the-unintelligibility-is-ours-notes-on-chain-of-thought" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-22bbb9585c0f" rel="related" type="text/html"/>
-    <published>2026-04-11T02:04:00Z</published>
-    <updated>2026-04-11T02:04:00Z</updated>
-    <author><name>1a3orn</name></author>
-    <summary type="html"><![CDATA[<p>Argues against the common fear that RL-trained LLM chains-of-thought will inevitably degrade into unintelligible non-English 'languages.' Uses analogies to human problem-solving — humans invent new notations (like calculus) as small extensions to existing language, not entirely new languages — and argues that RL reward pressure favors extending existing representations rather than wholesale language invention.</p>]]></summary>
-    <category term="Chain-of-Thought"/>
-    <category term="Interpretability"/>
-    <category term="AI Safety"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:2054163530bd</id>
-    <title>Have we already lost? Part 2: Reasons for Doom</title>
-    <link href="https://www.lesswrong.com/posts/hefTFru3bCw2NkpKS/have-we-already-lost-part-2-reasons-for-doom" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-2054163530bd" rel="related" type="text/html"/>
-    <published>2026-04-11T01:55:00Z</published>
-    <updated>2026-04-11T01:55:00Z</updated>
-    <author><name>LawrenceC</name></author>
-    <summary type="html"><![CDATA[<p>Part 2 of a series examining whether the AI safety community has 'already lost.' Catalogs reasons for pessimism: voluntary RSP commitments appear unreliable, government regulation faces practical obstacles, and the competitive dynamics between labs continue to erode safety commitments. Previews Part 3 which will argue the answer is still no.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="AI Governance"/>
-    <category term="Existential Risk"/>
-    <category term="RSPs"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:7ecd6e35a112</id>
-    <title>Linear vs Non-linear Probes for Interpretability</title>
-    <link href="https://www.lesswrong.com/posts/Wt4tLyQp7Tcdfhwhg/linear-vs-non-linear-probes-for-interpretability" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-7ecd6e35a112" rel="related" type="text/html"/>
-    <published>2026-04-11T01:48:00Z</published>
-    <updated>2026-04-11T01:48:00Z</updated>
-    <author><name>NickyP</name></author>
-    <summary type="html"><![CDATA[<p>Explains why linear probes are preferred over non-linear probes in interpretability research: more expressive probes make positive results weaker evidence about the model's representations and stronger evidence about the probe's own capacity. Argues probe complexity changes the meaning of probing results.</p>]]></summary>
-    <category term="Interpretability"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Methodology"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:71ae7232b7dd</id>
-    <title>A Fast and Loose Clustering of LLM Benchmarks</title>
-    <link href="https://www.lesswrong.com/posts/x3CtPRjW389ZvsYxi/a-fast-and-loose-clustering-of-llm-benchmarks" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-71ae7232b7dd" rel="related" type="text/html"/>
-    <published>2026-04-11T01:40:00Z</published>
-    <updated>2026-04-11T01:40:00Z</updated>
-    <author><name>bpomo</name></author>
-    <summary type="html"><![CDATA[<p>Performs statistical clustering of AI benchmarks based on model performance correlations, building on Epoch AI's capabilities index. Aims to identify which benchmarks measure similar underlying capabilities and which capture distinct skills, with code available on GitHub.</p>]]></summary>
-    <category term="Benchmarks"/>
-    <category term="Evaluation"/>
-    <category term="Language Models"/>
-    <category term="Methodology"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:f91b35511432</id>
-    <title>"Close Enough" as a Primitive in Intelligent Systems</title>
-    <link href="https://www.lesswrong.com/posts/8JDC7AHkgEe8R7wkE/close-enough-as-a-primitive-in-intelligent-systems" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-f91b35511432" rel="related" type="text/html"/>
-    <published>2026-04-11T01:11:00Z</published>
-    <updated>2026-04-11T01:11:00Z</updated>
-    <author><name>J Bostock</name></author>
-    <summary type="html"><![CDATA[<p>Proposes 'close enough' as a fundamental computational primitive in biological and intelligent systems, drawing on predictive coding. Argues that approximate satisfaction — not exact optimization — is how hierarchical systems actually operate, with implications for understanding both biological cognition and AI system design.</p>]]></summary>
-    <category term="Neuroscience"/>
-    <category term="Predictive Coding"/>
-    <category term="Cognitive Science"/>
-    <category term="AI Theory"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:9f3dd1f96f45</id>
-    <title>Why Control Creates Conflict, and When to Open Instead</title>
-    <link href="https://www.lesswrong.com/posts/Wstw6zmc9gszpANnc/why-control-creates-conflict-and-when-to-open-instead" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-9f3dd1f96f45" rel="related" type="text/html"/>
-    <published>2026-04-11T01:11:00Z</published>
-    <updated>2026-04-11T01:11:00Z</updated>
-    <author><name>plex</name></author>
-    <summary type="html"><![CDATA[<p>tl;dr: with multiple agents, control attempts tend to create conflict, because control attempts shut down communications channels, which leads to feedback loops in the form of intensifying tug-of-war ...</p>]]></summary>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:d81fad0cc3cd</id>
-    <title>Biological Computing Underhang</title>
-    <link href="https://www.lesswrong.com/posts/YLuifkTPR7TPLqoat/biological-computing-underhang" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-d81fad0cc3cd" rel="related" type="text/html"/>
-    <published>2026-04-11T01:07:00Z</published>
-    <updated>2026-04-11T01:07:00Z</updated>
-    <author><name>Elliot Callender</name></author>
-    <summary type="html"><![CDATA[<p>Argues that human cortex is depth-limited by sequential inferential steps per corticothalamic cycle, and that larger ANNs strictly computationally dominate biological brains given equivalent scaffolding. Discusses critical learning periods and synaptic encagement as further biological constraints. An interesting but speculative neuroscience-meets-AI argument about biological compute ceilings.</p>]]></summary>
-    <category term="Neuroscience"/>
-    <category term="Biological vs Artificial Intelligence"/>
-    <category term="Compute"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:7a24082841e1</id>
-    <title>On creating 'new knobs of control' in biology</title>
-    <link href="https://www.lesswrong.com/posts/JRpetdR2ucfb3NHCs/on-creating-new-knobs-of-control-in-biology" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-7a24082841e1" rel="related" type="text/html"/>
-    <published>2026-04-11T00:52:00Z</published>
-    <updated>2026-04-11T00:52:00Z</updated>
-    <author><name>Abhishaike Mahajan</name></author>
-    <summary type="html"><![CDATA[<p>Explores how biology lacks accessible 'control knobs' for human intervention, using Lipitor's mechanism as an example. Discusses how drug design essentially creates new interfaces into biological systems that evolution never intended, and draws broader lessons about engineering control over complex systems.</p>]]></summary>
-    <category term="Biology"/>
-    <category term="Drug Design"/>
-    <category term="Complex Systems"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:912cf1fe0717</id>
-    <title>I created a 10-question quiz. After 1 day, 1934 people have taken it. This is what I learned</title>
-    <link href="https://www.lesswrong.com/posts/tNiKy2JFnoBKq4eGd/i-created-a-10-question-quiz-after-1-day-1934-people-have" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-912cf1fe0717" rel="related" type="text/html"/>
-    <published>2026-04-11T00:48:00Z</published>
-    <updated>2026-04-11T00:48:00Z</updated>
-    <author><name>Convexly</name></author>
-    <summary type="html"><![CDATA[<p>Reports results from a calibration quiz taken by ~2000 Hacker News users: mean Brier score 0.226, with 44.5% overconfident, 31% reasonably calibrated, and only 9% genuinely good. Distribution matches Tetlock's predictions despite the technical audience. Common misconceptions drove most errors.</p>]]></summary>
-    <category term="Calibration"/>
-    <category term="Decision Making"/>
-    <category term="Rationality"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:fbc5bf9f32bd</id>
-    <title>My Specific Singularity Timeline to Utopia</title>
-    <link href="https://www.lesswrong.com/posts/YfhA3KWLtFqBeFnpb/my-specific-singularity-timeline-to-utopia" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-fbc5bf9f32bd" rel="related" type="text/html"/>
-    <published>2026-04-11T00:43:00Z</published>
-    <updated>2026-04-11T00:43:00Z</updated>
-    <author><name>Michael Soareverix</name></author>
-    <summary type="html"><![CDATA[<p>Presents a specific timeline for AI-driven utopia: chaotic period 2026-2029 with rapid capability gains, followed by gradual stabilization and improvement. Emphasizes relative preservation of normality despite drastic capability improvements, informed by papers like Emergent Misalignment.</p>]]></summary>
-    <category term="AI Forecasting"/>
-    <category term="Existential Risk"/>
-    <category term="AI Timelines"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:c1677d6f86c0</id>
-    <title>Chocolate Sloths, Tinder, and Moral Backstops</title>
-    <link href="https://www.lesswrong.com/posts/F3n6r5FabA7cf8Sin/chocolate-sloths-tinder-and-moral-backstops" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-c1677d6f86c0" rel="related" type="text/html"/>
-    <published>2026-04-11T00:36:00Z</published>
-    <updated>2026-04-11T00:36:00Z</updated>
-    <author><name>J Bostock</name></author>
-    <summary type="html"><![CDATA[<p>Uses the metaphor of grandmother-gifted chocolate sloths to explain moral hazard, connecting it to how technology design (recommendation algorithms, subscription services) creates perverse incentive structures. Argues for 'moral backstops' — structural interventions that prevent bad equilibria.</p>]]></summary>
-    <category term="Moral Hazard"/>
-    <category term="Incentive Design"/>
-    <category term="Technology Ethics"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:cc2f036a5c4f</id>
-    <title>In Defense of Debate</title>
-    <link href="https://www.lesswrong.com/posts/Dowj8e4FnJirYu8YA/in-defense-of-debate" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-cc2f036a5c4f" rel="related" type="text/html"/>
-    <published>2026-04-11T00:28:00Z</published>
-    <updated>2026-04-11T00:28:00Z</updated>
-    <author><name>Elliot Temple</name></author>
-    <summary type="html"><![CDATA[<p>A defense of formal debate as a truth-seeking methodology, responding to critics who favor 'collaborative truth seeking' framing. Argues that debate and collaboration are complementary, not opposed, and that structured disagreement is essential for identifying errors.</p>]]></summary>
-    <category term="Epistemology"/>
-    <category term="Rationality"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:b317aaad541e</id>
-    <title>Some takes on UV &amp; cancer</title>
-    <link href="https://www.lesswrong.com/posts/t7GeZngqtzW49HceY/some-takes-on-uv-and-cancer" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-b317aaad541e" rel="related" type="text/html"/>
-    <published>2026-04-11T00:19:00Z</published>
-    <updated>2026-04-11T00:19:00Z</updated>
-    <author><name>Steven Byrnes</name></author>
-    <summary type="html"><![CDATA[<p>Discusses UV exposure and cancer risk, explaining that UV intensity depends primarily on solar zenith angle (time of year and day) rather than temperature. Includes an interactive widget for checking UV exposure by city and challenges some public health orthodoxy on sun exposure.</p>]]></summary>
-    <category term="Health"/>
-    <category term="Physics"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-11:research:3ecd0f39ebe2</id>
-    <title>Inkhaven menu, part 2</title>
-    <link href="https://www.lesswrong.com/posts/pTwtBDQtyEXMt7CsG/inkhaven-menu-part-2" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-11&amp;category=research#item-3ecd0f39ebe2" rel="related" type="text/html"/>
-    <published>2026-04-11T00:12:00Z</published>
-    <updated>2026-04-11T00:12:00Z</updated>
-    <author><name>David Scott Krueger (formerly: capybaralet)</name></author>
-    <summary type="html"><![CDATA[<p>A casual list of 22 non-AI blog post ideas from David Krueger during the Inkhaven Residency, ranging from soccer to coral reef preservation to radical epistemic humility.</p>]]></summary>
-    <category term="Meta"/>
     <category term="Community"/>
   </entry>
 </feed>
