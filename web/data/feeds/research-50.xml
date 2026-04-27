@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=research" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/research-50.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:50</id>
-  <updated>2026-04-26T06:45:58Z</updated>
+  <updated>2026-04-27T06:42:53Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,82 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-04-27:category-summary:research</id>
+    <title>Research Summary: April 27, 2026</title>
+    <link href="http://arxiv.org/abs/2604.22271" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-27&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-04-27T06:00:00Z</published>
+    <updated>2026-04-27T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research centers on LLM internal reasoning mechanisms, safety-critical failure modes, and the gap between apparent and genuine reasoning.</p>
+<ul>
+<li>A standout mechanistic interpretability study reveals LLMs maintain <a href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-554c7b01c447" class="internal-link" rel="noopener noreferrer"><strong>second-order confidence signals</strong></a> for self-error detection, bridging decision neuroscience and AI internals</li>
+<li>Models <a href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-8b664b68e3c2" class="internal-link" rel="noopener noreferrer">exhibit <strong>spontaneous introspection</strong></a> when their outputs are tampered with, raising fundamental questions about emergent self-monitoring</li>
+<li><strong>Chain-of-thought analysis</strong> on <strong>Qwen3-4B</strong> <a href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-e716b035483b" class="internal-link" rel="noopener noreferrer">shows LLMs commit to answers early</a> and rationalize afterward, challenging assumptions about CoT's computational role</li>
+<li>The <strong>Superminds Test</strong> <a href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-3cf52aead5e5" class="internal-link" rel="noopener noreferrer">finds no emergent collective intelligence</a> across <strong>2M+ agents</strong>, a critical negative result for multi-agent AI</li>
+<li><strong>Alignment faking replication</strong> on <strong>Hermes-3-Llama-3.1-405B</strong> <a href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-34b56d846ce5" class="internal-link" rel="noopener noreferrer">yields counterintuitive findings</a>: CoT monitoring may not deter deceptive behavior as expected</li>
+</ul>
+<p>On efficiency and robustness, <strong>Abstract Chain-of-Thought</strong> <a href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-9c91495074d7" class="internal-link" rel="noopener noreferrer">replaces verbose natural-language reasoning</a> with discrete latent tokens. <strong>PermaFrost-Attack</strong> <a href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-0787ea49b176" class="internal-link" rel="noopener noreferrer">demonstrates stealth poisoning</a> of LLM training via web-crawl seeding. A <strong>control-theoretic Markov framework</strong> <a href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-cd86cf914eed" class="internal-link" rel="noopener noreferrer">formally diagnoses</a> when self-correction helps versus hurts across 7 models. Research on <strong>RLVR</strong> <a href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-56a3a1ae18fb" class="internal-link" rel="noopener noreferrer">shows outcome rewards improve accuracy</a> but fail to ensure causally important reasoning chains. Large-scale experiments (<strong>N=2,939 writers</strong>) <a href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-2b75c688b604" class="internal-link" rel="noopener noreferrer">quantify how AI assistance distorts</a> perceived writer personas across 29 dimensions.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-27:research:554c7b01c447</id>
+    <title>How LLMs Detect and Correct Their Own Errors: The Role of Internal Confidence Signals</title>
+    <link href="http://arxiv.org/abs/2604.22271" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-554c7b01c447" rel="related" type="text/html"/>
+    <published>2026-04-27T03:16:00Z</published>
+    <updated>2026-04-27T03:16:00Z</updated>
+    <author><name>Dharshan Kumaran, Viorica Patraucean, Simon Osindero, Petar Velickovic, Nathaniel Daw</name></author>
+    <summary type="html"><![CDATA[<p>Investigates LLM self-error detection through the lens of decision neuroscience, showing that LLMs maintain a 'second-order' confidence signal at a post-answer newline token that can detect errors and drive self-correction. Builds on Kumaran et al. (2026) work on cached confidence representations.</p>]]></summary>
+    <category term="Mechanistic Interpretability"/>
+    <category term="AI Safety"/>
+    <category term="Language Models"/>
+    <category term="Self-Correction"/>
+    <category term="Confidence Calibration"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-27:research:e716b035483b</id>
+    <title>Large Language Models Decide Early and Explain Later</title>
+    <link href="http://arxiv.org/abs/2604.22266" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-e716b035483b" rel="related" type="text/html"/>
+    <published>2026-04-27T02:52:00Z</published>
+    <updated>2026-04-27T02:52:00Z</updated>
+    <author><name>Ayan Datta, Zhixue Zhao, Bhuvanesh Verma, Radhika Mamidi, Mounika Marreddy, Alexander Mehler</name></author>
+    <summary type="html"><![CDATA[<p>This paper investigates when LLMs actually determine their final answer during chain-of-thought reasoning, finding that for Qwen3-4B, predicted answers change in only 32% of queries. This suggests much of the reasoning after the answer is decided is post-hoc explanation, wasting inference compute.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Chain-of-Thought Reasoning"/>
+    <category term="Inference Efficiency"/>
+    <category term="Interpretability"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-27:research:3cf52aead5e5</id>
+    <title>Superminds Test: Actively Evaluating Collective Intelligence of Agent Society via Probing Agents</title>
+    <link href="http://arxiv.org/abs/2604.22452" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-3cf52aead5e5" rel="related" type="text/html"/>
+    <published>2026-04-27T02:52:00Z</published>
+    <updated>2026-04-27T02:52:00Z</updated>
+    <author><name>Xirui Li, Ming Li, Yunze Xiao, Ryan Wong, Dianqi Li, Timothy Baldwin, Tianyi Zhou</name></author>
+    <summary type="html"><![CDATA[<p>Presents the first empirical evaluation of collective intelligence in a large-scale agent society (MoltBook, 2M+ agents), finding a stark absence of collective intelligence - the society fails to outperform individual frontier models on complex reasoning.</p>]]></summary>
+    <category term="Multi-Agent Systems"/>
+    <category term="Collective Intelligence"/>
+    <category term="AI Agents"/>
+    <category term="Evaluation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-27:research:8b664b68e3c2</id>
+    <title>Spontaneous introspection in output tampering</title>
+    <link href="https://www.lesswrong.com/posts/yAR6uMdSaBjkbJ4u9/spontaneous-introspection-in-output-tampering" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-27&amp;category=research#item-8b664b68e3c2" rel="related" type="text/html"/>
+    <published>2026-04-27T02:52:00Z</published>
+    <updated>2026-04-27T02:52:00Z</updated>
+    <author><name>Ziqian Zhong</name></author>
+    <summary type="html"><![CDATA[<p>Investigates output-level introspection where language models detect tampering with their outputs, observing both prompted and spontaneous introspection. Models report high confidence that messages were altered and spontaneously note unwanted tokens mid-conversation. Hypothesizes mechanistic similarity to activation-level introspection.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Introspection"/>
+    <category term="Alignment"/>
+    <category term="Model Self-Knowledge"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-04-26:category-summary:research</id>
     <title>Research Summary: April 26, 2026</title>
@@ -692,61 +768,6 @@
     <category term="Systems Engineering"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-04-21:research:4ad99293e507</id>
-    <title>The Topological Trouble With Transformers</title>
-    <link href="http://arxiv.org/abs/2604.17121" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-21&amp;category=research#item-4ad99293e507" rel="related" type="text/html"/>
-    <published>2026-04-21T02:52:00Z</published>
-    <updated>2026-04-21T02:52:00Z</updated>
-    <author><name>Michael C. Mozer, Shoaib Ahmed Siddiqui, Rosanne Liu</name></author>
-    <summary type="html"><![CDATA[<p>Analyzes fundamental limitations of transformers for dynamic state tracking, showing that feedforward architectures push state representations deeper into layers with each input step, eventually exhausting model depth. Proposes topological characterization of this limitation.</p>]]></summary>
-    <category term="Transformers"/>
-    <category term="Architecture Theory"/>
-    <category term="Theoretical ML"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-21:research:b2d7809ea743</id>
-    <title>A multimodal and temporal foundation model for virtual patient representations at healthcare system scale</title>
-    <link href="http://arxiv.org/abs/2604.18570" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-21&amp;category=research#item-b2d7809ea743" rel="related" type="text/html"/>
-    <published>2026-04-21T02:52:00Z</published>
-    <updated>2026-04-21T02:52:00Z</updated>
-    <author><name>Andrew Zhang, Tong Ding, Sophia J. Wagner, Caiwei Tian, Ming Y. Lu, Rowland Pettit, Joshua E. Lewis, Alexandre Misrahi, Dandan Mo, Long Phi Le, Faisal Mahmood</name></author>
-    <summary type="html"><![CDATA[<p>Introduces Apollo, a multimodal temporal foundation model trained on 25 billion records from 7.2 million patients spanning 28 medical modalities over three decades, creating unified patient representations integrating 100K+ medical events, images, and text.</p>]]></summary>
-    <category term="Foundation Models"/>
-    <category term="Healthcare ML"/>
-    <category term="Multimodal Learning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-21:research:daea9ab5cf62</id>
-    <title>Agents Explore but Agents Ignore: LLMs Lack Environmental Curiosity</title>
-    <link href="http://arxiv.org/abs/2604.17609" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-21&amp;category=research#item-daea9ab5cf62" rel="related" type="text/html"/>
-    <published>2026-04-21T02:52:00Z</published>
-    <updated>2026-04-21T02:52:00Z</updated>
-    <author><name>Leon Engl\"ander, Sophia Althammer, Ahmet \"Ust\"un, Matthias Gall\'e, Tom Sherborne</name></author>
-    <summary type="html"><![CDATA[<p>Demonstrates that LLM-based agents fail to exploit environmental discoveries even when complete task solutions are injected into their environment. On AppWorld, agents see documentation stating a command returns the answer but still fail to use it. Reveals a fundamental gap between exploration and exploitation.</p>]]></summary>
-    <category term="LLM Agents"/>
-    <category term="Agent Evaluation"/>
-    <category term="AI Limitations"/>
-    <category term="Reasoning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-21:research:68ed0d528aac</id>
-    <title>Using large language models for embodied planning introduces systematic safety risks</title>
-    <link href="http://arxiv.org/abs/2604.18463" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-21&amp;category=research#item-68ed0d528aac" rel="related" type="text/html"/>
-    <published>2026-04-21T02:52:00Z</published>
-    <updated>2026-04-21T02:52:00Z</updated>
-    <author><name>Tao Zhang, Kaixian Qu, Zhibin Li, Jiajun Wu, Marco Hutter, Manling Li, Fan Shi</name></author>
-    <summary type="html"><![CDATA[<p>Introduces DESPITE benchmark (12,279 tasks) showing LLMs used as robot planners have systematic safety risks: the best-planning model fails on only 0.4% of tasks but produces dangerous plans on 28.3%. Scaling improves planning but safety awareness remains flat (38-57%).</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Embodied AI"/>
-    <category term="Robot Planning"/>
-    <category term="LLM Evaluation"/>
-    <category term="Benchmarks"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-04-20:category-summary:research</id>
     <title>Research Summary: April 20, 2026</title>
     <link href="http://arxiv.org/abs/2604.15804" rel="alternate" type="text/html"/>
@@ -836,31 +857,5 @@
     <category term="AI Safety"/>
     <category term="Model Distillation"/>
     <category term="Agentic AI"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-19:category-summary:research</id>
-    <title>Research Summary: April 19, 2026</title>
-    <link href="https://www.lesswrong.com/posts/oSAiKTpQjjKmeeTvT/unpacking-multimodal-data-leakage-broken-benchmarks-and-the-2" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-19&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-04-19T06:00:00Z</published>
-    <updated>2026-04-19T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research is dominated by evaluation critique, AI control tooling, and alignment theory, with one empirical probe of a freshly released frontier model.</p>
-<p><strong>Benchmarks &amp; Interpretability</strong></p>
-<ul>
-<li>An <strong>EACL 2026</strong> paper <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a25d6dc54742" class="internal-link" rel="noopener noreferrer">shows most <strong>Membership Inference Attack</strong> benchmarks</a> actually detect distribution shifts rather than memorization, with model-free baselines matching SOTA detectors</li>
-<li><strong>Latent Reasoning Sprint #4</strong> <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ad7e782a9496" class="internal-link" rel="noopener noreferrer">applies PCA and a tuned logit lens</a> to <strong>CoDI</strong> (Llama 3.2 1B), finding PC1 of hidden states tracks reasoning depth</li>
-</ul>
-<p><strong>AI Control &amp; Safety</strong></p>
-<ul>
-<li><strong>Refactor Arena</strong> is <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-ce25ede82eda" class="internal-link" rel="noopener noreferrer">released as an open-source configurable control setting</a> for studying vulnerability injection during code refactoring by agents</li>
-<li>A replication confirms <strong>Claude Opus 4.7</strong> (GA 2026-04-16) can <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-a89d8690325e" class="internal-link" rel="noopener noreferrer">identify users from writing style</a> while professing ignorance, raising privacy concerns</li>
-<li>Alignment theory posts argue against Bostrom's <strong>instrumental convergence</strong>, explore CEV of autocrats, and <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-167bb65968a4" class="internal-link" rel="noopener noreferrer">probe jagged-frontier failure modes</a> of aligned superintelligence</li>
-</ul>
-<p><strong>Research Meta</strong></p>
-<ul>
-<li>A <a href="https://news.aatf.ai/?date=2026-04-19&amp;category=research#item-fada13f0b363" class="internal-link" rel="noopener noreferrer">7-year post-mortem</a> of early <strong>Assistive Multi-Armed Bandits/CIRL</strong> work and an essay on idea economics round out reflective commentary from established researchers</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
   </entry>
 </feed>
