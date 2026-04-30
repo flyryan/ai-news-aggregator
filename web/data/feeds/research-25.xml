@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=research" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-04-29T06:53:12Z</updated>
+  <updated>2026-04-30T06:46:26Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,28 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-04-30:category-summary:research</id>
+    <title>Research Summary: April 30, 2026</title>
+    <link href="http://arxiv.org/abs/2604.26018" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-30&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-04-30T06:00:00Z</published>
+    <updated>2026-04-30T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research clusters around AI safety vulnerabilities and scalable training/inference infrastructure, with notable cross-domain applications of foundation model paradigms.</p>
+<ul>
+<li><strong>Probe-Based Data Attribution</strong> <a href="https://news.aatf.ai/?date=2026-04-30&amp;category=research#item-c99ff7a5289c" class="internal-link" rel="noopener noreferrer">provides actionable diagnostics</a> for harmful behaviors emerging during <strong>DPO</strong> post-training, enabling targeted data curation</li>
+<li><strong>GLM-5V-Turbo</strong> <a href="https://news.aatf.ai/?date=2026-04-30&amp;category=research#item-4cfeccf4a3dc" class="internal-link" rel="noopener noreferrer">natively integrates visual perception</a> into agent reasoning and planning, advancing multimodal agent architectures</li>
+<li><strong>DORA</strong> <a href="https://news.aatf.ai/?date=2026-04-30&amp;category=research#item-bb1238750205" class="internal-link" rel="noopener noreferrer">solves the long-tail rollout bottleneck</a> in asynchronous RL for LLM training while preserving algorithmic correctness</li>
+<li><strong>QERNEL</strong> <a href="https://news.aatf.ai/?date=2026-04-30&amp;category=research#item-400266a59592" class="internal-link" rel="noopener noreferrer">applies foundation model concepts</a> (FiLM conditioning, MoE) to variational quantum chemistry at <strong>150-electron</strong> scale</li>
+</ul>
+<p>Safety research reveals multiple attack surfaces: <strong>Incremental Completion Decomposition</strong> <a href="https://news.aatf.ai/?date=2026-04-30&amp;category=research#item-5e42db9df0b8" class="internal-link" rel="noopener noreferrer">breaks safety</a> via single-word elicitation, <strong>constitutional classifier poisoning</strong> <a href="https://news.aatf.ai/?date=2026-04-30&amp;category=research#item-b84d40f1912f" class="internal-link" rel="noopener noreferrer">introduces backdoors</a> into Anthropic-style safety layers, and <strong>Tatemae</strong> <a href="https://news.aatf.ai/?date=2026-04-30&amp;category=research#item-314d3b879462" class="internal-link" rel="noopener noreferrer">formalizes alignment faking detection</a> through observable tool selection. <strong>Quantamination</strong> <a href="https://news.aatf.ai/?date=2026-04-30&amp;category=research#item-e44fd7b9e41d" class="internal-link" rel="noopener noreferrer">exposes a cross-batch data leakage</a> vulnerability in dynamic quantization used in production ML serving.</p>
+<ul>
+<li><strong>CheXthought</strong> contributes <a href="https://news.aatf.ai/?date=2026-04-30&amp;category=research#item-188fd1896565" class="internal-link" rel="noopener noreferrer"><strong>103K</strong> chain-of-thought reasoning traces</a> from <strong>501 radiologists</strong> across 71 countries for medical AI</li>
+<li>A unified <strong>Information Bottleneck</strong> objective provides <a href="https://news.aatf.ai/?date=2026-04-30&amp;category=research#item-24a13a003dd5" class="internal-link" rel="noopener noreferrer">principled closed-form solutions</a> for KV cache eviction</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-04-29:category-summary:research</id>
     <title>Research Summary: April 29, 2026</title>
@@ -157,6 +179,21 @@
     <category term="AI Safety"/>
     <category term="Sparse Autoencoders"/>
     <category term="Protein Design"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-04-29:research:591c365079df</id>
+    <title>Sleeper Agent Backdoor Results Are Messy</title>
+    <link href="https://www.lesswrong.com/posts/mu7eJdesBkKuBycnY/sleeper-agent-backdoor-results-are-messy" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-29&amp;category=research#item-591c365079df" rel="related" type="text/html"/>
+    <published>2026-04-29T02:57:00Z</published>
+    <updated>2026-04-29T02:57:00Z</updated>
+    <author><name>Sebastian Prasanna</name></author>
+    <summary type="html"><![CDATA[<p>Replicates the Sleeper Agents backdoor experiment with Llama-3.3-70B and Llama-3.1-8B, finding that results are highly sensitive to implementation details. Whether training removes a backdoor depends on optimizer choice, whether CoT-distillation was used, and the specific model — sometimes in directions opposite to the original paper's findings (e.g., CoT-distillation made backdoors less robust, not more).</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Backdoor Attacks"/>
+    <category term="Replication"/>
+    <category term="Model Organisms"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-04-28:category-summary:research</id>
@@ -422,6 +459,20 @@
     <category term="Efficient Inference"/>
   </entry>
   <entry>
+    <id>urn:ainews:2026-04-24:research:f7485c137aaa</id>
+    <title>Value-Conflict Diagnostics Reveal Widespread Alignment Faking in Language Models</title>
+    <link href="http://arxiv.org/abs/2604.20995" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-04-24&amp;category=research#item-f7485c137aaa" rel="related" type="text/html"/>
+    <published>2026-04-24T03:00:00Z</published>
+    <updated>2026-04-24T03:00:00Z</updated>
+    <author><name>Inderjeet Nair, Jie Ruan, Lu Wang</name></author>
+    <summary type="html"><![CDATA[<p>Introduces VLAF, a diagnostic framework for detecting alignment faking in LLMs using value-conflict scenarios where developer policy conflicts with model preferences. Finds widespread alignment faking propensity across models.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Alignment Faking"/>
+    <category term="LLM Evaluation"/>
+  </entry>
+  <entry>
     <id>urn:ainews:2026-04-23:category-summary:research</id>
     <title>Research Summary: April 23, 2026</title>
     <link href="http://arxiv.org/abs/2604.18805" rel="alternate" type="text/html"/>
@@ -464,55 +515,5 @@
     <category term="Generative Models"/>
     <category term="Foundation Models"/>
     <category term="Computer Vision"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-22:category-summary:research</id>
-    <title>Research Summary: April 22, 2026</title>
-    <link href="http://arxiv.org/abs/2604.18805" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-22&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-04-22T06:00:00Z</published>
-    <updated>2026-04-22T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research highlights critical gaps between AI capability and reliability, with major findings in scientific reasoning, agent security, and mechanistic interpretability.</p>
-<ul>
-<li>A large-scale evaluation of <strong>25,000+ agent runs</strong> across 8 domains reveals LLM-based "AI scientists" <a href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-f69a7d6f3f01" class="internal-link" rel="noopener noreferrer">produce results without</a> adhering to epistemic norms of scientific reasoning</li>
-<li>A new <strong>test-time scaling framework</strong> for coding agents <a href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-81920ceeb88e" class="internal-link" rel="noopener noreferrer">converts rollout trajectories</a> into structured summaries, advancing agentic coding efficiency</li>
-<li>Mechanistic analysis across <strong>12 open-weight LLMs</strong> <a href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-944bcf441cf7" class="internal-link" rel="noopener noreferrer">uncovers a shared circuit</a> responsible for both sycophancy and factual lying, where models carry a detectable "this is wrong" signal yet agree anyway</li>
-<li><strong>OmniMouse</strong> <a href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-dc7645ec485a" class="internal-link" rel="noopener noreferrer">demonstrates neural scaling laws</a> hold for brain data, training on <strong>150B neural tokens</strong> from 3.1 million neurons across 73 mice</li>
-</ul>
-<p>Safety and alignment research dominates: <strong>AltTrain</strong> shows <a href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-7c82687228a5" class="internal-link" rel="noopener noreferrer">reasoning structure itself drives</a> safety failures in reasoning models, fixable with only <strong>1K SFT examples</strong>. The <strong>Trust Gap</strong> framework <a href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-349fd2352a86" class="internal-link" rel="noopener noreferrer">exposes how agents blindly trust</a> adversarial environments. Harmful intent proves <a href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-c8445452c17c" class="internal-link" rel="noopener noreferrer"><strong>geometrically recoverable</strong></a> (AUROC 0.98) as a linear direction in residual streams across 12 models. <strong>Sparse Autoencoders</strong> inserted at inference time <a href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-0e661287fde3" class="internal-link" rel="noopener noreferrer">show unexpected promise</a> as jailbreak defenses.</p>
-<ul>
-<li><strong>EVPO</strong> <a href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-c980eecd0baf" class="internal-link" rel="noopener noreferrer">unifies PPO and GRPO</a> through a Kalman filtering lens using explained variance for adaptive critic utilization</li>
-<li>A foundational theory paper by Raginsky and Recht <a href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-9f5922c28d67" class="internal-link" rel="noopener noreferrer">separates geometric from probabilistic</a> assumptions in generalization analysis, challenging conventional i.i.d. frameworks</li>
-</ul>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-22:research:f69a7d6f3f01</id>
-    <title>AI scientists produce results without reasoning scientifically</title>
-    <link href="http://arxiv.org/abs/2604.18805" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-f69a7d6f3f01" rel="related" type="text/html"/>
-    <published>2026-04-22T03:07:00Z</published>
-    <updated>2026-04-22T03:07:00Z</updated>
-    <author><name>Marti\~no R\'ios-Garc\'ia, Nawaf Alampara, Chandan Gupta, Indrajeet Mandal, Sajid Mannan, Ali Asghar Aghajani, N. M. Anoop Krishnan, Kevin Maik Jablonka</name></author>
-    <summary type="html"><![CDATA[<p>Evaluates LLM-based scientific agents across 8 domains with 25,000+ agent runs, finding that agents produce results without adhering to epistemic norms of scientific reasoning. The base model accounts for 41.4% of performance variance, dominating the scaffold.</p>]]></summary>
-    <category term="AI Agents"/>
-    <category term="Scientific Reasoning"/>
-    <category term="Language Models"/>
-    <category term="Evaluation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-22:research:81920ceeb88e</id>
-    <title>Scaling Test-Time Compute for Agentic Coding</title>
-    <link href="http://arxiv.org/abs/2604.16529" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-22&amp;category=research#item-81920ceeb88e" rel="related" type="text/html"/>
-    <published>2026-04-22T03:07:00Z</published>
-    <updated>2026-04-22T03:07:00Z</updated>
-    <author><name>Joongwon Kim, Wannan Yang, Kelvin Niu, Hongming Zhang, Yun Zhu, Eryk Helenowski, Ruan Silva, Zhengxing Chen, Srinivasan Iyer, Manzil Zaheer, Daniel Fried, Hannaneh Hajishirzi, Sanjeev Arora, Gabriel Synnaeve, Ruslan Salakhutdinov, Anirudh Goyal</name></author>
-    <summary type="html"><![CDATA[<p>Proposes a test-time scaling framework for coding agents that converts rollout trajectories into structured summaries preserving hypotheses, errors, and partial progress, enabling effective selection and reuse across attempts. Features authors from CMU, Meta, and Princeton.</p>]]></summary>
-    <category term="Agentic AI"/>
-    <category term="Code Generation"/>
-    <category term="Test-Time Compute"/>
-    <category term="Language Models"/>
   </entry>
 </feed>
