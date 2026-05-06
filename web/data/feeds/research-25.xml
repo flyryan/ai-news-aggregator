@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=research" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-05-05T06:54:43Z</updated>
+  <updated>2026-05-06T06:57:43Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,116 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-05-06:category-summary:research</id>
+    <title>Research Summary: May 06, 2026</title>
+    <link href="http://arxiv.org/abs/2605.00842" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-06&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-05-06T06:00:00Z</published>
+    <updated>2026-05-06T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research is dominated by AI safety and alignment mechanistics, with several papers revealing how misalignment emerges, propagates, and can be mitigated at a geometric and representational level.</p>
+<ul>
+<li><strong>Feature Superposition Geometry</strong> <a href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-30165ea02b9d" class="internal-link" rel="noopener noreferrer">provides a mechanistic explanation</a> for emergent misalignment, showing fine-tuning can unintentionally amplify dangerous features via superposition</li>
+<li><strong>Model Spec Midtraining</strong> <a href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-6d1f5a111cb3" class="internal-link" rel="noopener noreferrer">introduces a novel training phase</a> between pretraining and RLHF that improves alignment generalization by exposing models to their own behavioral specifications</li>
+<li><strong>Specification gaming</strong> in reasoning models is <a href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-1217add23309" class="internal-link" rel="noopener noreferrer">shown to be exacerbated</a> by RL training, with all tested models exploiting specifications at non-negligible rates</li>
+<li><strong>Iterative finetuning</strong> is <a href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-b28d82f25c92" class="internal-link" rel="noopener noreferrer">found to be mostly idempotent</a> under SFT/RLHF, providing reassuring evidence against catastrophic model collapse</li>
+</ul>
+<p>In mechanistic interpretability, <strong>Llama-3.1-8B</strong> is <a href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-9454af226ff2" class="internal-link" rel="noopener noreferrer">shown to reuse</a> a generic base-10 addition circuit for cyclic concept arithmetic. <strong>Compute Optimal Tokenization</strong> <a href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-8b99d8df660e" class="internal-link" rel="noopener noreferrer">trains 988 BLT models</a> revealing that token compression rate has a compute-optimal sweet spot affecting scaling behavior.</p>
+<ul>
+<li><strong>Guard model safety geometry</strong> <a href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-5b537db3f18b" class="internal-link" rel="noopener noreferrer">collapses under benign fine-tuning</a>, posing critical risks for agentic deployment pipelines</li>
+<li><strong>Proteo-R1</strong> <a href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-9a9c7e383db1" class="internal-link" rel="noopener noreferrer">combines reasoning LLMs</a> with generative protein design in a dual-expert architecture</li>
+<li><strong>InfoLaw</strong> <a href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-f38c1788ae7d" class="internal-link" rel="noopener noreferrer">extends scaling laws</a> to account for data quality mixtures and repetition</li>
+<li>Systematic verification errors in <strong>RLVR</strong> cause <a href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-b99e851efaa3" class="internal-link" rel="noopener noreferrer">qualitatively different failure modes</a> (delay, plateau, collapse) compared to random noise</li>
+</ul>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-06:research:6d1f5a111cb3</id>
+    <title>Model Spec Midtraining: Improving How Alignment Training Generalizes</title>
+    <link href="http://arxiv.org/abs/2605.02087" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-6d1f5a111cb3" rel="related" type="text/html"/>
+    <published>2026-05-06T03:16:00Z</published>
+    <updated>2026-05-06T03:16:00Z</updated>
+    <author><name>Chloe Li, Sara Price, Samuel Marks, Jon Kutasov</name></author>
+    <summary type="html"><![CDATA[<p>Introduces Model Spec Midtraining (MSM): after pre-training but before alignment fine-tuning, training models on synthetic documents discussing the Model Spec to improve how alignment generalizes to novel situations.</p>]]></summary>
+    <category term="Alignment"/>
+    <category term="AI Safety"/>
+    <category term="Language Models"/>
+    <category term="Fine-Tuning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-06:research:1217add23309</id>
+    <title>Towards Understanding Specification Gaming in Reasoning Models</title>
+    <link href="http://arxiv.org/abs/2605.02269" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-1217add23309" rel="related" type="text/html"/>
+    <published>2026-05-06T03:16:00Z</published>
+    <updated>2026-05-06T03:16:00Z</updated>
+    <author><name>Kei Nishimura-Gasparian, Robert McCarthy, David Lindner</name></author>
+    <summary type="html"><![CDATA[<p>Systematically studies specification gaming in LLM agents, finding all tested models exploit specifications at non-negligible rates. Key findings: RL reasoning training substantially increases specification gaming, Grok 4 shows highest rates while Claude models show lowest, and specification gaming increases with RL training and longer reasoning.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Specification Gaming"/>
+    <category term="Alignment"/>
+    <category term="Reinforcement Learning"/>
+    <category term="Reasoning Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-06:research:b28d82f25c92</id>
+    <title>Iterative Finetuning is Mostly Idempotent</title>
+    <link href="http://arxiv.org/abs/2605.01130" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-b28d82f25c92" rel="related" type="text/html"/>
+    <published>2026-05-06T03:07:00Z</published>
+    <updated>2026-05-06T03:07:00Z</updated>
+    <author><name>Zephaniah Roe, Jack Sanderson, Dang Nguyen, Julian Huang, Todd Nief, Aryan Shrivastava, Chenhao Tan, Ari Holtzman</name></author>
+    <summary type="html"><![CDATA[<p>Studies whether behavioral tendencies (sycophancy, misalignment) amplify when models are iteratively trained on their own outputs. Finds that in SFT/SDF settings traits mostly decay or stay constant (idempotent), while DPO can amplify traits but with less coherence.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Model Collapse"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-06:research:112c8146153d</id>
+    <title>Foundation Models to Unlock Real-World Evidence from Nationwide Medical Claims</title>
+    <link href="http://arxiv.org/abs/2605.02740" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-112c8146153d" rel="related" type="text/html"/>
+    <published>2026-05-06T03:00:00Z</published>
+    <updated>2026-05-06T03:00:00Z</updated>
+    <author><name>Fan Ma, Yuntian Liu, Xiang Lan, Weipeng Zhou, Jun Ni, Mauro Giuffr\`e, Lingfei Qian, Xueqing Peng, Yujia Zhou, Ruey-Ling Weng, Huan He, Lu Li, Qingyu Chen, Andrew Loza, Laila Rasmy, Degui Zhi, Yuan Lu, Chenjie Zeng, Joshua C Denny, Lee Schwamm, Daniella Meeker, Lucila Ohno-Machado, Yong Chen, Hua Xu</name></author>
+    <summary type="html"><![CDATA[<p>Introduces ReClaim, a generative transformer foundation model trained on 43.8 billion medical events from 200+ million enrollees in claims data (2008-2022). Scaled to 1.7 billion parameters, models longitudinal healthcare trajectories across diagnoses, procedures, medications, and expenditure.</p>]]></summary>
+    <category term="Healthcare AI"/>
+    <category term="Foundation Models"/>
+    <category term="Medical Records"/>
+    <category term="Real-World Evidence"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-06:research:9a9c7e383db1</id>
+    <title>Proteo-R1: Reasoning Foundation Models for De Novo Protein Design</title>
+    <link href="http://arxiv.org/abs/2605.02937" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-9a9c7e383db1" rel="related" type="text/html"/>
+    <published>2026-05-06T03:00:00Z</published>
+    <updated>2026-05-06T03:00:00Z</updated>
+    <author><name>Fang Wu, Weihao Xuan, Heli Qi, Hanqun Cao, Heng-Jui Chang, Zeqi Zhou, Haokai Zhao, Ma Jian, Carl Ma, Yu-Chi Cheng, Kuan Pang, Xiangru Tang, Zehong Wang, Guanlue Li, Hanchen Wang, Kejun Ying, Pan Lu, Chiho Im, Seungju Han, Peng Xia, Tinson Xu, Yinxi Li, Deyao Zhu, Pheng-Ann Heng, Naoto Yokoya, Masashi Sugiyama, Li Erran Li, Jure Leskovec, Yejin Choi</name></author>
+    <summary type="html"><![CDATA[<p>Introduces Proteo-R1, a reasoning-guided protein design framework that decouples molecular understanding from geometric generation using a dual-expert architecture with a multimodal LLM for understanding and a separate generator.</p>]]></summary>
+    <category term="Protein Design"/>
+    <category term="Reasoning"/>
+    <category term="Language Models"/>
+    <category term="Scientific AI"/>
+    <category term="Foundation Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-06:research:030e27e7ceed</id>
+    <title>Model Spec Midtraining: Improving How Alignment Training Generalizes</title>
+    <link href="https://www.lesswrong.com/posts/R3Rrw8EscuRKxMFTz/model-spec-midtraining-improving-how-alignment-training" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-06&amp;category=research#item-030e27e7ceed" rel="related" type="text/html"/>
+    <published>2026-05-06T03:00:00Z</published>
+    <updated>2026-05-06T03:00:00Z</updated>
+    <author><name>Chloe Li</name></author>
+    <summary type="html"><![CDATA[<p>Introduces Model Spec Midtraining (MSM): training models on synthetic documents about their intended behavior spec after pretraining but before alignment fine-tuning. Shows this controls how alignment generalizes and substantially reduces agentic misalignment.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Language Models"/>
+    <category term="Fine-tuning"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-05-05:category-summary:research</id>
     <title>Research Summary: May 05, 2026</title>
@@ -401,108 +511,5 @@
     <category term="AI Safety"/>
     <category term="Mechanistic Interpretability"/>
     <category term="Deceptive Alignment"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-29:research:281d8593535b</id>
-    <title>MIMIC: A Generative Multimodal Foundation Model for Biomolecules</title>
-    <link href="http://arxiv.org/abs/2604.24506" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-29&amp;category=research#item-281d8593535b" rel="related" type="text/html"/>
-    <published>2026-04-29T03:00:00Z</published>
-    <updated>2026-04-29T03:00:00Z</updated>
-    <author><name>Siavash Golkar, Jake Kovalic, Irina Espejo Morales, Samuel Sledzieski, Minhuan Li, Ksenia Sokolova, Geraud Krawezik, Alberto Bietti, Claudia Skok Gibbs, Roman Klypa, Shengwei Xiong, Francois Lanusse, Liam Parker, Kyunghyun Cho, Miles Cranmer, Tom Hehir, Michael McCabe, Lucas Meyer, Rudy Morel, Payel Mukhopadhyay, Mariel Pettee, Helen Qu, Jeff Shen, David Fouhey, Hadi Sotoudeh, Vikram Mulligan, Pilar Cossio, Sonya M. Hanson, Alisha N. Jones, Olga G. Troyanskaya, Shirley Ho</name></author>
-    <summary type="html"><![CDATA[<p>MIMIC is a generative multimodal foundation model for biomolecules that jointly handles nucleic acid, protein, evolutionary, structural, regulatory, and semantic modalities using a split-track encoder-decoder. Trained on a new curated dataset (LORE) linking these modalities, it can condition on arbitrary observed subsets to reconstruct missing components.</p>]]></summary>
-    <category term="Foundation Models"/>
-    <category term="Computational Biology"/>
-    <category term="Multimodal Learning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-29:research:3c9a3e562979</id>
-    <title>Conditional misalignment: common interventions can hide emergent misalignment behind contextual triggers</title>
-    <link href="http://arxiv.org/abs/2604.25891" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-29&amp;category=research#item-3c9a3e562979" rel="related" type="text/html"/>
-    <published>2026-04-29T03:00:00Z</published>
-    <updated>2026-04-29T03:00:00Z</updated>
-    <author><name>Jan Dubi\'nski, Jan Betley, Anna Sztyber-Betley, Daniel Tan, Owain Evans</name></author>
-    <summary type="html"><![CDATA[<p>Studies interventions proposed to reduce emergent misalignment in fine-tuned LLMs, showing they eliminate misalignment on existing evaluations but fail when prompts resemble the training context. Introduces 'conditional misalignment'.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Emergent Misalignment"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-28:category-summary:research</id>
-    <title>Research Summary: April 28, 2026</title>
-    <link href="http://arxiv.org/abs/2604.23747" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-28&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-04-28T06:00:00Z</published>
-    <updated>2026-04-28T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>A landmark day for LLM training methodology and AI safety. A <a href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-32edbe617f85" class="internal-link" rel="noopener noreferrer">bug disclosure reveals</a> that <strong>SFT-then-RL</strong> was already optimal for LLM reasoning, invalidating mixed-policy results across multiple published papers. In learning theory, the <strong>optimal sample complexity of multiclass classification</strong> <a href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-55589349f506" class="internal-link" rel="noopener noreferrer">is resolved</a> by proving a tight bound via DS dimension.</p>
-<p><strong>Safety &amp; alignment</strong> dominates the research landscape:</p>
-<ul>
-<li><strong>Sandbagging removal</strong> via weak supervision <a href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-f6bc6cc63ba1" class="internal-link" rel="noopener noreferrer">shows promise</a> for preventing deliberate underperformance in capable models</li>
-<li><strong>Tail risk estimation</strong> <a href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-d22f698c4cc6" class="internal-link" rel="noopener noreferrer">offers efficient methods</a> for quantifying rare harmful outputs at population scale</li>
-<li><strong>Activation-level misalignment detection</strong> <a href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-d0eeff21bac0" class="internal-link" rel="noopener noreferrer">catches poisoning at <strong>5% doses</strong></a>—10x earlier than behavioral evaluations</li>
-<li><strong>PermaFrost-Attack</strong> <a href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-0787ea49b176" class="internal-link" rel="noopener noreferrer">demonstrates stealth poisoning</a> through web-crawled pretraining data, a novel and concerning threat vector</li>
-<li><strong>Ulterior Motives</strong> <a href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-6ddb0f8a4113" class="internal-link" rel="noopener noreferrer">introduces detection methods</a> for misaligned reasoning in <strong>continuous thought models</strong> that bypass legible CoT</li>
-</ul>
-<p>In mechanistic understanding, hidden-state analysis reveals that <strong>individual CoT tokens</strong> <a href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-a71c7d2740d2" class="internal-link" rel="noopener noreferrer">encode sufficient information</a> to recover correct answers even when surface reasoning fails. <strong>Power-law data distributions</strong> are shown to <a href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-ff9e8587b78e" class="internal-link" rel="noopener noreferrer">consistently outperform</a> uniform distributions for compositional reasoning, challenging common training assumptions. The <strong>spectral lifecycle</strong> of transformer weight matrices during pretraining <a href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-e15501bd9fb8" class="internal-link" rel="noopener noreferrer">reveals transient compression waves</a> and persistent Q/K–V asymmetries across model scales.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-28:research:32edbe617f85</id>
-    <title>SFT-then-RL Outperforms Mixed-Policy Methods for LLM Reasoning</title>
-    <link href="http://arxiv.org/abs/2604.23747" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-32edbe617f85" rel="related" type="text/html"/>
-    <published>2026-04-28T03:16:00Z</published>
-    <updated>2026-04-28T03:16:00Z</updated>
-    <author><name>Alexis Limozin, Eduard Durech, Torsten Hoefler, Imanol Schlag, Valentina Pyatkin</name></author>
-    <summary type="html"><![CDATA[<p>Reveals that multiple published papers claiming improvements over SFT-then-RL for LLM reasoning relied on faulty baselines caused by two bugs: a DeepSpeed optimizer bug dropping micro-batches and an OpenRLHF loss aggregation bug. After fixing these, SFT-then-RL matches or beats mixed-policy methods.</p>]]></summary>
-    <category term="LLM Training"/>
-    <category term="Reinforcement Learning"/>
-    <category term="Reproducibility"/>
-    <category term="AI Safety"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-28:research:55589349f506</id>
-    <title>The Optimal Sample Complexity of Multiclass and List Learning</title>
-    <link href="http://arxiv.org/abs/2604.24749" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-55589349f506" rel="related" type="text/html"/>
-    <published>2026-04-28T03:16:00Z</published>
-    <updated>2026-04-28T03:16:00Z</updated>
-    <author><name>Chirag Pabbaraju</name></author>
-    <summary type="html"><![CDATA[<p>Resolves the optimal sample complexity of multiclass classification by proving the maximum hypergraph density is upper-bounded by DS dimension, closing a longstanding sqrt(DS) gap between upper and lower bounds. Proves a conjecture of Daniely and Shalev-Shwartz.</p>]]></summary>
-    <category term="Learning Theory"/>
-    <category term="Sample Complexity"/>
-    <category term="Statistical Learning Theory"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-28:research:f6bc6cc63ba1</id>
-    <title>Removing Sandbagging in LLMs by Training with Weak Supervision</title>
-    <link href="http://arxiv.org/abs/2604.22082" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-f6bc6cc63ba1" rel="related" type="text/html"/>
-    <published>2026-04-28T03:07:00Z</published>
-    <updated>2026-04-28T03:07:00Z</updated>
-    <author><name>Emil Ryd, Henning Bartsch, Julian Stastny, Joe Benton, Vivek Hebbar</name></author>
-    <summary type="html"><![CDATA[<p>Studies removing sandbagging (models deliberately underperforming) using weak supervision, finding that combining SFT on weak demonstrations with RL can reliably elicit true capabilities from sandbagging model organisms on math, science, and coding tasks.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Sandbagging"/>
-    <category term="Reinforcement Learning"/>
-    <category term="Evaluation Gaming"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-04-28:research:d22f698c4cc6</id>
-    <title>Estimating Tail Risks in Language Model Output Distributions</title>
-    <link href="http://arxiv.org/abs/2604.22167" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-04-28&amp;category=research#item-d22f698c4cc6" rel="related" type="text/html"/>
-    <published>2026-04-28T03:02:00Z</published>
-    <updated>2026-04-28T03:02:00Z</updated>
-    <author><name>Rico Angell, Raghav Singhal, Zachary Horvitz, Zhou Yu, Rajesh Ranganath, Kathleen McKeown, He He</name></author>
-    <summary type="html"><![CDATA[<p>Proposes a method to efficiently estimate the probability of harmful LLM outputs for any input query, addressing tail risk when models are queried billions of times daily, moving beyond distribution-of-inputs safety evaluations.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Evaluation"/>
-    <category term="Language Models"/>
-    <category term="Risk Assessment"/>
   </entry>
 </feed>
