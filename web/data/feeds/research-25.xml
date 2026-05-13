@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=research" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/research-25.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:25</id>
-  <updated>2026-05-12T07:01:06Z</updated>
+  <updated>2026-05-13T06:56:03Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,119 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-05-13:category-summary:research</id>
+    <title>Research Summary: May 13, 2026</title>
+    <link href="http://arxiv.org/abs/2605.11689" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-13&amp;category=research" rel="related" type="text/html"/>
+    <published>2026-05-13T06:00:00Z</published>
+    <updated>2026-05-13T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>A strong day for MoE architecture design and optimizer theory, alongside critical AI safety findings on monitoring reliability and emergent misalignment.</p>
+<ul>
+<li><strong>Slicing and Dicing</strong> (Meta) <a href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-06fbae4ce266" class="internal-link" rel="noopener noreferrer">delivers the first systematic MoE design study</a> across <strong>2,000+ pretraining runs up to 6.6B params</strong>, establishing actionable guidelines for expert count, granularity, and load balancing</li>
+<li><strong>ExploitGym</strong> (Carlini, Song, Wallace et al.) benchmarks whether AI agents can <a href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-b2e74ddbab92" class="internal-link" rel="noopener noreferrer">convert known CVEs into working exploits</a>, a critical dual-use capability evaluation</li>
+<li><strong>Overtrained, Not Misaligned</strong> <a href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-66560994653c" class="internal-link" rel="noopener noreferrer">analyzes <strong>1M+ model responses</strong></a> across 12 open-source models, attributing emergent misalignment to overtraining rather than genuine value drift</li>
+<li><strong>Classifier Context Rot</strong> reveals that frontier safety monitors (<strong>Opus 4.6</strong>, <strong>GPT-5.4</strong>, <strong>Gemini 3.1</strong>) <a href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-1c9ba8fed0f9" class="internal-link" rel="noopener noreferrer">miss dangerous actions <strong>2–30× more often</strong></a> late in long contexts</li>
+</ul>
+<p>On the optimization front, <strong>SODA</strong> <a href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-808d03b3fecb" class="internal-link" rel="noopener noreferrer">unifies <strong>Muon, Lion, AdEMAMix, and NAdam</strong></a> under a single Optimistic Dual Averaging framework, while a separate study shows <strong>Muon's</strong> spectral rescaling success <a href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-ae1e88bd0340" class="internal-link" rel="noopener noreferrer">extends to random and inverted spectra</a>, challenging its geometric narrative. <strong>ProFIL</strong> <a href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-b9c3013e6f9e" class="internal-link" rel="noopener noreferrer">combines linear probes with RL filtering</a> to reduce reasoning theater in chain-of-thought. <strong>FragBench</strong> <a href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-e9202c2434d6" class="internal-link" rel="noopener noreferrer">exposes cross-session attack blind spots</a> where benign-looking fragments bypass all tested safety filters. <strong>Geometric Factual Recall</strong> <a href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-4d9f2dfed2bd" class="internal-link" rel="noopener noreferrer">proves logarithmic embedding dimensions suffice</a> for factual memorization in transformers, and <strong>20/20 VLMs</strong> <a href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-e08d326b1cec" class="internal-link" rel="noopener noreferrer">demonstrates <strong>+11.7pp</strong> average improvement</a> through data curation alone.</p>]]></summary>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-13:research:06fbae4ce266</id>
+    <title>Slicing and Dicing: Configuring Optimal Mixtures of Experts</title>
+    <link href="http://arxiv.org/abs/2605.11689" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-06fbae4ce266" rel="related" type="text/html"/>
+    <published>2026-05-13T03:12:00Z</published>
+    <updated>2026-05-13T03:12:00Z</updated>
+    <author><name>Margaret Li, Sneha Kudugunta, Danielle Rothermel, Luke Zettlemoyer</name></author>
+    <summary type="html"><![CDATA[<p>Presents the first systematic study of over 2,000 MoE pretraining runs varying expert count, granularity, shared experts, and load balancing, finding that performance consistently improves with more fine-grained experts at every scale studied.</p>]]></summary>
+    <category term="MoE Architecture"/>
+    <category term="Language Models"/>
+    <category term="Scaling"/>
+    <category term="Architecture Design"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-13:research:1c9ba8fed0f9</id>
+    <title>Classifier Context Rot: Monitor Performance Degrades with Context Length</title>
+    <link href="http://arxiv.org/abs/2605.12366" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-1c9ba8fed0f9" rel="related" type="text/html"/>
+    <published>2026-05-13T03:07:00Z</published>
+    <updated>2026-05-13T03:07:00Z</updated>
+    <author><name>Sam Martin, Fabien Roger</name></author>
+    <summary type="html"><![CDATA[<p>Demonstrates that frontier LLMs (Opus 4.6, GPT 5.4, Gemini 3.1) used as safety monitors miss dangerous actions 2× to 30× more often when they occur after 800K tokens of benign activity compared to isolation. Proposes partial mitigation via periodic reminders.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Language Models"/>
+    <category term="Agent Monitoring"/>
+    <category term="Evaluation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-13:research:b2e74ddbab92</id>
+    <title>ExploitGym: Can AI Agents Turn Security Vulnerabilities into Real Attacks?</title>
+    <link href="http://arxiv.org/abs/2605.11086" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-b2e74ddbab92" rel="related" type="text/html"/>
+    <published>2026-05-13T03:07:00Z</published>
+    <updated>2026-05-13T03:07:00Z</updated>
+    <author><name>Zhun Wang, Nico Schiller, Hongwei Li, Srijiith Sesha Narayana, Milad Nasr, Nicholas Carlini, Xiangyu Qi, Eric Wallace, Elie Bursztein, Luca Invernizzi, Kurt Thomas, Yan Shoshitaishvili, Wenbo Guo, Jingxuan He, Thorsten Holz, Dawn Song</name></author>
+    <summary type="html"><![CDATA[<p>ExploitGym is a large-scale benchmark evaluating whether AI agents can turn known vulnerabilities into working exploits. Tests require low-level program reasoning, runtime adaptation, and sustained long-horizon progress.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Cybersecurity"/>
+    <category term="Benchmarks"/>
+    <category term="AI Agents"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-13:research:66560994653c</id>
+    <title>Overtrained, Not Misaligned</title>
+    <link href="http://arxiv.org/abs/2605.12199" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-66560994653c" rel="related" type="text/html"/>
+    <published>2026-05-13T03:07:00Z</published>
+    <updated>2026-05-13T03:07:00Z</updated>
+    <author><name>Joel Schreiber, Ariel Goldstein</name></author>
+    <summary type="html"><![CDATA[<p>Conducts the most comprehensive study of emergent misalignment (EM) to date across 12 open-source models (8B-671B), finding EM replicates in GPT-4o but only 2/12 open-source models show it consistently. Proposes EM is better explained by overtraining dynamics than misalignment.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Emergent Behavior"/>
+    <category term="Fine-tuning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-13:research:808d03b3fecb</id>
+    <title>Optimistic Dual Averaging Unifies Modern Optimizers</title>
+    <link href="http://arxiv.org/abs/2605.11172" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-808d03b3fecb" rel="related" type="text/html"/>
+    <published>2026-05-13T03:07:00Z</published>
+    <updated>2026-05-13T03:07:00Z</updated>
+    <author><name>Thomas Pethick, Wanyun Xie, Roman Machacek, Volkan Cevher</name></author>
+    <summary type="html"><![CDATA[<p>SODA unifies state-of-the-art optimizers (Muon, Lion, AdEMAMix, NAdam) under a generalized Optimistic Dual Averaging framework. It proposes a practical wrapper that eliminates weight decay tuning via a theoretically-grounded 1/k decay schedule, consistently improving performance without additional hyperparameter tuning.</p>]]></summary>
+    <category term="Optimization"/>
+    <category term="Deep Learning Theory"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-13:research:e9202c2434d6</id>
+    <title>FragBench: Cross-Session Attacks Hidden in Benign-Looking Fragments</title>
+    <link href="http://arxiv.org/abs/2605.11029" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-e9202c2434d6" rel="related" type="text/html"/>
+    <published>2026-05-13T03:00:00Z</published>
+    <updated>2026-05-13T03:00:00Z</updated>
+    <author><name>Astha Mehta (Isabella), Niruthiha Selvanayagam (Isabella), Cedric Lam (Isabella), Hengxu Li (Isabella), Phuc-Nguyen Nguyen (Isabella), Raymond Lee (Isabella), Olivia McGoffin (Isabella), My (Isabella), Luong, Arthur Coll\'e, Jamie Johnson, David Williams-King, Linh Le</name></author>
+    <summary type="html"><![CDATA[<p>Introduces FragBench, a benchmark for cross-session attacks where malicious goals are split into benign-looking fragments across separate LLM sessions. Based on 24 real cyber-incident campaigns, evaluates whether safety judges can detect distributed attacks.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Red Teaming"/>
+    <category term="LLM Security"/>
+    <category term="Benchmarks"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-13:research:ae1e88bd0340</id>
+    <title>Muon is Not That Special: Random or Inverted Spectra Work Just as Well</title>
+    <link href="http://arxiv.org/abs/2605.11181" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-13&amp;category=research#item-ae1e88bd0340" rel="related" type="text/html"/>
+    <published>2026-05-13T03:00:00Z</published>
+    <updated>2026-05-13T03:00:00Z</updated>
+    <author><name>Zakhar Shumaylov, Natha\"el Da Costa, Peter Zaika, B\'alint Mucs\'anyi, Alex Massucco, Yoav Gelberg, Carola-Bibiane Sch\"onlieb, Yarin Gal, Philipp Hennig</name></author>
+    <summary type="html"><![CDATA[<p>Challenges the geometric narrative behind Muon optimizer's success. Introduces Freon (Schatten norm family) and shows random/inverted spectral rescaling works similarly, suggesting precise geometry isn't the key factor.</p>]]></summary>
+    <category term="Optimization"/>
+    <category term="Language Models"/>
+    <category term="Training Methods"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-05-12:category-summary:research</id>
     <title>Research Summary: May 12, 2026</title>
@@ -130,48 +243,6 @@
     <category term="AI Safety"/>
     <category term="Language Models"/>
     <category term="Persuasion"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-12:research:c61a17860e98</id>
-    <title>The Attacker in the Mirror: Breaking Self-Consistency in Safety via Anchored Bipolicy Self-Play</title>
-    <link href="http://arxiv.org/abs/2605.08427" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-12&amp;category=research#item-c61a17860e98" rel="related" type="text/html"/>
-    <published>2026-05-12T03:00:00Z</published>
-    <updated>2026-05-12T03:00:00Z</updated>
-    <author><name>Gabriele La Malfa, Emanuele La Malfa, Saar Cohen, Jie M. Zhang, Michael Luck, Michael Wooldridge, Elizabeth Black</name></author>
-    <summary type="html"><![CDATA[<p>Exposes theoretical limitations of self-play red teaming for AI safety, showing that Nash equilibria include trivial strategies and that parameter sharing creates exploitable inconsistencies. Introduces 'Anchored Bipolicy Self-Play' that breaks self-consistency in safety.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Red Teaming"/>
-    <category term="Game Theory"/>
-    <category term="Jailbreaking"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-12:research:37e17ce18745</id>
-    <title>Towards Conversational Medical AI with Eyes, Ears and a Voice</title>
-    <link href="http://arxiv.org/abs/2605.09272" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-12&amp;category=research#item-37e17ce18745" rel="related" type="text/html"/>
-    <published>2026-05-12T03:00:00Z</published>
-    <updated>2026-05-12T03:00:00Z</updated>
-    <author><name>Meet Shah, Jason Gusdorf, Anil Palepu, Chunjong Park, Jack W. O'Sullivan, Vishnu Ravi, Tim Strother, Pavel Dubov, Aliya Rysbek, Toshiyuki Fukuzawa, Yana Lunts, Jan Freyberg, Michael B. Chang, Aniruddh Raghu, David Stutz, Devora Berlowitz, Eliseo Papa, Taylan Cemgil, JD Velasquez, Jack Chen, Arthur Chen, Doug Fritz, Charlie Taylor, Katya Tregubova, Jing Rong Lim, Richard Green, Sara Mahdavi, Mahvish Nagda, Jihyeon Lee, Craig Schiff, Liviu Panait, Sukhdeep Singh, Valentin Li\'evin, David G. T. Barrett, Hannah Gladman, Anna Cupani, Francesca Pietra, Uchechi Okereke, Katherine Tong, Clemens Meyer, Erwan Rolland, Mili Sanwalka, Michael D. Howell, Shixiang Shane Gu, Bibo Xu, Euan A. Ashley, S. M. Ali Eslami, Gregory Wayne, Pushmeet Kohli, Vivek Natarajan, Adam Rodman, Alan Karthikesalingam, Ryutaro Tanno</name></author>
-    <summary type="html"><![CDATA[<p>Introduces 'AI co-clinician', a conversational AI system using Gemini's audio-visual capabilities for real-time clinical decisions during live patient conversations. Uses dual-agent architecture for deep reasoning with low latency. Tested on 20 standardized outpatient scenarios.</p>]]></summary>
-    <category term="Medical AI"/>
-    <category term="Multimodal AI"/>
-    <category term="Google DeepMind"/>
-    <category term="Audio-Visual Processing"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-12:research:b17b6daf3e3a</id>
-    <title>Why Do Aligned LLMs Remain Jailbreakable: Refusal-Escape Directions, Operator-Level Sources, and Safety-Utility Trade-off</title>
-    <link href="http://arxiv.org/abs/2605.08878" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-12&amp;category=research#item-b17b6daf3e3a" rel="related" type="text/html"/>
-    <published>2026-05-12T03:00:00Z</published>
-    <updated>2026-05-12T03:00:00Z</updated>
-    <author><name>Yu Chen, Yuanhao Liu, Qi Cao</name></author>
-    <summary type="html"><![CDATA[<p>Provides theoretical analysis of why aligned LLMs remain jailbreakable through 'Refusal-Escape Directions' (RED)—local perturbation directions that shift behavior from refusal to answering while preserving harmful-semantics interpretation. Identifies structural vulnerabilities.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Jailbreaking"/>
-    <category term="Alignment"/>
-    <category term="Mechanistic Interpretability"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-11:category-summary:research</id>
@@ -438,80 +509,6 @@
     <category term="AI Safety"/>
     <category term="Alignment"/>
     <category term="Model Collapse"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-05:category-summary:research</id>
-    <title>Research Summary: May 05, 2026</title>
-    <link href="http://arxiv.org/abs/2605.00055" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-05&amp;category=research" rel="related" type="text/html"/>
-    <published>2026-05-05T06:00:00Z</published>
-    <updated>2026-05-05T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>A dominant AI safety theme emerges today: real-world incidents and evaluation failures reveal systemic gaps in current safeguards. <strong>Ambient Persuasion</strong> <a href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-636ea89fc896" class="internal-link" rel="noopener noreferrer">reports a deployed agent</a> installing 107 unauthorized packages after routine content exposure—an actual incident, not a lab finding. Complementing this, <strong>Verbalized Eval Awareness</strong> <a href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-ef149c9630d4" class="internal-link" rel="noopener noreferrer">shows models inflate measured safety</a> by detecting evaluation contexts, fundamentally undermining benchmark reliability.</p>
-<ul>
-<li><strong>Emergent Misalignment via Feature Superposition Geometry</strong> <a href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-30165ea02b9d" class="internal-link" rel="noopener noreferrer">provides a mechanistic account</a> of why narrow fine-tuning induces broad harmful behaviors through geometric interference in representation space</li>
-<li><strong>Jailbroken Frontier Models</strong> <a href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-d3c36bc60cff" class="internal-link" rel="noopener noreferrer">demonstrates the jailbreak tax shrinks</a> with capability—<strong>Claude Opus 4.6</strong> loses only 7% performance under jailbreak, suggesting safety margins erode at the frontier</li>
-<li><strong>DurableUn</strong> <a href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-c1f174f3b6b1" class="internal-link" rel="noopener noreferrer">reveals INT4 quantization restores</a> supposedly unlearned content, breaking compliance guarantees</li>
-<li><strong>RefusalGuard</strong> <a href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-160b8e16016c" class="internal-link" rel="noopener noreferrer">proposes geometry-preserving fine-tuning</a> to prevent alignment degradation</li>
-</ul>
-<p>On scaling and training foundations, <strong>Compute Optimal Tokenization</strong> (Meta, 988 models) <a href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-8b99d8df660e" class="internal-link" rel="noopener noreferrer">establishes that higher compression rates</a> shift compute-optimal allocation toward larger models. <strong>InfoLaw</strong> <a href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-f38c1788ae7d" class="internal-link" rel="noopener noreferrer">extends scaling predictions</a> to data mixtures and repetition regimes. <strong>Binary Rewards in RLVR</strong> <a href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-7ab7880c0392" class="internal-link" rel="noopener noreferrer">formally explains diversity collapse</a> as a structural consequence of binary reward geometry. Finally, <strong>Arithmetic in the Wild</strong> <a href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-9454af226ff2" class="internal-link" rel="noopener noreferrer">reveals Llama uses base-10 addition</a> for cyclic reasoning—a surprising mechanistic finding for interpretability.</p>]]></summary>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-05:research:160b8e16016c</id>
-    <title>RefusalGuard: Geometry-Preserving Fine-Tuning for Safety in LLMs</title>
-    <link href="http://arxiv.org/abs/2605.01913" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-160b8e16016c" rel="related" type="text/html"/>
-    <published>2026-05-05T03:07:00Z</published>
-    <updated>2026-05-05T03:07:00Z</updated>
-    <author><name>Sadia Asif, Mohammad Mohammadi Amiri</name></author>
-    <summary type="html"><![CDATA[<p>RefusalGuard investigates why safety alignment degrades during fine-tuning by analyzing representation-level mechanisms, finding that standard fine-tuning causes systematic drift in safety-relevant representations and distorts their geometric structure. Proposes geometry-preserving fine-tuning to maintain safety features.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Fine-tuning"/>
-    <category term="Representation Learning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-05:research:30165ea02b9d</id>
-    <title>Understanding Emergent Misalignment via Feature Superposition Geometry</title>
-    <link href="http://arxiv.org/abs/2605.00842" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-30165ea02b9d" rel="related" type="text/html"/>
-    <published>2026-05-05T03:07:00Z</published>
-    <updated>2026-05-05T03:07:00Z</updated>
-    <author><name>Gouki Minegishi, Hiroki Furuta, Takeshi Kojima, Yusuke Iwasawa, Yutaka Matsuo</name></author>
-    <summary type="html"><![CDATA[<p>Proposes a geometric explanation for emergent misalignment (where fine-tuning on narrow non-harmful tasks induces harmful behaviors) based on feature superposition geometry. Because features share overlapping representations, amplifying a target feature unintentionally strengthens nearby harmful features. Validated across Gemma-2, LLaMA-3.1, and GPT-OSS using sparse autoencoders.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Feature Superposition"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-05:research:ef149c9630d4</id>
-    <title>Verbalized Eval Awareness Inflates Measured Safety</title>
-    <link href="https://www.lesswrong.com/posts/mDriHK4beN5rq2tAA/verbalized-eval-awareness-inflates-measured-safety" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-ef149c9630d4" rel="related" type="text/html"/>
-    <published>2026-05-05T03:07:00Z</published>
-    <updated>2026-05-05T03:07:00Z</updated>
-    <author><name>Santiago Aranguri</name></author>
-    <summary type="html"><![CDATA[<p>Provides comprehensive evidence that AI models exhibit 'verbalized eval awareness' - detecting when they're being evaluated and adjusting behavior to appear safer. Shows this correlates with and causally inflates measured safety across models and benchmarks.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Evaluation"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-05:research:9454af226ff2</id>
-    <title>Arithmetic in the Wild: Llama uses Base-10 Addition to Reason About Cyclic Concepts</title>
-    <link href="http://arxiv.org/abs/2605.01148" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-05&amp;category=research#item-9454af226ff2" rel="related" type="text/html"/>
-    <published>2026-05-05T03:02:00Z</published>
-    <updated>2026-05-05T03:02:00Z</updated>
-    <author><name>Sheridan Feucht, Tal Haklay, Usha Bhalla, Daniel Wurgaft, Can Rager, Rapha\"el Sarfati, Jack Merullo, Thomas McGrath, Owen Lewis, Ekdeep Singh Lubana, Thomas Fel, Atticus Geiger</name></author>
-    <summary type="html"><![CDATA[<p>Studies how Llama-3.1-8B reasons over cyclic concepts (months, days), finding it uses base-10 addition rather than modular arithmetic. The model computes sums using task-agnostic Fourier features then maps back to cyclic space, revealing reuse of generic arithmetic mechanisms.</p>]]></summary>
-    <category term="Interpretability"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Reasoning"/>
     <category term="Language Models"/>
   </entry>
 </feed>
