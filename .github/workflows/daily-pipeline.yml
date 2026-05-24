@@ -175,7 +175,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y wireguard-tools openresolv
+          sudo apt-get install -y wireguard-tools
           python -m pip install cryptography
 
           tmp_dir="$(mktemp -d)"
