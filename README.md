@@ -193,8 +193,6 @@ The `flyryan/ai-news-aggregator` repository runs the pipeline daily with GitHub 
 if: github.repository == 'flyryan/ai-news-aggregator'
 ```
 
-The AATF org mirror should not run the pipeline. The AWS mirror script also removes the flyryan-only workflow before force-pushing to the org repository.
-
 Forks and self-hosted copies can change the publishing repository by editing the workflow guard, schedule, provider secrets, and `PIPELINE_BASE_URL`. The repository-specific provider file remains ignored; production should store it in `PIPELINE_PROVIDERS_YAML`.
 
 ### Schedule
