@@ -47,6 +47,7 @@ jobs:
       REDDIT_PROXY_URL: ${{ secrets.REDDIT_PROXY_URL }}
       REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'AI-News-Aggregator/1.0 (by u/flyryan)' }}
       MULLVAD_ACCOUNT: ${{ secrets.MULLVAD_ACCOUNT }}
+      MULLVAD_WG_PRIVATE_KEY: ${{ secrets.MULLVAD_WG_PRIVATE_KEY }}
       MULLVAD_RELAY_FILTER: ${{ vars.MULLVAD_RELAY_FILTER || 'us' }}
       PIPELINE_BASE_URL: ${{ vars.PIPELINE_BASE_URL || 'https://news.aatf.ai' }}
       PIPELINE_COMMIT_PATHS: ${{ vars.PIPELINE_COMMIT_PATHS || 'web/data config/model_releases.yaml config/ecosystem_context.yaml' }}
@@ -179,15 +180,24 @@ jobs:
           python -m pip install cryptography
 
           tmp_dir="$(mktemp -d)"
+          settings_file="$tmp_dir/settings.conf"
           curl -fsSL \
             https://raw.githubusercontent.com/mullvad/wg-tools/c85b7ed35bdb6e0bd38fa24481819088fa6a68c5/wg-mullvad.py \
             -o "$tmp_dir/wg-mullvad.py"
+
+          if [[ -n "${MULLVAD_WG_PRIVATE_KEY:-}" ]]; then
+            umask 077
+            {
+              echo "[Interface]"
+              echo "privatekey = ${MULLVAD_WG_PRIVATE_KEY}"
+            } > "$settings_file"
+          fi
 
           python "$tmp_dir/wg-mullvad.py" \
             --account "$MULLVAD_ACCOUNT" \
             --filter "$MULLVAD_RELAY_FILTER" \
             --active \
-            --settings-file "$tmp_dir/settings.conf" \
+            --settings-file "$settings_file" \
             --output-dir "$tmp_dir/wg"
 
           wg_conf="$(find "$tmp_dir/wg" -name '*.conf' | sort | head -1)"
