@@ -22,6 +22,7 @@ Daily AI/ML news briefings curated by specialized agents with extended thinking.
 | [How It Works](#how-it-works) | Pipeline phases, thinking levels, architecture |
 | [Quick Start](#quick-start) | Docker and local setup |
 | [Configuration](#configuration) | Provider modes, prompts, data sources |
+| [Daily Automation](#daily-automation) | GitHub Actions publication workflow |
 | [Features](#features) | Multi-agent, continuity detection, frontend |
 | [Architecture](#architecture) | Directory structure, agent pairs, data output |
 | [Frontend Development](#frontend-development) | Dev server, build, URL routes |
@@ -183,6 +184,56 @@ python3 run_pipeline.py --resume
 python3 run_pipeline.py --resume-from 3      # Re-run topic detection onward
 python3 run_pipeline.py --resume-from 4.7    # Just regenerate hero image
 ```
+
+## Daily Automation
+
+The `flyryan/ai-news-aggregator` repository runs the pipeline daily with GitHub Actions. The workflow is intentionally guarded so scheduled runs only execute in that repository:
+
+```yaml
+if: github.repository == 'flyryan/ai-news-aggregator'
+```
+
+The AATF org mirror should not run the pipeline. The AWS mirror script also removes the flyryan-only workflow before force-pushing to the org repository.
+
+### Schedule
+
+GitHub Actions cron runs in UTC, so the workflow has two UTC entries and a local-time guard. Only the invocation that is actually `3 AM America/New_York` continues; the other exits as a no-op.
+
+### Required Repository Secrets
+
+Set these on the publishing repository:
+
+| Secret | Purpose |
+|--------|---------|
+| `PIPELINE_PROVIDERS_YAML` | Full contents of ignored `config/providers.yaml`; preferred for production because it preserves the exact provider mode and image settings |
+| `ANTHROPIC_API_KEY` | LLM/proxy API key, also used by the fallback generated provider config |
+| `ANTHROPIC_API_BASE` | OpenAI-compatible proxy base URL when used |
+| `TWITTERAPI_IO_KEY` | Optional Twitter/X collection |
+| `GOOGLE_API_KEY` | Optional Gemini native image generation when not using a proxy image provider |
+| `PIPELINE_PUSH_TOKEN` | Optional PAT if the default `GITHUB_TOKEN` is not enough for downstream webhook behavior |
+
+### Optional Repository Variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `ANTHROPIC_MODEL` | `claude-opus-4-7` | Model name used by the fallback generated provider config |
+| `PIPELINE_BASE_URL` | `https://news.aatf.ai` | Base URL used in feeds |
+| `PIPELINE_IMAGE_MODEL` | `gemini-3-pro-image-preview` | Native Gemini image model used by fallback config |
+| `PIPELINE_COMMIT_PATHS` | `web/data config/model_releases.yaml config/ecosystem_context.yaml` | Space-separated generated outputs to commit |
+
+### Manual Dry Runs
+
+Use `workflow_dispatch` with `commit_outputs=false` to run the full hosted pipeline without committing or pushing. The workflow uploads `web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml` as an artifact for inspection.
+
+### Generated Outputs
+
+The daily commit includes persistent generated site and grounding outputs:
+
+- `web/data/**` for the frontend, search index, feeds, and hero images
+- `config/model_releases.yaml` for curated and auto-detected model release facts
+- `config/ecosystem_context.yaml` as the last successful OpenRouter-enriched grounding cache
+
+Runtime scrape data, checkpoints, and logs under `data/**` and `logs/**` stay ignored. They are useful for local debugging but are not public site state.
 
 ---
 

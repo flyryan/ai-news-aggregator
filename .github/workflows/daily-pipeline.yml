@@ -1,0 +1,219 @@
+name: Daily Pipeline
+
+on:
+  schedule:
+    # GitHub cron is UTC-only. These two entries cover 3 AM America/New_York
+    # across daylight saving time; the ET gate below lets only the 3 AM run continue.
+    - cron: "0 7 * * *"
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: "Report date to generate (YYYY-MM-DD). Defaults to today in ET."
+        required: false
+        type: string
+      resume_from:
+        description: "Optional pipeline phase to resume from, for manual recovery."
+        required: false
+        type: string
+      commit_outputs:
+        description: "Commit and push generated outputs after the run."
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-pipeline-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  daily-pipeline:
+    name: Generate and publish daily data
+    if: github.repository == 'flyryan/ai-news-aggregator'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      TZ: America/New_York
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ANTHROPIC_API_BASE: ${{ secrets.ANTHROPIC_API_BASE }}
+      ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL || 'claude-opus-4-7' }}
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      TWITTERAPI_IO_KEY: ${{ secrets.TWITTERAPI_IO_KEY }}
+      PIPELINE_BASE_URL: ${{ vars.PIPELINE_BASE_URL || 'https://news.aatf.ai' }}
+      PIPELINE_COMMIT_PATHS: ${{ vars.PIPELINE_COMMIT_PATHS || 'web/data config/model_releases.yaml config/ecosystem_context.yaml' }}
+      PIPELINE_IMAGE_MODEL: ${{ vars.PIPELINE_IMAGE_MODEL || 'gemini-3-pro-image-preview' }}
+      TARGET_DATE_INPUT: ${{ inputs.target_date || '' }}
+      RESUME_FROM_INPUT: ${{ inputs.resume_from || '' }}
+      COMMIT_OUTPUTS: ${{ github.event_name != 'workflow_dispatch' || inputs.commit_outputs }}
+
+    steps:
+      - name: Check 3 AM ET schedule gate
+        id: schedule_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" != "schedule" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "Manual dispatch: bypassing ET schedule gate."
+            exit 0
+          fi
+
+          et_hour="$(TZ=America/New_York date +%H)"
+          if [[ "$et_hour" == "03" ]]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "Scheduled run is at 3 AM ET; continuing."
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "Scheduled run is not 3 AM ET (hour=$et_hour); exiting as a no-op."
+          fi
+
+      - name: Check out flyryan main
+        if: steps.schedule_gate.outputs.should_run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.PIPELINE_PUSH_TOKEN || github.token }}
+
+      - name: Set up Python
+        if: steps.schedule_gate.outputs.should_run == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        if: steps.schedule_gate.outputs.should_run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Write provider configuration
+        if: steps.schedule_gate.outputs.should_run == 'true'
+        shell: bash
+        env:
+          PIPELINE_PROVIDERS_YAML: ${{ secrets.PIPELINE_PROVIDERS_YAML }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${PIPELINE_PROVIDERS_YAML:-}" ]]; then
+            printf '%s\n' "$PIPELINE_PROVIDERS_YAML" > config/providers.yaml
+            echo "Wrote config/providers.yaml from PIPELINE_PROVIDERS_YAML."
+            exit 0
+          fi
+
+          if [[ -z "${ANTHROPIC_API_KEY:-}" ]]; then
+            echo "ANTHROPIC_API_KEY is required unless PIPELINE_PROVIDERS_YAML is set." >&2
+            exit 1
+          fi
+
+          if [[ -n "${ANTHROPIC_API_BASE:-}" ]]; then
+            cat > config/providers.yaml <<YAML
+          llm:
+            mode: "openai-compatible"
+            api_key: "\${ANTHROPIC_API_KEY}"
+            base_url: "\${ANTHROPIC_API_BASE}"
+            model: "\${ANTHROPIC_MODEL}"
+            timeout: 300
+
+          image:
+            mode: "openai-compatible"
+            api_key: "\${ANTHROPIC_API_KEY}"
+            endpoint: "\${ANTHROPIC_API_BASE}/v1"
+            model: "gemini-3-pro-image"
+
+          pipeline:
+            base_url: "${PIPELINE_BASE_URL}"
+            lookback_hours: 24
+          YAML
+          elif [[ -n "${GOOGLE_API_KEY:-}" ]]; then
+            cat > config/providers.yaml <<YAML
+          llm:
+            mode: "anthropic"
+            api_key: "\${ANTHROPIC_API_KEY}"
+            model: "\${ANTHROPIC_MODEL}"
+            timeout: 300
+
+          image:
+            mode: "native"
+            api_key: "\${GOOGLE_API_KEY}"
+            model: "${PIPELINE_IMAGE_MODEL}"
+
+          pipeline:
+            base_url: "${PIPELINE_BASE_URL}"
+            lookback_hours: 24
+          YAML
+          else
+            cat > config/providers.yaml <<YAML
+          llm:
+            mode: "anthropic"
+            api_key: "\${ANTHROPIC_API_KEY}"
+            model: "\${ANTHROPIC_MODEL}"
+            timeout: 300
+
+          pipeline:
+            base_url: "${PIPELINE_BASE_URL}"
+            lookback_hours: 24
+          YAML
+          fi
+
+      - name: Run pipeline
+        if: steps.schedule_gate.outputs.should_run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--config-dir ./config --data-dir ./data --web-dir ./web)
+          if [[ -n "${TARGET_DATE_INPUT:-}" ]]; then
+            args+=(--date "$TARGET_DATE_INPUT")
+          fi
+          if [[ -n "${RESUME_FROM_INPUT:-}" ]]; then
+            args+=(--resume-from "$RESUME_FROM_INPUT")
+          fi
+          python3 run_pipeline.py "${args[@]}"
+
+      - name: Commit generated outputs
+        if: steps.schedule_gate.outputs.should_run == 'true' && env.COMMIT_OUTPUTS == 'true'
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          read -r -a commit_paths <<< "$PIPELINE_COMMIT_PATHS"
+          git add -- "${commit_paths[@]}"
+
+          if git diff --cached --quiet; then
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+            echo "No generated output changes to commit."
+            exit 0
+          fi
+
+          report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
+          git commit -m "data: Auto-update ${report_date}"
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload generated outputs without committing
+        if: steps.schedule_gate.outputs.should_run == 'true' && env.COMMIT_OUTPUTS != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-pipeline-output
+          path: |
+            web/data
+            config/model_releases.yaml
+            config/ecosystem_context.yaml
+          if-no-files-found: error
+
+      - name: Push generated commit
+        if: steps.schedule_gate.outputs.should_run == 'true' && steps.commit.outputs.committed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin main
+          git push origin HEAD:main

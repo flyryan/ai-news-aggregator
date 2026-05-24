@@ -26,6 +26,13 @@ log "Swapping README for EMU..."
 cp /home/ubuntu/README-internal.md README.md
 git add README.md
 
+# Step 3b: Remove flyryan-only automation before mirroring to the AATF org.
+if [ -f ".github/workflows/daily-pipeline.yml" ]; then
+    log "Removing flyryan-only daily pipeline workflow before EMU push..."
+    rm -f .github/workflows/daily-pipeline.yml
+    git add -u .github/workflows/daily-pipeline.yml
+fi
+
 # Only commit if there are changes (avoids error if README already matches)
 if ! git diff --cached --quiet; then
     git commit -m "Use internal README for AATF org" --no-verify

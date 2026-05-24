@@ -105,9 +105,15 @@ class EcosystemContextManager:
             self._save_cache()
             logger.info("Ecosystem context: curated releases + OpenRouter")
         else:
-            # Fallback: just use curated data
-            self.context = self._curated_to_context()
-            logger.warning("Ecosystem context: using curated data only (OpenRouter unavailable)")
+            # Fallback: prefer the committed cache from the last successful run,
+            # then overlay curated releases so hand-maintained data always wins.
+            cached_context = self._load_cache()
+            if self._is_valid_context(cached_context):
+                self.context = self._merge_cache_with_curated(cached_context)
+                logger.warning("Ecosystem context: using committed cache + curated releases (OpenRouter unavailable)")
+            else:
+                self.context = self._curated_to_context()
+                logger.warning("Ecosystem context: using curated data only (OpenRouter unavailable, no valid cache)")
 
         # Build system prompt
         self._system_prompt = self._build_system_prompt()
@@ -151,8 +157,61 @@ class EcosystemContextManager:
             logger.warning(f"Ecosystem cache not found: {self.cache_path}")
             return {'metadata': {'last_updated': '1970-01-01'}, 'models': {}}
 
-        with open(self.cache_path, 'r') as f:
-            return yaml.safe_load(f) or {}
+        try:
+            with open(self.cache_path, 'r') as f:
+                return yaml.safe_load(f) or {}
+        except Exception as e:
+            logger.warning(f"Failed to load ecosystem cache: {e}")
+            return {'metadata': {'last_updated': '1970-01-01'}, 'models': {}}
+
+    def _is_valid_context(self, context: Dict[str, Any]) -> bool:
+        """Return True when cached ecosystem context has usable model data."""
+        if not isinstance(context, dict):
+            return False
+        models = context.get('models')
+        if not isinstance(models, dict):
+            return False
+        return any(isinstance(provider_models, list) and provider_models for provider_models in models.values())
+
+    def _merge_cache_with_curated(self, cached_context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Use committed OpenRouter-enriched context as a fallback, while preserving
+        curated model_releases.yaml as the source of truth for known models.
+        """
+        cached_models = cached_context.get('models', {})
+        merged_models: Dict[str, List[Dict[str, Any]]] = {
+            provider: [dict(model) for model in models if isinstance(model, dict)]
+            for provider, models in cached_models.items()
+            if isinstance(models, list)
+        }
+
+        curated_context = self._curated_to_context()
+        for provider, curated_models in curated_context.get('models', {}).items():
+            provider_models = merged_models.setdefault(provider, [])
+            existing_by_name = {
+                self._normalize_model_name(str(model.get('name', ''))): index
+                for index, model in enumerate(provider_models)
+            }
+
+            for curated_model in curated_models:
+                key = self._normalize_model_name(str(curated_model.get('name', '')))
+                if key in existing_by_name:
+                    provider_models[existing_by_name[key]].update(curated_model)
+                else:
+                    existing_by_name[key] = len(provider_models)
+                    provider_models.append(dict(curated_model))
+
+            provider_models.sort(key=self._model_sort_key, reverse=True)
+
+        metadata = dict(cached_context.get('metadata') or {})
+        metadata['fallback_used'] = 'committed-cache'
+        metadata['curated_overlay'] = True
+
+        return {
+            **cached_context,
+            'metadata': metadata,
+            'models': merged_models,
+        }
 
     def _save_cache(self):
         """Save current context to local YAML cache file."""
@@ -231,16 +290,11 @@ class EcosystemContextManager:
                 })
             discovered_by_provider[provider] = discovered
 
-        sort_key = lambda m: (
-            m.get('ga_date', '1970-01-01') if m.get('ga_date') != 'unknown' else '1970-01-01',
-            m.get('api_date', '1970-01-01') if m.get('api_date') != 'unknown' else '1970-01-01'
-        )
-
         merged_models: Dict[str, List[Dict[str, Any]]] = {}
         all_providers = set(curated_by_provider) | set(discovered_by_provider)
         for provider in all_providers:
-            curated = sorted(curated_by_provider.get(provider, []), key=sort_key, reverse=True)
-            discovered = sorted(discovered_by_provider.get(provider, []), key=sort_key, reverse=True)
+            curated = sorted(curated_by_provider.get(provider, []), key=self._model_sort_key, reverse=True)
+            discovered = sorted(discovered_by_provider.get(provider, []), key=self._model_sort_key, reverse=True)
 
             if len(curated) >= self.MAX_MODELS_PER_PROVIDER:
                 if discovered:
@@ -320,6 +374,15 @@ class EcosystemContextManager:
         if ': ' in name:
             name = name.split(': ', 1)[1]
         return name.lower().replace('-', '').replace(' ', '').replace('.', '').replace(':', '')
+
+    def _model_sort_key(self, model: Dict[str, Any]) -> tuple:
+        """Sort models by GA date first, then API date, with unknown dates last."""
+        ga_date = model.get('ga_date', '1970-01-01')
+        api_date = model.get('api_date', '1970-01-01')
+        return (
+            ga_date if ga_date != 'unknown' else '1970-01-01',
+            api_date if api_date != 'unknown' else '1970-01-01',
+        )
 
     def _get_cache_age(self) -> int:
         """Get age of cached config in days."""
