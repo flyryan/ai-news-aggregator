@@ -211,8 +211,22 @@ jobs:
           sudo wg-quick up "$wg_conf"
 
           echo "REDDIT_PROXY_URL=socks5h://10.64.0.1:1080" >> "$GITHUB_ENV"
-          curl -fsSL --proxy socks5h://10.64.0.1:1080 https://www.reddit.com/.json >/dev/null
-          echo "Mullvad SOCKS proxy is reachable for Reddit requests."
+          proxy_ip="$(curl -fsSL --proxy socks5h://10.64.0.1:1080 https://am.i.mullvad.net/ip || true)"
+          if [[ -n "$proxy_ip" ]]; then
+            echo "Mullvad SOCKS proxy is reachable."
+          else
+            echo "Mullvad SOCKS proxy did not return an external IP smoke-test response." >&2
+          fi
+
+          reddit_status="$(curl -sS -o /dev/null -w '%{http_code}' \
+            -A "$REDDIT_USER_AGENT" \
+            --proxy socks5h://10.64.0.1:1080 \
+            https://www.reddit.com/.json || true)"
+          if [[ "$reddit_status" == "200" ]]; then
+            echo "Reddit probe succeeded through Mullvad."
+          else
+            echo "Reddit probe returned HTTP ${reddit_status:-unknown}; continuing so the gatherer can report detailed subreddit status." >&2
+          fi
 
       - name: Run pipeline
         if: steps.schedule_gate.outputs.should_run == 'true'
