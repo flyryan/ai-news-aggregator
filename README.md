@@ -248,7 +248,7 @@ Runtime scrape data, checkpoints, and logs under `data/**` and `logs/**` stay ig
 
 The Reddit gatherer prefers official app-only OAuth when `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET` are set, and then calls `https://oauth.reddit.com`. Without those credentials, it falls back to public `.json` endpoints.
 
-If a CI provider's IP ranges are blocked only for Reddit, set `REDDIT_PROXY_URL` to an HTTP(S) or SOCKS proxy URL. If multiple sources block hosted runner egress, set `PIPELINE_PROXY_URL` instead; the workflow exports it as the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` variables for the pipeline process. The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed.
+If a CI provider's IP ranges are blocked only for Reddit, set `REDDIT_PROXY_URL` to an HTTP(S) or SOCKS proxy URL. If multiple sources block hosted runner egress, set `PIPELINE_PROXY_URL` instead; the workflow exports it as the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` variables for the pipeline process. The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed; provider clients using `httpx` need `socksio`.
 
 The GitHub workflow also supports `MULLVAD_ACCOUNT`: when set and `PIPELINE_PROXY_URL` is empty, it creates a WireGuard tunnel with Mullvad's official `wg-tools` script, narrows the route to Mullvad's SOCKS proxy address, and sets `PIPELINE_PROXY_URL` plus `REDDIT_PROXY_URL` to `socks5h://10.64.0.1:1080` for the pipeline. Set `MULLVAD_WG_PRIVATE_KEY` to reuse one registered CI device across runs.
 
