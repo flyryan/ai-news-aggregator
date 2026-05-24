@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Project Overview
 
-AI News Aggregator - A Python-based multi-agent pipeline that collects AI/ML news from multiple sources (RSS feeds, arXiv API, Twitter, Reddit, Bluesky, Mastodon), analyzes them using Codex Opus 4.7 with adaptive thinking, and serves a modern Svelte SPA frontend with AATF branding.
+AI News Aggregator - A Python-based multi-agent pipeline that collects AI/ML news from multiple sources (RSS feeds, arXiv API, Twitter, Reddit, Bluesky, Mastodon), analyzes them using Claude Opus 4.7 with adaptive thinking, and serves a modern Svelte SPA frontend with AATF branding.
 
 **Testing:** The user always runs tests themselves. Do not run the pipeline or tests unless explicitly asked.
 
@@ -116,7 +116,7 @@ Phase 7: Search Index Update (Lunr.js compatible)
 ```
 agents/
 ├── __init__.py
-├── llm_client.py              # Anthropic client with extended thinking
+├── llm_client.py              # Anthropic client with adaptive/manual thinking profiles
 ├── base.py                    # Base classes (BaseGatherer, BaseAnalyzer)
 ├── orchestrator.py            # Main coordinator
 ├── link_enricher.py           # Adds internal links to summaries
@@ -164,7 +164,7 @@ frontend/                       # Svelte SPA frontend
 ### Key Files
 - `run_pipeline.py` - Async entry point using MainOrchestrator
 - `agents/orchestrator.py` - Main coordinator for all agents
-- `agents/llm_client.py` - Anthropic SDK with extended thinking
+- `agents/llm_client.py` - Anthropic SDK with adaptive/manual thinking profiles
 - `agents/link_enricher.py` - Adds internal links to summaries using LLM
 - `agents/cost_tracker.py` - Tracks LLM API usage and costs
 - `agents/ecosystem_context.py` - Model release tracking for LLM grounding
@@ -181,7 +181,7 @@ frontend/                       # Svelte SPA frontend
 - `web/data/` - Generated JSON data for frontend
 
 ### External Dependencies
-- **Anthropic SDK** - Direct Codex API with extended thinking (Bearer auth)
+- **Anthropic SDK** - Direct Claude API with adaptive thinking support (Bearer auth)
 - **TwitterAPI.io** - Twitter/X data collection ($0.15/1000 tweets)
 - **Reddit JSON** - Free Reddit endpoint (add .json to Reddit URLs)
 - **Bluesky Public API** - Free, no auth required
@@ -209,20 +209,20 @@ LOOKBACK_HOURS        # Data window in hours (default: 24)
 TZ                    # Timezone (default: America/New_York)
 ```
 
-## Extended Thinking
+## Adaptive Thinking Profiles
 
-The pipeline uses Codex's extended thinking feature with budget levels:
+The pipeline uses Claude Opus 4.7 adaptive thinking profiles. For Opus 4.7, the legacy budget labels map to `output_config.effort`; `budget_tokens` is only used for older Claude models that still support manual thinking.
 
-| Component | Thinking Level | Budget Tokens |
-|-----------|---------------|---------------|
-| Link relevance check | QUICK | 4,096 |
-| Item summarization | QUICK | 4,096 |
-| Category theme detection | STANDARD | 8,192 |
-| Item ranking | DEEP | 16,000 |
-| Cross-category topics | ULTRATHINK | 32,000 |
-| Executive summary | DEEP | 16,000 |
-| Link enrichment | STANDARD | 8,192 |
-| Ecosystem enrichment | STANDARD | 8,192 |
+| Component | Profile | Opus 4.7 Effort |
+|-----------|---------|-----------------|
+| Link relevance check | QUICK | high |
+| Item summarization | QUICK | high |
+| Category theme detection | STANDARD | xhigh |
+| Item ranking | DEEP | max |
+| Cross-category topics | ULTRATHINK | max |
+| Executive summary | DEEP | max |
+| Link enrichment | STANDARD | xhigh |
+| Ecosystem enrichment | STANDARD | xhigh |
 
 ## Ecosystem Context
 

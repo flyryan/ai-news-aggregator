@@ -10,7 +10,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 
-Daily AI/ML news briefings curated by specialized agents with extended thinking. The publishing repository runs the hosted pipeline every morning at 3 AM ET.
+Daily AI/ML news briefings curated by specialized agents using adaptive thinking profiles. The publishing repository runs the hosted pipeline every morning at 3 AM ET.
 
 ---
 
@@ -19,7 +19,7 @@ Daily AI/ML news briefings curated by specialized agents with extended thinking.
 | Section | Description |
 |---------|-------------|
 | [What It Does](#what-it-does) | Key stats and capabilities |
-| [How It Works](#how-it-works) | Pipeline phases, thinking levels, architecture |
+| [How It Works](#how-it-works) | Pipeline phases, reasoning profiles, architecture |
 | [Quick Start](#quick-start) | Docker and local setup |
 | [Configuration](#configuration) | Provider modes, prompts, data sources |
 | [Daily Automation](#daily-automation) | GitHub Actions publication workflow |
@@ -34,13 +34,13 @@ Daily AI/ML news briefings curated by specialized agents with extended thinking.
 
 ## What It Does
 
-A Python-based pipeline that collects AI/ML news from multiple sources, analyzes them using specialized agents with Claude's extended thinking, and serves a modern Svelte SPA frontend.
+A Python-based pipeline that collects AI/ML news from multiple sources, analyzes them using specialized agents with Claude's adaptive thinking, and serves a modern Svelte SPA frontend.
 
 **Key Stats:**
 - **100+ RSS feeds** from AI news sites, blogs, and research organizations
 - **7 arXiv categories** (cs.AI, cs.LG, cs.CL, cs.CV, cs.NE, cs.RO, stat.ML)
 - **6 social platforms** (Twitter, Bluesky, Mastodon, Reddit, LessWrong, research blogs)
-- **~80-85K thinking tokens** per daily run
+- **Adaptive reasoning profiles** for lightweight triage through cross-category synthesis
 - **Daily hero image** generated with AATF skunk mascot
 
 ---
@@ -51,27 +51,29 @@ A Python-based pipeline that collects AI/ML news from multiple sources, analyzes
 
 ### The Multi-Phase Pipeline
 
-| Phase | Description | Thinking Level |
+| Phase | Description | Reasoning Profile |
 |-------|-------------|----------------|
 | **0. Ecosystem Context** | Load AI model release dates for LLM grounding | - |
 | **1. Parallel Gathering** | 4 gatherers collect from RSS, arXiv, Twitter, Reddit, Bluesky, Mastodon | - |
-| **2. Parallel Analysis** | MAP-REDUCE pattern: batch items (75 each), analyze, then synthesize | STANDARD (8K) → DEEP (16K) |
+| **2. Parallel Analysis** | MAP-REDUCE pattern: batch items (75 each), analyze, then synthesize | STANDARD -> DEEP |
 | **2.5. Continuity Detection** | Track developing stories, detect rehashes, link related coverage | - |
-| **3. Cross-Category Topics** | Identify 3-6 themes spanning all categories | ULTRATHINK (32K) |
-| **4. Executive Summary** | Generate daily briefing (500-800 words) | DEEP (16K) |
-| **4.5. Link Enrichment** | Inject internal links to referenced items | STANDARD (8K) |
-| **4.6. Ecosystem Enrichment** | Auto-detect new model releases from news | STANDARD (8K) |
+| **3. Cross-Category Topics** | Identify 3-6 themes spanning all categories | ULTRATHINK |
+| **4. Executive Summary** | Generate daily briefing (500-800 words) | DEEP |
+| **4.5. Link Enrichment** | Inject internal links to referenced items | STANDARD |
+| **4.6. Ecosystem Enrichment** | Auto-detect new model releases from news | STANDARD |
 | **4.7. Hero Image** | Generate branded banner with Gemini 3 Pro | - |
 | **5-7. Output** | JSON data generation + RSS feeds + Lunr.js search index | - |
 
-### Extended Thinking Levels
+### Adaptive Thinking Profiles
 
-| Level | Budget | Use Case |
-|-------|--------|----------|
-| QUICK | 4,096 tokens | Link relevance decisions |
-| STANDARD | 8,192 tokens | Batch analysis, link enrichment |
-| DEEP | 16,000 tokens | Category ranking, executive summary |
-| ULTRATHINK | 32,000 tokens | Cross-category topic detection |
+For Claude Opus 4.7, these are profiles rather than fixed token budgets. The client sends `thinking: { type: "adaptive", display: "summarized" }` and maps each profile to `output_config.effort`. Manual `budget_tokens` is only used for older Claude models that still support it.
+
+| Profile | Opus 4.7 Effort | Legacy Manual Budget | Use Case |
+|---------|-----------------|----------------------|----------|
+| QUICK | `high` | 4,096 tokens | Link relevance decisions, item summarization |
+| STANDARD | `xhigh` | 8,192 tokens | Batch analysis, link enrichment |
+| DEEP | `max` | 16,000 tokens | Category ranking, executive summary |
+| ULTRATHINK | `max` | 32,000 tokens | Cross-category topic detection |
 
 ### Agent Architecture
 
@@ -270,10 +272,10 @@ cp config/providers.yaml.example config/providers.yaml
 
 Supports two modes:
 
-| Mode | Description | Auth | Extended Thinking |
-|------|-------------|------|-------------------|
-| `anthropic` (default) | Direct Anthropic API | x-api-key header | Full support |
-| `openai-compatible` | LiteLLM, vLLM, or other proxies | Bearer token | May not be supported |
+| Mode | Description | Auth | Thinking Support |
+|------|-------------|------|------------------|
+| `anthropic` (default) | Direct Anthropic API | x-api-key header | Adaptive thinking on Opus 4.7 |
+| `openai-compatible` | LiteLLM, vLLM, or other proxies | Bearer token | Depends on proxy passthrough support |
 
 **Direct Anthropic API:**
 
@@ -415,9 +417,10 @@ Automatically identifies when today's stories continue from previous coverage:
 - **Smart ranking**: Items flagged as `rehash` can be demoted from top stories
 - **2-day lookback**: Compares against items from the past 2 days
 
-### Extended Thinking
-- Configurable thinking budgets from 4K to 32K tokens
-- ULTRATHINK mode for complex cross-category analysis
+### Adaptive Thinking Profiles
+- Claude Opus 4.7 uses adaptive thinking plus effort settings, not fixed manual `budget_tokens`
+- QUICK/STANDARD/DEEP/ULTRATHINK remain as internal profile names for callers, logs, and older Claude models
+- ULTRATHINK profile for complex cross-category analysis
 - **Cost tracking**: Per-phase breakdown with input/output/cache token tracking, logged at end of each run
 
 ### Ecosystem Grounding
@@ -475,7 +478,7 @@ Multiple Atom 1.0 feeds for different use cases:
 ```
 ai-news-aggregator/
 ├── agents/
-│   ├── llm_client.py          # Anthropic client with extended thinking
+│   ├── llm_client.py          # Anthropic client with adaptive/manual thinking profiles
 │   ├── base.py                # BaseGatherer, BaseAnalyzer classes
 │   ├── orchestrator.py        # Main coordinator
 │   ├── ecosystem_context.py   # AI model release dates for LLM grounding

@@ -1,9 +1,9 @@
 """
-Anthropic Client with Extended Thinking Support
+Anthropic Client with Adaptive/Manual Thinking Support
 
 This module provides a wrapper around the Anthropic SDK that:
 1. Uses Bearer token authentication (custom httpx transport)
-2. Supports extended thinking with configurable budget levels
+2. Supports Opus 4.7 adaptive thinking and legacy manual thinking budgets
 3. Returns structured responses including thinking blocks
 4. Automatically tracks token usage and costs
 """
@@ -30,7 +30,11 @@ logger = logging.getLogger(__name__)
 
 
 class ThinkingLevel(IntEnum):
-    """Budget levels for extended thinking."""
+    """Internal thinking profiles.
+
+    On Opus 4.7+, these legacy budget values are mapped to adaptive effort
+    levels. On older Claude models, they remain manual thinking budgets.
+    """
     QUICK = 4096       # Simple tasks (summarization)
     STANDARD = 8192    # Normal analysis
     DEEP = 16000       # Complex ranking
@@ -51,7 +55,7 @@ BUDGET_TO_EFFORT = {
 def _uses_adaptive_thinking(model: str) -> bool:
     """True if model requires adaptive thinking (Opus 4.7 and later).
 
-    Opus 4.7 removed manual extended thinking (`type: enabled` + budget_tokens)
+    Opus 4.7 removed manual thinking (`type: enabled` + budget_tokens)
     and sampling parameters. Opus 4.6 and earlier still accept manual thinking,
     so we keep the legacy path for them. Regex is permissive to handle the
     alias space: claude-opus-4-7, claude-4.7-opus, claude-opus-4-7-20260416,
@@ -102,7 +106,7 @@ class ApiKeyAuth(httpx.Auth):
 
 class AnthropicClient:
     """
-    Native Anthropic client with mode-based auth and extended thinking support.
+    Native Anthropic client with mode-based auth and adaptive/manual thinking support.
 
     This client wraps the Anthropic SDK to work with either:
     - Direct Anthropic API (x-api-key header authentication)
@@ -194,7 +198,7 @@ class AnthropicClient:
         temperature: float = 1.0
     ) -> LLMResponse:
         """
-        Make a standard API call without extended thinking.
+        Make a standard API call without thinking enabled.
 
         Args:
             messages: List of message dicts with 'role' and 'content'.
@@ -246,7 +250,7 @@ class AnthropicClient:
         temperature: float = 1.0
     ) -> LLMResponse:
         """
-        Make an API call with extended thinking enabled.
+        Make an API call with adaptive or manual thinking enabled.
 
         Args:
             messages: List of message dicts with 'role' and 'content'.
@@ -351,7 +355,7 @@ class AnthropicClient:
                 )
             else:
                 error_msg += (
-                    f"Check that the model '{self.model}' supports extended thinking "
+                    f"Check that the model '{self.model}' supports manual thinking "
                     f"and that the API endpoint is responding correctly."
                 )
             raise RuntimeError(error_msg)
@@ -596,7 +600,7 @@ class AsyncAnthropicClient:
                 )
             else:
                 error_msg += (
-                    f"Check that the model '{self.model}' supports extended thinking "
+                    f"Check that the model '{self.model}' supports manual thinking "
                     f"and that the API endpoint is responding correctly."
                 )
             raise RuntimeError(error_msg)

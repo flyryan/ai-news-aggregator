@@ -4,7 +4,7 @@ AI News Aggregation Pipeline - Multi-Agent Architecture
 
 Main entry point that orchestrates the multi-agent pipeline:
 1. Parallel Gathering (4 gatherers: news, papers, social, reddit)
-2. Parallel Analysis (4 analyzers with extended thinking)
+2. Parallel Analysis (4 analyzers with adaptive/manual thinking profiles)
 3. Cross-Category Topic Detection (ULTRATHINK)
 4. Executive Summary Generation
 5. Deduplication & QC

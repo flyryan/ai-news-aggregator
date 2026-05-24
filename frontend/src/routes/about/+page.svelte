@@ -58,7 +58,7 @@
 				</li>
 				<li>
 					<strong>Category Analysis</strong> - Four analyzers process each category using
-					extended thinking to identify key developments, assess importance, and generate summaries.
+					adaptive thinking profiles to identify key developments, assess importance, and generate summaries.
 				</li>
 				<li>
 					<strong>Cross-Category Topic Detection</strong> - The system identifies themes that
@@ -95,9 +95,9 @@
 						without human editorial review.
 					</p>
 					<p>
-						The pipeline uses <strong>extended thinking</strong> (up to 32,000 tokens of reasoning)
-						for complex analysis tasks like cross-category topic detection and executive summaries.
-						This helps the AI produce more thoughtful, well-reasoned content.
+						The pipeline uses Claude Opus 4.7 <strong>adaptive thinking</strong> for complex
+						analysis tasks like cross-category topic detection and executive summaries. On Opus 4.7,
+						this is guided by effort settings rather than fixed manual token budgets.
 					</p>
 					<p>
 						<strong>While we strive for accuracy, AI can and does make errors.</strong> These may include:

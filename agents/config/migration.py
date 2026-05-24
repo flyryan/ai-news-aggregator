@@ -120,12 +120,12 @@ llm:
   # anthropic (default):
   #   - Direct Anthropic API access
   #   - Uses x-api-key header authentication
-  #   - Full extended thinking support (QUICK/STANDARD/DEEP/ULTRATHINK)
+  #   - Adaptive thinking support (QUICK/STANDARD/DEEP/ULTRATHINK profiles)
   #
   # openai-compatible:
   #   - For LiteLLM, AWS Bedrock proxies, or other OpenAI-compatible endpoints
   #   - Uses Bearer token authentication
-  #   - Extended thinking will log warnings (proxy may not support it)
+  #   - Thinking support depends on proxy passthrough support
   #
   mode: "{llm_mode}"
 

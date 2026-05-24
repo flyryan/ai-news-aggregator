@@ -13,12 +13,10 @@ digraph AINewsPipeline {
 
     // Title
     labelloc="t";
-    label=<<B>AI News Aggregator Pipeline</B><BR/><FONT POINT-SIZE="10">Multi-Agent Architecture with Extended Thinking</FONT>>;
+    label=<<B>AI News Aggregator Pipeline</B><BR/><FONT POINT-SIZE="10">Multi-Agent Architecture with Adaptive Thinking Profiles</FONT>>;
     fontsize=16;
 
-    // ═══════════════════════════════════════════════════════════════
     // DATA SOURCES
-    // ═══════════════════════════════════════════════════════════════
     subgraph cluster_sources {
         label=<<B>Data Sources</B>>;
         style="rounded,filled";
@@ -34,9 +32,7 @@ digraph AINewsPipeline {
         reddit [label="Reddit", shape=cylinder, fillcolor="#DBEAFE"];
     }
 
-    // ═══════════════════════════════════════════════════════════════
     // PHASE 1: GATHERING
-    // ═══════════════════════════════════════════════════════════════
     subgraph cluster_phase1 {
         label=<<B>Phase 1: Parallel Gathering</B>>;
         style="rounded,filled";
@@ -59,13 +55,11 @@ digraph AINewsPipeline {
             color="#BE123C";
 
             news_gatherer [label="NewsGatherer", shape=box, fillcolor="#FECACA"];
-            link_follower [label="LinkFollower\n×N parallel", shape=box, fillcolor="#F87171", peripheries=3];
+            link_follower [label="LinkFollower\nxN parallel", shape=box, fillcolor="#F87171", peripheries=3];
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
     // PHASE 2: ANALYSIS (4 PARALLEL TRACKS)
-    // ═══════════════════════════════════════════════════════════════
     subgraph cluster_phase2 {
         label=<<B>Phase 2: Parallel Analysis (4 tracks)</B>>;
         style="rounded,filled";
@@ -76,38 +70,36 @@ digraph AINewsPipeline {
             label="News";
             style="rounded";
             color="#B45309";
-            news_map [label="MAP ×N", shape=box, fillcolor="#FBBF24", peripheries=3];
-            news_reduce [label="REDUCE", shape=box, fillcolor="#F59E0B"];
+            news_map [label="MAP xN\nSTANDARD profile", shape=box, fillcolor="#FBBF24", peripheries=3];
+            news_reduce [label="REDUCE\nDEEP profile", shape=box, fillcolor="#F59E0B"];
         }
 
         subgraph cluster_research_track {
             label="Research";
             style="rounded";
             color="#B45309";
-            research_map [label="MAP ×N", shape=box, fillcolor="#FBBF24", peripheries=3];
-            research_reduce [label="REDUCE", shape=box, fillcolor="#F59E0B"];
+            research_map [label="MAP xN\nSTANDARD profile", shape=box, fillcolor="#FBBF24", peripheries=3];
+            research_reduce [label="REDUCE\nDEEP profile", shape=box, fillcolor="#F59E0B"];
         }
 
         subgraph cluster_social_track {
             label="Social";
             style="rounded";
             color="#B45309";
-            social_map [label="MAP ×N", shape=box, fillcolor="#FBBF24", peripheries=3];
-            social_reduce [label="REDUCE", shape=box, fillcolor="#F59E0B"];
+            social_map [label="MAP xN\nSTANDARD profile", shape=box, fillcolor="#FBBF24", peripheries=3];
+            social_reduce [label="REDUCE\nDEEP profile", shape=box, fillcolor="#F59E0B"];
         }
 
         subgraph cluster_reddit_track {
             label="Reddit";
             style="rounded";
             color="#B45309";
-            reddit_map [label="MAP ×N", shape=box, fillcolor="#FBBF24", peripheries=3];
-            reddit_reduce [label="REDUCE", shape=box, fillcolor="#F59E0B"];
+            reddit_map [label="MAP xN\nSTANDARD profile", shape=box, fillcolor="#FBBF24", peripheries=3];
+            reddit_reduce [label="REDUCE\nDEEP profile", shape=box, fillcolor="#F59E0B"];
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════
     // PHASE 2.5: CONTINUITY (4 PARALLEL MATCHERS)
-    // ═══════════════════════════════════════════════════════════════
     subgraph cluster_phase25 {
         label=<<B>Phase 2.5: Continuity Detection</B>>;
         style="rounded,filled";
@@ -126,47 +118,50 @@ digraph AINewsPipeline {
         }
 
         editorial [label="Stage B: Editorial Curator", shape=box, fillcolor="#EC4899", fontcolor="white"];
+        staleness [label="Staleness Checker", shape=box, fillcolor="#F9A8D4"];
     }
 
-    // ═══════════════════════════════════════════════════════════════
     // PHASE 3: CROSS-CATEGORY
-    // ═══════════════════════════════════════════════════════════════
     subgraph cluster_phase3 {
         label=<<B>Phase 3: Cross-Category Topics</B>>;
         style="rounded,filled";
         fillcolor="#FEF2F2";
         color="#DC2626";
 
-        orchestrator [label="Orchestrator\nULTRATHINK (32K)", shape=box, fillcolor="#DC2626", fontcolor="white", penwidth=3];
+        orchestrator [label="Orchestrator\nULTRATHINK profile", shape=box, fillcolor="#DC2626", fontcolor="white", penwidth=3];
     }
 
-    // ═══════════════════════════════════════════════════════════════
     // PHASE 4: EXECUTIVE SUMMARY
-    // ═══════════════════════════════════════════════════════════════
     subgraph cluster_phase4 {
         label=<<B>Phase 4: Executive Summary</B>>;
         style="rounded,filled";
         fillcolor="#FFF7ED";
         color="#EA580C";
 
-        exec_summary [label="Summary Generator\nDEEP (16K)", shape=box, fillcolor="#FB923C"];
+        exec_summary [label="Summary Generator\nDEEP profile", shape=box, fillcolor="#FB923C"];
     }
 
-    // ═══════════════════════════════════════════════════════════════
     // PHASE 4.5: LINK ENRICHMENT (PARALLEL)
-    // ═══════════════════════════════════════════════════════════════
     subgraph cluster_phase45 {
         label=<<B>Phase 4.5: Link Enrichment</B>>;
         style="rounded,filled";
         fillcolor="#FEFCE8";
         color="#CA8A04";
 
-        link_enricher [label="LinkEnricher\n×8-11 parallel", shape=box, fillcolor="#FACC15", peripheries=3];
+        link_enricher [label="LinkEnricher\nx8-11 parallel", shape=box, fillcolor="#FACC15", peripheries=3];
     }
 
-    // ═══════════════════════════════════════════════════════════════
+    // PHASE 4.6: ECOSYSTEM ENRICHMENT
+    subgraph cluster_phase46 {
+        label=<<B>Phase 4.6: Ecosystem Enrichment</B>>;
+        style="rounded,filled";
+        fillcolor="#ECFDF5";
+        color="#059669";
+
+        ecosystem_enricher [label="Model Release\nDetector", shape=box, fillcolor="#A7F3D0"];
+    }
+
     // PHASE 4.7: HERO IMAGE
-    // ═══════════════════════════════════════════════════════════════
     subgraph cluster_phase47 {
         label=<<B>Phase 4.7: Hero Image</B>>;
         style="rounded,filled";
@@ -176,9 +171,7 @@ digraph AINewsPipeline {
         hero_gen [label="HeroGenerator\nGemini 3 Pro", shape=box, fillcolor="#A78BFA"];
     }
 
-    // ═══════════════════════════════════════════════════════════════
     // PHASE 5: ASSEMBLY
-    // ═══════════════════════════════════════════════════════════════
     subgraph cluster_phase5 {
         label=<<B>Phase 5: Assembly</B>>;
         style="rounded,filled";
@@ -188,9 +181,7 @@ digraph AINewsPipeline {
         result_assembly [label="OrchestratorResult", shape=box, fillcolor="#86EFAC"];
     }
 
-    // ═══════════════════════════════════════════════════════════════
     // PHASE 6: JSON OUTPUT
-    // ═══════════════════════════════════════════════════════════════
     subgraph cluster_phase6 {
         label=<<B>Phase 6: JSON Generation</B>>;
         style="rounded,filled";
@@ -200,9 +191,17 @@ digraph AINewsPipeline {
         json_gen [label="JSONGenerator", shape=box, fillcolor="#86EFAC"];
     }
 
-    // ═══════════════════════════════════════════════════════════════
+    // PHASE 6.5: RSS FEEDS
+    subgraph cluster_phase65 {
+        label=<<B>Phase 6.5: RSS Feeds</B>>;
+        style="rounded,filled";
+        fillcolor="#F0FDF4";
+        color="#16A34A";
+
+        feed_gen [label="FeedGenerator\nAtom + Media RSS", shape=box, fillcolor="#86EFAC"];
+    }
+
     // PHASE 7: SEARCH INDEX
-    // ═══════════════════════════════════════════════════════════════
     subgraph cluster_phase7 {
         label=<<B>Phase 7: Search Index</B>>;
         style="rounded,filled";
@@ -212,14 +211,10 @@ digraph AINewsPipeline {
         search_idx [label="SearchIndexer\nLunr.js", shape=box, fillcolor="#86EFAC"];
     }
 
-    // ═══════════════════════════════════════════════════════════════
     // FRONTEND
-    // ═══════════════════════════════════════════════════════════════
     frontend [label="Svelte SPA Frontend", shape=box, fillcolor="#E63946", fontcolor="white", penwidth=3];
 
-    // ═══════════════════════════════════════════════════════════════
     // EDGES
-    // ═══════════════════════════════════════════════════════════════
 
     // Sources to gatherers
     rss -> news_gatherer;
@@ -252,14 +247,15 @@ digraph AINewsPipeline {
     social_reduce -> social_matcher;
     reddit_reduce -> reddit_matcher;
 
-    // Matchers to Editorial
+    // Matchers to Editorial and staleness check
     news_matcher -> editorial;
     research_matcher -> editorial;
     social_matcher -> editorial;
     reddit_matcher -> editorial;
+    editorial -> staleness;
 
     // Editorial to Orchestrator
-    editorial -> orchestrator;
+    staleness -> orchestrator;
 
     // Orchestrator branches
     orchestrator -> exec_summary;
@@ -268,12 +264,16 @@ digraph AINewsPipeline {
     // Summary to Enricher
     exec_summary -> link_enricher;
 
+    // Ecosystem enrichment before assembly
+    link_enricher -> ecosystem_enricher;
+
     // Converge to Assembly
-    link_enricher -> result_assembly;
+    ecosystem_enricher -> result_assembly;
     hero_gen -> result_assembly;
 
     // Output chain
     result_assembly -> json_gen;
-    json_gen -> search_idx;
+    json_gen -> feed_gen;
+    feed_gen -> search_idx;
     search_idx -> frontend;
 }
