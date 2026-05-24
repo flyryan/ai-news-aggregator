@@ -209,6 +209,10 @@ Set these on the publishing repository:
 | `ANTHROPIC_API_KEY` | LLM/proxy API key, also used by the fallback generated provider config |
 | `ANTHROPIC_API_BASE` | OpenAI-compatible proxy base URL when used |
 | `TWITTERAPI_IO_KEY` | Optional Twitter/X collection |
+| `REDDIT_CLIENT_ID` | Optional Reddit OAuth app client ID; recommended for GitHub-hosted runs |
+| `REDDIT_CLIENT_SECRET` | Optional Reddit OAuth app secret; used with `REDDIT_CLIENT_ID` |
+| `REDDIT_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for Reddit requests if runner egress is blocked |
+| `MULLVAD_ACCOUNT` | Optional Mullvad account number; used to create a temporary WireGuard tunnel for Reddit when no `REDDIT_PROXY_URL` is set |
 | `GOOGLE_API_KEY` | Optional Gemini native image generation when not using a proxy image provider |
 | `PIPELINE_PUSH_TOKEN` | Optional PAT if the default `GITHUB_TOKEN` is not enough for downstream webhook behavior |
 
@@ -220,6 +224,8 @@ Set these on the publishing repository:
 | `PIPELINE_BASE_URL` | `https://news.aatf.ai` | Base URL used in feeds |
 | `PIPELINE_IMAGE_MODEL` | `gemini-3-pro-image-preview` | Native Gemini image model used by fallback config |
 | `PIPELINE_COMMIT_PATHS` | `web/data config/model_releases.yaml config/ecosystem_context.yaml` | Space-separated generated outputs to commit |
+| `REDDIT_USER_AGENT` | `AI-News-Aggregator/1.0 (by u/flyryan)` | User-Agent sent to Reddit API requests |
+| `MULLVAD_RELAY_FILTER` | `us` | Mullvad WireGuard relay hostname prefix used for CI Reddit egress |
 
 ### Manual Dry Runs
 
@@ -234,6 +240,12 @@ The daily commit includes persistent generated site and grounding outputs:
 - `config/ecosystem_context.yaml` as the last successful OpenRouter-enriched grounding cache
 
 Runtime scrape data, checkpoints, and logs under `data/**` and `logs/**` stay ignored. They are useful for local debugging but are not public site state.
+
+### Reddit Collection on Hosted Runners
+
+The Reddit gatherer prefers official app-only OAuth when `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET` are set, and then calls `https://oauth.reddit.com`. Without those credentials, it falls back to public `.json` endpoints.
+
+If a CI provider's IP ranges are blocked, set `REDDIT_PROXY_URL` to an HTTP(S) or SOCKS proxy URL. The GitHub workflow also supports `MULLVAD_ACCOUNT`: when set and `REDDIT_PROXY_URL` is empty, it creates a temporary WireGuard tunnel with Mullvad's official `wg-tools` script, narrows the route to Mullvad's SOCKS proxy address, and sets `REDDIT_PROXY_URL=socks5h://10.64.0.1:1080` for the pipeline.
 
 ---
 
@@ -317,6 +329,12 @@ export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
 | `ANTHROPIC_API_KEY` | Anthropic API key | Yes |
 | `GOOGLE_API_KEY` | Google AI API key | No (hero images) |
 | `TWITTERAPI_IO_KEY` | TwitterAPI.io key ($0.15/1000 tweets) | No |
+| `REDDIT_CLIENT_ID` | Reddit app client ID for OAuth collection | No |
+| `REDDIT_CLIENT_SECRET` | Reddit app client secret for OAuth collection | No |
+| `REDDIT_PROXY_URL` | HTTP(S) or SOCKS proxy for Reddit requests | No |
+| `REDDIT_USER_AGENT` | User-Agent for Reddit requests | No |
+| `MULLVAD_ACCOUNT` | Mullvad account number for CI Reddit proxy setup | No |
+| `MULLVAD_RELAY_FILTER` | Mullvad relay hostname prefix for CI tunnel selection | No |
 | `TARGET_DATE` | Report date (YYYY-MM-DD) | No |
 | `ENABLE_CRON` | Enable scheduled collection | No |
 | `COLLECTION_SCHEDULE` | Cron schedule (default: `0 6 * * *`) | No |
@@ -356,7 +374,7 @@ Edit files in `config/`:
 | Twitter | `twitter_accounts.txt` | Usernames (requires TWITTERAPI_IO_KEY) |
 | Bluesky | `bluesky_accounts.txt` | Handles (e.g., `karpathy.bsky.social`) |
 | Mastodon | `mastodon_accounts.txt` | Full addresses (e.g., `user@mastodon.social`) |
-| Reddit | `reddit_subreddits.txt` | Subreddit names (free, no key needed) |
+| Reddit | `reddit_subreddits.txt` | Subreddit names (public JSON fallback; OAuth recommended on hosted runners) |
 
 ### Model Release Tracking
 
@@ -419,7 +437,7 @@ Each pipeline run tracks collection status per source:
 | **News** | 100+ RSS feeds + linked articles | RSS + LLM-guided link following |
 | **Research** | arXiv (7 categories) + LessWrong | RSS/OAI-PMH + GraphQL API |
 | **Social** | Twitter, Bluesky, Mastodon | TwitterAPI.io + free APIs |
-| **Reddit** | Configurable subreddits | JSON endpoint (free) |
+| **Reddit** | Configurable subreddits | OAuth API or public JSON fallback |
 
 ### Frontend Features
 - **AATF Branding** - Trend Red (#E63946) color scheme with skunk mascot

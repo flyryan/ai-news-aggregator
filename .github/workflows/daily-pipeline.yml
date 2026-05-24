@@ -42,6 +42,12 @@ jobs:
       ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL || 'claude-opus-4-7' }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       TWITTERAPI_IO_KEY: ${{ secrets.TWITTERAPI_IO_KEY }}
+      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+      REDDIT_PROXY_URL: ${{ secrets.REDDIT_PROXY_URL }}
+      REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'AI-News-Aggregator/1.0 (by u/flyryan)' }}
+      MULLVAD_ACCOUNT: ${{ secrets.MULLVAD_ACCOUNT }}
+      MULLVAD_RELAY_FILTER: ${{ vars.MULLVAD_RELAY_FILTER || 'us' }}
       PIPELINE_BASE_URL: ${{ vars.PIPELINE_BASE_URL || 'https://news.aatf.ai' }}
       PIPELINE_COMMIT_PATHS: ${{ vars.PIPELINE_COMMIT_PATHS || 'web/data config/model_releases.yaml config/ecosystem_context.yaml' }}
       PIPELINE_IMAGE_MODEL: ${{ vars.PIPELINE_IMAGE_MODEL || 'gemini-3-pro-image-preview' }}
@@ -162,6 +168,41 @@ jobs:
             lookback_hours: 24
           YAML
           fi
+
+      - name: Start Mullvad tunnel for Reddit
+        if: steps.schedule_gate.outputs.should_run == 'true' && env.MULLVAD_ACCOUNT != '' && env.REDDIT_PROXY_URL == ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y wireguard-tools openresolv
+          python -m pip install cryptography
+
+          tmp_dir="$(mktemp -d)"
+          curl -fsSL \
+            https://raw.githubusercontent.com/mullvad/wg-tools/c85b7ed35bdb6e0bd38fa24481819088fa6a68c5/wg-mullvad.py \
+            -o "$tmp_dir/wg-mullvad.py"
+
+          python "$tmp_dir/wg-mullvad.py" \
+            --account "$MULLVAD_ACCOUNT" \
+            --filter "$MULLVAD_RELAY_FILTER" \
+            --active \
+            --settings-file "$tmp_dir/settings.conf" \
+            --output-dir "$tmp_dir/wg"
+
+          wg_conf="$(find "$tmp_dir/wg" -name '*.conf' | sort | head -1)"
+          if [[ -z "$wg_conf" ]]; then
+            echo "No Mullvad WireGuard config generated." >&2
+            exit 1
+          fi
+
+          sudo sed -i '/^dns[[:space:]]*=/Id' "$wg_conf"
+          sudo sed -i 's#^allowedips[[:space:]]*=.*#allowedips = 10.64.0.1/32#I' "$wg_conf"
+          sudo wg-quick up "$wg_conf"
+
+          echo "REDDIT_PROXY_URL=socks5h://10.64.0.1:1080" >> "$GITHUB_ENV"
+          curl -fsSL --proxy socks5h://10.64.0.1:1080 https://www.reddit.com/.json >/dev/null
+          echo "Mullvad SOCKS proxy is reachable for Reddit requests."
 
       - name: Run pipeline
         if: steps.schedule_gate.outputs.should_run == 'true'

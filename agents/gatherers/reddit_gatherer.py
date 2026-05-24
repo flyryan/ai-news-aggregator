@@ -6,18 +6,26 @@ Uses the free Reddit JSON endpoint (no API key needed).
 
 import asyncio
 import logging
+import os
 import time
 from datetime import datetime
 from typing import List, Optional, Set
 
 import requests
+from requests.auth import HTTPBasicAuth
 
 from ..base import BaseGatherer, CollectedItem
 
 logger = logging.getLogger(__name__)
 
 # Reddit JSON endpoint configuration
-REDDIT_USER_AGENT = "AI-News-Aggregator/1.0"
+REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "AI-News-Aggregator/1.0")
+REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID", "")
+REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET", "")
+REDDIT_PROXY_URL = os.getenv("REDDIT_PROXY_URL", "")
+REDDIT_PUBLIC_BASE = os.getenv("REDDIT_PUBLIC_BASE", "https://www.reddit.com")
+REDDIT_OAUTH_BASE = os.getenv("REDDIT_OAUTH_BASE", "https://oauth.reddit.com")
+REDDIT_TOKEN_URL = os.getenv("REDDIT_TOKEN_URL", "https://www.reddit.com/api/v1/access_token")
 
 
 class RedditGatherer(BaseGatherer):
@@ -32,6 +40,18 @@ class RedditGatherer(BaseGatherer):
     ):
         super().__init__(config_dir, data_dir, lookback_hours, target_date)
         self.subreddits = self.load_config_list('reddit_subreddits.txt')
+        self.session = requests.Session()
+        self.session.headers.update({"User-Agent": REDDIT_USER_AGENT})
+        if REDDIT_PROXY_URL:
+            self.session.proxies.update({
+                "http": REDDIT_PROXY_URL,
+                "https": REDDIT_PROXY_URL,
+            })
+            logger.info("Reddit gatherer using configured proxy")
+
+        self.oauth_token: Optional[str] = None
+        self.oauth_expires_at = 0.0
+
         if not self.subreddits:
             # Default subreddits if none configured
             self.subreddits = [
@@ -76,7 +96,6 @@ class RedditGatherer(BaseGatherer):
     def _fetch_subreddit(self, subreddit: str, seen_ids: set = None) -> List[CollectedItem]:
         """Fetch hot posts from a single subreddit with pagination."""
         posts = []
-        headers = {"User-Agent": REDDIT_USER_AGENT}
         after = None
         max_search_pages = 30  # Search up to 30 pages to find first post in range
         max_drain_pages = 10  # After finding posts, continue up to 10 more pages
@@ -97,12 +116,7 @@ class RedditGatherer(BaseGatherer):
                 if after:
                     params["after"] = after
 
-                response = requests.get(
-                    f"https://www.reddit.com/r/{subreddit}/hot.json",
-                    params=params,
-                    headers=headers,
-                    timeout=30
-                )
+                response = self._request_listing(subreddit, params)
                 response.raise_for_status()
                 data = response.json()
 
@@ -198,3 +212,73 @@ class RedditGatherer(BaseGatherer):
         time.sleep(1)
 
         return posts
+
+    def _request_listing(self, subreddit: str, params: dict) -> requests.Response:
+        """Fetch a subreddit listing through OAuth when configured, else public JSON."""
+        token = self._get_oauth_token()
+        if token:
+            url = f"{REDDIT_OAUTH_BASE}/r/{subreddit}/hot"
+            headers = {"Authorization": f"Bearer {token}"}
+        else:
+            url = f"{REDDIT_PUBLIC_BASE}/r/{subreddit}/hot.json"
+            headers = {}
+
+        last_response = None
+        for attempt in range(3):
+            response = self.session.get(url, params=params, headers=headers, timeout=30)
+            last_response = response
+
+            if response.status_code == 401 and token:
+                logger.warning("Reddit OAuth token rejected; refreshing once")
+                self.oauth_token = None
+                token = self._get_oauth_token()
+                if token:
+                    headers = {"Authorization": f"Bearer {token}"}
+                    continue
+
+            if response.status_code in (429, 500, 502, 503, 504):
+                delay = 2 ** attempt
+                logger.warning(
+                    f"Reddit returned HTTP {response.status_code} for r/{subreddit}; "
+                    f"retrying in {delay}s"
+                )
+                time.sleep(delay)
+                continue
+
+            return response
+
+        return last_response
+
+    def _get_oauth_token(self) -> Optional[str]:
+        """Return an app-only OAuth token when Reddit API credentials are configured."""
+        if not REDDIT_CLIENT_ID and not REDDIT_CLIENT_SECRET:
+            return None
+        if not REDDIT_CLIENT_ID or not REDDIT_CLIENT_SECRET:
+            logger.warning("Reddit OAuth disabled: set both REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET")
+            return None
+
+        now = time.time()
+        if self.oauth_token and now < self.oauth_expires_at - 60:
+            return self.oauth_token
+
+        try:
+            response = self.session.post(
+                REDDIT_TOKEN_URL,
+                auth=HTTPBasicAuth(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET),
+                data={"grant_type": "client_credentials"},
+                timeout=30,
+            )
+            response.raise_for_status()
+            token_data = response.json()
+            access_token = token_data.get("access_token")
+            if not access_token:
+                logger.warning("Reddit OAuth response did not include an access token")
+                return None
+
+            self.oauth_token = access_token
+            self.oauth_expires_at = now + int(token_data.get("expires_in", 3600))
+            logger.info("Reddit OAuth token acquired")
+            return self.oauth_token
+        except requests.exceptions.RequestException as e:
+            logger.warning(f"Failed to acquire Reddit OAuth token: {e}")
+            return None
