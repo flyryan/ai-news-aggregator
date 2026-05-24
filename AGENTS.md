@@ -184,8 +184,6 @@ ANTHROPIC_API_BASE    # Anthropic API endpoint (no /v1 suffix)
 ANTHROPIC_API_KEY     # Bearer token for authentication
 ANTHROPIC_MODEL       # Model name (default: claude-opus-4-7)
 TWITTERAPI_IO_KEY     # TwitterAPI.io API key
-REDDIT_CLIENT_ID      # Reddit app client ID for OAuth collection (optional)
-REDDIT_CLIENT_SECRET  # Reddit app client secret for OAuth collection (optional)
 REDDIT_PROXY_URL      # HTTP(S) or SOCKS proxy for Reddit requests (optional)
 REDDIT_USER_AGENT     # User-Agent sent to Reddit (optional)
 PIPELINE_PROXY_URL    # HTTP(S) or SOCKS proxy for the whole pipeline (optional)

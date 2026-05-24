@@ -211,8 +211,6 @@ Set these on the publishing repository:
 | `ANTHROPIC_API_KEY` | LLM/proxy API key, also used by the fallback generated provider config |
 | `ANTHROPIC_API_BASE` | OpenAI-compatible proxy base URL when used |
 | `TWITTERAPI_IO_KEY` | Optional Twitter/X collection |
-| `REDDIT_CLIENT_ID` | Optional Reddit OAuth app client ID; recommended for GitHub-hosted runs |
-| `REDDIT_CLIENT_SECRET` | Optional Reddit OAuth app secret; used with `REDDIT_CLIENT_ID` |
 | `REDDIT_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for Reddit requests if runner egress is blocked |
 | `PIPELINE_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for the whole pipeline; useful when hosted runner egress is blocked by multiple sources |
 | `MULLVAD_ACCOUNT` | Optional Mullvad account number; used to create a WireGuard tunnel when neither `PIPELINE_PROXY_URL` nor `REDDIT_PROXY_URL` is set |
@@ -248,7 +246,7 @@ Runtime scrape data, checkpoints, and logs under `data/**` and `logs/**` stay ig
 
 ### Reddit Collection on Hosted Runners
 
-The Reddit gatherer prefers official app-only OAuth when `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET` are set, and then calls `https://oauth.reddit.com`. Without those credentials, it falls back to public `.json` endpoints.
+The Reddit gatherer uses Reddit's public `.json` endpoints and does not require Reddit app credentials.
 
 If a CI provider's IP ranges are blocked only for Reddit, set `REDDIT_PROXY_URL` to an HTTP(S) or SOCKS proxy URL. If multiple sources block hosted runner egress, set `PIPELINE_PROXY_URL` instead; the workflow exports it as the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` variables for the pipeline process. The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed; provider clients using `httpx` need `socksio`.
 
@@ -336,8 +334,6 @@ export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
 | `ANTHROPIC_API_KEY` | Anthropic API key | Yes |
 | `GOOGLE_API_KEY` | Google AI API key | No (hero images) |
 | `TWITTERAPI_IO_KEY` | TwitterAPI.io key ($0.15/1000 tweets) | No |
-| `REDDIT_CLIENT_ID` | Reddit app client ID for OAuth collection | No |
-| `REDDIT_CLIENT_SECRET` | Reddit app client secret for OAuth collection | No |
 | `REDDIT_PROXY_URL` | HTTP(S) or SOCKS proxy for Reddit requests | No |
 | `REDDIT_USER_AGENT` | User-Agent for Reddit requests | No |
 | `PIPELINE_PROXY_URL` | HTTP(S) or SOCKS proxy for the whole pipeline | No |
@@ -384,7 +380,7 @@ Edit files in `config/`:
 | Twitter | `twitter_accounts.txt` | Usernames (requires TWITTERAPI_IO_KEY) |
 | Bluesky | `bluesky_accounts.txt` | Handles (e.g., `karpathy.bsky.social`) |
 | Mastodon | `mastodon_accounts.txt` | Full addresses (e.g., `user@mastodon.social`) |
-| Reddit | `reddit_subreddits.txt` | Subreddit names (public JSON fallback; OAuth recommended on hosted runners) |
+| Reddit | `reddit_subreddits.txt` | Subreddit names |
 
 ### Model Release Tracking
 
@@ -447,7 +443,7 @@ Each pipeline run tracks collection status per source:
 | **News** | 100+ RSS feeds + linked articles | RSS + LLM-guided link following |
 | **Research** | arXiv (7 categories) + LessWrong | RSS/OAI-PMH + GraphQL API |
 | **Social** | Twitter, Bluesky, Mastodon | TwitterAPI.io + free APIs |
-| **Reddit** | Configurable subreddits | OAuth API or public JSON fallback |
+| **Reddit** | Configurable subreddits | Public JSON endpoints |
 
 ### Frontend Features
 - **AATF Branding** - Trend Red (#E63946) color scheme with skunk mascot
@@ -674,7 +670,6 @@ python3 scripts/regenerate_hero.py 2026-01-06 -e "Add a coffee cup to the scene"
 | Anthropic API | Yes | Pay-per-token | LLM analysis |
 | Google AI | No | Pay-per-image | Hero images |
 | TwitterAPI.io | No | $0.15/1000 tweets | Twitter collection |
-| Reddit API app | No | Free | Optional OAuth collection for Reddit |
 | Mullvad | No | Subscription | Optional hosted-runner egress proxy |
 
 ---
