@@ -6,11 +6,13 @@ Combines RSS collection with smart link following from social media posts.
 
 import asyncio
 import logging
+import os
 from datetime import datetime
 from typing import List, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import feedparser
+import requests
 from dateutil import parser as date_parser
 
 from ..base import BaseGatherer, CollectedItem, deduplicate_items
@@ -18,6 +20,17 @@ from ..llm_client import AnthropicClient
 from .link_follower import LinkFollower
 
 logger = logging.getLogger(__name__)
+
+NEWS_USER_AGENT = os.getenv(
+    "NEWS_USER_AGENT",
+    os.getenv("REDDIT_USER_AGENT", "AI-News-Aggregator/1.0")
+)
+PIPELINE_PROXY_URL = (
+    os.getenv("PIPELINE_PROXY_URL")
+    or os.getenv("ALL_PROXY")
+    or os.getenv("HTTPS_PROXY")
+    or os.getenv("HTTP_PROXY")
+)
 
 
 class NewsGatherer(BaseGatherer):
@@ -45,6 +58,17 @@ class NewsGatherer(BaseGatherer):
         self.llm_client = llm_client
         self.max_workers = max_workers
         self.link_follower = LinkFollower(llm_client=llm_client, prompt_accessor=prompt_accessor)
+        self.feed_session = requests.Session()
+        self.feed_session.headers.update({
+            "User-Agent": NEWS_USER_AGENT,
+            "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
+        })
+        if PIPELINE_PROXY_URL:
+            self.feed_session.proxies.update({
+                "http": PIPELINE_PROXY_URL,
+                "https": PIPELINE_PROXY_URL,
+            })
+            logger.info("News gatherer using configured pipeline proxy for RSS")
 
         # Load RSS feeds
         self.feeds = self.load_config_list('rss_feeds.txt')
@@ -117,7 +141,14 @@ class NewsGatherer(BaseGatherer):
 
         try:
             logger.debug(f"Fetching feed: {feed_url}")
-            feed = feedparser.parse(feed_url)
+            response = self.feed_session.get(feed_url, timeout=30)
+            response.raise_for_status()
+            feed = feedparser.parse(
+                response.content,
+                response_headers={
+                    "content-type": response.headers.get("content-type", "")
+                }
+            )
 
             if feed.bozo:
                 # CharacterEncodingOverride is benign - feedparser handles it correctly

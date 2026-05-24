@@ -212,7 +212,9 @@ Set these on the publishing repository:
 | `REDDIT_CLIENT_ID` | Optional Reddit OAuth app client ID; recommended for GitHub-hosted runs |
 | `REDDIT_CLIENT_SECRET` | Optional Reddit OAuth app secret; used with `REDDIT_CLIENT_ID` |
 | `REDDIT_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for Reddit requests if runner egress is blocked |
-| `MULLVAD_ACCOUNT` | Optional Mullvad account number; used to create a temporary WireGuard tunnel for Reddit when no `REDDIT_PROXY_URL` is set |
+| `PIPELINE_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for the whole pipeline; useful when hosted runner egress is blocked by multiple sources |
+| `MULLVAD_ACCOUNT` | Optional Mullvad account number; used to create a WireGuard tunnel when no `PIPELINE_PROXY_URL` is set |
+| `MULLVAD_WG_PRIVATE_KEY` | Optional stable WireGuard private key for the CI Mullvad device; avoids creating a new Mullvad device on every run |
 | `GOOGLE_API_KEY` | Optional Gemini native image generation when not using a proxy image provider |
 | `PIPELINE_PUSH_TOKEN` | Optional PAT if the default `GITHUB_TOKEN` is not enough for downstream webhook behavior |
 
@@ -225,7 +227,8 @@ Set these on the publishing repository:
 | `PIPELINE_IMAGE_MODEL` | `gemini-3-pro-image-preview` | Native Gemini image model used by fallback config |
 | `PIPELINE_COMMIT_PATHS` | `web/data config/model_releases.yaml config/ecosystem_context.yaml` | Space-separated generated outputs to commit |
 | `REDDIT_USER_AGENT` | `AI-News-Aggregator/1.0 (by u/flyryan)` | User-Agent sent to Reddit API requests |
-| `MULLVAD_RELAY_FILTER` | `us` | Mullvad WireGuard relay hostname prefix used for CI Reddit egress |
+| `NEWS_USER_AGENT` | `REDDIT_USER_AGENT` value | User-Agent sent to RSS/feed sources |
+| `MULLVAD_RELAY_FILTER` | `us` | Mullvad WireGuard relay hostname prefix used for CI egress |
 
 ### Manual Dry Runs
 
@@ -245,7 +248,9 @@ Runtime scrape data, checkpoints, and logs under `data/**` and `logs/**` stay ig
 
 The Reddit gatherer prefers official app-only OAuth when `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET` are set, and then calls `https://oauth.reddit.com`. Without those credentials, it falls back to public `.json` endpoints.
 
-If a CI provider's IP ranges are blocked, set `REDDIT_PROXY_URL` to an HTTP(S) or SOCKS proxy URL. The GitHub workflow also supports `MULLVAD_ACCOUNT`: when set and `REDDIT_PROXY_URL` is empty, it creates a temporary WireGuard tunnel with Mullvad's official `wg-tools` script, narrows the route to Mullvad's SOCKS proxy address, and sets `REDDIT_PROXY_URL=socks5h://10.64.0.1:1080` for the pipeline.
+If a CI provider's IP ranges are blocked only for Reddit, set `REDDIT_PROXY_URL` to an HTTP(S) or SOCKS proxy URL. If multiple sources block hosted runner egress, set `PIPELINE_PROXY_URL` instead; the workflow exports it as the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` variables for the pipeline process. The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed.
+
+The GitHub workflow also supports `MULLVAD_ACCOUNT`: when set and `PIPELINE_PROXY_URL` is empty, it creates a WireGuard tunnel with Mullvad's official `wg-tools` script, narrows the route to Mullvad's SOCKS proxy address, and sets `PIPELINE_PROXY_URL` plus `REDDIT_PROXY_URL` to `socks5h://10.64.0.1:1080` for the pipeline. Set `MULLVAD_WG_PRIVATE_KEY` to reuse one registered CI device across runs.
 
 ---
 
@@ -333,7 +338,10 @@ export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
 | `REDDIT_CLIENT_SECRET` | Reddit app client secret for OAuth collection | No |
 | `REDDIT_PROXY_URL` | HTTP(S) or SOCKS proxy for Reddit requests | No |
 | `REDDIT_USER_AGENT` | User-Agent for Reddit requests | No |
-| `MULLVAD_ACCOUNT` | Mullvad account number for CI Reddit proxy setup | No |
+| `PIPELINE_PROXY_URL` | HTTP(S) or SOCKS proxy for the whole pipeline | No |
+| `NEWS_USER_AGENT` | User-Agent for RSS/feed requests | No |
+| `MULLVAD_ACCOUNT` | Mullvad account number for CI proxy setup | No |
+| `MULLVAD_WG_PRIVATE_KEY` | Stable WireGuard private key for the CI Mullvad device | No |
 | `MULLVAD_RELAY_FILTER` | Mullvad relay hostname prefix for CI tunnel selection | No |
 | `TARGET_DATE` | Report date (YYYY-MM-DD) | No |
 | `ENABLE_CRON` | Enable scheduled collection | No |

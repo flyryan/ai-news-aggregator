@@ -46,6 +46,7 @@ jobs:
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       REDDIT_PROXY_URL: ${{ secrets.REDDIT_PROXY_URL }}
       REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'AI-News-Aggregator/1.0 (by u/flyryan)' }}
+      PIPELINE_PROXY_URL: ${{ secrets.PIPELINE_PROXY_URL }}
       MULLVAD_ACCOUNT: ${{ secrets.MULLVAD_ACCOUNT }}
       MULLVAD_WG_PRIVATE_KEY: ${{ secrets.MULLVAD_WG_PRIVATE_KEY }}
       MULLVAD_RELAY_FILTER: ${{ vars.MULLVAD_RELAY_FILTER || 'us' }}
@@ -171,7 +172,7 @@ jobs:
           fi
 
       - name: Start Mullvad tunnel for Reddit
-        if: steps.schedule_gate.outputs.should_run == 'true' && env.MULLVAD_ACCOUNT != '' && env.REDDIT_PROXY_URL == ''
+        if: steps.schedule_gate.outputs.should_run == 'true' && env.MULLVAD_ACCOUNT != '' && env.PIPELINE_PROXY_URL == '' && env.REDDIT_PROXY_URL == ''
         shell: bash
         run: |
           set -euo pipefail
@@ -210,7 +211,10 @@ jobs:
           sudo sed -i 's#^allowedips[[:space:]]*=.*#allowedips = 10.64.0.1/32#I' "$wg_conf"
           sudo wg-quick up "$wg_conf"
 
-          echo "REDDIT_PROXY_URL=socks5h://10.64.0.1:1080" >> "$GITHUB_ENV"
+          {
+            echo "PIPELINE_PROXY_URL=socks5h://10.64.0.1:1080"
+            echo "REDDIT_PROXY_URL=socks5h://10.64.0.1:1080"
+          } >> "$GITHUB_ENV"
           proxy_ip="$(curl -fsSL --proxy socks5h://10.64.0.1:1080 https://am.i.mullvad.net/ip || true)"
           if [[ -n "$proxy_ip" ]]; then
             echo "Mullvad SOCKS proxy is reachable."
@@ -233,6 +237,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [[ -n "${PIPELINE_PROXY_URL:-}" ]]; then
+            export ALL_PROXY="$PIPELINE_PROXY_URL"
+            export HTTPS_PROXY="$PIPELINE_PROXY_URL"
+            export HTTP_PROXY="$PIPELINE_PROXY_URL"
+            export all_proxy="$PIPELINE_PROXY_URL"
+            export https_proxy="$PIPELINE_PROXY_URL"
+            export http_proxy="$PIPELINE_PROXY_URL"
+            export NO_PROXY="localhost,127.0.0.1,::1"
+            export no_proxy="$NO_PROXY"
+            echo "Pipeline-wide proxy is configured."
+          fi
+
           args=(--config-dir ./config --data-dir ./data --web-dir ./web)
           if [[ -n "${TARGET_DATE_INPUT:-}" ]]; then
             args+=(--date "$TARGET_DATE_INPUT")
