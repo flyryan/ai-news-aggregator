@@ -315,7 +315,7 @@ class EcosystemContextManager:
                 provider_models = curated + trimmed
 
             # Final sort so render order is newest-first across the merged list
-            provider_models.sort(key=sort_key, reverse=True)
+            provider_models.sort(key=self._model_sort_key, reverse=True)
             merged_models[provider] = provider_models
 
         return {
