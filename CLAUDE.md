@@ -53,13 +53,24 @@ npm run check                   # TypeScript type checking
 
 There are no unit tests, linting, or type checking configured.
 
+### Web-Only Host Deployment
+```bash
+git fetch origin
+git reset --hard origin/main
+docker compose -f docker-compose.web.yml up -d --build
+```
+
+The production web host serves a web-only Docker image. `web/_app/` is intentionally ignored and built on the host, so do not commit rebuilt Svelte bundle files just to update the site. Data-only updates can be picked up by a git sync of `web/data`; frontend/source changes need the web-only image rebuild above.
+
 ## Daily Automation
 
-The production publishing workflow lives in `.github/workflows/daily-pipeline.yml` and is guarded to run only in `flyryan/ai-news-aggregator`. Do not enable this workflow in the AATF org mirror. The schedule uses two UTC cron entries with a local-time gate so exactly the 3 AM ET invocation continues.
+The production publishing workflow lives in `.github/workflows/daily-pipeline.yml` and is guarded to run only in the configured publishing repository. Do not enable scheduled publishing in mirrors or forks unless the workflow guard, secrets, and output ownership have been intentionally reconfigured. The schedule uses two UTC cron entries with a local-time gate so exactly the 3 AM ET invocation continues.
 
 The workflow writes ignored `config/providers.yaml` from the `PIPELINE_PROVIDERS_YAML` secret, runs the pipeline, and commits only generated public outputs (`web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml`) when `commit_outputs=true`. Use `workflow_dispatch` with `commit_outputs=false` for a full hosted dry run that uploads artifacts without committing.
 
 Hosted runner egress can be proxied with `PIPELINE_PROXY_URL` for all sources or `REDDIT_PROXY_URL` for Reddit only. If neither proxy URL is set and `MULLVAD_ACCOUNT` is configured, the workflow creates a Mullvad WireGuard tunnel and exposes Mullvad's local SOCKS proxy as both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL`. `MULLVAD_WG_PRIVATE_KEY` pins CI to one registered Mullvad device across runs.
+
+Use `scripts/post_pipeline_verify.sh` for hosted-site verification. It is configured with environment variables: set `AWS_HOST` directly, or set `AWS_PROFILE` plus `AWS_INSTANCE_ID`/`AWS_INSTANCE_NAME` for EC2 lookup. Set `REBUILD_WEB=true` when the deployment includes frontend source or web-image changes.
 
 ## Architecture
 

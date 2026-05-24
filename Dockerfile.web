@@ -1,9 +1,9 @@
 # Lightweight web-only image for serving the frontend on AWS.
-# The full pipeline (scrapers, LLM agents, Playwright) runs on duffplex
-# and pushes data via git.  AWS just needs nginx + the static site.
+# The publishing pipeline runs elsewhere and pushes public data via git.
+# AWS just needs nginx + the static site.
 #
 # Usage:
-#   docker-compose -f docker-compose.web.yml up -d --build
+#   docker compose -f docker-compose.web.yml up -d --build
 
 # Stage 1: Build the Svelte frontend
 FROM node:20-alpine AS frontend-builder

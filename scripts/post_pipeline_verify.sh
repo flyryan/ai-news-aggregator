@@ -1,18 +1,80 @@
 #!/bin/bash
 # Post-pipeline verification for AI News Aggregator
-# Runs after pipeline to verify AWS received the update
-# Can auto-fix by forcing git sync on AWS
+# Verifies the public site received the update.
+#
+# Optional environment variables:
+#   SITE_URL              Public site URL. Defaults to https://news.aatf.ai.
+#   AWS_HOST              SSH target, e.g. ubuntu@203.0.113.10.
+#   SSH_KEY               SSH key path. Defaults to ./aatf-news.pem.
+#   AWS_PROFILE           AWS CLI profile for instance lookup.
+#   AWS_CLI               AWS CLI executable. Defaults to aws.
+#   AWS_REGION            AWS region for instance lookup. Defaults to us-east-1.
+#   AWS_INSTANCE_ID       EC2 instance id to resolve when AWS_HOST is unset.
+#   AWS_INSTANCE_NAME     EC2 Name tag to resolve when AWS_HOST is unset.
+#   AWS_SSH_USER          SSH username for EC2 lookup. Defaults to ubuntu.
+#   REMOTE_REPO           Repo path on the host. Defaults to /home/ubuntu/ai-news-aggregator.
+#   COMPOSE_FILE          Compose file for rebuilds. Defaults to docker-compose.web.yml.
+#   REBUILD_WEB           Set true to rebuild/restart the web-only container after sync.
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-SSH_KEY="$PROJECT_DIR/aatf-news.pem"
-AWS_HOST="ubuntu@54.82.53.70"
-SITE_URL="https://news.aatf.ai"
+SSH_KEY="${SSH_KEY:-$PROJECT_DIR/aatf-news.pem}"
+AWS_HOST="${AWS_HOST:-}"
+AWS_PROFILE="${AWS_PROFILE:-}"
+AWS_CLI="${AWS_CLI:-aws}"
+AWS_REGION="${AWS_REGION:-us-east-1}"
+AWS_INSTANCE_ID="${AWS_INSTANCE_ID:-}"
+AWS_INSTANCE_NAME="${AWS_INSTANCE_NAME:-}"
+AWS_SSH_USER="${AWS_SSH_USER:-ubuntu}"
+REMOTE_REPO="${REMOTE_REPO:-/home/ubuntu/ai-news-aggregator}"
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.web.yml}"
+REBUILD_WEB="${REBUILD_WEB:-false}"
+SITE_URL="${SITE_URL:-https://news.aatf.ai}"
 
 # Today's date (what should be on the site after pipeline runs)
 TODAY=$(date +%Y-%m-%d)
+
+resolve_aws_host() {
+    if [ -n "$AWS_HOST" ]; then
+        echo "$AWS_HOST"
+        return
+    fi
+
+    if [ -z "$AWS_INSTANCE_ID" ] && [ -z "$AWS_INSTANCE_NAME" ]; then
+        echo "AWS_HOST is unset. Set AWS_HOST, or set AWS_INSTANCE_ID/AWS_INSTANCE_NAME for AWS CLI lookup." >&2
+        return 1
+    fi
+
+    local aws_args=(--region "$AWS_REGION")
+    if [ -n "$AWS_PROFILE" ]; then
+        aws_args+=(--profile "$AWS_PROFILE")
+    fi
+
+    local query='Reservations[].Instances[?State.Name==`running`].PublicIpAddress | [0]'
+    local public_ip
+    if [ -n "$AWS_INSTANCE_ID" ]; then
+        public_ip=$("$AWS_CLI" ec2 describe-instances \
+            "${aws_args[@]}" \
+            --instance-ids "$AWS_INSTANCE_ID" \
+            --query "$query" \
+            --output text)
+    else
+        public_ip=$("$AWS_CLI" ec2 describe-instances \
+            "${aws_args[@]}" \
+            --filters "Name=tag:Name,Values=$AWS_INSTANCE_NAME" \
+            --query "$query" \
+            --output text)
+    fi
+
+    if [ -z "$public_ip" ] || [ "$public_ip" = "None" ]; then
+        echo "Could not resolve a running public IP for the configured AWS instance." >&2
+        return 1
+    fi
+
+    echo "$AWS_SSH_USER@$public_ip"
+}
 
 echo "=========================================="
 echo "Post-Pipeline AWS Verification"
@@ -28,9 +90,17 @@ check_site() {
 
 # Function to force sync AWS
 force_sync_aws() {
-    echo "[FIX] Forcing git sync on AWS..."
-    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$AWS_HOST" \
-        "cd /home/ubuntu/ai-news-aggregator && git fetch origin && git reset --hard origin/main" 2>&1
+    local host
+    host="$(resolve_aws_host)"
+
+    echo "[FIX] Forcing git sync on AWS host..."
+    if [ "$REBUILD_WEB" = "true" ]; then
+        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$host" \
+            "cd '$REMOTE_REPO' && git fetch origin && git reset --hard origin/main && docker compose -f '$COMPOSE_FILE' up -d --build" 2>&1
+    else
+        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$host" \
+            "cd '$REMOTE_REPO' && git fetch origin && git reset --hard origin/main" 2>&1
+    fi
 }
 
 # Check current state

@@ -136,10 +136,16 @@ git clone https://github.com/flyryan/ai-news-aggregator.git
 cd ai-news-aggregator
 
 # Build and run (web-only)
-docker-compose -f docker-compose.web.yml up -d --build
+docker compose -f docker-compose.web.yml up -d --build
 ```
 
-The web-only image uses `nginx:alpine` and mounts `web/data` and `web/assets` as volumes so a `git pull` on the host picks up new pipeline data automatically.
+The web-only image uses `nginx:alpine` and mounts `web/data` and `web/assets` as volumes so a `git pull` on the host picks up new pipeline data. Frontend source changes require rebuilding the web-only image because the Svelte bundle under `web/_app/` is built on the host and is not committed.
+
+```bash
+git fetch origin
+git reset --hard origin/main
+docker compose -f docker-compose.web.yml up -d --build
+```
 
 Open [http://localhost:7100](http://localhost:7100)
 
@@ -647,9 +653,12 @@ python3 scripts/regenerate_hero.py 2026-01-06 -e "Add a coffee cup to the scene"
 | Script | Purpose |
 |--------|---------|
 | `daily_pipeline.sh` | Legacy local cron wrapper: pulls latest, runs pipeline, auto-commits and pushes results |
+| `post_pipeline_verify.sh` | Verifies the public site picked up today's generated data and can force a configured host git sync |
 | `cleanup_external_links.py` | Strips external links from topic descriptions and re-enriches with internal links only |
 | `convert_hero_images.py` | One-time migration: converts PNG hero images to WebP format |
 | `patch_news_notice.py` | One-time: adds collection start notice to early dates |
+
+`post_pipeline_verify.sh` is host-agnostic. Set `AWS_HOST` directly, or set `AWS_PROFILE` plus `AWS_INSTANCE_ID` or `AWS_INSTANCE_NAME` so the script can resolve the current EC2 public IP. Set `REBUILD_WEB=true` when the deployed change includes frontend source or other web-image changes.
 
 ---
 
