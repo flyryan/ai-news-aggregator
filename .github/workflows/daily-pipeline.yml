@@ -171,7 +171,7 @@ jobs:
           YAML
           fi
 
-      - name: Start Mullvad tunnel for Reddit
+      - name: Start Mullvad tunnel for hosted egress
         if: steps.schedule_gate.outputs.should_run == 'true' && env.MULLVAD_ACCOUNT != '' && env.PIPELINE_PROXY_URL == '' && env.REDDIT_PROXY_URL == ''
         shell: bash
         run: |

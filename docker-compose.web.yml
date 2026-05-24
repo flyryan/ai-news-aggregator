@@ -1,6 +1,7 @@
 # Lightweight compose file for AWS web-only deployment.
 # Uses Dockerfile.web (nginx + static frontend) instead of the full
-# pipeline image.  Pipeline runs on duffplex and pushes data via git;
+# pipeline image. The publishing pipeline runs elsewhere (currently
+# flyryan/ai-news-aggregator GitHub Actions) and pushes data via git;
 # volumes mount the git-managed data/assets directories.
 #
 # Usage:

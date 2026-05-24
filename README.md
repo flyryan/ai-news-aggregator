@@ -10,7 +10,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 
-Daily AI/ML news briefings curated by specialized agents with extended thinking. Updated every morning at 6 AM ET.
+Daily AI/ML news briefings curated by specialized agents with extended thinking. The publishing repository runs the hosted pipeline every morning at 3 AM ET.
 
 ---
 
@@ -103,7 +103,7 @@ Open [http://localhost:8080](http://localhost:8080)
 
 ```bash
 # Clone and setup
-git clone https://github.com/trend-ai-acceleration-task-force/ai-news-aggregator.git
+git clone https://github.com/flyryan/ai-news-aggregator.git
 cd ai-news-aggregator
 
 # Python setup
@@ -174,7 +174,7 @@ docker exec ai-news-aggregator python3 /app/run_pipeline.py
 # Run for a specific date
 python3 run_pipeline.py -d 2026-01-05
 
-# Enable scheduled collection (cron, Docker only)
+# Enable scheduled collection (legacy local/Docker cron only)
 ENABLE_CRON=true docker-compose up -d
 
 # Resume after a crash (auto-detects latest checkpoint)
@@ -195,9 +195,11 @@ if: github.repository == 'flyryan/ai-news-aggregator'
 
 The AATF org mirror should not run the pipeline. The AWS mirror script also removes the flyryan-only workflow before force-pushing to the org repository.
 
+Forks and self-hosted copies can change the publishing repository by editing the workflow guard, schedule, provider secrets, and `PIPELINE_BASE_URL`. The repository-specific provider file remains ignored; production should store it in `PIPELINE_PROVIDERS_YAML`.
+
 ### Schedule
 
-GitHub Actions cron runs in UTC, so the workflow has two UTC entries and a local-time guard. Only the invocation that is actually `3 AM America/New_York` continues; the other exits as a no-op.
+GitHub Actions cron runs in UTC, so the workflow has two UTC entries and a local-time guard. Only the invocation that is actually `3 AM America/New_York` continues; the other exits as a no-op. This means the workflow is listed with two schedules but only one scheduled run proceeds each day.
 
 ### Required Repository Secrets
 
@@ -213,7 +215,7 @@ Set these on the publishing repository:
 | `REDDIT_CLIENT_SECRET` | Optional Reddit OAuth app secret; used with `REDDIT_CLIENT_ID` |
 | `REDDIT_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for Reddit requests if runner egress is blocked |
 | `PIPELINE_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for the whole pipeline; useful when hosted runner egress is blocked by multiple sources |
-| `MULLVAD_ACCOUNT` | Optional Mullvad account number; used to create a WireGuard tunnel when no `PIPELINE_PROXY_URL` is set |
+| `MULLVAD_ACCOUNT` | Optional Mullvad account number; used to create a WireGuard tunnel when neither `PIPELINE_PROXY_URL` nor `REDDIT_PROXY_URL` is set |
 | `MULLVAD_WG_PRIVATE_KEY` | Optional stable WireGuard private key for the CI Mullvad device; avoids creating a new Mullvad device on every run |
 | `GOOGLE_API_KEY` | Optional Gemini native image generation when not using a proxy image provider |
 | `PIPELINE_PUSH_TOKEN` | Optional PAT if the default `GITHUB_TOKEN` is not enough for downstream webhook behavior |
@@ -250,7 +252,7 @@ The Reddit gatherer prefers official app-only OAuth when `REDDIT_CLIENT_ID` and 
 
 If a CI provider's IP ranges are blocked only for Reddit, set `REDDIT_PROXY_URL` to an HTTP(S) or SOCKS proxy URL. If multiple sources block hosted runner egress, set `PIPELINE_PROXY_URL` instead; the workflow exports it as the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` variables for the pipeline process. The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed; provider clients using `httpx` need `socksio`.
 
-The GitHub workflow also supports `MULLVAD_ACCOUNT`: when set and `PIPELINE_PROXY_URL` is empty, it creates a WireGuard tunnel with Mullvad's official `wg-tools` script, narrows the route to Mullvad's SOCKS proxy address, and sets `PIPELINE_PROXY_URL` plus `REDDIT_PROXY_URL` to `socks5h://10.64.0.1:1080` for the pipeline. Set `MULLVAD_WG_PRIVATE_KEY` to reuse one registered CI device across runs.
+The GitHub workflow also supports `MULLVAD_ACCOUNT`: when set and both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL` are empty, it creates a WireGuard tunnel with Mullvad's official `wg-tools` script, narrows the route to Mullvad's SOCKS proxy address, and sets `PIPELINE_PROXY_URL` plus `REDDIT_PROXY_URL` to `socks5h://10.64.0.1:1080` for the pipeline. Set `MULLVAD_WG_PRIVATE_KEY` to reuse one registered CI device across runs.
 
 ---
 
@@ -650,7 +652,7 @@ python3 scripts/regenerate_hero.py 2026-01-06 -e "Add a coffee cup to the scene"
 
 | Script | Purpose |
 |--------|---------|
-| `daily_pipeline.sh` | Cron wrapper: pulls latest, runs pipeline, auto-commits and pushes results |
+| `daily_pipeline.sh` | Legacy local cron wrapper: pulls latest, runs pipeline, auto-commits and pushes results |
 | `cleanup_external_links.py` | Strips external links from topic descriptions and re-enriches with internal links only |
 | `convert_hero_images.py` | One-time migration: converts PNG hero images to WebP format |
 | `patch_news_notice.py` | One-time: adds collection start notice to early dates |
@@ -672,6 +674,8 @@ python3 scripts/regenerate_hero.py 2026-01-06 -e "Add a coffee cup to the scene"
 | Anthropic API | Yes | Pay-per-token | LLM analysis |
 | Google AI | No | Pay-per-image | Hero images |
 | TwitterAPI.io | No | $0.15/1000 tweets | Twitter collection |
+| Reddit API app | No | Free | Optional OAuth collection for Reddit |
+| Mullvad | No | Subscription | Optional hosted-runner egress proxy |
 
 ---
 

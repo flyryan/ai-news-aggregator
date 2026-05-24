@@ -53,6 +53,14 @@ npm run check                   # TypeScript type checking
 
 There are no unit tests, linting, or type checking configured.
 
+## Daily Automation
+
+The production publishing workflow lives in `.github/workflows/daily-pipeline.yml` and is guarded to run only in `flyryan/ai-news-aggregator`. Do not enable this workflow in the AATF org mirror. The schedule uses two UTC cron entries with a local-time gate so exactly the 3 AM ET invocation continues.
+
+The workflow writes ignored `config/providers.yaml` from the `PIPELINE_PROVIDERS_YAML` secret, runs the pipeline, and commits only generated public outputs (`web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml`) when `commit_outputs=true`. Use `workflow_dispatch` with `commit_outputs=false` for a full hosted dry run that uploads artifacts without committing.
+
+Hosted runner egress can be proxied with `PIPELINE_PROXY_URL` for all sources or `REDDIT_PROXY_URL` for Reddit only. If neither proxy URL is set and `MULLVAD_ACCOUNT` is configured, the workflow creates a Mullvad WireGuard tunnel and exposes Mullvad's local SOCKS proxy as both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL`. `MULLVAD_WG_PRIVATE_KEY` pins CI to one registered Mullvad device across runs.
+
 ## Architecture
 
 ### Multi-Agent Pipeline (run_pipeline.py)
@@ -176,6 +184,15 @@ ANTHROPIC_API_BASE    # Anthropic API endpoint (no /v1 suffix)
 ANTHROPIC_API_KEY     # Bearer token for authentication
 ANTHROPIC_MODEL       # Model name (default: claude-opus-4-7)
 TWITTERAPI_IO_KEY     # TwitterAPI.io API key
+REDDIT_CLIENT_ID      # Reddit app client ID for OAuth collection (optional)
+REDDIT_CLIENT_SECRET  # Reddit app client secret for OAuth collection (optional)
+REDDIT_PROXY_URL      # HTTP(S) or SOCKS proxy for Reddit requests (optional)
+REDDIT_USER_AGENT     # User-Agent sent to Reddit (optional)
+PIPELINE_PROXY_URL    # HTTP(S) or SOCKS proxy for the whole pipeline (optional)
+NEWS_USER_AGENT       # User-Agent sent to RSS/feed sources (optional)
+MULLVAD_ACCOUNT       # Mullvad account number for CI proxy setup (optional)
+MULLVAD_WG_PRIVATE_KEY # Stable WireGuard private key for the CI Mullvad device (optional)
+MULLVAD_RELAY_FILTER  # Mullvad relay hostname prefix for CI tunnel selection (optional)
 TARGET_DATE           # Report date (YYYY-MM-DD), coverage is day before. Defaults to today.
 ENABLE_CRON           # Enable scheduled collection (default: false)
 COLLECTION_SCHEDULE   # Cron schedule (default: 0 6 * * *), requires ENABLE_CRON=true
