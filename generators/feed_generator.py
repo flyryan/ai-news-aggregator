@@ -99,8 +99,10 @@ class FeedGenerator:
         """
         Extract first external href from HTML content.
 
-        Used to find an external link for summary entries so Feedly doesn't
-        filter them out (Feedly filters entries with same-domain alternate links).
+        Used to find a representative source link for summary entries. Summary
+        entries keep the AATF briefing as the primary alternate/canonical URL,
+        while this external URL is emitted as secondary Feedly-compatible
+        metadata and as the semantic source via link.
         """
         if not html:
             return None
@@ -210,8 +212,8 @@ class FeedGenerator:
                 exec_summary = summary.get('executive_summary_html', summary.get('executive_summary', ''))
                 hero_image_url = summary.get('hero_image_url', '')
                 if exec_summary:
-                    # Find first external URL from top items for Feedly compatibility
-                    # (Feedly filters entries where alternate link matches feed domain)
+                    # Find a representative source URL retained as secondary
+                    # Feedly-compatible metadata for the summary entry.
                     first_external_url = None
                     for category, cat_data in summary.get('categories', {}).items():
                         for item in cat_data.get('top_items', [])[:5]:
@@ -327,7 +329,8 @@ class FeedGenerator:
                     # Get category summary
                     cat_summary = data.get('category_summary_html', data.get('category_summary', ''))
                     if cat_summary:
-                        # Find first external URL from items for Feedly compatibility
+                        # Find a representative source URL retained as secondary
+                        # Feedly-compatible metadata for the summary entry.
                         first_external_url = None
                         for item in data.get('items', [])[:10]:
                             url = item.get('url', '')
@@ -444,7 +447,8 @@ class FeedGenerator:
                 hero_image_url = summary.get('hero_image_url', '')
 
                 if exec_summary:
-                    # Find first external URL for Feedly compatibility
+                    # Find a representative source URL retained as secondary
+                    # Feedly-compatible metadata for the summary entry.
                     first_external_url = None
                     for category, cat_data in summary.get('categories', {}).items():
                         for item in cat_data.get('top_items', [])[:5]:
@@ -504,7 +508,8 @@ class FeedGenerator:
 
                 cat_summary = data.get('category_summary_html', data.get('category_summary', ''))
                 if cat_summary:
-                    # Find first external URL for Feedly compatibility
+                    # Find a representative source URL retained as secondary
+                    # Feedly-compatible metadata for the summary entry.
                     first_external_url = None
                     for item in data.get('items', [])[:10]:
                         url = item.get('url', '')
@@ -568,7 +573,8 @@ class FeedGenerator:
                 hero_image_url = summary.get('hero_image_url', '')
 
                 if exec_summary:
-                    # Find first external URL for Feedly compatibility
+                    # Find a representative source URL retained as secondary
+                    # Feedly-compatible metadata for the summary entry.
                     first_external_url = None
                     for category, cat_data in summary.get('categories', {}).items():
                         for item in cat_data.get('top_items', [])[:5]:
@@ -603,7 +609,8 @@ class FeedGenerator:
 
                         cat_summary = cat_data.get('category_summary_html', cat_data.get('category_summary', ''))
                         if cat_summary:
-                            # Find first external URL
+                            # Find a representative source URL retained as
+                            # secondary Feedly-compatible metadata.
                             first_external_url = None
                             for item in cat_data.get('items', [])[:10]:
                                 url = item.get('url', '')
@@ -762,22 +769,29 @@ class FeedGenerator:
             hero_img_html = f'<p><img src="{hero_full_url}" alt="Daily briefing hero image" style="max-width:100%;height:auto;border-radius:8px;margin-bottom:16px;"/></p>\n'
             summary_html = hero_img_html + summary_html
 
-        # Use external URL from first top item to bypass Feedly's same-domain filtering
-        # (Feedly filters entries where alternate link matches the feed's domain)
+        # Keep the AATF briefing URL as the primary alternate/canonical link.
+        # The representative external URL remains as a secondary alternate for
+        # Feedly compatibility, while rel="via" identifies it semantically.
         external_url = item.get('_external_url')
-        alternate_url = external_url or site_url
 
         # Generate a unique ID for the summary
         summary_type = 'category' if category else 'executive'
         entry_id = f"urn:ainews:{date}:{summary_type}-summary" + (f":{category}" if category else "")
 
-        alternate_url_encoded = encode_url_for_xml(alternate_url)
         site_url_encoded = encode_url_for_xml(site_url)
+        external_url_encoded = encode_url_for_xml(external_url) if external_url else ''
 
-        # Build links - alternate points to external (for Feedly), related points to site
-        links = f'<link href="{alternate_url_encoded}" rel="alternate" type="text/html"/>'
+        links = '\n    '.join([
+            f'<link href="{site_url_encoded}" rel="alternate" type="text/html"/>',
+            f'<link href="{site_url_encoded}" rel="canonical" type="text/html"/>',
+        ])
         if external_url:
-            links += f'\n    <link href="{site_url_encoded}" rel="related" type="text/html"/>'
+            links += (
+                f'\n    <link href="{external_url_encoded}" rel="alternate" '
+                f'type="text/html; charset=utf-8" title="Representative source"/>'
+                f'\n    <link href="{external_url_encoded}" rel="via" '
+                f'type="text/html" title="Representative source"/>'
+            )
 
         # Add media:thumbnail for RSS readers that support Media RSS (e.g., Feedly)
         media_element = ''
@@ -795,6 +809,7 @@ class FeedGenerator:
     <updated>{published}</updated>
     <author><name>AATF AI News Aggregator</name></author>
     <summary type="html"><![CDATA[{summary_html}]]></summary>
+    <content type="html"><![CDATA[{summary_html}]]></content>
     <category term="daily-summary"/>{media_element}
   </entry>'''
 
