@@ -34,7 +34,7 @@ class LLMProviderConfig(BaseModel):
         description="Maximum output tokens the model/proxy supports. "
                     "Set lower for proxies with restrictive limits (e.g., 64000)."
     )
-    timeout: float = Field(default=300.0, ge=1.0, le=600.0, description="Request timeout in seconds")
+    timeout: float = Field(default=600.0, ge=1.0, le=600.0, description="Request timeout in seconds")
 
     @field_validator('api_key')
     @classmethod

@@ -285,7 +285,7 @@ llm:
   api_key: "${ANTHROPIC_API_KEY}"  # Use env var reference
   # base_url: "https://api.anthropic.com"  # Default, uncomment to override
   model: "claude-opus-4-7"
-  timeout: 300
+  timeout: 600
 ```
 
 **OpenAI-compatible proxies (LiteLLM, etc.):**
@@ -296,7 +296,7 @@ llm:
   api_key: "${PROXY_API_KEY}"
   base_url: "https://your-litellm-proxy.example.com"
   model: "claude-opus-4-7"  # Your proxy's model alias
-  timeout: 300
+  timeout: 600
 ```
 
 ### Image Provider (Optional)

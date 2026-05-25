@@ -118,7 +118,7 @@ class AnthropicClient:
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
         model: Optional[str] = None,
-        timeout: float = 300.0,
+        timeout: float = 600.0,
         mode: str = "anthropic",
         max_output_tokens: Optional[int] = None
     ):
@@ -448,7 +448,7 @@ class AsyncAnthropicClient:
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
         model: Optional[str] = None,
-        timeout: float = 300.0,
+        timeout: float = 600.0,
         mode: str = "anthropic",
         max_output_tokens: Optional[int] = None
     ):

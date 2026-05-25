@@ -142,7 +142,7 @@ llm:
   model: "{model_value}"
 
   # Request timeout in seconds (1-600)
-  timeout: 300
+  timeout: 600
 
 # =============================================================================
 # Image Provider (hero image generation)
