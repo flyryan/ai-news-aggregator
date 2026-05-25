@@ -228,7 +228,7 @@ Set these on the publishing repository:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `ANTHROPIC_MODEL` | `claude-opus-4-7` | Model name used by the fallback generated provider config |
+| `ANTHROPIC_MODEL` | `claude-opus-4-7` | Default LLM model ID; applied to the generated `config/providers.yaml`, including the secret-backed production config |
 | `PIPELINE_BASE_URL` | `https://news.aatf.ai` | Base URL used in feeds |
 | `PIPELINE_IMAGE_MODEL` | `gemini-3-pro-image-preview` | Native Gemini image model used by fallback config |
 | `PIPELINE_COMMIT_PATHS` | `web/data config/model_releases.yaml config/ecosystem_context.yaml` | Space-separated generated outputs to commit |
@@ -244,7 +244,7 @@ Set these on the publishing repository:
 
 ### Manual Dry Runs
 
-Use `workflow_dispatch` with `commit_outputs=false` to run the full hosted pipeline without committing or pushing. The workflow uploads `web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml` as an artifact for inspection.
+Use `workflow_dispatch` with `commit_outputs=false` to run the full hosted pipeline without committing or pushing. The workflow uploads `web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml` as an artifact for inspection. Set the optional `anthropic_model` dispatch input to test a one-off model ID without changing repository variables or secrets.
 
 Every hosted run also uploads a `pipeline-diagnostics` artifact when available. It includes `data/llm_metrics.jsonl` and cost reports, which are useful for comparing model IDs/providers without committing diagnostics to the public site.
 

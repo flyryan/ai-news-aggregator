@@ -17,6 +17,10 @@ on:
         description: "Optional pipeline phase to resume from, for manual recovery."
         required: false
         type: string
+      anthropic_model:
+        description: "Optional LLM model ID override for this run."
+        required: false
+        type: string
       commit_outputs:
         description: "Commit and push generated outputs after the run."
         required: false
@@ -40,7 +44,7 @@ jobs:
       TZ: America/New_York
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       ANTHROPIC_API_BASE: ${{ secrets.ANTHROPIC_API_BASE }}
-      ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL || 'claude-opus-4-7' }}
+      ANTHROPIC_MODEL: ${{ inputs.anthropic_model || vars.ANTHROPIC_MODEL || 'claude-opus-4-7' }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       TWITTERAPI_IO_KEY: ${{ secrets.TWITTERAPI_IO_KEY }}
       REDDIT_PROXY_URL: ${{ secrets.REDDIT_PROXY_URL }}
@@ -166,15 +170,10 @@ jobs:
           if [[ -n "${PIPELINE_PROVIDERS_YAML:-}" ]]; then
             printf '%s\n' "$PIPELINE_PROVIDERS_YAML" > config/providers.yaml
             echo "Wrote config/providers.yaml from PIPELINE_PROVIDERS_YAML."
-            exit 0
-          fi
-
-          if [[ -z "${ANTHROPIC_API_KEY:-}" ]]; then
+          elif [[ -z "${ANTHROPIC_API_KEY:-}" ]]; then
             echo "ANTHROPIC_API_KEY is required unless PIPELINE_PROVIDERS_YAML is set." >&2
             exit 1
-          fi
-
-          if [[ -n "${ANTHROPIC_API_BASE:-}" ]]; then
+          elif [[ -n "${ANTHROPIC_API_BASE:-}" ]]; then
             cat > config/providers.yaml <<YAML
           llm:
             mode: "openai-compatible"
@@ -223,6 +222,30 @@ jobs:
             lookback_hours: 24
           YAML
           fi
+
+          python3 <<'PY'
+          import os
+          from pathlib import Path
+
+          import yaml
+
+          model = os.environ.get("ANTHROPIC_MODEL", "").strip()
+          if not model:
+              raise SystemExit(0)
+
+          path = Path("config/providers.yaml")
+          with path.open("r", encoding="utf-8") as handle:
+              config = yaml.safe_load(handle) or {}
+
+          llm_config = config.setdefault("llm", {})
+          previous_model = llm_config.get("model")
+          llm_config["model"] = model
+
+          with path.open("w", encoding="utf-8") as handle:
+              yaml.safe_dump(config, handle, sort_keys=False)
+
+          print(f"Configured llm.model={model} (was {previous_model})")
+          PY
 
       - name: Start Mullvad tunnel for hosted egress
         if: steps.schedule_gate.outputs.should_run == 'true' && env.MULLVAD_ACCOUNT != '' && env.PIPELINE_PROXY_URL == '' && env.REDDIT_PROXY_URL == ''
