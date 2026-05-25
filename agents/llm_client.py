@@ -46,6 +46,20 @@ def _env_int(name: str, default: int, minimum: int = 0) -> int:
     return value
 
 
+def _env_bool(name: str, default: bool = False) -> bool:
+    """Read a boolean environment setting."""
+    raw_value = os.environ.get(name)
+    if raw_value is None or raw_value == "":
+        return default
+    normalized = raw_value.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    logger.warning(f"Ignoring invalid {name}={raw_value!r}; using {default}")
+    return default
+
+
 class ThinkingLevel(IntEnum):
     """Internal thinking profiles.
 
@@ -158,6 +172,7 @@ class AnthropicClient:
         self.timeout = timeout
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
+        self.trust_env_proxy = _env_bool("LLM_TRUST_ENV_PROXY", False)
 
         if not self.api_key:
             raise ValueError("ANTHROPIC_API_KEY environment variable or api_key parameter required")
@@ -175,7 +190,8 @@ class AnthropicClient:
         # Create httpx client with mode-appropriate auth
         self._http_client = httpx.Client(
             auth=auth,
-            timeout=httpx.Timeout(timeout)
+            timeout=httpx.Timeout(timeout),
+            trust_env=self.trust_env_proxy
         )
 
         # Create Anthropic client with custom http client
@@ -185,7 +201,10 @@ class AnthropicClient:
             http_client=self._http_client
         )
 
-        logger.info(f"AnthropicClient initialized with mode={self.mode}, model={self.model}, base_url={self.base_url}")
+        logger.info(
+            f"AnthropicClient initialized with mode={self.mode}, model={self.model}, "
+            f"base_url={self.base_url}, trust_env_proxy={self.trust_env_proxy}"
+        )
 
     @classmethod
     def from_config(cls, config: 'LLMProviderConfig') -> 'AnthropicClient':
@@ -475,6 +494,7 @@ class AsyncAnthropicClient:
         self.timeout = timeout
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
+        self.trust_env_proxy = _env_bool("LLM_TRUST_ENV_PROXY", False)
         self.max_concurrent_requests = _env_int("LLM_MAX_CONCURRENT_REQUESTS", 4)
         self._request_semaphore = (
             asyncio.Semaphore(self.max_concurrent_requests)
@@ -498,7 +518,8 @@ class AsyncAnthropicClient:
         # Create async httpx client with mode-appropriate auth
         self._http_client = httpx.AsyncClient(
             auth=auth,
-            timeout=httpx.Timeout(timeout)
+            timeout=httpx.Timeout(timeout),
+            trust_env=self.trust_env_proxy
         )
 
         # Create async Anthropic client
@@ -510,7 +531,8 @@ class AsyncAnthropicClient:
 
         logger.info(
             f"AsyncAnthropicClient initialized with mode={self.mode}, model={self.model}, "
-            f"max_concurrent_requests={self.max_concurrent_requests or 'unlimited'}"
+            f"max_concurrent_requests={self.max_concurrent_requests or 'unlimited'}, "
+            f"trust_env_proxy={self.trust_env_proxy}"
         )
 
     async def _create_message(self, **kwargs):
