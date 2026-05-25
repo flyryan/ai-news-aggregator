@@ -205,7 +205,7 @@ Forks and self-hosted copies can change the publishing repository by editing the
 
 ### Schedule
 
-GitHub Actions cron runs in UTC, so the workflow has two UTC entries and a local-time guard. Only the invocation that is actually `3 AM America/New_York` continues; the other exits as a no-op. This means the workflow is listed with two schedules but only one scheduled run proceeds each day.
+GitHub Actions cron runs in UTC, so the workflow has two UTC entries and a local-time guard. Only the cron entry whose nominal scheduled time maps to `3 AM America/New_York` continues; the other exits as a no-op. GitHub may start scheduled runners late, so the guard uses the schedule expression instead of the runner's wall-clock start time. This means the workflow is listed with two schedules but only one scheduled run proceeds each day.
 
 ### Required Repository Secrets
 
