@@ -238,6 +238,7 @@ Set these on the publishing repository:
 | `MULLVAD_RELAY_FILTER` | `us` | Mullvad WireGuard relay hostname prefix used for CI egress |
 | `LLM_TIMEOUT_SECONDS` | `240` | Hosted LLM request timeout override; supersedes provider YAML timeout |
 | `LLM_MAX_CONCURRENT_REQUESTS` | `8` | Async LLM request cap per provider route; single-provider configs still get one cap |
+| `LLM_ADAPTIVE_MAX_TOKENS` | `65536` | Response output ceiling for adaptive-thinking calls; separate from analysis profile/effort |
 | `LLM_MAX_RETRIES` | `2` | Anthropic SDK retry count for transient request failures |
 | `LLM_LOG_REQUESTS` | `true` | Log queue/start/done metadata without raw prompt content |
 | `LLM_HEARTBEAT_SECONDS` | `60` | Emit progress logs for in-flight LLM requests; set `0` to disable |
@@ -381,6 +382,7 @@ export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
 | `LLM_TRUST_ENV_PROXY` | Allow LLM clients to use `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`. Default: `false` | No |
 | `LLM_TIMEOUT_SECONDS` | Override provider-config LLM request timeout. GitHub Actions default: `240` | No |
 | `LLM_MAX_CONCURRENT_REQUESTS` | Async LLM request cap per provider route; `0` disables the cap. Default: `8` | No |
+| `LLM_ADAPTIVE_MAX_TOKENS` | Response output ceiling for adaptive-thinking calls. It is not a thinking budget. Default: `65536` | No |
 | `LLM_MAX_RETRIES` | Anthropic SDK retry count for transient request failures. Default: `2` | No |
 | `LLM_LOG_REQUESTS` | Log LLM queue/start/done metadata without raw prompt content. Default: `true` | No |
 | `LLM_HEARTBEAT_SECONDS` | Seconds between in-flight LLM progress logs. Default: `60`; set `0` to disable | No |
@@ -460,9 +462,11 @@ Automatically identifies when today's stories continue from previous coverage:
 - **Smart ranking**: Items flagged as `rehash` can be demoted from top stories
 - **2-day lookback**: Compares against items from the past 2 days
 
-### Adaptive Thinking Profiles
+### Analysis Profiles And Adaptive Thinking
+- QUICK/STANDARD/DEEP/ULTRATHINK are internal AATF analysis profiles, not Anthropic API thinking levels
 - Claude Opus 4.7 uses adaptive thinking plus effort settings, not fixed manual `budget_tokens`
 - Opus 4.7 requests send top-level `thinking: {"type": "adaptive", "display": "summarized"}` plus `output_config.effort`
+- `LLM_ADAPTIVE_MAX_TOKENS` sets the response output ceiling and is separate from thinking depth
 - QUICK/STANDARD/DEEP/ULTRATHINK remain as internal profile names for callers, logs, and older Claude models
 - ULTRATHINK profile for complex cross-category analysis
 - **Cost tracking**: Per-phase breakdown with input/output/cache token tracking, logged at end of each run

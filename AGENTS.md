@@ -203,6 +203,7 @@ NEWS_USER_AGENT       # User-Agent sent to RSS/feed sources (optional)
 LLM_TRUST_ENV_PROXY   # Let LLM clients use HTTP(S)/ALL_PROXY env vars (default: false)
 LLM_TIMEOUT_SECONDS   # Override provider-config LLM request timeout (Actions default: 240)
 LLM_MAX_CONCURRENT_REQUESTS # Async LLM request cap per provider route; 0 disables it (default: 8)
+LLM_ADAPTIVE_MAX_TOKENS # Response output ceiling for adaptive calls; not a thinking budget (default: 65536)
 LLM_MAX_RETRIES       # Anthropic SDK retry count for transient request failures (default: 2)
 LLM_LOG_REQUESTS      # Log LLM queue/start/done metadata without raw prompt content (default: true)
 LLM_HEARTBEAT_SECONDS # Seconds between in-flight LLM progress logs; 0 disables it (default: 60)
@@ -221,7 +222,7 @@ TZ                    # Timezone (default: America/New_York)
 
 ## Adaptive Thinking Profiles
 
-The pipeline uses Claude Opus 4.7 adaptive thinking profiles. For Opus 4.7, the legacy budget labels map to `output_config.effort`; `budget_tokens` is only used for older Claude models that still support manual thinking.
+The pipeline uses internal AATF analysis profiles that map to Claude Opus 4.7 adaptive `output_config.effort`. QUICK/STANDARD/DEEP/ULTRATHINK are not provider thinking levels for Opus 4.7. `LLM_ADAPTIVE_MAX_TOKENS` controls the response output ceiling separately; `budget_tokens` is only used for older Claude models that still support manual thinking.
 
 | Component | Profile | Opus 4.7 Effort |
 |-----------|---------|-----------------|

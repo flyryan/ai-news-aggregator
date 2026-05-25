@@ -266,6 +266,21 @@ The summary should read like a professional briefing, focusing on what matters f
         """DEEP thinking for reduce phase ranking."""
         return ThinkingLevel.DEEP
 
+    def _thinking_log_message(self, label: str, response) -> str:
+        """Format thinking diagnostics without confusing adaptive mode for off."""
+        if response.thinking:
+            return f"{label}: {response.thinking[:500]}..."
+        if getattr(response, 'thinking_type', None) == 'adaptive':
+            effort = getattr(response, 'adaptive_effort', None) or 'unknown'
+            analysis_profile = getattr(response, 'analysis_profile', None) or 'unknown'
+            return (
+                f"{label}: adaptive thinking requested "
+                f"(analysis_profile={analysis_profile}, effort={effort}, "
+                f"thinking_blocks={getattr(response, 'thinking_block_count', 0)}); "
+                "no summary block returned"
+            )
+        return f"{label}: no thinking block returned"
+
     def _get_batch_analysis_prompt(
         self,
         items_context: str,
@@ -346,7 +361,7 @@ Snippet: {item.content[:300]}...
             result = self._parse_json_response(response.content)
             ai_ids = set(result.get('ai_article_ids', []))
 
-            logger.info(f"LLM filter thinking: {response.thinking[:500]}..." if response.thinking else "No thinking")
+            logger.info(self._thinking_log_message("LLM filter thinking", response))
             logger.info(f"LLM filter returned {len(ai_ids)} AI article IDs")
 
             # Match truncated IDs back to full IDs
@@ -411,7 +426,7 @@ Snippet: {item.content[:300]}...
             result = self._parse_json_response(response.content)
             thinking = response.thinking
 
-            logger.info(f"Small batch thinking: {thinking[:500]}..." if thinking else "No thinking")
+            logger.info(self._thinking_log_message("Small batch thinking", response))
 
         except Exception as e:
             logger.error(f"Small batch analysis failed: {e}")

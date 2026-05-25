@@ -48,6 +48,8 @@ class APICallRecord:
     cache_read_tokens: int = 0
     model: str = "claude-4.7-opus-aws"
     provider_id: Optional[str] = None
+    analysis_profile: Optional[str] = None
+    adaptive_effort: Optional[str] = None
     duration_seconds: float = 0.0
 
     @property
@@ -132,7 +134,9 @@ class CostTracker:
         thinking_level: Optional[str] = None,
         duration_seconds: float = 0.0,
         model: Optional[str] = None,
-        provider_id: Optional[str] = None
+        provider_id: Optional[str] = None,
+        analysis_profile: Optional[str] = None,
+        adaptive_effort: Optional[str] = None
     ):
         """
         Record an API call.
@@ -154,6 +158,8 @@ class CostTracker:
             cache_read_tokens=usage.get('cache_read_input_tokens', 0),
             model=model or self.model,
             provider_id=provider_id,
+            analysis_profile=analysis_profile,
+            adaptive_effort=adaptive_effort,
             duration_seconds=duration_seconds
         )
         self.calls.append(record)
@@ -355,6 +361,8 @@ class CostTracker:
                     "cache_read_tokens": call.cache_read_tokens,
                     "model": call.model,
                     "provider_id": call.provider_id,
+                    "analysis_profile": call.analysis_profile,
+                    "adaptive_effort": call.adaptive_effort,
                     "duration_seconds": call.duration_seconds
                 }
                 for call in self.calls

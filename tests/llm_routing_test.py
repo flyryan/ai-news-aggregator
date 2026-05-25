@@ -40,6 +40,7 @@ class FakeRouteClient:
     def __init__(self, provider_id, model=None, failures=None):
         self.provider_id = provider_id
         self.model = model or f"claude-4.7-opus-{provider_id}"
+        self.max_concurrent_requests = 8
         self.failures = list(failures or [])
         self.calls = []
 
@@ -171,6 +172,7 @@ class AsyncLLMRouterTests(unittest.TestCase):
                     [client.max_concurrent_requests for client in router.clients],
                     [3, 3, 3],
                 )
+                self.assertEqual(router.max_total_concurrent_requests, 9)
             finally:
                 if router is not None:
                     await router.close()
@@ -178,6 +180,44 @@ class AsyncLLMRouterTests(unittest.TestCase):
                     os.environ.pop("LLM_MAX_CONCURRENT_REQUESTS", None)
                 else:
                     os.environ["LLM_MAX_CONCURRENT_REQUESTS"] = previous
+
+        asyncio.run(run())
+
+    def test_three_providers_at_cap_eight_allow_twenty_four_total_requests(self):
+        async def run():
+            config = LLMProviderConfig(
+                mode="openai-compatible",
+                api_key="test-key",
+                base_url="https://proxy.example.com",
+                model="claude-4.7-opus-aws",
+                routes=[
+                    LLMRouteConfig(
+                        id="aws",
+                        model="claude-4.7-opus-aws",
+                        max_concurrent_requests=8,
+                    ),
+                    LLMRouteConfig(
+                        id="gcp",
+                        model="claude-4.7-opus-gcp",
+                        max_concurrent_requests=8,
+                    ),
+                    LLMRouteConfig(
+                        id="anthropic",
+                        model="claude-4.7-opus-anthropic",
+                        max_concurrent_requests=8,
+                    ),
+                ],
+            )
+            router = AsyncLLMRouter.from_config(config)
+            try:
+                self.assertIsInstance(router, AsyncLLMRouter)
+                self.assertEqual(
+                    [client.max_concurrent_requests for client in router.clients],
+                    [8, 8, 8],
+                )
+                self.assertEqual(router.max_total_concurrent_requests, 24)
+            finally:
+                await router.close()
 
         asyncio.run(run())
 
@@ -251,8 +291,10 @@ class AsyncLLMRouterTests(unittest.TestCase):
             )
             self.assertNotIn("temperature", captured_kwargs)
             self.assertEqual(captured_context["thinking_type"], "adaptive")
-            self.assertEqual(captured_context["profile"], "QUICK")
+            self.assertNotIn("profile", captured_context)
+            self.assertEqual(captured_context["analysis_profile"], "QUICK")
             self.assertEqual(captured_context["adaptive_effort"], "high")
+            self.assertEqual(captured_context["response_max_tokens"], 65536)
 
         asyncio.run(run())
 
@@ -294,7 +336,8 @@ class AsyncLLMRouterTests(unittest.TestCase):
             self.assertNotIn("temperature", captured_kwargs)
             self.assertEqual(captured_context["kind"], "adaptive_message")
             self.assertEqual(captured_context["thinking_type"], "adaptive")
-            self.assertEqual(captured_context["profile"], "QUICK")
+            self.assertNotIn("profile", captured_context)
+            self.assertEqual(captured_context["analysis_profile"], "plain")
             self.assertEqual(captured_context["adaptive_effort"], "high")
 
         asyncio.run(run())

@@ -92,15 +92,20 @@ class ThinkingLevel(IntEnum):
     ULTRATHINK = 32000 # Cross-category synthesis
 
 
-# Map legacy token budgets to Opus 4.7+ effort levels. Effort is a behavioral
-# signal, not a token budget, so we key on the caller's original intent rather
-# than on any max_tokens-adjusted value.
+# Map internal pipeline analysis profiles to Opus 4.7+ effort levels. Effort is
+# the provider-facing reasoning knob; the enum values only remain for older
+# manual-thinking models and backwards-compatible call sites.
 BUDGET_TO_EFFORT = {
     ThinkingLevel.QUICK: "high",
     ThinkingLevel.STANDARD: "xhigh",
     ThinkingLevel.DEEP: "max",
     ThinkingLevel.ULTRATHINK: "max",
 }
+
+# Opus 4.7 adaptive thinking does not use fixed thinking budgets. Keep the
+# response ceiling separate from internal profiles so logs do not imply that
+# QUICK/STANDARD/DEEP/ULTRATHINK are Anthropic token-budget settings.
+DEFAULT_ADAPTIVE_MAX_TOKENS = 65536
 
 THINKING_LEVEL_NAMES = {
     ThinkingLevel.QUICK: "QUICK",
@@ -151,6 +156,10 @@ class LLMResponse:
     usage: Dict[str, int]
     model: str
     stop_reason: Optional[str] = None  # Detect truncation via "max_tokens"
+    thinking_type: Optional[str] = None
+    adaptive_effort: Optional[str] = None
+    analysis_profile: Optional[str] = None
+    thinking_block_count: int = 0
 
 
 class BearerAuth(httpx.Auth):
@@ -212,6 +221,10 @@ class AnthropicClient:
         self.timeout = _env_float("LLM_TIMEOUT_SECONDS", timeout, minimum=1.0)
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
+        self.adaptive_max_tokens = min(
+            _env_int("LLM_ADAPTIVE_MAX_TOKENS", DEFAULT_ADAPTIVE_MAX_TOKENS, minimum=1024),
+            self.max_output_tokens,
+        )
         self.trust_env_proxy = _env_bool("LLM_TRUST_ENV_PROXY", False)
         self.max_retries = _env_int("LLM_MAX_RETRIES", 2, minimum=0)
 
@@ -311,7 +324,10 @@ class AnthropicClient:
 
         # Extract text content
         content = ""
+        thinking_block_count = 0
         for block in response.content:
+            if getattr(block, "type", None) == "thinking":
+                thinking_block_count += 1
             if hasattr(block, 'text'):
                 content += block.text
 
@@ -322,7 +338,11 @@ class AnthropicClient:
                 "input_tokens": response.usage.input_tokens,
                 "output_tokens": response.usage.output_tokens
             },
-            model=response.model
+            model=response.model,
+            thinking_type="adaptive" if use_adaptive else None,
+            adaptive_effort="high" if use_adaptive else None,
+            analysis_profile="plain" if use_adaptive else None,
+            thinking_block_count=thinking_block_count
         )
 
     def call_with_thinking(
@@ -344,8 +364,9 @@ class AnthropicClient:
             profile: Analysis profile (use ThinkingLevel enum). Opus 4.7+
                      maps this to adaptive effort; older models use it as a
                      manual thinking budget.
-            max_tokens: Maximum response output tokens. Defaults to profile plus
-                       an output buffer for dense JSON responses.
+            max_tokens: Maximum response output tokens. On adaptive models this
+                       defaults to LLM_ADAPTIVE_MAX_TOKENS; older manual
+                       thinking models default to profile plus an output buffer.
             temperature: Must be 1.0 for thinking mode.
 
         Returns:
@@ -353,15 +374,22 @@ class AnthropicClient:
         """
         requested_profile = profile if profile is not None else budget_tokens
         profile_name = THINKING_LEVEL_NAMES.get(requested_profile, str(requested_profile))
-        manual_budget_tokens = int(requested_profile)
         use_adaptive = _uses_adaptive_thinking(self.model)
 
-        # Use larger buffer (49152) to avoid JSON truncation in dense batches
-        # (e.g. 75-item research batches can produce 30k-40k tokens of JSON).
-        if max_tokens is None:
-            max_tokens = manual_budget_tokens + 49152
-        elif max_tokens <= manual_budget_tokens:
-            max_tokens = manual_budget_tokens + 16384
+        if use_adaptive:
+            effort = BUDGET_TO_EFFORT.get(requested_profile, "high")
+            if max_tokens is None:
+                max_tokens = self.adaptive_max_tokens
+            manual_budget_tokens = None
+        else:
+            effort = None
+            manual_budget_tokens = int(requested_profile)
+            # Use larger buffer (49152) to avoid JSON truncation in dense batches
+            # on older manual-thinking models.
+            if max_tokens is None:
+                max_tokens = manual_budget_tokens + 49152
+            elif max_tokens <= manual_budget_tokens:
+                max_tokens = manual_budget_tokens + 16384
 
         # Cap at model/proxy limit
         if max_tokens > self.max_output_tokens:
@@ -370,7 +398,7 @@ class AnthropicClient:
 
         # If capping pushed max_tokens below the manual budget, reduce it too
         # (only meaningful on the manual-thinking path)
-        if max_tokens <= manual_budget_tokens:
+        if not use_adaptive and max_tokens <= manual_budget_tokens:
             manual_budget_tokens = max(max_tokens - 8192, max_tokens // 2)
             logger.info(
                 f"Reduced manual thinking budget to {manual_budget_tokens} "
@@ -390,11 +418,10 @@ class AnthropicClient:
             # top-level so Opus 4.7 cannot silently run with thinking disabled.
             # `output_config` is not typed in this SDK yet, so effort goes
             # through extra_body as a passthrough.
-            effort = BUDGET_TO_EFFORT.get(requested_profile, "high")
             kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
             kwargs["extra_body"] = {"output_config": {"effort": effort}}
             logger.debug(
-                f"Calling with adaptive thinking: profile={profile_name}, "
+                f"Calling with adaptive thinking: analysis_profile={profile_name}, "
                 f"effort={effort}, max_tokens={max_tokens}"
             )
         else:
@@ -463,7 +490,11 @@ class AnthropicClient:
                 "output_tokens": response.usage.output_tokens
             },
             model=response.model,
-            stop_reason=response.stop_reason
+            stop_reason=response.stop_reason,
+            thinking_type="adaptive" if use_adaptive else "enabled",
+            adaptive_effort=effort,
+            analysis_profile=profile_name,
+            thinking_block_count=len(thinking_blocks)
         )
 
     def call_json(
@@ -557,6 +588,10 @@ class AsyncAnthropicClient:
         self.timeout = _env_float("LLM_TIMEOUT_SECONDS", timeout, minimum=1.0)
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
+        self.adaptive_max_tokens = min(
+            _env_int("LLM_ADAPTIVE_MAX_TOKENS", DEFAULT_ADAPTIVE_MAX_TOKENS, minimum=1024),
+            self.max_output_tokens,
+        )
         self.trust_env_proxy = _env_bool("LLM_TRUST_ENV_PROXY", False)
         self.max_concurrent_requests = (
             max_concurrent_requests
@@ -630,10 +665,11 @@ class AsyncAnthropicClient:
         ]
         for key in (
             "thinking_type",
-            "profile",
+            "analysis_profile",
             "adaptive_effort",
             "manual_budget_tokens",
-            "max_tokens",
+            "response_max_tokens",
+            "thinking_blocks",
             "attempt",
             "fallback_from",
             "retry_reason",
@@ -715,10 +751,18 @@ class AsyncAnthropicClient:
         input_tokens = getattr(usage, "input_tokens", None)
         output_tokens = getattr(usage, "output_tokens", None)
         stop_reason = getattr(response, "stop_reason", None)
+        content_blocks = getattr(response, "content", []) or []
+        thinking_block_count = sum(
+            1 for block in content_blocks if getattr(block, "type", None) == "thinking"
+        )
+        text_block_count = sum(
+            1 for block in content_blocks if getattr(block, "type", None) == "text"
+        )
         logger.info(
             f"LLM done #{request_id} {self._format_request_context(request_context)} "
             f"active={active} queued={queued} duration={duration:.1f}s "
-            f"stop_reason={stop_reason} input_tokens={input_tokens} output_tokens={output_tokens}"
+            f"stop_reason={stop_reason} input_tokens={input_tokens} output_tokens={output_tokens} "
+            f"thinking_blocks={thinking_block_count} text_blocks={text_block_count}"
         )
         await self._write_metric({
             "event": "done",
@@ -729,6 +773,8 @@ class AsyncAnthropicClient:
             "active_after": active,
             "queued_after": queued,
             "stop_reason": stop_reason,
+            "thinking_blocks": thinking_block_count,
+            "text_blocks": text_block_count,
             "response_model": getattr(response, "model", None),
             "usage": {
                 "input_tokens": input_tokens,
@@ -931,15 +977,22 @@ class AsyncAnthropicClient:
         """Async version of call_with_thinking."""
         requested_profile = profile if profile is not None else budget_tokens
         profile_name = THINKING_LEVEL_NAMES.get(requested_profile, str(requested_profile))
-        manual_budget_tokens = int(requested_profile)
         use_adaptive = _uses_adaptive_thinking(self.model)
 
-        # Use larger buffer (49152) to avoid JSON truncation in dense batches
-        # (e.g. 75-item research batches can produce 30k-40k tokens of JSON).
-        if max_tokens is None:
-            max_tokens = manual_budget_tokens + 49152
-        elif max_tokens <= manual_budget_tokens:
-            max_tokens = manual_budget_tokens + 16384
+        if use_adaptive:
+            effort = BUDGET_TO_EFFORT.get(requested_profile, "high")
+            if max_tokens is None:
+                max_tokens = self.adaptive_max_tokens
+            manual_budget_tokens = None
+        else:
+            effort = None
+            manual_budget_tokens = int(requested_profile)
+            # Use larger buffer (49152) to avoid JSON truncation in dense batches
+            # on older manual-thinking models.
+            if max_tokens is None:
+                max_tokens = manual_budget_tokens + 49152
+            elif max_tokens <= manual_budget_tokens:
+                max_tokens = manual_budget_tokens + 16384
 
         # Cap at model/proxy limit
         if max_tokens > self.max_output_tokens:
@@ -948,7 +1001,7 @@ class AsyncAnthropicClient:
 
         # If capping pushed max_tokens below the manual budget, reduce it too
         # (only meaningful on the manual-thinking path)
-        if max_tokens <= manual_budget_tokens:
+        if not use_adaptive and max_tokens <= manual_budget_tokens:
             manual_budget_tokens = max(max_tokens - 8192, max_tokens // 2)
             logger.info(
                 f"Reduced manual thinking budget to {manual_budget_tokens} "
@@ -964,7 +1017,6 @@ class AsyncAnthropicClient:
         if use_adaptive:
             # Opus 4.7+ path: adaptive thinking with effort. See the sync
             # method for the thinking/output_config rationale.
-            effort = BUDGET_TO_EFFORT.get(requested_profile, "high")
             kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
             kwargs["extra_body"] = {"output_config": {"effort": effort}}
         else:
@@ -984,10 +1036,10 @@ class AsyncAnthropicClient:
             "provider_id": self.provider_id,
             "provider_model": self.model,
             "thinking_type": "adaptive" if use_adaptive else "enabled",
-            "profile": profile_name,
+            "analysis_profile": profile_name,
             "adaptive_effort": effort if use_adaptive else None,
             "manual_budget_tokens": manual_budget_tokens if not use_adaptive else None,
-            "max_tokens": max_tokens,
+            "response_max_tokens": max_tokens,
             "message_count": len(messages),
             "message_chars": _messages_char_count(messages),
             "system_chars": _content_char_count(system),
@@ -1051,10 +1103,12 @@ class AsyncAnthropicClient:
         get_tracker().record_call(
             caller=caller or "async_call_with_thinking",
             usage=usage,
-            thinking_level=profile_name,
+            thinking_level=None if use_adaptive else profile_name,
             duration_seconds=duration,
             model=response.model,
-            provider_id=self.provider_id
+            provider_id=self.provider_id,
+            analysis_profile=profile_name if use_adaptive else None,
+            adaptive_effort=effort if use_adaptive else None
         )
 
         return LLMResponse(
@@ -1062,7 +1116,11 @@ class AsyncAnthropicClient:
             thinking="\n\n".join(thinking_blocks) if thinking_blocks else None,
             usage=usage,
             model=response.model,
-            stop_reason=response.stop_reason
+            stop_reason=response.stop_reason,
+            thinking_type="adaptive" if use_adaptive else "enabled",
+            adaptive_effort=effort,
+            analysis_profile=profile_name,
+            thinking_block_count=len(thinking_blocks)
         )
 
     async def call(
@@ -1098,9 +1156,9 @@ class AsyncAnthropicClient:
             "provider_id": self.provider_id,
             "provider_model": self.model,
             "thinking_type": "adaptive" if use_adaptive else None,
-            "profile": "QUICK" if use_adaptive else None,
+            "analysis_profile": "plain" if use_adaptive else None,
             "adaptive_effort": "high" if use_adaptive else None,
-            "max_tokens": max_tokens,
+            "response_max_tokens": max_tokens,
             "message_count": len(messages),
             "message_chars": _messages_char_count(messages),
             "system_chars": _content_char_count(system),
@@ -1112,7 +1170,10 @@ class AsyncAnthropicClient:
         duration = time.time() - start_time
 
         content = ""
+        thinking_block_count = 0
         for block in response.content:
+            if getattr(block, "type", None) == "thinking":
+                thinking_block_count += 1
             if hasattr(block, 'text'):
                 content += block.text
 
@@ -1133,14 +1194,20 @@ class AsyncAnthropicClient:
             thinking_level=None,
             duration_seconds=duration,
             model=response.model,
-            provider_id=self.provider_id
+            provider_id=self.provider_id,
+            analysis_profile="plain" if use_adaptive else None,
+            adaptive_effort="high" if use_adaptive else None
         )
 
         return LLMResponse(
             content=content,
             thinking=None,
             usage=usage,
-            model=response.model
+            model=response.model,
+            thinking_type="adaptive" if use_adaptive else None,
+            adaptive_effort="high" if use_adaptive else None,
+            analysis_profile="plain" if use_adaptive else None,
+            thinking_block_count=thinking_block_count
         )
 
     async def call_json(
@@ -1200,9 +1267,21 @@ class AsyncLLMRouter:
         self.clients = clients
         self._route_lock = asyncio.Lock()
         self._next_route_index = 0
+        finite_caps = [client.max_concurrent_requests for client in clients]
+        self.max_total_concurrent_requests = (
+            sum(finite_caps)
+            if all(cap > 0 for cap in finite_caps)
+            else None
+        )
         logger.info(
-            "AsyncLLMRouter initialized with routes=%s",
+            "AsyncLLMRouter initialized with routes=%s per_provider_caps=%s "
+            "max_total_concurrent_requests=%s",
             ", ".join(f"{client.provider_id}:{client.model}" for client in clients),
+            ", ".join(
+                f"{client.provider_id}:{client.max_concurrent_requests or 'unlimited'}"
+                for client in clients
+            ),
+            self.max_total_concurrent_requests or "unlimited",
         )
 
     @classmethod
