@@ -13,6 +13,7 @@ import re
 import json
 import logging
 import time
+import asyncio
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 from enum import IntEnum
@@ -27,6 +28,22 @@ if TYPE_CHECKING:
     from .config import LLMProviderConfig
 
 logger = logging.getLogger(__name__)
+
+
+def _env_int(name: str, default: int, minimum: int = 0) -> int:
+    """Read an integer environment setting with validation."""
+    raw_value = os.environ.get(name)
+    if not raw_value:
+        return default
+    try:
+        value = int(raw_value)
+    except ValueError:
+        logger.warning(f"Ignoring invalid {name}={raw_value!r}; using {default}")
+        return default
+    if value < minimum:
+        logger.warning(f"Ignoring {name}={value}; minimum is {minimum}, using {default}")
+        return default
+    return value
 
 
 class ThinkingLevel(IntEnum):
@@ -458,6 +475,12 @@ class AsyncAnthropicClient:
         self.timeout = timeout
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
+        self.max_concurrent_requests = _env_int("LLM_MAX_CONCURRENT_REQUESTS", 4)
+        self._request_semaphore = (
+            asyncio.Semaphore(self.max_concurrent_requests)
+            if self.max_concurrent_requests > 0
+            else None
+        )
 
         if not self.api_key:
             raise ValueError("ANTHROPIC_API_KEY environment variable or api_key parameter required")
@@ -485,7 +508,17 @@ class AsyncAnthropicClient:
             http_client=self._http_client
         )
 
-        logger.info(f"AsyncAnthropicClient initialized with mode={self.mode}, model={self.model}")
+        logger.info(
+            f"AsyncAnthropicClient initialized with mode={self.mode}, model={self.model}, "
+            f"max_concurrent_requests={self.max_concurrent_requests or 'unlimited'}"
+        )
+
+    async def _create_message(self, **kwargs):
+        """Create a message under the optional global async LLM concurrency cap."""
+        if self._request_semaphore is None:
+            return await self._client.messages.create(**kwargs)
+        async with self._request_semaphore:
+            return await self._client.messages.create(**kwargs)
 
     @classmethod
     def from_config(cls, config: 'LLMProviderConfig') -> 'AsyncAnthropicClient':
@@ -565,7 +598,7 @@ class AsyncAnthropicClient:
             kwargs["system"] = system
 
         start_time = time.time()
-        response = await self._client.messages.create(**kwargs)
+        response = await self._create_message(**kwargs)
         duration = time.time() - start_time
 
         # Log stop_reason for diagnostics (helps debug proxy behavior)
@@ -664,7 +697,7 @@ class AsyncAnthropicClient:
             kwargs["system"] = system
 
         start_time = time.time()
-        response = await self._client.messages.create(**kwargs)
+        response = await self._create_message(**kwargs)
         duration = time.time() - start_time
 
         content = ""

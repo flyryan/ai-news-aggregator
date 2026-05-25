@@ -52,6 +52,9 @@ jobs:
       PIPELINE_BASE_URL: ${{ vars.PIPELINE_BASE_URL || 'https://news.aatf.ai' }}
       PIPELINE_COMMIT_PATHS: ${{ vars.PIPELINE_COMMIT_PATHS || 'web/data config/model_releases.yaml config/ecosystem_context.yaml' }}
       PIPELINE_IMAGE_MODEL: ${{ vars.PIPELINE_IMAGE_MODEL || 'gemini-3-pro-image-preview' }}
+      LLM_MAX_CONCURRENT_REQUESTS: ${{ vars.LLM_MAX_CONCURRENT_REQUESTS || '4' }}
+      ANALYZER_BATCH_SIZE: ${{ vars.ANALYZER_BATCH_SIZE || '50' }}
+      ANALYZER_MAX_CONCURRENT_BATCHES: ${{ vars.ANALYZER_MAX_CONCURRENT_BATCHES || '2' }}
       TARGET_DATE_INPUT: ${{ inputs.target_date || '' }}
       RESUME_FROM_INPUT: ${{ inputs.resume_from || '' }}
       COMMIT_OUTPUTS: ${{ github.event_name != 'workflow_dispatch' || inputs.commit_outputs }}

@@ -36,6 +36,31 @@ class TruncatedJSONError(Exception):
     """
 
 
+class MalformedJSONError(Exception):
+    """Raised when an LLM JSON response is complete but malformed.
+
+    Large batch prompts occasionally return JSON with a local syntax error
+    (for example a missing comma between objects). Map batches should recover
+    by splitting into smaller batches instead of dropping every item.
+    """
+
+
+def _env_int(name: str, default: int, minimum: int = 1) -> int:
+    """Read a positive integer from the environment."""
+    raw_value = os.environ.get(name)
+    if not raw_value:
+        return default
+    try:
+        value = int(raw_value)
+    except ValueError:
+        logger.warning(f"Ignoring invalid {name}={raw_value!r}; using {default}")
+        return default
+    if value < minimum:
+        logger.warning(f"Ignoring {name}={value}; minimum is {minimum}, using {default}")
+        return default
+    return value
+
+
 @dataclass
 class CollectedItem:
     """Standardized item from any gatherer."""
@@ -417,8 +442,8 @@ class BaseAnalyzer(ABC):
         return ThinkingLevel.DEEP
 
     # Map-reduce batch processing constants
-    BATCH_SIZE = 75  # Items per batch for map phase
-    MAX_CONCURRENT_BATCHES = 4  # Limit parallel API calls
+    BATCH_SIZE = _env_int("ANALYZER_BATCH_SIZE", 75)  # Items per batch for map phase
+    MAX_CONCURRENT_BATCHES = _env_int("ANALYZER_MAX_CONCURRENT_BATCHES", 4)  # Per-category API calls
 
     # --- Map-Reduce Methods ---
 
@@ -468,9 +493,9 @@ class BaseAnalyzer(ABC):
 
             try:
                 result = self._parse_json_response(response.content)
-            except TruncatedJSONError:
+            except (TruncatedJSONError, MalformedJSONError) as parse_error:
                 return await self._handle_truncated_batch(
-                    batch_items, batch_index, total_batches, sub_label
+                    batch_items, batch_index, total_batches, sub_label, str(parse_error)
                 )
 
             batch_themes = result.get('themes', result.get('category_themes', []))
@@ -501,9 +526,9 @@ class BaseAnalyzer(ABC):
                     )
                 try:
                     result = self._parse_json_response(response.content)
-                except TruncatedJSONError:
+                except (TruncatedJSONError, MalformedJSONError) as parse_error:
                     return await self._handle_truncated_batch(
-                        batch_items, batch_index, total_batches, sub_label
+                        batch_items, batch_index, total_batches, sub_label, str(parse_error)
                     )
                 batch_themes = result.get('themes', result.get('category_themes', []))
                 parsed_items = result.get('items', [])
@@ -531,11 +556,12 @@ class BaseAnalyzer(ABC):
         batch_index: int,
         total_batches: int,
         sub_label: str,
+        reason: str = "truncated",
     ) -> BatchResult:
-        """Recover from a truncated LLM response by splitting the batch.
+        """Recover from an unusable LLM response by splitting the batch.
 
         Runs each half through ``_analyze_batch`` in parallel and merges
-        the results. When a single-item batch still truncates there is
+        the results. When a single-item batch still fails there is
         nothing further to split, so the item is dropped with a loud
         ERROR (the same user-visible outcome as the old silent-drop path,
         but only after exhausting recovery attempts).
@@ -543,21 +569,21 @@ class BaseAnalyzer(ABC):
         label = f"{batch_index + 1}{sub_label}/{total_batches}"
         if len(batch_items) <= 1:
             logger.error(
-                f"  {self.category} map {label}: TRUNCATED with "
-                f"{len(batch_items)} item(s); cannot split further, dropping"
+                f"  {self.category} map {label}: unrecoverable response "
+                f"({reason}) with {len(batch_items)} item(s); cannot split further, dropping"
             )
             return BatchResult(
                 batch_index=batch_index,
                 item_analyses=[],
                 batch_themes=[],
                 cross_signals=[],
-                thinking=f"Error: response truncated with {len(batch_items)} item(s); cannot split further"
+                thinking=f"Error: unusable response ({reason}) with {len(batch_items)} item(s); cannot split further"
             )
 
         mid = len(batch_items) // 2
         left_items, right_items = batch_items[:mid], batch_items[mid:]
         logger.warning(
-            f"  {self.category} map {label}: truncated, splitting "
+            f"  {self.category} map {label}: unusable response ({reason}), splitting "
             f"{len(batch_items)} items into {len(left_items)}+{len(right_items)} sub-batches"
         )
 
@@ -962,6 +988,14 @@ class BaseAnalyzer(ABC):
         try:
             return json.loads(content)
         except json.JSONDecodeError as e:
+            repaired = self._repair_common_json_errors(content)
+            if repaired != content:
+                try:
+                    logger.warning(f"Repaired malformed JSON response after parse error: {e}")
+                    return json.loads(repaired)
+                except json.JSONDecodeError as repair_e:
+                    logger.warning(f"JSON repair attempt failed: {repair_e}")
+
             # If the brace-walk left the object unclosed, the decode failure
             # is almost certainly truncation rather than malformed JSON.
             # Surface that to the caller so it can split-and-retry instead
@@ -971,7 +1005,33 @@ class BaseAnalyzer(ABC):
                 raise TruncatedJSONError(str(e)) from e
             logger.error(f"Failed to parse JSON: {e}")
             logger.error(f"Content was: {content[:500]}...")
-            return {}
+            raise MalformedJSONError(str(e)) from e
+
+    def _repair_common_json_errors(self, content: str) -> str:
+        """Repair common local syntax errors in otherwise complete JSON.
+
+        The LLM sometimes emits a valid-looking object with a missing comma,
+        especially in large map batches. Keep repairs narrow so genuinely bad
+        responses still fall through to split-and-retry.
+        """
+        repaired = content
+
+        # Missing comma between adjacent objects in an array:
+        # [{"id": "a"} {"id": "b"}] -> [{"id": "a"}, {"id": "b"}]
+        repaired = re.sub(r'}\s+(?={)', '}, ', repaired)
+
+        # Missing comma between an object/array value and the next object key:
+        # {"items": [...]\n"themes": []} -> {"items": [...], "themes": []}
+        repaired = re.sub(
+            r'([}\]])\s+(?="(?:items|themes|category_themes|cross_signals|top_10|category_summary)"\s*:)',
+            r'\1, ',
+            repaired
+        )
+
+        # Trailing commas before object/array close are common and safe to drop.
+        repaired = re.sub(r',\s*([}\]])', r'\1', repaired)
+
+        return repaired
 
 
 def deduplicate_items(items: List[CollectedItem]) -> List[CollectedItem]:

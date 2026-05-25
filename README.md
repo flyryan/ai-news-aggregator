@@ -344,6 +344,9 @@ export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
 | `REDDIT_USER_AGENT` | User-Agent for Reddit requests | No |
 | `PIPELINE_PROXY_URL` | HTTP(S) or SOCKS proxy for the whole pipeline | No |
 | `NEWS_USER_AGENT` | User-Agent for RSS/feed requests | No |
+| `LLM_MAX_CONCURRENT_REQUESTS` | Global async LLM request cap; `0` disables the cap. Hosted default: `4` | No |
+| `ANALYZER_BATCH_SIZE` | Items per analyzer map batch. Hosted default: `50` | No |
+| `ANALYZER_MAX_CONCURRENT_BATCHES` | Per-category analyzer map concurrency. Hosted default: `2` | No |
 | `MULLVAD_ACCOUNT` | Mullvad account number for CI proxy setup | No |
 | `MULLVAD_WG_PRIVATE_KEY` | Stable WireGuard private key for the CI Mullvad device | No |
 | `MULLVAD_RELAY_FILTER` | Mullvad relay hostname prefix for CI tunnel selection | No |
