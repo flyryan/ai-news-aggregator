@@ -9,7 +9,7 @@ Example usage:
 
     # Load provider config
     config = load_config("./config")
-    print(config.llm.model)  # claude-opus-4-7
+    print(config.llm.model)  # claude-4.7-opus-aws
 
     # Load prompts with typed accessor
     prompt_config = load_prompts("./config")
@@ -25,6 +25,8 @@ For migration from env vars:
 from .schema import (
     ProviderConfig,
     LLMProviderConfig,
+    LLMRouteConfig,
+    ResolvedLLMRouteConfig,
     ImageProviderConfig,
     LLMConfig,  # Backwards-compatible alias
     ImageConfig,  # Backwards-compatible alias
@@ -46,6 +48,8 @@ __all__ = [
     # Provider config
     'ProviderConfig',
     'LLMProviderConfig',
+    'LLMRouteConfig',
+    'ResolvedLLMRouteConfig',
     'ImageProviderConfig',
     'LLMConfig',  # Backwards-compatible alias
     'ImageConfig',  # Backwards-compatible alias

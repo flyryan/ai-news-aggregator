@@ -44,7 +44,7 @@ jobs:
       TZ: America/New_York
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       ANTHROPIC_API_BASE: ${{ secrets.ANTHROPIC_API_BASE }}
-      ANTHROPIC_MODEL: ${{ inputs.anthropic_model || vars.ANTHROPIC_MODEL || 'claude-opus-4-7' }}
+      ANTHROPIC_MODEL: ${{ inputs.anthropic_model || vars.ANTHROPIC_MODEL || 'claude-4.7-opus-aws' }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       TWITTERAPI_IO_KEY: ${{ secrets.TWITTERAPI_IO_KEY }}
       REDDIT_PROXY_URL: ${{ secrets.REDDIT_PROXY_URL }}
@@ -182,6 +182,13 @@ jobs:
             base_url: "\${ANTHROPIC_API_BASE}"
             model: "\${ANTHROPIC_MODEL}"
             timeout: 600
+            routes:
+              - id: "aws"
+                model: "claude-4.7-opus-aws"
+              - id: "gcp"
+                model: "claude-4.7-opus-gcp"
+              - id: "anthropic"
+                model: "claude-4.7-opus-anthropic"
 
           image:
             mode: "openai-compatible"
@@ -239,6 +246,10 @@ jobs:
               config = yaml.safe_load(handle) or {}
 
           llm_config = config.setdefault("llm", {})
+          if llm_config.get("routes"):
+              print("llm.routes configured; leaving route models unchanged.")
+              raise SystemExit(0)
+
           previous_model = llm_config.get("model")
           llm_config["model"] = model
 

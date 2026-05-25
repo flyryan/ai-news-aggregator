@@ -5,7 +5,7 @@ This module contains the agent-based architecture for collecting and analyzing
 AI/ML news from multiple sources.
 """
 
-from .llm_client import AnthropicClient, AsyncAnthropicClient, ThinkingLevel, LLMResponse
+from .llm_client import AnthropicClient, AsyncAnthropicClient, AsyncLLMRouter, ThinkingLevel, LLMResponse
 from .base import (
     BaseGatherer, BaseAnalyzer,
     CollectedItem, AnalyzedItem, CategoryReport, CategoryTheme,
@@ -19,6 +19,7 @@ __all__ = [
     # LLM Client
     'AnthropicClient',
     'AsyncAnthropicClient',
+    'AsyncLLMRouter',
     'ThinkingLevel',
     'LLMResponse',
     # Base classes

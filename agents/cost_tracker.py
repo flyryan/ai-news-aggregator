@@ -46,7 +46,8 @@ class APICallRecord:
     output_tokens: int
     cache_creation_tokens: int = 0
     cache_read_tokens: int = 0
-    model: str = "claude-opus-4-7"
+    model: str = "claude-4.7-opus-aws"
+    provider_id: Optional[str] = None
     duration_seconds: float = 0.0
 
     @property
@@ -84,7 +85,7 @@ class CostTracker:
         print(tracker.get_summary())
     """
 
-    def __init__(self, model: str = "claude-opus-4-7"):
+    def __init__(self, model: str = "claude-4.7-opus-aws"):
         self.model = model
         self.calls: List[APICallRecord] = []
         self.start_time: Optional[datetime] = None
@@ -130,7 +131,8 @@ class CostTracker:
         usage: Dict[str, int],
         thinking_level: Optional[str] = None,
         duration_seconds: float = 0.0,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        provider_id: Optional[str] = None
     ):
         """
         Record an API call.
@@ -151,6 +153,7 @@ class CostTracker:
             cache_creation_tokens=usage.get('cache_creation_input_tokens', 0),
             cache_read_tokens=usage.get('cache_read_input_tokens', 0),
             model=model or self.model,
+            provider_id=provider_id,
             duration_seconds=duration_seconds
         )
         self.calls.append(record)
@@ -221,11 +224,29 @@ class CostTracker:
 
         return by_caller
 
+    def get_cost_by_provider(self) -> Dict[str, CostBreakdown]:
+        """Get cost breakdown by routed provider id."""
+        by_provider: Dict[str, CostBreakdown] = {}
+
+        for call in self.calls:
+            provider = call.provider_id or call.model
+            if provider not in by_provider:
+                by_provider[provider] = CostBreakdown()
+
+            cost = self.calculate_cost(call)
+            by_provider[provider].input_cost += cost.input_cost
+            by_provider[provider].output_cost += cost.output_cost
+            by_provider[provider].cache_write_cost += cost.cache_write_cost
+            by_provider[provider].cache_hit_cost += cost.cache_hit_cost
+
+        return by_provider
+
     def get_summary(self) -> str:
         """Get a formatted summary of usage and costs."""
         totals = self.get_totals()
         cost = self.get_total_cost()
         by_caller = self.get_cost_by_caller()
+        by_provider = self.get_cost_by_provider()
 
         duration = ""
         if self.start_time and self.end_time:
@@ -268,6 +289,19 @@ class CostTracker:
         for caller, caller_cost in sorted_callers:
             lines.append(f"  {caller:30s} ${caller_cost.total_cost:.4f}")
 
+        if len(by_provider) > 1:
+            lines.extend([
+                "",
+                "COST BY PROVIDER:",
+            ])
+            sorted_providers = sorted(
+                by_provider.items(),
+                key=lambda x: x[1].total_cost,
+                reverse=True
+            )
+            for provider, provider_cost in sorted_providers:
+                lines.append(f"  {provider:30s} ${provider_cost.total_cost:.4f}")
+
         lines.extend([
             "",
             "PRICING (Claude Opus 4.7):",
@@ -283,6 +317,7 @@ class CostTracker:
         totals = self.get_totals()
         cost = self.get_total_cost()
         by_caller = self.get_cost_by_caller()
+        by_provider = self.get_cost_by_provider()
 
         return {
             "model": self.model,
@@ -305,6 +340,10 @@ class CostTracker:
                 caller: round(c.total_cost, 6)
                 for caller, c in by_caller.items()
             },
+            "cost_by_provider": {
+                provider: round(c.total_cost, 6)
+                for provider, c in by_provider.items()
+            },
             "calls": [
                 {
                     "timestamp": call.timestamp,
@@ -314,6 +353,8 @@ class CostTracker:
                     "output_tokens": call.output_tokens,
                     "cache_creation_tokens": call.cache_creation_tokens,
                     "cache_read_tokens": call.cache_read_tokens,
+                    "model": call.model,
+                    "provider_id": call.provider_id,
                     "duration_seconds": call.duration_seconds
                 }
                 for call in self.calls
@@ -339,7 +380,7 @@ def get_tracker() -> CostTracker:
     return _global_tracker
 
 
-def reset_tracker(model: str = "claude-opus-4-7") -> CostTracker:
+def reset_tracker(model: str = "claude-4.7-opus-aws") -> CostTracker:
     """Reset and return a new global tracker."""
     global _global_tracker
     _global_tracker = CostTracker(model)

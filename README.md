@@ -229,7 +229,7 @@ Set these on the publishing repository:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `ANTHROPIC_MODEL` | `claude-opus-4-7` | Default LLM model ID; applied to the generated `config/providers.yaml`, including the secret-backed production config |
+| `ANTHROPIC_MODEL` | `claude-4.7-opus-aws` | Legacy single-provider model ID; ignored when `llm.routes` is configured |
 | `PIPELINE_BASE_URL` | `https://news.aatf.ai` | Base URL used in feeds |
 | `PIPELINE_IMAGE_MODEL` | `gemini-3-pro-image-preview` | Native Gemini image model used by fallback config |
 | `PIPELINE_COMMIT_PATHS` | `web/data config/model_releases.yaml config/ecosystem_context.yaml` | Space-separated generated outputs to commit |
@@ -237,7 +237,7 @@ Set these on the publishing repository:
 | `NEWS_USER_AGENT` | `REDDIT_USER_AGENT` value | User-Agent sent to RSS/feed sources |
 | `MULLVAD_RELAY_FILTER` | `us` | Mullvad WireGuard relay hostname prefix used for CI egress |
 | `LLM_TIMEOUT_SECONDS` | `240` | Hosted LLM request timeout override; supersedes provider YAML timeout |
-| `LLM_MAX_CONCURRENT_REQUESTS` | `8` | Global async LLM request cap |
+| `LLM_MAX_CONCURRENT_REQUESTS` | `8` | Async LLM request cap per provider route; single-provider configs still get one cap |
 | `LLM_MAX_RETRIES` | `2` | Anthropic SDK retry count for transient request failures |
 | `LLM_LOG_REQUESTS` | `true` | Log queue/start/done metadata without raw prompt content |
 | `LLM_HEARTBEAT_SECONDS` | `60` | Emit progress logs for in-flight LLM requests; set `0` to disable |
@@ -245,9 +245,31 @@ Set these on the publishing repository:
 
 ### Manual Dry Runs
 
-Use `workflow_dispatch` with `commit_outputs=false` to run the full hosted pipeline without committing or pushing. The workflow uploads `web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml` as an artifact for inspection. Set the optional `anthropic_model` dispatch input to test a one-off model ID without changing repository variables or secrets.
+Use `workflow_dispatch` with `commit_outputs=false` to run the full hosted pipeline without committing or pushing. The workflow uploads `web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml` as an artifact for inspection. Set the optional `anthropic_model` dispatch input to test a one-off model ID for legacy single-provider configs; it is intentionally ignored when `llm.routes` is configured.
 
 Every hosted run also uploads a `pipeline-diagnostics` artifact when available. It includes `data/llm_metrics.jsonl` and cost reports, which are useful for comparing model IDs/providers without committing diagnostics to the public site.
+
+### Multi-Provider LLM Routing
+
+Production can route async LLM calls across multiple Opus 4.7 provider aliases by adding `llm.routes` to the ignored `config/providers.yaml` stored in `PIPELINE_PROVIDERS_YAML`. Routes inherit root `llm` settings unless overridden:
+
+```yaml
+llm:
+  mode: "openai-compatible"
+  api_key: "${ANTHROPIC_API_KEY}"
+  base_url: "${ANTHROPIC_API_BASE}"
+  model: "claude-4.7-opus-aws"
+  timeout: 600
+  routes:
+    - id: "aws"
+      model: "claude-4.7-opus-aws"
+    - id: "gcp"
+      model: "claude-4.7-opus-gcp"
+    - id: "anthropic"
+      model: "claude-4.7-opus-anthropic"
+```
+
+With routes configured, new async LLM calls rotate across providers. Retryable transport failures, 429s, and 5xx responses retry on a different provider. Prompt/schema/client errors do not cross-provider retry. Diagnostics include provider IDs and route attempts, but never prompt text, API keys, or provider URLs.
 
 ### Generated Outputs
 
@@ -295,7 +317,7 @@ llm:
   mode: "anthropic"
   api_key: "${ANTHROPIC_API_KEY}"  # Use env var reference
   # base_url: "https://api.anthropic.com"  # Default, uncomment to override
-  model: "claude-opus-4-7"
+  model: "claude-4.7-opus-anthropic"  # Or your endpoint's Opus 4.7 alias
   timeout: 600
 ```
 
@@ -306,7 +328,7 @@ llm:
   mode: "openai-compatible"
   api_key: "${PROXY_API_KEY}"
   base_url: "https://your-litellm-proxy.example.com"
-  model: "claude-opus-4-7"  # Your proxy's model alias
+  model: "claude-4.7-opus-aws"  # Your proxy's model alias
   timeout: 600
 ```
 
@@ -358,7 +380,7 @@ export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
 | `NEWS_USER_AGENT` | User-Agent for RSS/feed requests | No |
 | `LLM_TRUST_ENV_PROXY` | Allow LLM clients to use `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`. Default: `false` | No |
 | `LLM_TIMEOUT_SECONDS` | Override provider-config LLM request timeout. GitHub Actions default: `240` | No |
-| `LLM_MAX_CONCURRENT_REQUESTS` | Global async LLM request cap; `0` disables the cap. Default: `8` | No |
+| `LLM_MAX_CONCURRENT_REQUESTS` | Async LLM request cap per provider route; `0` disables the cap. Default: `8` | No |
 | `LLM_MAX_RETRIES` | Anthropic SDK retry count for transient request failures. Default: `2` | No |
 | `LLM_LOG_REQUESTS` | Log LLM queue/start/done metadata without raw prompt content. Default: `true` | No |
 | `LLM_HEARTBEAT_SECONDS` | Seconds between in-flight LLM progress logs. Default: `60`; set `0` to disable | No |
@@ -440,6 +462,7 @@ Automatically identifies when today's stories continue from previous coverage:
 
 ### Adaptive Thinking Profiles
 - Claude Opus 4.7 uses adaptive thinking plus effort settings, not fixed manual `budget_tokens`
+- Opus 4.7 requests send top-level `thinking: {"type": "adaptive", "display": "summarized"}` plus `output_config.effort`
 - QUICK/STANDARD/DEEP/ULTRATHINK remain as internal profile names for callers, logs, and older Claude models
 - ULTRATHINK profile for complex cross-category analysis
 - **Cost tracking**: Per-phase breakdown with input/output/cache token tracking, logged at end of each run

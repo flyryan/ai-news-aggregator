@@ -234,10 +234,13 @@ def load_config(
     # Validate with Pydantic
     try:
         config = ProviderConfig.model_validate(raw_config)
+        route_configs = config.llm.get_route_configs()
+        route_summary = ",".join(f"{route.id}:{route.model}" for route in route_configs)
         logger.info(
             f"Loaded provider config: llm.mode={config.llm.mode}, "
             f"llm.model={config.llm.model}, llm.timeout={config.llm.timeout}s, "
             f"llm.max_output_tokens={config.llm.max_output_tokens}, "
+            f"llm.routes={len(route_configs)} [{route_summary}], "
             f"image={'enabled' if config.image else 'disabled'}"
         )
         return config

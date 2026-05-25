@@ -29,6 +29,7 @@ from .cost_tracker import get_tracker
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .config import LLMProviderConfig
+    from .config.schema import ResolvedLLMRouteConfig
 
 logger = logging.getLogger(__name__)
 
@@ -207,7 +208,7 @@ class AnthropicClient:
         """
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
-        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-opus-4-7')
+        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.7-opus-aws')
         self.timeout = _env_float("LLM_TIMEOUT_SECONDS", timeout, minimum=1.0)
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
@@ -276,7 +277,10 @@ class AnthropicClient:
         temperature: float = 1.0
     ) -> LLMResponse:
         """
-        Make a standard API call without thinking enabled.
+        Make a plain API call.
+
+        Opus 4.7+ still receives adaptive thinking request metadata here; this
+        method only means the caller does not need returned thinking text.
 
         Args:
             messages: List of message dicts with 'role' and 'content'.
@@ -285,7 +289,7 @@ class AnthropicClient:
             temperature: Sampling temperature (ignored on Opus 4.7+).
 
         Returns:
-            LLMResponse with content, no thinking.
+            LLMResponse with content and no returned thinking text.
         """
         kwargs = {
             "model": self.model,
@@ -293,9 +297,11 @@ class AnthropicClient:
             "messages": messages
         }
 
-        # Opus 4.7+ rejects any non-default sampling parameter with 400.
-        # Omit temperature entirely on that path.
-        if not _uses_adaptive_thinking(self.model):
+        use_adaptive = _uses_adaptive_thinking(self.model)
+        if use_adaptive:
+            kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
+            kwargs["extra_body"] = {"output_config": {"effort": "high"}}
+        else:
             kwargs["temperature"] = temperature
 
         if system:
@@ -539,17 +545,29 @@ class AsyncAnthropicClient:
         model: Optional[str] = None,
         timeout: float = 600.0,
         mode: str = "anthropic",
-        max_output_tokens: Optional[int] = None
+        max_output_tokens: Optional[int] = None,
+        provider_id: Optional[str] = None,
+        max_concurrent_requests: Optional[int] = None,
+        max_retries: Optional[int] = None
     ):
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
-        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-opus-4-7')
+        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.7-opus-aws')
+        self.provider_id = provider_id or self.model
         self.timeout = _env_float("LLM_TIMEOUT_SECONDS", timeout, minimum=1.0)
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
         self.trust_env_proxy = _env_bool("LLM_TRUST_ENV_PROXY", False)
-        self.max_concurrent_requests = _env_int("LLM_MAX_CONCURRENT_REQUESTS", 8)
-        self.max_retries = _env_int("LLM_MAX_RETRIES", 2, minimum=0)
+        self.max_concurrent_requests = (
+            max_concurrent_requests
+            if max_concurrent_requests is not None
+            else _env_int("LLM_MAX_CONCURRENT_REQUESTS", 8)
+        )
+        self.max_retries = (
+            max_retries
+            if max_retries is not None
+            else _env_int("LLM_MAX_RETRIES", 2, minimum=0)
+        )
         self.log_requests = _env_bool("LLM_LOG_REQUESTS", True)
         self.heartbeat_seconds = _env_float("LLM_HEARTBEAT_SECONDS", 60.0, minimum=0.0)
         self.metrics_path = os.environ.get("LLM_METRICS_PATH", "").strip()
@@ -593,7 +611,8 @@ class AsyncAnthropicClient:
         )
 
         logger.info(
-            f"AsyncAnthropicClient initialized with mode={self.mode}, model={self.model}, "
+            f"AsyncAnthropicClient initialized with provider_id={self.provider_id}, "
+            f"mode={self.mode}, model={self.model}, "
             f"timeout={self.timeout}s, sdk_max_retries={self.max_retries}, "
             f"heartbeat_seconds={self.heartbeat_seconds}, "
             f"max_concurrent_requests={self.max_concurrent_requests or 'unlimited'}, "
@@ -606,7 +625,8 @@ class AsyncAnthropicClient:
         parts = [
             f"caller={context.get('caller', 'unknown')}",
             f"kind={context.get('kind', 'message')}",
-            f"model={self.model}",
+            f"provider_id={context.get('provider_id', self.provider_id)}",
+            f"provider_model={context.get('provider_model', self.model)}",
         ]
         for key in (
             "thinking_type",
@@ -614,6 +634,9 @@ class AsyncAnthropicClient:
             "adaptive_effort",
             "manual_budget_tokens",
             "max_tokens",
+            "attempt",
+            "fallback_from",
+            "retry_reason",
             "message_count",
             "message_chars",
             "system_chars",
@@ -785,6 +808,8 @@ class AsyncAnthropicClient:
 
         base_record = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            "provider_id": self.provider_id,
+            "provider_model": self.model,
             "configured_model": self.model,
             "mode": self.mode,
             "timeout_seconds": self.timeout,
@@ -873,6 +898,25 @@ class AsyncAnthropicClient:
             max_output_tokens=getattr(config, 'max_output_tokens', DEFAULT_MODEL_MAX_TOKENS)
         )
 
+    @classmethod
+    def from_route_config(
+        cls,
+        config: 'ResolvedLLMRouteConfig',
+        max_retries: Optional[int] = None
+    ) -> 'AsyncAnthropicClient':
+        """Create a concrete async client from a resolved route config."""
+        return cls(
+            api_key=config.api_key,
+            base_url=config.base_url,
+            model=config.model,
+            timeout=config.timeout,
+            mode=config.mode,
+            max_output_tokens=config.max_output_tokens,
+            provider_id=config.id,
+            max_concurrent_requests=config.max_concurrent_requests,
+            max_retries=max_retries,
+        )
+
     async def call_with_thinking(
         self,
         messages: List[Dict[str, str]],
@@ -881,7 +925,8 @@ class AsyncAnthropicClient:
         profile: Optional[int] = None,
         max_tokens: Optional[int] = None,
         temperature: float = 1.0,
-        caller: Optional[str] = None
+        caller: Optional[str] = None,
+        routing_context: Optional[Dict[str, Any]] = None
     ) -> LLMResponse:
         """Async version of call_with_thinking."""
         requested_profile = profile if profile is not None else budget_tokens
@@ -936,6 +981,8 @@ class AsyncAnthropicClient:
         request_context = {
             "caller": caller or "async_call_with_thinking",
             "kind": "adaptive_thinking" if use_adaptive else "manual_thinking",
+            "provider_id": self.provider_id,
+            "provider_model": self.model,
             "thinking_type": "adaptive" if use_adaptive else "enabled",
             "profile": profile_name,
             "adaptive_effort": effort if use_adaptive else None,
@@ -945,6 +992,8 @@ class AsyncAnthropicClient:
             "message_chars": _messages_char_count(messages),
             "system_chars": _content_char_count(system),
         }
+        if routing_context:
+            request_context.update(routing_context)
 
         response = await self._create_message(request_context=request_context, **kwargs)
         duration = time.time() - start_time
@@ -1004,7 +1053,8 @@ class AsyncAnthropicClient:
             usage=usage,
             thinking_level=profile_name,
             duration_seconds=duration,
-            model=response.model
+            model=response.model,
+            provider_id=self.provider_id
         )
 
         return LLMResponse(
@@ -1021,17 +1071,21 @@ class AsyncAnthropicClient:
         system: Optional[str] = None,
         max_tokens: int = 4096,
         temperature: float = 1.0,
-        caller: Optional[str] = None
+        caller: Optional[str] = None,
+        routing_context: Optional[Dict[str, Any]] = None
     ) -> LLMResponse:
-        """Async version of call without thinking."""
+        """Async plain call; Opus 4.7+ still uses adaptive thinking metadata."""
         kwargs = {
             "model": self.model,
             "max_tokens": max_tokens,
             "messages": messages
         }
 
-        # Opus 4.7+ rejects any non-default sampling parameter with 400.
-        if not _uses_adaptive_thinking(self.model):
+        use_adaptive = _uses_adaptive_thinking(self.model)
+        if use_adaptive:
+            kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
+            kwargs["extra_body"] = {"output_config": {"effort": "high"}}
+        else:
             kwargs["temperature"] = temperature
 
         if system:
@@ -1040,12 +1094,19 @@ class AsyncAnthropicClient:
         start_time = time.time()
         request_context = {
             "caller": caller or "async_call",
-            "kind": "message",
+            "kind": "adaptive_message" if use_adaptive else "message",
+            "provider_id": self.provider_id,
+            "provider_model": self.model,
+            "thinking_type": "adaptive" if use_adaptive else None,
+            "profile": "QUICK" if use_adaptive else None,
+            "adaptive_effort": "high" if use_adaptive else None,
             "max_tokens": max_tokens,
             "message_count": len(messages),
             "message_chars": _messages_char_count(messages),
             "system_chars": _content_char_count(system),
         }
+        if routing_context:
+            request_context.update(routing_context)
 
         response = await self._create_message(request_context=request_context, **kwargs)
         duration = time.time() - start_time
@@ -1071,7 +1132,8 @@ class AsyncAnthropicClient:
             usage=usage,
             thinking_level=None,
             duration_seconds=duration,
-            model=response.model
+            model=response.model,
+            provider_id=self.provider_id
         )
 
         return LLMResponse(
@@ -1121,6 +1183,203 @@ class AsyncAnthropicClient:
     async def close(self):
         """Close the async HTTP client."""
         await self._http_client.aclose()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
+
+
+class AsyncLLMRouter:
+    """Round-robin async LLM router with per-provider caps and failover."""
+
+    def __init__(self, clients: List[AsyncAnthropicClient]):
+        if not clients:
+            raise ValueError("AsyncLLMRouter requires at least one route client")
+        self.clients = clients
+        self._route_lock = asyncio.Lock()
+        self._next_route_index = 0
+        logger.info(
+            "AsyncLLMRouter initialized with routes=%s",
+            ", ".join(f"{client.provider_id}:{client.model}" for client in clients),
+        )
+
+    @classmethod
+    def from_config(cls, config: 'LLMProviderConfig') -> 'AsyncLLMRouter | AsyncAnthropicClient':
+        """Create a routed client when llm.routes is configured."""
+        routes = config.get_route_configs()
+        if len(routes) == 1:
+            return AsyncAnthropicClient.from_route_config(routes[0])
+
+        # In routed mode, provider failover is the retry strategy. Disable SDK
+        # retries so a retryable provider failure moves to another route.
+        clients = [
+            AsyncAnthropicClient.from_route_config(route, max_retries=0)
+            for route in routes
+        ]
+        return cls(clients)
+
+    async def _next_start_index(self) -> int:
+        async with self._route_lock:
+            start_index = self._next_route_index
+            self._next_route_index = (self._next_route_index + 1) % len(self.clients)
+        return start_index
+
+    def _ordered_clients(self, start_index: int) -> List[AsyncAnthropicClient]:
+        return [
+            self.clients[(start_index + offset) % len(self.clients)]
+            for offset in range(len(self.clients))
+        ]
+
+    @staticmethod
+    def _retry_reason(error: Exception) -> Optional[str]:
+        """Return retry reason for transient provider failures."""
+        retryable_types = (
+            httpx.TimeoutException,
+            httpx.TransportError,
+            anthropic.APITimeoutError,
+            anthropic.APIConnectionError,
+        )
+        if isinstance(error, retryable_types):
+            return type(error).__name__
+
+        status_code = getattr(error, "status_code", None)
+        response = getattr(error, "response", None)
+        if status_code is None and response is not None:
+            status_code = getattr(response, "status_code", None)
+
+        if status_code == 429:
+            return "http_429"
+        if isinstance(status_code, int) and status_code >= 500:
+            return f"http_{status_code}"
+
+        return None
+
+    async def _call_with_failover(
+        self,
+        method_name: str,
+        call_kwargs: Dict[str, Any],
+    ) -> LLMResponse:
+        start_index = await self._next_start_index()
+        fallback_from = None
+        retry_reason = None
+        last_error = None
+
+        for attempt, client in enumerate(self._ordered_clients(start_index), start=1):
+            routing_context = {
+                "attempt": attempt,
+                "fallback_from": fallback_from,
+                "retry_reason": retry_reason,
+            }
+            try:
+                return await getattr(client, method_name)(
+                    **call_kwargs,
+                    routing_context=routing_context,
+                )
+            except Exception as error:
+                last_error = error
+                reason = self._retry_reason(error)
+                if reason is None or attempt >= len(self.clients):
+                    raise
+
+                logger.warning(
+                    "Retrying LLM call on another provider after %s failed: %s: %s",
+                    client.provider_id,
+                    type(error).__name__,
+                    error,
+                )
+                fallback_from = client.provider_id
+                retry_reason = reason
+
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError("LLM router had no route to call")
+
+    async def call_with_thinking(
+        self,
+        messages: List[Dict[str, str]],
+        system: Optional[str] = None,
+        budget_tokens: int = ThinkingLevel.STANDARD,
+        profile: Optional[int] = None,
+        max_tokens: Optional[int] = None,
+        temperature: float = 1.0,
+        caller: Optional[str] = None
+    ) -> LLMResponse:
+        """Route an adaptive/manual thinking call across configured providers."""
+        return await self._call_with_failover(
+            "call_with_thinking",
+            {
+                "messages": messages,
+                "system": system,
+                "budget_tokens": budget_tokens,
+                "profile": profile,
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+                "caller": caller,
+            },
+        )
+
+    async def call(
+        self,
+        messages: List[Dict[str, str]],
+        system: Optional[str] = None,
+        max_tokens: int = 4096,
+        temperature: float = 1.0,
+        caller: Optional[str] = None
+    ) -> LLMResponse:
+        """Route a plain message call across configured providers."""
+        return await self._call_with_failover(
+            "call",
+            {
+                "messages": messages,
+                "system": system,
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+                "caller": caller,
+            },
+        )
+
+    async def call_json(
+        self,
+        messages: List[Dict[str, str]],
+        system: Optional[str] = None,
+        budget_tokens: Optional[int] = None,
+        max_tokens: int = 4096
+    ) -> Dict[str, Any]:
+        """Route a JSON helper call across configured providers."""
+        if budget_tokens:
+            response = await self.call_with_thinking(
+                messages=messages,
+                system=system,
+                budget_tokens=budget_tokens,
+                max_tokens=max_tokens,
+            )
+        else:
+            response = await self.call(
+                messages=messages,
+                system=system,
+                max_tokens=max_tokens,
+            )
+
+        content = response.content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        elif content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+
+        try:
+            return json.loads(content.strip())
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse JSON response: {e}")
+            raise ValueError(f"Invalid JSON in response: {e}")
+
+    async def close(self):
+        """Close all routed async clients."""
+        for client in self.clients:
+            await client.close()
 
     async def __aenter__(self):
         return self

@@ -1,6 +1,64 @@
 """Pydantic models for provider and prompt configuration schema."""
 from pydantic import BaseModel, Field, field_validator, model_validator
-from typing import Dict, Optional, Literal
+from typing import Dict, List, Optional, Literal
+
+
+class LLMRouteConfig(BaseModel):
+    """Optional per-route override for multi-provider LLM routing."""
+
+    id: str = Field(..., min_length=1, description="Stable route/provider identifier")
+    mode: Optional[Literal["anthropic", "openai-compatible"]] = Field(
+        default=None,
+        description="Override API mode for this route"
+    )
+    api_key: Optional[str] = Field(default=None, description="Override API key for this route")
+    base_url: Optional[str] = Field(default=None, description="Override API base URL for this route")
+    model: str = Field(..., min_length=1, description="Model identifier for this route")
+    max_output_tokens: Optional[int] = Field(
+        default=None,
+        ge=1024,
+        le=128000,
+        description="Override maximum output tokens for this route"
+    )
+    timeout: Optional[float] = Field(
+        default=None,
+        ge=1.0,
+        le=600.0,
+        description="Override request timeout for this route"
+    )
+    max_concurrent_requests: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description="Override per-provider async request cap; 0 disables the cap"
+    )
+
+    @field_validator('api_key')
+    @classmethod
+    def validate_optional_api_key(cls, v: Optional[str]) -> Optional[str]:
+        """Validate route API key if explicitly configured."""
+        if v is None:
+            return v
+        if not v or v == "your-api-key-here":
+            raise ValueError("Route API key is not configured")
+        if v.startswith('${') and v.endswith('}'):
+            raise ValueError(
+                f"Environment variable {v} was not resolved. "
+                "Check that the variable is set."
+            )
+        return v
+
+    @field_validator('base_url')
+    @classmethod
+    def validate_optional_base_url(cls, v: Optional[str]) -> Optional[str]:
+        """Validate route base_url if explicitly configured."""
+        if v is None:
+            return v
+        if v.endswith('/v1'):
+            raise ValueError(
+                f"base_url should not include '/v1' suffix. "
+                f"Use '{v[:-3]}' instead."
+            )
+        return v.rstrip('/')
 
 
 class LLMProviderConfig(BaseModel):
@@ -26,7 +84,7 @@ class LLMProviderConfig(BaseModel):
         default="https://api.anthropic.com",
         description="API base URL (no /v1 suffix)"
     )
-    model: str = Field(default="claude-opus-4-7", description="Model identifier")
+    model: str = Field(default="claude-4.7-opus-aws", description="Model identifier")
     max_output_tokens: int = Field(
         default=128000,
         ge=1024,
@@ -35,6 +93,10 @@ class LLMProviderConfig(BaseModel):
                     "Set lower for proxies with restrictive limits (e.g., 64000)."
     )
     timeout: float = Field(default=600.0, ge=1.0, le=600.0, description="Request timeout in seconds")
+    routes: Optional[List[LLMRouteConfig]] = Field(
+        default=None,
+        description="Optional route list for multi-provider LLM routing"
+    )
 
     @field_validator('api_key')
     @classmethod
@@ -61,6 +123,62 @@ class LLMProviderConfig(BaseModel):
                 f"Use '{v[:-3]}' instead."
             )
         return v.rstrip('/')
+
+    @model_validator(mode='after')
+    def validate_routes(self) -> 'LLMProviderConfig':
+        """Validate optional multi-provider route configuration."""
+        if self.routes is None:
+            return self
+        if not self.routes:
+            raise ValueError("llm.routes must not be empty when configured")
+        route_ids = [route.id for route in self.routes]
+        duplicates = sorted({route_id for route_id in route_ids if route_ids.count(route_id) > 1})
+        if duplicates:
+            raise ValueError(f"Duplicate llm.routes id(s): {', '.join(duplicates)}")
+        return self
+
+    def get_route_configs(self) -> List['ResolvedLLMRouteConfig']:
+        """Return concrete route configs, inheriting root LLM settings."""
+        if not self.routes:
+            return [
+                ResolvedLLMRouteConfig(
+                    id=self.model,
+                    mode=self.mode,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
+                    model=self.model,
+                    max_output_tokens=self.max_output_tokens,
+                    timeout=self.timeout,
+                    max_concurrent_requests=None,
+                )
+            ]
+
+        return [
+            ResolvedLLMRouteConfig(
+                id=route.id,
+                mode=route.mode or self.mode,
+                api_key=route.api_key or self.api_key,
+                base_url=route.base_url or self.base_url,
+                model=route.model,
+                max_output_tokens=route.max_output_tokens or self.max_output_tokens,
+                timeout=route.timeout or self.timeout,
+                max_concurrent_requests=route.max_concurrent_requests,
+            )
+            for route in self.routes
+        ]
+
+
+class ResolvedLLMRouteConfig(BaseModel):
+    """Concrete LLM provider route after inheritance from root llm config."""
+
+    id: str
+    mode: Literal["anthropic", "openai-compatible"]
+    api_key: str
+    base_url: str
+    model: str
+    max_output_tokens: int
+    timeout: float
+    max_concurrent_requests: Optional[int] = None
 
 
 class ImageProviderConfig(BaseModel):

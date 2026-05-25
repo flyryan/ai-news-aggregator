@@ -13,7 +13,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
-from .llm_client import AnthropicClient, AsyncAnthropicClient, ThinkingLevel, LLMResponse
+from .llm_client import AnthropicClient, AsyncAnthropicClient, AsyncLLMRouter, ThinkingLevel, LLMResponse
 from .base import (
     BaseGatherer, BaseAnalyzer, CollectedItem, AnalyzedItem,
     CategoryReport, CategoryTheme, deduplicate_items
@@ -140,7 +140,7 @@ class MainOrchestrator:
         # Initialize LLM clients from config
         if provider_config:
             self.llm_client = AnthropicClient.from_config(provider_config.llm)
-            self.async_client = AsyncAnthropicClient.from_config(provider_config.llm)
+            self.async_client = AsyncLLMRouter.from_config(provider_config.llm)
         else:
             # Fallback to env vars for backwards compatibility
             self.llm_client = AnthropicClient()

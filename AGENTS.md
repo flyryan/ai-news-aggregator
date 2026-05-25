@@ -66,7 +66,7 @@ The production web host serves a web-only Docker image. `web/_app/` is intention
 
 The production publishing workflow lives in `.github/workflows/daily-pipeline.yml` and is guarded to run only in the configured publishing repository. Do not enable scheduled publishing in mirrors or forks unless the workflow guard, secrets, and output ownership have been intentionally reconfigured. The schedule uses two UTC cron entries with a local-time gate so exactly the nominal 3 AM ET invocation continues, even if GitHub starts the runner late.
 
-The workflow writes ignored `config/providers.yaml` from the `PIPELINE_PROVIDERS_YAML` secret, applies `ANTHROPIC_MODEL` or the `anthropic_model` dispatch input as the LLM model override, runs the pipeline, and commits only generated public outputs (`web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml`) when `commit_outputs=true`. Use `workflow_dispatch` with `commit_outputs=false` for a full hosted dry run that uploads artifacts without committing. Hosted runs also upload a `pipeline-diagnostics` artifact with LLM request metrics and cost reports when those files exist.
+The workflow writes ignored `config/providers.yaml` from the `PIPELINE_PROVIDERS_YAML` secret. `ANTHROPIC_MODEL` or the `anthropic_model` dispatch input only overrides legacy single-provider configs; it must not clobber `llm.routes`. The workflow runs the pipeline and commits only generated public outputs (`web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml`) when `commit_outputs=true`. Use `workflow_dispatch` with `commit_outputs=false` for a full hosted dry run that uploads artifacts without committing. Hosted runs also upload a `pipeline-diagnostics` artifact with LLM request metrics and cost reports when those files exist.
 
 Hosted runner egress can be proxied with `PIPELINE_PROXY_URL` for all sources, `REDDIT_PROXY_URL` for Reddit only, or `LESSWRONG_PROXY_URL` for LessWrong only. If neither pipeline nor Reddit proxy URL is set and `MULLVAD_ACCOUNT` is configured, the workflow creates a Mullvad WireGuard tunnel and exposes Mullvad's local SOCKS proxy as both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL`. `MULLVAD_WG_PRIVATE_KEY` pins CI to one registered Mullvad device across runs.
 
@@ -193,7 +193,7 @@ frontend/                       # Svelte SPA frontend
 ```
 ANTHROPIC_API_BASE    # Anthropic API endpoint (no /v1 suffix)
 ANTHROPIC_API_KEY     # Bearer token for authentication
-ANTHROPIC_MODEL       # Model name (default: claude-opus-4-7)
+ANTHROPIC_MODEL       # Legacy single-provider model name (default: claude-4.7-opus-aws)
 TWITTERAPI_IO_KEY     # TwitterAPI.io API key
 REDDIT_PROXY_URL      # HTTP(S) or SOCKS proxy for Reddit requests (optional)
 REDDIT_USER_AGENT     # User-Agent sent to Reddit (optional)
@@ -202,7 +202,7 @@ PIPELINE_PROXY_URL    # HTTP(S) or SOCKS proxy for the whole pipeline (optional)
 NEWS_USER_AGENT       # User-Agent sent to RSS/feed sources (optional)
 LLM_TRUST_ENV_PROXY   # Let LLM clients use HTTP(S)/ALL_PROXY env vars (default: false)
 LLM_TIMEOUT_SECONDS   # Override provider-config LLM request timeout (Actions default: 240)
-LLM_MAX_CONCURRENT_REQUESTS # Global async LLM request cap; 0 disables it (default: 8)
+LLM_MAX_CONCURRENT_REQUESTS # Async LLM request cap per provider route; 0 disables it (default: 8)
 LLM_MAX_RETRIES       # Anthropic SDK retry count for transient request failures (default: 2)
 LLM_LOG_REQUESTS      # Log LLM queue/start/done metadata without raw prompt content (default: true)
 LLM_HEARTBEAT_SECONDS # Seconds between in-flight LLM progress logs; 0 disables it (default: 60)
