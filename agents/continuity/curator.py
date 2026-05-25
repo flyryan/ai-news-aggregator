@@ -62,7 +62,7 @@ class EditorialCurator:
         try:
             response = await self.async_client.call_with_thinking(
                 messages=[{"role": "user", "content": prompt}],
-                budget_tokens=ThinkingLevel.DEEP,  # Nuanced judgment
+                profile=ThinkingLevel.DEEP,  # Nuanced judgment
                 caller="continuity.curator"
             )
 

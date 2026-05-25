@@ -905,7 +905,7 @@ RELEASE-DATE GROUNDING (mandatory check for any topic that names or implies a mo
             response = await self.async_client.call_with_thinking(
                 messages=[{"role": "user", "content": prompt}],
                 system=self.grounding_context,  # Inject ecosystem grounding
-                budget_tokens=ThinkingLevel.ULTRATHINK,
+                profile=ThinkingLevel.ULTRATHINK,
                 caller="orchestrator.topics"
             )
 
@@ -1062,7 +1062,7 @@ The summary should help a busy professional quickly scan and understand what's N
             response = await self.async_client.call_with_thinking(
                 messages=[{"role": "user", "content": prompt}],
                 system=self.grounding_context,  # Inject ecosystem grounding
-                budget_tokens=ThinkingLevel.DEEP,
+                profile=ThinkingLevel.DEEP,
                 caller="orchestrator.summary"
             )
 

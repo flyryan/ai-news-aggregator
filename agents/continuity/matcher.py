@@ -65,7 +65,7 @@ class StoryMatcher:
         try:
             response = await self.async_client.call_with_thinking(
                 messages=[{"role": "user", "content": prompt}],
-                budget_tokens=ThinkingLevel.QUICK,  # Fast matching
+                profile=ThinkingLevel.QUICK,  # Fast matching
                 caller=f"continuity.matcher.{self.category}"
             )
 

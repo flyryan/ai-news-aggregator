@@ -288,7 +288,7 @@ Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not ent
         try:
             response = await self.async_client.call_with_thinking(
                 messages=[{"role": "user", "content": prompt}],
-                budget_tokens=ThinkingLevel.STANDARD,
+                profile=ThinkingLevel.STANDARD,
                 caller=f"link_enricher.{context_name}"
             )
 

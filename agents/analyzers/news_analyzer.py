@@ -339,7 +339,7 @@ Snippet: {item.content[:300]}...
         try:
             response = await self.async_client.call_with_thinking(
                 messages=[{"role": "user", "content": prompt}],
-                budget_tokens=ThinkingLevel.QUICK,  # Fast filter
+                profile=ThinkingLevel.QUICK,  # Fast filter
                 caller="news_analyzer.filter"
             )
 
@@ -404,7 +404,7 @@ Snippet: {item.content[:300]}...
         try:
             response = await self.async_client.call_with_thinking(
                 messages=[{"role": "user", "content": prompt}],
-                budget_tokens=ThinkingLevel.DEEP,  # Higher budget for combined task
+                profile=ThinkingLevel.DEEP,  # Higher profile for combined task
                 caller="news_analyzer.small_batch"
             )
 

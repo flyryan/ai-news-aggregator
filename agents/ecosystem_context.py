@@ -664,7 +664,7 @@ IMPORTANT:
             from .llm_client import ThinkingLevel
             response = await llm_client.call_with_thinking(
                 messages=[{"role": "user", "content": prompt}],
-                budget_tokens=ThinkingLevel.STANDARD,
+                profile=ThinkingLevel.STANDARD,
                 caller="ecosystem_context.enrichment"
             )
 

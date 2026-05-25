@@ -466,7 +466,7 @@ class BaseAnalyzer(ABC):
         """
         MAP phase: Analyze a single batch of items.
 
-        Uses STANDARD thinking for quality per-item analysis.
+        Uses the STANDARD analysis profile for quality per-item analysis.
 
         When the LLM response is truncated (``stop_reason == 'max_tokens'``
         or the JSON was cut off mid-token), the batch is split in half and
@@ -495,7 +495,7 @@ class BaseAnalyzer(ABC):
             response = await self.async_client.call_with_thinking(
                 messages=[{"role": "user", "content": prompt}],
                 system=self.grounding_context,  # Inject ecosystem grounding
-                budget_tokens=ThinkingLevel.STANDARD,  # Quality batch processing
+                profile=ThinkingLevel.STANDARD,  # Quality batch processing
                 caller=f"{self.category}_analyzer.batch_{caller_suffix}"
             )
 
@@ -532,7 +532,7 @@ class BaseAnalyzer(ABC):
                 response = await self.async_client.call_with_thinking(
                     messages=[{"role": "user", "content": prompt}],
                     system=self.grounding_context,  # Inject ecosystem grounding
-                    budget_tokens=ThinkingLevel.STANDARD,
+                    profile=ThinkingLevel.STANDARD,
                     caller=f"{self.category}_analyzer.batch_{caller_suffix}_retry"
                 )
                 if response.stop_reason == "max_tokens":
@@ -825,7 +825,7 @@ class BaseAnalyzer(ABC):
             response = await self.async_client.call_with_thinking(
                 messages=[{"role": "user", "content": ranking_prompt}],
                 system=self.grounding_context,  # Inject ecosystem grounding
-                budget_tokens=self.thinking_budget,  # DEEP
+                profile=self.thinking_budget,  # DEEP
                 caller=f"{self.category}_analyzer.reduce_rank"
             )
 
