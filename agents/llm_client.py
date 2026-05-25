@@ -495,7 +495,7 @@ class AsyncAnthropicClient:
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
         self.trust_env_proxy = _env_bool("LLM_TRUST_ENV_PROXY", False)
-        self.max_concurrent_requests = _env_int("LLM_MAX_CONCURRENT_REQUESTS", 4)
+        self.max_concurrent_requests = _env_int("LLM_MAX_CONCURRENT_REQUESTS", 0)
         self._request_semaphore = (
             asyncio.Semaphore(self.max_concurrent_requests)
             if self.max_concurrent_requests > 0

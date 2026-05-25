@@ -442,7 +442,7 @@ class BaseAnalyzer(ABC):
         return ThinkingLevel.DEEP
 
     # Map-reduce batch processing constants
-    BATCH_SIZE = _env_int("ANALYZER_BATCH_SIZE", 75)  # Items per batch for map phase
+    BATCH_SIZE = _env_int("ANALYZER_BATCH_SIZE", 50)  # Items per batch for map phase
     MAX_CONCURRENT_BATCHES = _env_int("ANALYZER_MAX_CONCURRENT_BATCHES", 4)  # Per-category API calls
 
     # --- Map-Reduce Methods ---
