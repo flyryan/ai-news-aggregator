@@ -68,7 +68,7 @@ The production publishing workflow lives in `.github/workflows/daily-pipeline.ym
 
 The workflow writes ignored `config/providers.yaml` from the `PIPELINE_PROVIDERS_YAML` secret. `ANTHROPIC_MODEL` or the `anthropic_model` dispatch input only overrides legacy single-provider configs; it must not clobber `llm.routes`. The workflow runs the pipeline and commits only generated public outputs (`web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml`) when `commit_outputs=true`. Use `workflow_dispatch` with `commit_outputs=false` for a full hosted dry run that uploads artifacts without committing. Hosted runs also upload a `pipeline-diagnostics` artifact with LLM request metrics and cost reports when those files exist.
 
-Hosted runner egress can be proxied with `PIPELINE_PROXY_URL` for all sources, `REDDIT_PROXY_URL` for Reddit only, or `LESSWRONG_PROXY_URL` for LessWrong only. If neither pipeline nor Reddit proxy URL is set and `MULLVAD_ACCOUNT` is configured, the workflow creates a Mullvad WireGuard tunnel and exposes Mullvad's local SOCKS proxy as both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL`. `MULLVAD_WG_PRIVATE_KEY` pins CI to one registered Mullvad device across runs.
+Hosted runner egress can be proxied with `PIPELINE_PROXY_URL` for all sources, `REDDIT_PROXY_URL` for Reddit only, or `LESSWRONG_PROXY_URL` for LessWrong only. LLM clients ignore proxy environment variables by default because `LLM_TRUST_ENV_PROXY=false`; set it true only when LLM traffic should use the runner proxy too. If neither pipeline nor Reddit proxy URL is set and `MULLVAD_ACCOUNT` is configured, the workflow creates a Mullvad WireGuard tunnel and exposes Mullvad's local SOCKS proxy as both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL`. `MULLVAD_WG_PRIVATE_KEY` pins CI to one registered Mullvad device across runs.
 
 Use `scripts/post_pipeline_verify.sh` for hosted-site verification. It is configured with environment variables: set `AWS_HOST` directly, or set `AWS_PROFILE` plus `AWS_INSTANCE_ID`/`AWS_INSTANCE_NAME` for EC2 lookup. Set `REBUILD_WEB=true` when the deployment includes frontend source or web-image changes.
 
@@ -235,6 +235,12 @@ The pipeline uses internal AATF analysis profiles that map to Claude Opus 4.7 ad
 | Link enrichment | STANDARD | xhigh |
 | Ecosystem enrichment | STANDARD | xhigh |
 
+## Multi-Provider LLM Routing
+
+`config/providers.yaml` can define `llm.routes` for async LLM calls. Routes inherit root `llm` settings unless overridden, and new async calls rotate across routes. `LLM_MAX_CONCURRENT_REQUESTS` is applied per route, so three routes at the default cap of 8 allow up to 24 active LLM requests while analyzer/category concurrency remains controlled by `ANALYZER_MAX_CONCURRENT_BATCHES`.
+
+Retryable transport failures, timeouts, 429s, and 5xx responses retry on a different route. Prompt/schema/client errors and JSON parse failures do not cross-provider retry. Hosted diagnostics include provider IDs, provider model IDs, route attempts, fallback source, retry reason, `thinking_type`, `analysis_profile`, `adaptive_effort`, `response_max_tokens`, queue/active counts, and content block counts; they must stay secret-safe and prompt-free.
+
 ## Ecosystem Context
 
 The pipeline uses an ecosystem context system to ground LLM analysis with accurate model release dates. This prevents hallucinations like treating news about "GPT-5.2" as a new release when it was actually released weeks earlier.
@@ -323,6 +329,8 @@ Executive summary entries include the hero image via:
 
 Requires Media RSS namespace: `xmlns:media="http://search.yahoo.com/mrss/"`
 
+Summary feed entries keep the AATF report URL as the first `rel="alternate"` and `rel="canonical"` link. A representative external source, when present, remains as a secondary alternate with a distinct content type plus `rel="via"` for Feedly compatibility. Summary entries also emit `<content type="html">` with the same HTML as `<summary type="html">`.
+
 ### Manual Feed Regeneration
 ```bash
 # Regenerate feeds for last 30 days
@@ -336,6 +344,7 @@ Feeds are output to `web/data/feeds/` and accessible at `/data/feeds/*.xml` on t
 ## Important Notes
 
 - **arXiv**: Uses arXiv RSS feeds for today's collection (no rate limits, more reliable) with automatic API fallback. For historical dates, uses API directly since RSS only contains current announcements. Only collects papers with `announce_type` of "new" or "cross" (skips replacements). arXiv only publishes papers on weekdays (Mon-Fri). Weekend dates will return 0 papers.
+- **LessWrong**: Uses GraphQL for date-range collection because RSS only exposes the newest posts. The helper tries direct GraphQL, cached cookies, and a Playwright browser warm-up. `LESSWRONG_PROXY_URL` can target only this source; otherwise `PIPELINE_PROXY_URL` is reused.
 - **Link Following**: The News gatherer receives social posts and uses LLM to decide which linked articles to fetch.
 - **Link Enrichment**: Executive summaries, category summaries, and topic descriptions are enriched with internal links to referenced items. Links use format `/?date={date}&category={category}#item-{id}`.
 - **Date Semantics**: TARGET_DATE represents the report date. Coverage period is the day BEFORE the report date (00:00-23:59 ET). For example, TARGET_DATE=2026-01-05 generates a "January 5th report" covering news from January 4th.

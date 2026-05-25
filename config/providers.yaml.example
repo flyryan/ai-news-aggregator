@@ -53,9 +53,11 @@ llm:
   # Request timeout in seconds (1-600)
   timeout: 600
 
-  # Optional multi-provider routing. When present, each route inherits mode,
-  # api_key, base_url, timeout, and max_output_tokens unless overridden.
-  # The async LLM request cap applies per route.
+  # Optional multi-provider routing. When present, async LLM calls rotate
+  # across routes and retryable provider failures fail over to another route.
+  # Each route inherits mode, api_key, base_url, timeout, and max_output_tokens
+  # unless overridden. The async LLM request cap applies per route, so three
+  # routes with LLM_MAX_CONCURRENT_REQUESTS=8 can run up to 24 LLM calls.
   #
   # routes:
   #   - id: "aws"
@@ -64,6 +66,12 @@ llm:
   #     model: "claude-4.7-opus-gcp"
   #   - id: "anthropic"
   #     model: "claude-4.7-opus-anthropic"
+  #     # Optional per-route overrides:
+  #     # mode: "anthropic"
+  #     # api_key: "${ANTHROPIC_DIRECT_API_KEY}"
+  #     # base_url: "https://api.anthropic.com"
+  #     # timeout: 600
+  #     # max_concurrent_requests: 8
 
 # -----------------------------------------------------------------------------
 # Image Provider Configuration (Optional)

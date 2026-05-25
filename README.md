@@ -168,7 +168,7 @@ python3 scripts/pipeline_health.py --json
 python3 scripts/lesswrong_cookie_fetch.py --after 2026-03-27 --before 2026-03-28
 ```
 
-`lesswrong_cookie_fetch.py` exists because direct `requests` calls to LessWrong GraphQL may hit Vercel's bot challenge (HTTP 429), while a real browser context can sometimes pass. The script caches browser cookies in `~/.cache/lesswrong_cookies.json` and retries with those cookies before re-solving.
+`lesswrong_cookie_fetch.py` exists because direct `requests` calls to LessWrong GraphQL may hit Vercel's bot challenge (HTTP 429), while a real browser context can sometimes pass. The helper tries direct GraphQL first, then cached browser cookies, then a fresh Playwright warm-up before giving up. Browser cookies are cached in `~/.cache/lesswrong_cookies.json`.
 
 ### Manual Pipeline Run
 
@@ -237,7 +237,7 @@ Set these on the publishing repository:
 | `NEWS_USER_AGENT` | `REDDIT_USER_AGENT` value | User-Agent sent to RSS/feed sources |
 | `MULLVAD_RELAY_FILTER` | `us` | Mullvad WireGuard relay hostname prefix used for CI egress |
 | `LLM_TIMEOUT_SECONDS` | `240` | Hosted LLM request timeout override; supersedes provider YAML timeout |
-| `LLM_MAX_CONCURRENT_REQUESTS` | `8` | Async LLM request cap per provider route; single-provider configs still get one cap |
+| `LLM_MAX_CONCURRENT_REQUESTS` | `8` | Async LLM request cap per provider route; with three routes, the default maximum is 24 active LLM requests |
 | `LLM_ADAPTIVE_MAX_TOKENS` | `65536` | Response output ceiling for adaptive-thinking calls; separate from analysis profile/effort |
 | `LLM_MAX_RETRIES` | `2` | Anthropic SDK retry count for transient request failures |
 | `LLM_LOG_REQUESTS` | `true` | Log queue/start/done metadata without raw prompt content |
@@ -270,7 +270,9 @@ llm:
       model: "claude-4.7-opus-anthropic"
 ```
 
-With routes configured, new async LLM calls rotate across providers. Retryable transport failures, 429s, and 5xx responses retry on a different provider. Prompt/schema/client errors do not cross-provider retry. Diagnostics include provider IDs and route attempts, but never prompt text, API keys, or provider URLs.
+With routes configured, new async LLM calls rotate across providers. Each route gets its own semaphore using `LLM_MAX_CONCURRENT_REQUESTS`, so analyzer/category concurrency is unchanged but LLM capacity scales with the number of configured routes. Retryable transport failures, timeouts, 429s, and 5xx responses retry on a different provider. Prompt/schema/client errors and JSON parse failures do not cross-provider retry.
+
+Hosted diagnostics include provider IDs, provider model IDs, route attempts, fallback source, retry reason, adaptive thinking type, analysis profile, adaptive effort, response token ceiling, queue/active counts, and content block counts. They never include prompt text, API keys, or provider URLs.
 
 ### Generated Outputs
 
@@ -286,9 +288,9 @@ Runtime scrape data, checkpoints, and logs under `data/**` and `logs/**` stay ig
 
 The Reddit gatherer uses Reddit's public `.json` endpoints and does not require Reddit app credentials.
 
-If a CI provider's IP ranges are blocked only for Reddit, set `REDDIT_PROXY_URL` to an HTTP(S) or SOCKS proxy URL. If multiple sources block hosted runner egress, set `PIPELINE_PROXY_URL` instead; the workflow exports it as the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` variables for the pipeline process. The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed; provider clients using `httpx` need `socksio`.
+If a CI provider's IP ranges are blocked only for Reddit, set `REDDIT_PROXY_URL` to an HTTP(S) or SOCKS proxy URL. If multiple sources block hosted runner egress, set `PIPELINE_PROXY_URL` instead; the workflow exports it as the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` variables for the pipeline process. The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed. LLM clients bypass those proxy environment variables by default; set `LLM_TRUST_ENV_PROXY=true` only when LLM traffic should also use the runner proxy.
 
-LessWrong uses GraphQL for date-range research collection. The LessWrong client now tries direct GraphQL first, then falls back to a browser cookie warm-up only if needed. If hosted egress is blocked only for LessWrong, set `LESSWRONG_PROXY_URL`; otherwise `PIPELINE_PROXY_URL` is reused for both direct GraphQL and the Playwright browser fallback.
+LessWrong uses GraphQL for date-range research collection. The LessWrong helper tries direct GraphQL first, then cached cookies, then a browser cookie warm-up only if needed. If hosted egress is blocked only for LessWrong, set `LESSWRONG_PROXY_URL`; otherwise `PIPELINE_PROXY_URL` is reused for direct GraphQL, cached-cookie requests, and the Playwright browser fallback.
 
 The GitHub workflow also supports `MULLVAD_ACCOUNT`: when set and both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL` are empty, it creates a WireGuard tunnel with Mullvad's official `wg-tools` script, narrows the route to Mullvad's SOCKS proxy address, and sets `PIPELINE_PROXY_URL` plus `REDDIT_PROXY_URL` to `socks5h://10.64.0.1:1080` for the pipeline. Set `MULLVAD_WG_PRIVATE_KEY` to reuse one registered CI device across runs.
 
@@ -467,7 +469,8 @@ Automatically identifies when today's stories continue from previous coverage:
 - Claude Opus 4.7 uses adaptive thinking plus effort settings, not fixed manual `budget_tokens`
 - Opus 4.7 requests send top-level `thinking: {"type": "adaptive", "display": "summarized"}` plus `output_config.effort`
 - `LLM_ADAPTIVE_MAX_TOKENS` sets the response output ceiling and is separate from thinking depth
-- QUICK/STANDARD/DEEP/ULTRATHINK remain as internal profile names for callers, logs, and older Claude models
+- Request logs use `analysis_profile`, `adaptive_effort`, and `response_max_tokens` so the internal profile names are not confused with provider thinking levels or manual token budgets
+- QUICK/STANDARD/DEEP/ULTRATHINK remain as internal profile names for callers and older Claude models
 - ULTRATHINK profile for complex cross-category analysis
 - **Cost tracking**: Per-phase breakdown with input/output/cache token tracking, logged at end of each run
 
@@ -489,6 +492,8 @@ Each pipeline run tracks collection status per source:
 - **Phase tracking**: End-of-run summary showing status, timing, and details for every phase
 - **Checkpoint/resume**: Each major phase saves a checkpoint to `data/checkpoints/`; use `--resume` for crash recovery or `--resume-from N` to re-run specific phases
 - **Hero image fallback**: When topic detection fails, hero generation falls back to top category themes
+- **LLM routing diagnostics**: Queue/start/done logs include caller, provider, attempt, active/queued counts, input size, timing, and retry/fallback metadata without raw prompt content
+- **Analyzer recovery**: MAP batches log the item count and prompt size before sending; unusable or truncated JSON responses are split into smaller sub-batches before items are dropped
 - **Clean logging**: httpx noise suppressed; MAP-REDUCE batches show per-batch progress with category tags
 
 ### Data Sources
@@ -516,6 +521,8 @@ Multiple Atom 1.0 feeds for different use cases:
 - **Daily Briefing** - Executive summaries only with hero image
 - **Category Feeds** - News, Research, Social, Reddit separately
 - **Summary Feeds** - All category summaries
+- Summary entries keep the AATF briefing URL as the first `rel="alternate"` and `rel="canonical"` link; the representative external source remains as a secondary alternate plus `rel="via"` for Feedly compatibility
+- Summary entries include both `<summary type="html">` and `<content type="html">` with the same publisher-provided HTML so full-content readers do not need to fetch the linked page
 
 ---
 
@@ -632,7 +639,7 @@ npm run check            # TypeScript type checking
 - Example: `TARGET_DATE=2026-01-05` covers news from January 4th
 
 ### LessWrong Collection
-Uses GraphQL API instead of RSS because RSS doesn't support date-range queries - only returns the ~10-20 most recent posts which scroll off within hours.
+Uses GraphQL API instead of RSS because RSS doesn't support date-range queries - only returns the ~10-20 most recent posts which scroll off within hours. The helper tries direct GraphQL, cached cookies, and a Playwright browser warm-up; `LESSWRONG_PROXY_URL` can target only this source when CI egress is the problem.
 
 ### Item IDs
 12-character SHA256 hashes (~280 trillion unique values) for compact, stable URLs.
