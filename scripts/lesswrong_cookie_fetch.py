@@ -12,10 +12,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
+import os
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from urllib.parse import unquote, urlsplit, urlunsplit
 
 import requests
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
@@ -29,6 +32,7 @@ DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
 )
+LOGGER = logging.getLogger(__name__)
 
 TEST_QUERY = """
 query GetPosts($after: Date, $before: Date) {
@@ -78,14 +82,18 @@ class LessWrongClient:
     def graphql(self, query: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         variables = variables or {}
 
+        direct_response = self._try_graphql_request(query, variables, [], self.user_agent)
+        if direct_response is not None and self._response_looks_valid(direct_response):
+            return direct_response.json()
+
         cached = self.load_cached_cookies()
         if cached:
-            response = self._graphql_request(query, variables, cached.cookies, cached.user_agent)
+            response = self._try_graphql_request(query, variables, cached.cookies, cached.user_agent)
             if self._response_looks_valid(response):
                 return response.json()
 
         fresh = self.solve_and_cache_cookies()
-        response = self._graphql_request(query, variables, fresh.cookies, fresh.user_agent)
+        response = self._try_graphql_request(query, variables, fresh.cookies, fresh.user_agent)
         if self._response_looks_valid(response):
             return response.json()
 
@@ -93,8 +101,10 @@ class LessWrongClient:
         if self._browser_result_looks_valid(browser_result):
             return json.loads(browser_result["text"])
 
+        status_code = response.status_code if response is not None else "unknown"
+        response_text = response.text[:500] if response is not None else "no response"
         raise LessWrongCookieError(
-            f"GraphQL request still failed after browser solve: HTTP {response.status_code} {response.text[:500]}"
+            f"GraphQL request still failed after browser solve: HTTP {status_code} {response_text}"
         )
 
     def fetch_posts(self, after: str, before: str) -> List[Dict[str, Any]]:
@@ -127,7 +137,10 @@ class LessWrongClient:
         deadline = time.time() + self.timeout_seconds
 
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=self.headless)
+            browser = playwright.chromium.launch(
+                headless=self.headless,
+                proxy=self._playwright_proxy_config(),
+            )
             context = browser.new_context(user_agent=self.user_agent)
             page = context.new_page()
             page.set_default_timeout(10_000)
@@ -162,7 +175,10 @@ class LessWrongClient:
 
     def _graphql_request_via_new_browser(self, query: str, variables: Dict[str, Any]) -> Dict[str, Any]:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=self.headless)
+            browser = playwright.chromium.launch(
+                headless=self.headless,
+                proxy=self._playwright_proxy_config(),
+            )
             context = browser.new_context(user_agent=self.user_agent)
             page = context.new_page()
             page.goto(LESSWRONG_HOME, wait_until="domcontentloaded")
@@ -204,8 +220,61 @@ class LessWrongClient:
             timeout=45,
         )
 
+    def _try_graphql_request(
+        self,
+        query: str,
+        variables: Dict[str, Any],
+        cookies: List[Dict[str, Any]],
+        user_agent: str,
+    ) -> Optional[requests.Response]:
+        try:
+            return self._graphql_request(query, variables, cookies, user_agent)
+        except requests.exceptions.RequestException as exc:
+            LOGGER.debug("LessWrong direct GraphQL request failed: %s", exc)
+            return None
+
     @staticmethod
-    def _response_looks_valid(response: requests.Response) -> bool:
+    def _proxy_url_from_env() -> Optional[str]:
+        for name in (
+            "LESSWRONG_PROXY_URL",
+            "PIPELINE_PROXY_URL",
+            "HTTPS_PROXY",
+            "https_proxy",
+            "HTTP_PROXY",
+            "http_proxy",
+            "ALL_PROXY",
+            "all_proxy",
+        ):
+            value = os.environ.get(name, "").strip()
+            if value:
+                return value
+        return None
+
+    @classmethod
+    def _playwright_proxy_config(cls) -> Optional[Dict[str, str]]:
+        proxy_url = cls._proxy_url_from_env()
+        if not proxy_url:
+            return None
+
+        parsed = urlsplit(proxy_url)
+        if not parsed.scheme or not parsed.hostname:
+            return {"server": proxy_url}
+
+        host = parsed.hostname
+        if parsed.port:
+            host = f"{host}:{parsed.port}"
+
+        proxy_config = {"server": urlunsplit((parsed.scheme, host, "", "", ""))}
+        if parsed.username:
+            proxy_config["username"] = unquote(parsed.username)
+        if parsed.password:
+            proxy_config["password"] = unquote(parsed.password)
+        return proxy_config
+
+    @staticmethod
+    def _response_looks_valid(response: Optional[requests.Response]) -> bool:
+        if response is None:
+            return False
         if response.status_code != 200:
             return False
         try:

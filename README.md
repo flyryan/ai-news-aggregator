@@ -218,6 +218,7 @@ Set these on the publishing repository:
 | `ANTHROPIC_API_BASE` | OpenAI-compatible proxy base URL when used |
 | `TWITTERAPI_IO_KEY` | Optional Twitter/X collection |
 | `REDDIT_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for Reddit requests if runner egress is blocked |
+| `LESSWRONG_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for LessWrong GraphQL/browser fallback requests |
 | `PIPELINE_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for the whole pipeline; useful when hosted runner egress is blocked by multiple sources |
 | `MULLVAD_ACCOUNT` | Optional Mullvad account number; used to create a WireGuard tunnel when neither `PIPELINE_PROXY_URL` nor `REDDIT_PROXY_URL` is set |
 | `MULLVAD_WG_PRIVATE_KEY` | Optional stable WireGuard private key for the CI Mullvad device; avoids creating a new Mullvad device on every run |
@@ -263,6 +264,8 @@ Runtime scrape data, checkpoints, and logs under `data/**` and `logs/**` stay ig
 The Reddit gatherer uses Reddit's public `.json` endpoints and does not require Reddit app credentials.
 
 If a CI provider's IP ranges are blocked only for Reddit, set `REDDIT_PROXY_URL` to an HTTP(S) or SOCKS proxy URL. If multiple sources block hosted runner egress, set `PIPELINE_PROXY_URL` instead; the workflow exports it as the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` variables for the pipeline process. The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed; provider clients using `httpx` need `socksio`.
+
+LessWrong uses GraphQL for date-range research collection. The LessWrong client now tries direct GraphQL first, then falls back to a browser cookie warm-up only if needed. If hosted egress is blocked only for LessWrong, set `LESSWRONG_PROXY_URL`; otherwise `PIPELINE_PROXY_URL` is reused for both direct GraphQL and the Playwright browser fallback.
 
 The GitHub workflow also supports `MULLVAD_ACCOUNT`: when set and both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL` are empty, it creates a WireGuard tunnel with Mullvad's official `wg-tools` script, narrows the route to Mullvad's SOCKS proxy address, and sets `PIPELINE_PROXY_URL` plus `REDDIT_PROXY_URL` to `socks5h://10.64.0.1:1080` for the pipeline. Set `MULLVAD_WG_PRIVATE_KEY` to reuse one registered CI device across runs.
 
@@ -350,6 +353,7 @@ export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
 | `TWITTERAPI_IO_KEY` | TwitterAPI.io key ($0.15/1000 tweets) | No |
 | `REDDIT_PROXY_URL` | HTTP(S) or SOCKS proxy for Reddit requests | No |
 | `REDDIT_USER_AGENT` | User-Agent for Reddit requests | No |
+| `LESSWRONG_PROXY_URL` | HTTP(S) or SOCKS proxy for LessWrong requests | No |
 | `PIPELINE_PROXY_URL` | HTTP(S) or SOCKS proxy for the whole pipeline | No |
 | `NEWS_USER_AGENT` | User-Agent for RSS/feed requests | No |
 | `LLM_TRUST_ENV_PROXY` | Allow LLM clients to use `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`. Default: `false` | No |

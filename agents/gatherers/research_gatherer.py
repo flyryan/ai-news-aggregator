@@ -14,6 +14,7 @@ arXiv publishing schedule:
 
 import asyncio
 import logging
+import os
 import re
 import sys
 import time
@@ -33,8 +34,10 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 try:
+    from lesswrong_cookie_fetch import DEFAULT_USER_AGENT as LESSWRONG_USER_AGENT
     from lesswrong_cookie_fetch import LessWrongClient
 except ImportError:
+    LESSWRONG_USER_AGENT = "AI-News-Aggregator/1.0"
     LessWrongClient = None
 
 logger = logging.getLogger(__name__)
@@ -554,8 +557,14 @@ class ResearchGatherer(BaseGatherer):
         response = requests.post(
             'https://www.lesswrong.com/graphql',
             json={'query': query, 'variables': variables},
-            headers={'Content-Type': 'application/json'},
-            timeout=30
+            headers={
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Origin': 'https://www.lesswrong.com',
+                'Referer': 'https://www.lesswrong.com/',
+                'User-Agent': os.environ.get('NEWS_USER_AGENT') or LESSWRONG_USER_AGENT,
+            },
+            timeout=45
         )
         response.raise_for_status()
         return response.json()

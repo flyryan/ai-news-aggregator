@@ -68,7 +68,7 @@ The production publishing workflow lives in `.github/workflows/daily-pipeline.ym
 
 The workflow writes ignored `config/providers.yaml` from the `PIPELINE_PROVIDERS_YAML` secret, applies `ANTHROPIC_MODEL` or the `anthropic_model` dispatch input as the LLM model override, runs the pipeline, and commits only generated public outputs (`web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml`) when `commit_outputs=true`. Use `workflow_dispatch` with `commit_outputs=false` for a full hosted dry run that uploads artifacts without committing. Hosted runs also upload a `pipeline-diagnostics` artifact with LLM request metrics and cost reports when those files exist.
 
-Hosted runner egress can be proxied with `PIPELINE_PROXY_URL` for all sources or `REDDIT_PROXY_URL` for Reddit only. If neither proxy URL is set and `MULLVAD_ACCOUNT` is configured, the workflow creates a Mullvad WireGuard tunnel and exposes Mullvad's local SOCKS proxy as both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL`. `MULLVAD_WG_PRIVATE_KEY` pins CI to one registered Mullvad device across runs.
+Hosted runner egress can be proxied with `PIPELINE_PROXY_URL` for all sources, `REDDIT_PROXY_URL` for Reddit only, or `LESSWRONG_PROXY_URL` for LessWrong only. If neither pipeline nor Reddit proxy URL is set and `MULLVAD_ACCOUNT` is configured, the workflow creates a Mullvad WireGuard tunnel and exposes Mullvad's local SOCKS proxy as both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL`. `MULLVAD_WG_PRIVATE_KEY` pins CI to one registered Mullvad device across runs.
 
 Use `scripts/post_pipeline_verify.sh` for hosted-site verification. It is configured with environment variables: set `AWS_HOST` directly, or set `AWS_PROFILE` plus `AWS_INSTANCE_ID`/`AWS_INSTANCE_NAME` for EC2 lookup. Set `REBUILD_WEB=true` when the deployment includes frontend source or web-image changes.
 
@@ -197,6 +197,7 @@ ANTHROPIC_MODEL       # Model name (default: claude-opus-4-7)
 TWITTERAPI_IO_KEY     # TwitterAPI.io API key
 REDDIT_PROXY_URL      # HTTP(S) or SOCKS proxy for Reddit requests (optional)
 REDDIT_USER_AGENT     # User-Agent sent to Reddit (optional)
+LESSWRONG_PROXY_URL   # HTTP(S) or SOCKS proxy for LessWrong GraphQL/browser fallback requests (optional)
 PIPELINE_PROXY_URL    # HTTP(S) or SOCKS proxy for the whole pipeline (optional)
 NEWS_USER_AGENT       # User-Agent sent to RSS/feed sources (optional)
 LLM_TRUST_ENV_PROXY   # Let LLM clients use HTTP(S)/ALL_PROXY env vars (default: false)
