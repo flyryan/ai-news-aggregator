@@ -345,9 +345,9 @@ export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
 | `PIPELINE_PROXY_URL` | HTTP(S) or SOCKS proxy for the whole pipeline | No |
 | `NEWS_USER_AGENT` | User-Agent for RSS/feed requests | No |
 | `LLM_TRUST_ENV_PROXY` | Allow LLM clients to use `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`. Default: `false` | No |
-| `LLM_MAX_CONCURRENT_REQUESTS` | Global async LLM request cap; `0` disables the cap. Default: `0` | No |
-| `ANALYZER_BATCH_SIZE` | Items per analyzer map batch. Default: `50` | No |
-| `ANALYZER_MAX_CONCURRENT_BATCHES` | Per-category analyzer map concurrency. Default: `4` | No |
+| `LLM_MAX_CONCURRENT_REQUESTS` | Global async LLM request cap; `0` disables the cap. Default: `8` | No |
+| `ANALYZER_BATCH_SIZE` | Items per analyzer map batch. Default: `75` | No |
+| `ANALYZER_MAX_CONCURRENT_BATCHES` | Per-category analyzer map concurrency. Default: `3` | No |
 | `MULLVAD_ACCOUNT` | Mullvad account number for CI proxy setup | No |
 | `MULLVAD_WG_PRIVATE_KEY` | Stable WireGuard private key for the CI Mullvad device | No |
 | `MULLVAD_RELAY_FILTER` | Mullvad relay hostname prefix for CI tunnel selection | No |

@@ -442,8 +442,8 @@ class BaseAnalyzer(ABC):
         return ThinkingLevel.DEEP
 
     # Map-reduce batch processing constants
-    BATCH_SIZE = _env_int("ANALYZER_BATCH_SIZE", 50)  # Items per batch for map phase
-    MAX_CONCURRENT_BATCHES = _env_int("ANALYZER_MAX_CONCURRENT_BATCHES", 4)  # Per-category API calls
+    BATCH_SIZE = _env_int("ANALYZER_BATCH_SIZE", 75)  # Items per batch for map phase
+    MAX_CONCURRENT_BATCHES = _env_int("ANALYZER_MAX_CONCURRENT_BATCHES", 3)  # Per-category API calls
 
     # --- Map-Reduce Methods ---
 
@@ -510,7 +510,7 @@ class BaseAnalyzer(ABC):
                 thinking=response.thinking
             )
         except Exception as e:
-            logger.error(f"Batch {label} analysis failed: {e}")
+            logger.error(f"{self.category} batch {label} analysis failed: {type(e).__name__}: {e}")
             # Retry once with backoff for transient failures (network, 5xx, etc.)
             try:
                 await asyncio.sleep(5)
@@ -541,7 +541,10 @@ class BaseAnalyzer(ABC):
                     thinking=response.thinking
                 )
             except Exception as retry_e:
-                logger.error(f"  {self.category} map {label}: FAILED")
+                logger.error(
+                    f"  {self.category} map {label}: FAILED after retry: "
+                    f"{type(retry_e).__name__}: {retry_e}"
+                )
                 return BatchResult(
                     batch_index=batch_index,
                     item_analyses=[],
@@ -635,7 +638,10 @@ class BaseAnalyzer(ABC):
         ]
         total_batches = len(batches)
 
-        logger.info(f"  {self.category} MAP: processing {len(items)} items in {total_batches} batches")
+        logger.info(
+            f"  {self.category} MAP: processing {len(items)} items in {total_batches} batches "
+            f"(batch_size={self.BATCH_SIZE}, per_category_concurrency={self.MAX_CONCURRENT_BATCHES})"
+        )
 
         # Process batches with concurrency limit
         semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_BATCHES)
