@@ -53,7 +53,12 @@ jobs:
       PIPELINE_COMMIT_PATHS: ${{ vars.PIPELINE_COMMIT_PATHS || 'web/data config/model_releases.yaml config/ecosystem_context.yaml' }}
       PIPELINE_IMAGE_MODEL: ${{ vars.PIPELINE_IMAGE_MODEL || 'gemini-3-pro-image-preview' }}
       LLM_TRUST_ENV_PROXY: ${{ vars.LLM_TRUST_ENV_PROXY || 'false' }}
+      LLM_TIMEOUT_SECONDS: ${{ vars.LLM_TIMEOUT_SECONDS || '240' }}
       LLM_MAX_CONCURRENT_REQUESTS: ${{ vars.LLM_MAX_CONCURRENT_REQUESTS || '8' }}
+      LLM_MAX_RETRIES: ${{ vars.LLM_MAX_RETRIES || '2' }}
+      LLM_LOG_REQUESTS: ${{ vars.LLM_LOG_REQUESTS || 'true' }}
+      LLM_HEARTBEAT_SECONDS: ${{ vars.LLM_HEARTBEAT_SECONDS || '60' }}
+      LLM_METRICS_PATH: ${{ vars.LLM_METRICS_PATH || 'data/llm_metrics.jsonl' }}
       ANALYZER_BATCH_SIZE: ${{ vars.ANALYZER_BATCH_SIZE || '75' }}
       ANALYZER_MAX_CONCURRENT_BATCHES: ${{ vars.ANALYZER_MAX_CONCURRENT_BATCHES || '3' }}
       TARGET_DATE_INPUT: ${{ inputs.target_date || '' }}
@@ -338,6 +343,16 @@ jobs:
             config/model_releases.yaml
             config/ecosystem_context.yaml
           if-no-files-found: error
+
+      - name: Upload pipeline diagnostics
+        if: always() && steps.schedule_gate.outputs.should_run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-diagnostics
+          path: |
+            data/llm_metrics.jsonl
+            data/processed/cost_report_*.json
+          if-no-files-found: ignore
 
       - name: Push generated commit
         if: steps.schedule_gate.outputs.should_run == 'true' && steps.commit.outputs.committed == 'true'

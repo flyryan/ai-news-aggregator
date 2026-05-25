@@ -14,8 +14,11 @@ import json
 import logging
 import time
 import asyncio
+from contextlib import suppress
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import List, Dict, Any, Optional, Tuple
 from enum import IntEnum
 
 import httpx
@@ -37,6 +40,22 @@ def _env_int(name: str, default: int, minimum: int = 0) -> int:
         return default
     try:
         value = int(raw_value)
+    except ValueError:
+        logger.warning(f"Ignoring invalid {name}={raw_value!r}; using {default}")
+        return default
+    if value < minimum:
+        logger.warning(f"Ignoring {name}={value}; minimum is {minimum}, using {default}")
+        return default
+    return value
+
+
+def _env_float(name: str, default: float, minimum: float = 0.0) -> float:
+    """Read a float environment setting with validation."""
+    raw_value = os.environ.get(name)
+    if not raw_value:
+        return default
+    try:
+        value = float(raw_value)
     except ValueError:
         logger.warning(f"Ignoring invalid {name}={raw_value!r}; using {default}")
         return default
@@ -81,6 +100,26 @@ BUDGET_TO_EFFORT = {
     ThinkingLevel.DEEP: "max",
     ThinkingLevel.ULTRATHINK: "max",
 }
+
+THINKING_LEVEL_NAMES = {
+    ThinkingLevel.QUICK: "QUICK",
+    ThinkingLevel.STANDARD: "STANDARD",
+    ThinkingLevel.DEEP: "DEEP",
+    ThinkingLevel.ULTRATHINK: "ULTRATHINK",
+}
+
+
+def _content_char_count(content: Any) -> int:
+    """Estimate request content size without logging the raw content."""
+    if content is None:
+        return 0
+    if isinstance(content, str):
+        return len(content)
+    return len(json.dumps(content, ensure_ascii=False, default=str))
+
+
+def _messages_char_count(messages: List[Dict[str, Any]]) -> int:
+    return sum(_content_char_count(message.get("content")) for message in messages)
 
 
 def _uses_adaptive_thinking(model: str) -> bool:
@@ -169,10 +208,11 @@ class AnthropicClient:
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
         self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-opus-4-7')
-        self.timeout = timeout
+        self.timeout = _env_float("LLM_TIMEOUT_SECONDS", timeout, minimum=1.0)
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
         self.trust_env_proxy = _env_bool("LLM_TRUST_ENV_PROXY", False)
+        self.max_retries = _env_int("LLM_MAX_RETRIES", 2, minimum=0)
 
         if not self.api_key:
             raise ValueError("ANTHROPIC_API_KEY environment variable or api_key parameter required")
@@ -190,7 +230,7 @@ class AnthropicClient:
         # Create httpx client with mode-appropriate auth
         self._http_client = httpx.Client(
             auth=auth,
-            timeout=httpx.Timeout(timeout),
+            timeout=httpx.Timeout(self.timeout),
             trust_env=self.trust_env_proxy
         )
 
@@ -198,12 +238,14 @@ class AnthropicClient:
         self._client = anthropic.Anthropic(
             base_url=self.base_url,
             api_key=self.api_key,  # SDK sends this as x-api-key header
-            http_client=self._http_client
+            http_client=self._http_client,
+            max_retries=self.max_retries,
         )
 
         logger.info(
             f"AnthropicClient initialized with mode={self.mode}, model={self.model}, "
-            f"base_url={self.base_url}, trust_env_proxy={self.trust_env_proxy}"
+            f"base_url={self.base_url}, timeout={self.timeout}s, sdk_max_retries={self.max_retries}, "
+            f"trust_env_proxy={self.trust_env_proxy}"
         )
 
     @classmethod
@@ -491,16 +533,25 @@ class AsyncAnthropicClient:
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
         self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-opus-4-7')
-        self.timeout = timeout
+        self.timeout = _env_float("LLM_TIMEOUT_SECONDS", timeout, minimum=1.0)
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
         self.trust_env_proxy = _env_bool("LLM_TRUST_ENV_PROXY", False)
         self.max_concurrent_requests = _env_int("LLM_MAX_CONCURRENT_REQUESTS", 8)
+        self.max_retries = _env_int("LLM_MAX_RETRIES", 2, minimum=0)
+        self.log_requests = _env_bool("LLM_LOG_REQUESTS", True)
+        self.heartbeat_seconds = _env_float("LLM_HEARTBEAT_SECONDS", 60.0, minimum=0.0)
+        self.metrics_path = os.environ.get("LLM_METRICS_PATH", "").strip()
         self._request_semaphore = (
             asyncio.Semaphore(self.max_concurrent_requests)
             if self.max_concurrent_requests > 0
             else None
         )
+        self._request_lock = asyncio.Lock()
+        self._metrics_lock = asyncio.Lock()
+        self._request_sequence = 0
+        self._active_requests = 0
+        self._queued_requests = 0
 
         if not self.api_key:
             raise ValueError("ANTHROPIC_API_KEY environment variable or api_key parameter required")
@@ -518,7 +569,7 @@ class AsyncAnthropicClient:
         # Create async httpx client with mode-appropriate auth
         self._http_client = httpx.AsyncClient(
             auth=auth,
-            timeout=httpx.Timeout(timeout),
+            timeout=httpx.Timeout(self.timeout),
             trust_env=self.trust_env_proxy
         )
 
@@ -526,21 +577,268 @@ class AsyncAnthropicClient:
         self._client = anthropic.AsyncAnthropic(
             base_url=self.base_url,
             api_key=self.api_key,  # SDK sends this as x-api-key header
-            http_client=self._http_client
+            http_client=self._http_client,
+            max_retries=self.max_retries,
         )
 
         logger.info(
             f"AsyncAnthropicClient initialized with mode={self.mode}, model={self.model}, "
+            f"timeout={self.timeout}s, sdk_max_retries={self.max_retries}, "
+            f"heartbeat_seconds={self.heartbeat_seconds}, "
             f"max_concurrent_requests={self.max_concurrent_requests or 'unlimited'}, "
-            f"trust_env_proxy={self.trust_env_proxy}"
+            f"trust_env_proxy={self.trust_env_proxy}, request_logging={self.log_requests}, "
+            f"metrics_path={self.metrics_path or 'disabled'}"
         )
 
-    async def _create_message(self, **kwargs):
+    def _format_request_context(self, request_context: Optional[Dict[str, Any]]) -> str:
+        context = request_context or {}
+        parts = [
+            f"caller={context.get('caller', 'unknown')}",
+            f"kind={context.get('kind', 'message')}",
+            f"model={self.model}",
+        ]
+        for key in (
+            "thinking_level",
+            "effort",
+            "max_tokens",
+            "message_count",
+            "message_chars",
+            "system_chars",
+        ):
+            value = context.get(key)
+            if value is not None:
+                parts.append(f"{key}={value}")
+        return " ".join(parts)
+
+    async def _register_queued_request(self, request_context: Optional[Dict[str, Any]]) -> Tuple[int, int, int]:
+        async with self._request_lock:
+            self._request_sequence += 1
+            request_id = self._request_sequence
+            self._queued_requests += 1
+            active = self._active_requests
+            queued = self._queued_requests
+        logger.info(
+            f"LLM queued #{request_id} {self._format_request_context(request_context)} "
+            f"active={active} queued={queued} cap={self.max_concurrent_requests or 'unlimited'}"
+        )
+        return request_id, active, queued
+
+    async def _mark_request_started(
+        self,
+        request_id: int,
+        request_context: Optional[Dict[str, Any]],
+        queued_at: float,
+    ) -> float:
+        async with self._request_lock:
+            self._queued_requests = max(0, self._queued_requests - 1)
+            self._active_requests += 1
+            active = self._active_requests
+            queued = self._queued_requests
+        wait_seconds = time.time() - queued_at
+        logger.info(
+            f"LLM start #{request_id} {self._format_request_context(request_context)} "
+            f"active={active} queued={queued} waited={wait_seconds:.1f}s"
+        )
+        return wait_seconds
+
+    async def _mark_request_finished(
+        self,
+        request_id: int,
+        request_context: Optional[Dict[str, Any]],
+        started_at: float,
+        wait_seconds: float,
+        response: Optional[Any] = None,
+        error: Optional[BaseException] = None,
+    ) -> None:
+        async with self._request_lock:
+            self._active_requests = max(0, self._active_requests - 1)
+            active = self._active_requests
+            queued = self._queued_requests
+
+        duration = time.time() - started_at
+        if error is not None:
+            logger.info(
+                f"LLM failed #{request_id} {self._format_request_context(request_context)} "
+                f"active={active} queued={queued} duration={duration:.1f}s "
+                f"error={type(error).__name__}: {error}"
+            )
+            await self._write_metric({
+                "event": "failed",
+                "request_id": request_id,
+                "context": request_context or {},
+                "wait_seconds": round(wait_seconds, 3),
+                "duration_seconds": round(duration, 3),
+                "active_after": active,
+                "queued_after": queued,
+                "error_type": type(error).__name__,
+                "error": str(error),
+            })
+            return
+
+        usage = getattr(response, "usage", None)
+        input_tokens = getattr(usage, "input_tokens", None)
+        output_tokens = getattr(usage, "output_tokens", None)
+        stop_reason = getattr(response, "stop_reason", None)
+        logger.info(
+            f"LLM done #{request_id} {self._format_request_context(request_context)} "
+            f"active={active} queued={queued} duration={duration:.1f}s "
+            f"stop_reason={stop_reason} input_tokens={input_tokens} output_tokens={output_tokens}"
+        )
+        await self._write_metric({
+            "event": "done",
+            "request_id": request_id,
+            "context": request_context or {},
+            "wait_seconds": round(wait_seconds, 3),
+            "duration_seconds": round(duration, 3),
+            "active_after": active,
+            "queued_after": queued,
+            "stop_reason": stop_reason,
+            "response_model": getattr(response, "model", None),
+            "usage": {
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "cache_creation_input_tokens": getattr(usage, "cache_creation_input_tokens", None),
+                "cache_read_input_tokens": getattr(usage, "cache_read_input_tokens", None),
+            },
+        })
+
+    async def _cancel_queued_request(
+        self,
+        request_id: int,
+        request_context: Optional[Dict[str, Any]],
+        queued_at: float,
+        error: BaseException,
+    ) -> None:
+        async with self._request_lock:
+            self._queued_requests = max(0, self._queued_requests - 1)
+            active = self._active_requests
+            queued = self._queued_requests
+        logger.info(
+            f"LLM cancelled before start #{request_id} {self._format_request_context(request_context)} "
+            f"active={active} queued={queued} waited={time.time() - queued_at:.1f}s "
+            f"error={type(error).__name__}: {error}"
+        )
+        await self._write_metric({
+            "event": "cancelled_before_start",
+            "request_id": request_id,
+            "context": request_context or {},
+            "wait_seconds": round(time.time() - queued_at, 3),
+            "active_after": active,
+            "queued_after": queued,
+            "error_type": type(error).__name__,
+            "error": str(error),
+        })
+
+    def _start_heartbeat(
+        self,
+        request_id: int,
+        request_context: Optional[Dict[str, Any]],
+        started_at: float,
+    ) -> Optional[asyncio.Task]:
+        if self.heartbeat_seconds <= 0:
+            return None
+        return asyncio.create_task(
+            self._log_request_heartbeat(request_id, request_context, started_at)
+        )
+
+    async def _log_request_heartbeat(
+        self,
+        request_id: int,
+        request_context: Optional[Dict[str, Any]],
+        started_at: float,
+    ) -> None:
+        while True:
+            await asyncio.sleep(self.heartbeat_seconds)
+            async with self._request_lock:
+                active = self._active_requests
+                queued = self._queued_requests
+            duration = time.time() - started_at
+            logger.info(
+                f"LLM running #{request_id} {self._format_request_context(request_context)} "
+                f"active={active} queued={queued} duration={duration:.1f}s"
+            )
+            await self._write_metric({
+                "event": "heartbeat",
+                "request_id": request_id,
+                "context": request_context or {},
+                "duration_seconds": round(duration, 3),
+                "active": active,
+                "queued": queued,
+            })
+
+    async def _write_metric(self, record: Dict[str, Any]) -> None:
+        if not self.metrics_path:
+            return
+
+        base_record = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "configured_model": self.model,
+            "mode": self.mode,
+            "timeout_seconds": self.timeout,
+            "sdk_max_retries": self.max_retries,
+            "max_concurrent_requests": self.max_concurrent_requests or None,
+            "trust_env_proxy": self.trust_env_proxy,
+        }
+        base_record.update(record)
+
+        async with self._metrics_lock:
+            await asyncio.to_thread(self._append_metric_record, base_record)
+
+    def _append_metric_record(self, record: Dict[str, Any]) -> None:
+        metrics_file = Path(self.metrics_path)
+        metrics_file.parent.mkdir(parents=True, exist_ok=True)
+        with metrics_file.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
+
+    async def _create_message(self, request_context: Optional[Dict[str, Any]] = None, **kwargs):
         """Create a message under the optional global async LLM concurrency cap."""
-        if self._request_semaphore is None:
-            return await self._client.messages.create(**kwargs)
-        async with self._request_semaphore:
-            return await self._client.messages.create(**kwargs)
+        if not self.log_requests:
+            if self._request_semaphore is None:
+                return await self._client.messages.create(**kwargs)
+            async with self._request_semaphore:
+                return await self._client.messages.create(**kwargs)
+
+        queued_at = time.time()
+        request_id, _, _ = await self._register_queued_request(request_context)
+        acquired = False
+        started_at = queued_at
+        heartbeat_task = None
+
+        try:
+            if self._request_semaphore is not None:
+                await self._request_semaphore.acquire()
+            acquired = True
+            started_at = time.time()
+            wait_seconds = await self._mark_request_started(request_id, request_context, queued_at)
+            heartbeat_task = self._start_heartbeat(request_id, request_context, started_at)
+            response = await self._client.messages.create(**kwargs)
+            await self._mark_request_finished(
+                request_id,
+                request_context,
+                started_at,
+                wait_seconds,
+                response=response,
+            )
+            return response
+        except BaseException as error:
+            if acquired:
+                await self._mark_request_finished(
+                    request_id,
+                    request_context,
+                    started_at,
+                    wait_seconds if 'wait_seconds' in locals() else 0.0,
+                    error=error,
+                )
+            else:
+                await self._cancel_queued_request(request_id, request_context, queued_at, error)
+            raise
+        finally:
+            if heartbeat_task is not None:
+                heartbeat_task.cancel()
+                with suppress(asyncio.CancelledError):
+                    await heartbeat_task
+            if acquired and self._request_semaphore is not None:
+                self._request_semaphore.release()
 
     @classmethod
     def from_config(cls, config: 'LLMProviderConfig') -> 'AsyncAnthropicClient':
@@ -620,7 +918,19 @@ class AsyncAnthropicClient:
             kwargs["system"] = system
 
         start_time = time.time()
-        response = await self._create_message(**kwargs)
+        thinking_name = THINKING_LEVEL_NAMES.get(original_budget, str(original_budget))
+        request_context = {
+            "caller": caller or "async_call_with_thinking",
+            "kind": "adaptive_thinking" if use_adaptive else "manual_thinking",
+            "thinking_level": thinking_name,
+            "effort": effort if use_adaptive else None,
+            "max_tokens": max_tokens,
+            "message_count": len(messages),
+            "message_chars": _messages_char_count(messages),
+            "system_chars": _content_char_count(system),
+        }
+
+        response = await self._create_message(request_context=request_context, **kwargs)
         duration = time.time() - start_time
 
         # Log stop_reason for diagnostics (helps debug proxy behavior)
@@ -673,13 +983,6 @@ class AsyncAnthropicClient:
 
         # Track cost — label by the caller's original intent (not any
         # capped-down value) so the cost report stays legible.
-        thinking_name = {
-            ThinkingLevel.QUICK: "QUICK",
-            ThinkingLevel.STANDARD: "STANDARD",
-            ThinkingLevel.DEEP: "DEEP",
-            ThinkingLevel.ULTRATHINK: "ULTRATHINK"
-        }.get(original_budget, str(original_budget))
-
         get_tracker().record_call(
             caller=caller or "async_call_with_thinking",
             usage=usage,
@@ -719,7 +1022,16 @@ class AsyncAnthropicClient:
             kwargs["system"] = system
 
         start_time = time.time()
-        response = await self._create_message(**kwargs)
+        request_context = {
+            "caller": caller or "async_call",
+            "kind": "message",
+            "max_tokens": max_tokens,
+            "message_count": len(messages),
+            "message_chars": _messages_char_count(messages),
+            "system_chars": _content_char_count(system),
+        }
+
+        response = await self._create_message(request_context=request_context, **kwargs)
         duration = time.time() - start_time
 
         content = ""

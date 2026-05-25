@@ -10,7 +10,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-green.svg)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 
-Daily AI/ML news briefings curated by specialized agents using adaptive thinking profiles. The publishing repository runs the hosted pipeline every morning at 3 AM ET.
+Daily AI/ML news briefings curated by specialized agents using adaptive thinking profiles. The publishing repository starts the hosted pipeline every morning at 3 AM ET, with the live site typically updated around 4 AM ET.
 
 ---
 
@@ -235,10 +235,18 @@ Set these on the publishing repository:
 | `REDDIT_USER_AGENT` | `AI-News-Aggregator/1.0 (by u/flyryan)` | User-Agent sent to Reddit API requests |
 | `NEWS_USER_AGENT` | `REDDIT_USER_AGENT` value | User-Agent sent to RSS/feed sources |
 | `MULLVAD_RELAY_FILTER` | `us` | Mullvad WireGuard relay hostname prefix used for CI egress |
+| `LLM_TIMEOUT_SECONDS` | `240` | Hosted LLM request timeout override; supersedes provider YAML timeout |
+| `LLM_MAX_CONCURRENT_REQUESTS` | `8` | Global async LLM request cap |
+| `LLM_MAX_RETRIES` | `2` | Anthropic SDK retry count for transient request failures |
+| `LLM_LOG_REQUESTS` | `true` | Log queue/start/done metadata without raw prompt content |
+| `LLM_HEARTBEAT_SECONDS` | `60` | Emit progress logs for in-flight LLM requests; set `0` to disable |
+| `LLM_METRICS_PATH` | `data/llm_metrics.jsonl` | JSONL diagnostics file uploaded as a workflow artifact |
 
 ### Manual Dry Runs
 
 Use `workflow_dispatch` with `commit_outputs=false` to run the full hosted pipeline without committing or pushing. The workflow uploads `web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml` as an artifact for inspection.
+
+Every hosted run also uploads a `pipeline-diagnostics` artifact when available. It includes `data/llm_metrics.jsonl` and cost reports, which are useful for comparing model IDs/providers without committing diagnostics to the public site.
 
 ### Generated Outputs
 
@@ -345,7 +353,12 @@ export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
 | `PIPELINE_PROXY_URL` | HTTP(S) or SOCKS proxy for the whole pipeline | No |
 | `NEWS_USER_AGENT` | User-Agent for RSS/feed requests | No |
 | `LLM_TRUST_ENV_PROXY` | Allow LLM clients to use `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`. Default: `false` | No |
+| `LLM_TIMEOUT_SECONDS` | Override provider-config LLM request timeout. GitHub Actions default: `240` | No |
 | `LLM_MAX_CONCURRENT_REQUESTS` | Global async LLM request cap; `0` disables the cap. Default: `8` | No |
+| `LLM_MAX_RETRIES` | Anthropic SDK retry count for transient request failures. Default: `2` | No |
+| `LLM_LOG_REQUESTS` | Log LLM queue/start/done metadata without raw prompt content. Default: `true` | No |
+| `LLM_HEARTBEAT_SECONDS` | Seconds between in-flight LLM progress logs. Default: `60`; set `0` to disable | No |
+| `LLM_METRICS_PATH` | Optional JSONL path for per-request LLM metrics. GitHub Actions default: `data/llm_metrics.jsonl` | No |
 | `ANALYZER_BATCH_SIZE` | Items per analyzer map batch. Default: `75` | No |
 | `ANALYZER_MAX_CONCURRENT_BATCHES` | Per-category analyzer map concurrency. Default: `3` | No |
 | `MULLVAD_ACCOUNT` | Mullvad account number for CI proxy setup | No |

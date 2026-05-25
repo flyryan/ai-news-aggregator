@@ -447,6 +447,15 @@ class BaseAnalyzer(ABC):
 
     # --- Map-Reduce Methods ---
 
+    def _format_batch_sample(self, batch_items: List[CollectedItem], max_items: int = 2) -> str:
+        samples = []
+        for item in batch_items[:max_items]:
+            title = re.sub(r'\s+', ' ', item.title or '').strip()
+            if len(title) > 80:
+                title = title[:77] + "..."
+            samples.append(f"{item.id}:{title}")
+        return " | ".join(samples)
+
     async def _analyze_batch(
         self,
         batch_items: List[CollectedItem],
@@ -477,6 +486,10 @@ class BaseAnalyzer(ABC):
 
         label = f"{batch_index + 1}{sub_label}/{total_batches}"
         caller_suffix = f"{batch_index}{sub_label}"
+        logger.info(
+            f"  {self.category} map {label}: sending {len(batch_items)} items "
+            f"(prompt_chars={len(prompt)}, system_chars={len(self.grounding_context or '')})"
+        )
 
         try:
             response = await self.async_client.call_with_thinking(
@@ -492,7 +505,9 @@ class BaseAnalyzer(ABC):
                 )
 
             try:
-                result = self._parse_json_response(response.content)
+                result = self._parse_json_response(
+                    response.content, expected_items=len(batch_items)
+                )
             except (TruncatedJSONError, MalformedJSONError) as parse_error:
                 return await self._handle_truncated_batch(
                     batch_items, batch_index, total_batches, sub_label, str(parse_error)
@@ -525,7 +540,9 @@ class BaseAnalyzer(ABC):
                         batch_items, batch_index, total_batches, sub_label
                     )
                 try:
-                    result = self._parse_json_response(response.content)
+                    result = self._parse_json_response(
+                        response.content, expected_items=len(batch_items)
+                    )
                 except (TruncatedJSONError, MalformedJSONError) as parse_error:
                     return await self._handle_truncated_batch(
                         batch_items, batch_index, total_batches, sub_label, str(parse_error)
@@ -563,11 +580,13 @@ class BaseAnalyzer(ABC):
     ) -> BatchResult:
         """Recover from an unusable LLM response by splitting the batch.
 
-        Runs each half through ``_analyze_batch`` in parallel and merges
-        the results. When a single-item batch still fails there is
-        nothing further to split, so the item is dropped with a loud
-        ERROR (the same user-visible outcome as the old silent-drop path,
-        but only after exhausting recovery attempts).
+        Runs each half through ``_analyze_batch`` inside the current batch
+        slot and merges the results. Keeping recovery sequential prevents a
+        malformed response from briefly exceeding the per-category analyzer
+        concurrency limit. When a single-item batch still fails there is
+        nothing further to split, so the item is dropped with a loud ERROR
+        (the same user-visible outcome as the old silent-drop path, but only
+        after exhausting recovery attempts).
         """
         label = f"{batch_index + 1}{sub_label}/{total_batches}"
         if len(batch_items) <= 1:
@@ -590,9 +609,11 @@ class BaseAnalyzer(ABC):
             f"{len(batch_items)} items into {len(left_items)}+{len(right_items)} sub-batches"
         )
 
-        left_result, right_result = await asyncio.gather(
-            self._analyze_batch(left_items, batch_index, total_batches, sub_label + "a"),
-            self._analyze_batch(right_items, batch_index, total_batches, sub_label + "b"),
+        left_result = await self._analyze_batch(
+            left_items, batch_index, total_batches, sub_label + "a"
+        )
+        right_result = await self._analyze_batch(
+            right_items, batch_index, total_batches, sub_label + "b"
         )
 
         thinkings = [t for t in (left_result.thinking, right_result.thinking) if t]
@@ -642,6 +663,11 @@ class BaseAnalyzer(ABC):
             f"  {self.category} MAP: processing {len(items)} items in {total_batches} batches "
             f"(batch_size={self.BATCH_SIZE}, per_category_concurrency={self.MAX_CONCURRENT_BATCHES})"
         )
+        for i, batch in enumerate(batches):
+            logger.info(
+                f"  {self.category} MAP queue {i + 1}/{total_batches}: "
+                f"{len(batch)} items, sample={self._format_batch_sample(batch)}"
+            )
 
         # Process batches with concurrency limit
         semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_BATCHES)
@@ -889,27 +915,46 @@ class BaseAnalyzer(ABC):
 
     def _build_item_summary(self, item: CollectedItem) -> str:
         """Build a concise summary of an item for LLM context."""
-        parts = [f"Title: {item.title}"]
-        if item.author:
-            parts.append(f"Author: {item.author}")
-        parts.append(f"Source: {item.source}")
-        parts.append(f"Published: {item.published}")
-        if item.content:
-            # Truncate content for context
-            content = item.content[:500] + "..." if len(item.content) > 500 else item.content
-            parts.append(f"Content: {content}")
-        if item.url:
-            parts.append(f"URL: {item.url}")
-        return "\n".join(parts)
+        return json.dumps(
+            {
+                "id": item.id,
+                "title": self._clip_context_text(item.title),
+                "author": self._clip_context_text(item.author),
+                "source": item.source,
+                "published": item.published,
+                "content": self._clip_context_text(item.content, 500),
+                "url": item.url,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    def _clip_context_text(self, value: Any, max_chars: int = 800) -> str:
+        """Trim source text before placing it in LLM context."""
+        if value is None:
+            return ""
+        text = str(value).replace("\x00", "")
+        return text[:max_chars] + "..." if len(text) > max_chars else text
+
+    def _json_items_context(self, records: List[Dict[str, Any]]) -> str:
+        """Render source items as JSON so quote-heavy content stays inert."""
+        return json.dumps(records, ensure_ascii=False, indent=2)
 
     def _build_items_context(self, items: List[CollectedItem], max_items: int = 50) -> str:
         """Build context string from multiple items."""
-        context_parts = []
-        for i, item in enumerate(items[:max_items], 1):
-            context_parts.append(f"--- Item {i} ---")
-            context_parts.append(self._build_item_summary(item))
-            context_parts.append("")
-        return "\n".join(context_parts)
+        records = []
+        for position, item in enumerate(items[:max_items], 1):
+            records.append({
+                "position": position,
+                "id": item.id,
+                "title": self._clip_context_text(item.title),
+                "author": self._clip_context_text(item.author),
+                "source": item.source,
+                "published": item.published,
+                "content": self._clip_context_text(item.content, 500),
+                "url": item.url,
+            })
+        return self._json_items_context(records)
 
     def load_items(self, filename: str) -> List[CollectedItem]:
         """Load items from a JSON file."""
@@ -935,7 +980,7 @@ class BaseAnalyzer(ABC):
 
         logger.info(f"Saved report to {filepath}")
 
-    def _parse_json_response(self, content: str) -> dict:
+    def _parse_json_response(self, content: str, expected_items: Optional[int] = None) -> dict:
         """Parse JSON from LLM response, handling various formats.
 
         Handles:
@@ -1009,9 +1054,21 @@ class BaseAnalyzer(ABC):
             if truncated:
                 logger.error(f"Truncated JSON (parse failed at {e}); last 100 chars: ...{content[-100:]}")
                 raise TruncatedJSONError(str(e)) from e
+            recovered = self._recover_malformed_map_response(content, expected_items)
+            if recovered is not None:
+                return recovered
             logger.error(f"Failed to parse JSON: {e}")
+            logger.error(f"JSON error context: {self._json_error_excerpt(content, e.pos)}")
             logger.error(f"Content was: {content[:500]}...")
             raise MalformedJSONError(str(e)) from e
+
+    def _json_error_excerpt(self, content: str, pos: int, radius: int = 220) -> str:
+        """Show a small parse-error window without dumping the full response."""
+        start = max(0, pos - radius)
+        end = min(len(content), pos + radius)
+        excerpt = content[start:end].replace("\n", "\\n")
+        pointer = " " * (pos - start) + "^"
+        return f"...{excerpt}...\n...{pointer}..."
 
     def _repair_common_json_errors(self, content: str) -> str:
         """Repair common local syntax errors in otherwise complete JSON.
@@ -1034,10 +1091,150 @@ class BaseAnalyzer(ABC):
             repaired
         )
 
+        # Missing comma between a scalar value and the next known object key:
+        # {"reasoning": "text"\n"themes": []} -> {"reasoning": "text", "themes": []}
+        key_lookahead = (
+            r'(?="(?:id|summary|importance_score|reasoning|themes|name|description|'
+            r'item_count|importance|cross_signals|top_10|category_summary)"\s*:)'
+        )
+        repaired = re.sub(r'("(?:[^"\\]|\\.)*")\s+' + key_lookahead, r'\1, ', repaired)
+        repaired = re.sub(
+            r'(-?\d+(?:\.\d+)?|true|false|null)\s+' + key_lookahead,
+            r'\1, ',
+            repaired
+        )
+
         # Trailing commas before object/array close are common and safe to drop.
         repaired = re.sub(r',\s*([}\]])', r'\1', repaired)
 
         return repaired
+
+    def _recover_malformed_map_response(
+        self,
+        content: str,
+        expected_items: Optional[int],
+        min_ratio: float = 0.7,
+    ) -> Optional[Dict[str, Any]]:
+        """Recover a mostly complete map response without another LLM call.
+
+        This is intentionally limited to map responses where we know roughly
+        how many item objects should be present. If recovery coverage is low,
+        callers still split and retry so we do not silently drop most of a
+        batch.
+        """
+        if expected_items is None or expected_items <= 0:
+            return None
+
+        items = self._extract_object_array(content, "items")
+        if not items:
+            return None
+
+        min_items = max(1, int(expected_items * min_ratio))
+        if len(items) < min_items:
+            logger.warning(
+                f"Recovered only {len(items)}/{expected_items} item analyses from malformed JSON; "
+                "splitting batch instead"
+            )
+            return None
+
+        themes = (
+            self._extract_object_array(content, "themes")
+            or self._extract_object_array(content, "category_themes")
+        )
+        cross_signals = self._extract_string_array(content, "cross_signals")
+
+        logger.warning(
+            f"Recovered {len(items)}/{expected_items} item analyses from malformed JSON "
+            "without an extra split retry"
+        )
+        return {
+            "items": items,
+            "themes": themes,
+            "cross_signals": cross_signals,
+        }
+
+    def _find_array_bounds(self, content: str, key: str) -> Optional[Tuple[int, int]]:
+        match = re.search(rf'"{re.escape(key)}"\s*:\s*\[', content)
+        if not match:
+            return None
+
+        start = content.find('[', match.start())
+        depth = 0
+        in_string = False
+        escape_next = False
+
+        for i in range(start, len(content)):
+            char = content[i]
+            if escape_next:
+                escape_next = False
+                continue
+            if char == '\\':
+                escape_next = True
+                continue
+            if char == '"':
+                in_string = not in_string
+            if in_string:
+                continue
+            if char == '[':
+                depth += 1
+            elif char == ']':
+                depth -= 1
+                if depth == 0:
+                    return start, i + 1
+
+        return start, len(content)
+
+    def _extract_object_array(self, content: str, key: str) -> List[Dict[str, Any]]:
+        bounds = self._find_array_bounds(content, key)
+        if not bounds:
+            return []
+
+        start, end = bounds
+        array_text = content[start:end]
+        objects = []
+        depth = 0
+        in_string = False
+        escape_next = False
+        obj_start = None
+
+        for i, char in enumerate(array_text):
+            if escape_next:
+                escape_next = False
+                continue
+            if char == '\\':
+                escape_next = True
+                continue
+            if char == '"':
+                in_string = not in_string
+            if in_string:
+                continue
+            if char == '{':
+                if depth == 0:
+                    obj_start = i
+                depth += 1
+            elif char == '}' and depth > 0:
+                depth -= 1
+                if depth == 0 and obj_start is not None:
+                    raw_object = array_text[obj_start:i + 1]
+                    try:
+                        objects.append(json.loads(self._repair_common_json_errors(raw_object)))
+                    except json.JSONDecodeError:
+                        logger.debug(f"Skipping unrecoverable object in malformed {key} array")
+                    obj_start = None
+
+        return objects
+
+    def _extract_string_array(self, content: str, key: str) -> List[str]:
+        bounds = self._find_array_bounds(content, key)
+        if not bounds:
+            return []
+
+        start, end = bounds
+        try:
+            values = json.loads(self._repair_common_json_errors(content[start:end]))
+        except json.JSONDecodeError:
+            return []
+        return [str(value) for value in values if isinstance(value, str)]
 
 
 def deduplicate_items(items: List[CollectedItem]) -> List[CollectedItem]:

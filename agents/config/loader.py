@@ -234,8 +234,12 @@ def load_config(
     # Validate with Pydantic
     try:
         config = ProviderConfig.model_validate(raw_config)
-        logger.info(f"Loaded provider config: llm.model={config.llm.model}, "
-                   f"image={'enabled' if config.image else 'disabled'}")
+        logger.info(
+            f"Loaded provider config: llm.mode={config.llm.mode}, "
+            f"llm.model={config.llm.model}, llm.timeout={config.llm.timeout}s, "
+            f"llm.max_output_tokens={config.llm.max_output_tokens}, "
+            f"image={'enabled' if config.image else 'disabled'}"
+        )
         return config
     except ValidationError as e:
         logger.error("Configuration validation failed:")
