@@ -689,7 +689,7 @@ class AsyncAnthropicClient:
             self._queued_requests += 1
             active = self._active_requests
             queued = self._queued_requests
-        logger.info(
+        logger.debug(
             f"LLM queued #{request_id} {self._format_request_context(request_context)} "
             f"active={active} queued={queued} cap={self.max_concurrent_requests or 'unlimited'}"
         )
@@ -707,7 +707,7 @@ class AsyncAnthropicClient:
             active = self._active_requests
             queued = self._queued_requests
         wait_seconds = time.time() - queued_at
-        logger.info(
+        logger.debug(
             f"LLM start #{request_id} {self._format_request_context(request_context)} "
             f"active={active} queued={queued} waited={wait_seconds:.1f}s"
         )

@@ -294,7 +294,8 @@ class JSONGenerator:
                     'importance_score': item.get('importance_score', 50),
                     'reasoning': item.get('reasoning', ''),
                     'themes': item.get('themes', []),
-                    'continuation': item.get('continuation')  # Story continuation info
+                    'continuation': item.get('continuation'),  # Story continuation info
+                    'freshness': base.get('metadata', {}).get('freshness')
                 }
             else:
                 # Flat structure
@@ -312,8 +313,12 @@ class JSONGenerator:
                     'importance_score': item.get('importance_score', 50),
                     'reasoning': item.get('reasoning', ''),
                     'themes': item.get('themes', []),
-                    'continuation': item.get('continuation')  # Story continuation info
+                    'continuation': item.get('continuation'),  # Story continuation info
+                    'freshness': item.get('metadata', {}).get('freshness') or item.get('freshness')
                 }
+
+            if not simplified_item.get('freshness'):
+                simplified_item.pop('freshness', None)
 
             # Convert summary and content to HTML for frontend rendering
             simplified_item['summary_html'] = self._markdown_to_html(simplified_item.get('summary', ''))
@@ -456,8 +461,6 @@ class JSONGenerator:
         if not text:
             return ''
 
-        # Convert markdown links FIRST (before bold, since links may be inside bold)
-        # Differentiate internal vs external links
         def link_replacer(match):
             link_text, url = match.groups()
             if url.startswith('/') or url.startswith('#'):
@@ -467,10 +470,14 @@ class JSONGenerator:
                 # External link - opens in new tab
                 return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{link_text}</a>'
 
-        text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', link_replacer, text)
+        def convert_inline(line: str) -> str:
+            # Convert links before bold so existing **markers inside link labels**
+            # remain visible to the bold parser without letting unmatched markers
+            # bleed into later lines.
+            line = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', link_replacer, line)
+            return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', line)
 
-        # Convert **bold** to <strong>
-        text = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text)
+        text = '\n'.join(convert_inline(line) for line in text.split('\n'))
 
         # Convert markdown headers to HTML (h2-h4)
         text = re.sub(r'^####\s+(.+)$', r'<h4>\1</h4>', text, flags=re.MULTILINE)

@@ -25,6 +25,7 @@
 	$: hasContent = item.content && item.content.length > 0;
 	$: truncatedContent = item.content?.slice(0, 300);
 	$: needsTruncation = item.content?.length > 300;
+	$: freshness = item.freshness;
 
 	// Use pre-rendered HTML if available, otherwise convert client-side
 	$: summaryHtml = item.summary_html || markdownToHtml(item.summary || '');
@@ -77,6 +78,14 @@
 	<!-- Metadata -->
 	<div class="flex flex-wrap items-center gap-2 text-sm text-trend-gray-500 dark:text-trend-gray-400 mb-3">
 		<span>{item.source}</span>
+		{#if freshness?.label}
+			<span
+				class="text-[11px] leading-none px-1.5 py-1 rounded border border-trend-gray-200 dark:border-trend-gray-600 text-trend-gray-500 dark:text-trend-gray-400 bg-trend-gray-50 dark:bg-trend-gray-800"
+				title={freshness.reason || freshness.label}
+			>
+				{freshness.label}
+			</span>
+		{/if}
 		{#if item.author}
 			<span>&middot;</span>
 			<span>{item.author}</span>

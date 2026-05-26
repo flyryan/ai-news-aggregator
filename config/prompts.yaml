@@ -757,16 +757,16 @@ post_processing:
     LINKING STRATEGY (CRITICAL):
     1. Keep links SHORT (3-7 words max) - just the key action phrase
        - BAD (too long): "Google [published verification that GPT-5.2 solved an unsolved problem](/...)"
-       - BAD (too long): "[announced **Vera Rubin** chips are in full production](/...)"
+       - BAD (too long): "[announced Vera Rubin chips are in full production](/...)"
        - GOOD: "Google [published verification](/...) that GPT-5.2 solved a problem"
-       - GOOD: "Nvidia [announced **Vera Rubin** chips](/...) are in full production"
+       - GOOD: "Nvidia [announced Vera Rubin chips](/...) are in full production"
     2. Link the ACTION/EVENT phrase, NOT the leading company/entity name
        - BAD: "[Google DeepMind](/...) announced robots"
        - GOOD: "Google DeepMind [announced Atlas robots](/...)"
     3. ONE link per distinct story/development in the text
     4. Link to the HIGHEST-RANKED item that covers that story (items are ordered by importance)
-    5. Bold markers (**text**) CAN appear inside links - just don't start the link with a bold entity name
-    6. Preserve ALL original formatting exactly (headers, bullets, bold, etc.)
+    5. Do NOT add new **bold** markers inside link labels. Preserve existing bold markers outside links.
+    6. Preserve ALL original formatting exactly unless a link would require moving existing bold markers outside the link.
     7. For bullet points, link the key action/event after the entity prefix
 
     LINK FORMAT (exact format required):
@@ -795,7 +795,7 @@ post_processing:
     - Newlines in the text must be escaped as \n
     - Use single quotes for emphasis when possible to avoid escaping issues
 
-    Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not entities. Bold inside links is OK.
+    Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not entities. Avoid bold markers inside links.
 
   # Available variables: ${report_date}, ${coverage_date}, ${existing_models}, ${news_items}
   ecosystem_enrichment: |

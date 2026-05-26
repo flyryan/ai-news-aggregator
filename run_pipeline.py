@@ -182,28 +182,62 @@ def create_default_config_files(config_dir: str):
     """Create default configuration files."""
 
     # RSS feeds
-    rss_feeds = """# AI News RSS Feeds (one per line)
+    rss_feeds = """# AI News RSS/Atom Feeds (one per line)
 # Major news sites
 https://feeds.arstechnica.com/arstechnica/index
 https://www.wired.com/feed/tag/ai/latest/rss
 https://venturebeat.com/category/ai/feed/
 https://www.theguardian.com/technology/artificialintelligenceai/rss
 https://www.artificialintelligence-news.com/feed/rss/
+https://techcrunch.com/category/artificial-intelligence/feed/
+https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+https://www.technologyreview.com/topic/artificial-intelligence/feed/
+https://spectrum.ieee.org/rss/artificial-intelligence/fulltext
+https://the-decoder.com/feed/
+https://www.theregister.com/software/ai_ml/headlines.atom
+https://www.newscientist.com/subject/artificial-intelligence/feed/
 
 # AI-specific sites
 https://aibusiness.com/rss.xml
-https://analyticsindiamag.com/feed/
 https://www.marktechpost.com/feed
+https://openai.com/news/rss.xml
+https://blog.google/technology/ai/rss/
+https://blogs.microsoft.com/ai/feed/
+https://aws.amazon.com/blogs/machine-learning/feed/
+https://blogs.nvidia.com/blog/tag/generative-ai/feed/
+https://github.blog/tag/github-copilot/feed/
 
 # Research blogs
 https://deepmind.com/blog/feed/basic/
 https://huggingface.co/blog/feed.xml
-https://blog.langchain.dev/rss/
 
 # Industry analysis
 https://every.to/chain-of-thought/feed.xml
 https://lastweekin.ai/feed
 https://www.latent.space/feed
+https://semianalysis.com/feed/
+"""
+
+    research_feeds = """# AI research RSS/Atom feeds and technical blogs (one per line)
+https://www.lesswrong.com/feed.xml?view=frontpage-rss&karmaThreshold=2
+https://research.google/blog/rss/
+https://www.microsoft.com/en-us/research/blog/category/artificial-intelligence/feed/
+https://research.facebook.com/feed/
+https://www.amazon.science/index.rss
+https://allenai.org/rss.xml
+https://bair.berkeley.edu/blog/feed.xml
+https://metr.org/feed.xml
+https://www.alignmentforum.org/feed.xml?view=frontpage-rss&karmaThreshold=2
+https://news.mit.edu/rss/topic/artificial-intelligence2
+https://blog.ml.cmu.edu/feed/
+https://thegradient.pub/rss/
+https://importai.substack.com/feed
+https://www.interconnects.ai/feed
+https://lilianweng.github.io/index.xml
+https://huyenchip.com/feed.xml
+https://www.nature.com/subjects/machine-learning.rss
+https://www.nature.com/natmachintell.rss
+http://feeds.trendmicro.com/TrendMicroSimplySecurity
 """
 
     # Twitter accounts
@@ -267,6 +301,9 @@ Gargron@mastodon.social
 
     with open(os.path.join(config_dir, 'rss_feeds.txt'), 'w') as f:
         f.write(rss_feeds)
+
+    with open(os.path.join(config_dir, 'research_feeds.txt'), 'w') as f:
+        f.write(research_feeds)
 
     with open(os.path.join(config_dir, 'twitter_accounts.txt'), 'w') as f:
         f.write(twitter_accounts)

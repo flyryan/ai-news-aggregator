@@ -11,6 +11,8 @@ Focuses on FRONTIER AI news only:
 
 import json
 import logging
+import os
+from datetime import datetime
 from typing import List, Optional, Set
 
 from ..base import (
@@ -18,6 +20,7 @@ from ..base import (
     CategoryReport, CategoryTheme
 )
 from ..llm_client import AnthropicClient, AsyncAnthropicClient, ThinkingLevel
+from ..staleness_checker import StalenessChecker
 
 logger = logging.getLogger(__name__)
 
@@ -252,10 +255,14 @@ The summary should read like a professional briefing, focusing on what matters f
         llm_client: Optional[AnthropicClient] = None,
         async_client: Optional[AsyncAnthropicClient] = None,
         data_dir: str = './data',
+        config_dir: str = './config',
+        target_date: Optional[str] = None,
         grounding_context: Optional[str] = None,
         prompt_accessor=None
     ):
         super().__init__(llm_client, async_client, data_dir, grounding_context, prompt_accessor)
+        self.config_dir = config_dir
+        self.target_date = target_date or os.getenv('TARGET_DATE') or datetime.now().strftime('%Y-%m-%d')
 
     @property
     def category(self) -> str:
@@ -526,15 +533,21 @@ Snippet: {item.content[:300]}...
             logger.warning("No frontier AI articles found after LLM filter")
             return self._empty_report()
 
-        # Use combined analysis+ranking for small batches (saves one LLM call)
-        if len(filtered_items) < self.BATCH_SIZE:
-            return await self._analyze_small_batch(filtered_items)
-
-        # MAP phase: Parallel batch analysis of filtered items (for large batches)
+        # Always use map + deterministic freshness + reduce so stale follow-ups
+        # cannot shape top-story ranking or category summaries.
         batch_results, filtered_items = await self._map_phase(filtered_items)
 
         # Merge batch results
         analyzed_items, themes, cross_signals = self._merge_batch_results(batch_results, filtered_items)
+
+        freshness_checker = StalenessChecker(
+            config_dir=self.config_dir,
+            target_date=self.target_date,
+        )
+        demoted = freshness_checker.process_news_items(analyzed_items)
+        if demoted:
+            analyzed_items.sort(key=lambda x: x.importance_score, reverse=True)
+            logger.info(f"News freshness policy: demoted/excluded {demoted} stale item(s) before ranking")
 
         # Collect thinking from batches for logging
         batch_thinking = "\n---\n".join(
@@ -554,9 +567,12 @@ Snippet: {item.content[:300]}...
                 "id": item.id,
                 "title": self._clip_context_text(item.title),
                 "source": item.source,
+                "published": item.published,
+                "source_type": item.source_type,
                 "url": item.url,
                 "content": self._clip_context_text(item.content, 800),
                 "tags": item.tags,
+                "freshness": item.metadata.get("freshness") if isinstance(item.metadata, dict) else None,
             })
         return self._json_items_context(records)
 

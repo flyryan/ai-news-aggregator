@@ -182,6 +182,8 @@ class MainOrchestrator:
                 llm_client=self.llm_client,
                 async_client=self.async_client,
                 data_dir=data_dir,
+                config_dir=config_dir,
+                target_date=self.target_date,
                 prompt_accessor=prompt_accessor
             ),
             'research': ResearchAnalyzer(
@@ -765,25 +767,31 @@ class MainOrchestrator:
                 llm_client=self.llm_client,
                 async_client=self.async_client,
                 data_dir=self.data_dir,
-                grounding_context=self.grounding_context
+                config_dir=self.config_dir,
+                target_date=self.target_date,
+                grounding_context=self.grounding_context,
+                prompt_accessor=self.prompt_accessor
             ),
             'research': ResearchAnalyzer(
                 llm_client=self.llm_client,
                 async_client=self.async_client,
                 data_dir=self.data_dir,
-                grounding_context=self.grounding_context
+                grounding_context=self.grounding_context,
+                prompt_accessor=self.prompt_accessor
             ),
             'social': SocialAnalyzer(
                 llm_client=self.llm_client,
                 async_client=self.async_client,
                 data_dir=self.data_dir,
-                grounding_context=self.grounding_context
+                grounding_context=self.grounding_context,
+                prompt_accessor=self.prompt_accessor
             ),
             'reddit': RedditAnalyzer(
                 llm_client=self.llm_client,
                 async_client=self.async_client,
                 data_dir=self.data_dir,
-                grounding_context=self.grounding_context
+                grounding_context=self.grounding_context,
+                prompt_accessor=self.prompt_accessor
             )
         }
 

@@ -37,7 +37,7 @@ Daily AI/ML news briefings curated by specialized agents using adaptive thinking
 A Python-based pipeline that collects AI/ML news from multiple sources, analyzes them using specialized agents with Claude's adaptive thinking, and serves a modern Svelte SPA frontend.
 
 **Key Stats:**
-- **100+ RSS feeds** from AI news sites, blogs, and research organizations
+- **40+ curated RSS/Atom sources** plus 7 arXiv category feeds
 - **7 arXiv categories** (cs.AI, cs.LG, cs.CL, cs.CV, cs.NE, cs.RO, stat.ML)
 - **6 social platforms** (Twitter, Bluesky, Mastodon, Reddit, LessWrong, research blogs)
 - **Adaptive reasoning profiles** for lightweight triage through cross-category synthesis
@@ -500,8 +500,8 @@ Each pipeline run tracks collection status per source:
 
 | Category | Sources | Collection Method |
 |----------|---------|-------------------|
-| **News** | 100+ RSS feeds + linked articles | RSS + LLM-guided link following |
-| **Research** | arXiv (7 categories) + LessWrong | RSS/OAI-PMH + GraphQL API |
+| **News** | 26 curated RSS/Atom feeds + linked articles | RSS/Atom + LLM-guided link following |
+| **Research** | 19 research feeds + 7 arXiv categories | RSS/Atom + arXiv RSS/OAI-PMH + LessWrong GraphQL |
 | **Social** | Twitter, Bluesky, Mastodon | TwitterAPI.io + free APIs |
 | **Reddit** | Configurable subreddits | Public JSON endpoints |
 

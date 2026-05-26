@@ -20,6 +20,15 @@ export interface NewsItem {
 	importance_score: number;
 	reasoning: string;
 	themes: string[];
+	freshness?: {
+		status: string;
+		label: string;
+		reason?: string;
+		primary_url?: string;
+		primary_published?: string;
+		age_days?: number;
+		exclude_from_top?: boolean;
+	};
 }
 
 export interface CategoryTheme {
@@ -148,8 +157,8 @@ export const CATEGORY_CONFIG: Record<
 		accentClass: 'category-accent-news'
 	},
 	research: {
-		title: 'Research Papers',
-		shortTitle: 'Papers',
+		title: 'Research',
+		shortTitle: 'Research',
 		color: '#10b981',
 		bgClass: 'bg-category-research',
 		textClass: 'text-category-research',

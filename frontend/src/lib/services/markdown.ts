@@ -28,19 +28,22 @@ export function markdownToHtml(text: string): string {
 		(url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${truncateUrl(url)}</a>`
 	);
 
-	// Convert markdown links [text](url)
-	text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, linkText, url) => {
-		if (url.startsWith('/') || url.startsWith('#')) {
-			// Internal link
-			return `<a href="${url}" class="internal-link">${linkText}</a>`;
-		} else {
-			// External link
-			return `<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
-		}
-	});
+	text = text
+		.split('\n')
+		.map((line) => {
+			// Convert links before bold so existing **markers inside link labels**
+			// render, while unmatched markers cannot bleed into later lines.
+			line = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, linkText, url) => {
+				if (url.startsWith('/') || url.startsWith('#')) {
+					return `<a href="${url}" class="internal-link">${linkText}</a>`;
+				} else {
+					return `<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+				}
+			});
 
-	// Convert **bold** to <strong>
-	text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+			return line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+		})
+		.join('\n');
 
 	// Convert markdown headers to HTML (h2-h4)
 	text = text.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');

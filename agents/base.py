@@ -812,10 +812,26 @@ class BaseAnalyzer(ABC):
         if not analyzed_items:
             return self._empty_report()
 
-        logger.info(f"  {self.category} REDUCE: ranking {len(analyzed_items[:50])} candidates...")
-
         # Select top candidates for final ranking (top 50 by score)
-        top_candidates = analyzed_items[:50]
+        eligible_items = [item for item in analyzed_items if not self._exclude_from_top(item)]
+        excluded_count = len(analyzed_items) - len(eligible_items)
+        if excluded_count:
+            logger.info(f"  {self.category} REDUCE: excluding {excluded_count} freshness/continuation item(s) from top ranking")
+        if not eligible_items:
+            logger.warning(f"  {self.category} REDUCE: no eligible top-ranking items after exclusions")
+            return CategoryReport(
+                category=self.category,
+                top_items=[],
+                all_items=analyzed_items,
+                category_summary="No fresh eligible items to summarize.",
+                themes=themes[:10],
+                cross_signals=cross_signals,
+                total_collected=len(analyzed_items),
+                thinking=f"Batch Analysis:\n{batch_thinking}\n\nRanking:\nNo eligible items"
+            )
+
+        top_candidates = eligible_items[:50]
+        logger.info(f"  {self.category} REDUCE: ranking {len(top_candidates)} candidates...")
 
         # Build ranking context
         ranking_context = self._build_ranking_context(top_candidates, themes)
@@ -848,13 +864,16 @@ class BaseAnalyzer(ABC):
         top_items = []
         for id in top_ids:
             for item in analyzed_items:
-                if item.item.id == id:
+                if item.item.id == id and not self._exclude_from_top(item):
                     top_items.append(item)
                     break
 
         # Fill to 10 if needed (in case some IDs weren't found)
         if len(top_items) < 10:
-            remaining = [i for i in analyzed_items if i not in top_items]
+            remaining = [
+                i for i in analyzed_items
+                if i not in top_items and not self._exclude_from_top(i)
+            ]
             top_items.extend(remaining[:10 - len(top_items)])
 
         logger.info(f"  {self.category} REDUCE: complete, {len(top_items)} top items ranked")
@@ -872,6 +891,14 @@ class BaseAnalyzer(ABC):
             total_collected=len(analyzed_items),
             thinking=f"Batch Analysis:\n{batch_thinking}\n\nRanking:\n{ranking_thinking}"
         )
+
+    def _exclude_from_top(self, item: AnalyzedItem) -> bool:
+        """Return True when an analyzed item must not be used for top-story ranking."""
+        if item.continuation and item.continuation.should_demote:
+            return True
+        metadata = item.item.metadata if isinstance(item.item.metadata, dict) else {}
+        freshness = metadata.get('freshness') if isinstance(metadata.get('freshness'), dict) else {}
+        return bool(freshness.get('exclude_from_top'))
 
     def _empty_report(self) -> CategoryReport:
         """Return an empty CategoryReport."""

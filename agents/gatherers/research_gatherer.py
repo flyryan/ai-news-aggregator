@@ -62,6 +62,29 @@ class ResearchGatherer(BaseGatherer):
 
     API_BASE = "https://export.arxiv.org/api/query"
     RSS_BASE = "https://rss.arxiv.org/rss"
+    TREND_RESEARCH_FEED_MARKERS = (
+        'feeds.trendmicro.com/trendmicrosimplysecurity',
+        'trend micro research'
+    )
+    TREND_AI_RELEVANCE_PATTERNS = (
+        r'\btrendai\b',
+        r'\bai\b',
+        r'\bai[- ](?:enabled|augmented|powered|driven|scaled|first)\b',
+        r'\bartificial intelligence\b',
+        r'\bmachine learning\b',
+        r'\bml\b',
+        r'\bllm\b',
+        r'\bllms\b',
+        r'\blarge language model',
+        r'\bgenerative ai\b',
+        r'\bagentic\b',
+        r'\bprompt injection\b',
+        r'\bjailbreak',
+        r'\bmcp\b',
+        r'\bmodel context protocol\b',
+        r'\bdeepfake',
+        r'\bvibe hacking\b',
+    )
 
     def __init__(
         self,
@@ -348,6 +371,9 @@ class ResearchGatherer(BaseGatherer):
                     logger.warning(f"Feed warning for {feed_url}: {exc}")
 
             feed_title = feed.feed.get('title', 'Research Blog')
+            is_trend_feed = self._is_trend_research_feed(feed_url, feed_title)
+            trend_filtered = 0
+            trend_retained = 0
 
             for entry in feed.entries:
                 try:
@@ -377,6 +403,11 @@ class ResearchGatherer(BaseGatherer):
                     title = entry.get('title', 'No Title')
                     url = entry.get('link', '')
                     author = entry.get('author', entry.get('dc_creator', 'Unknown'))
+                    tags = [tag.term for tag in entry.get('tags', []) if getattr(tag, 'term', None)]
+
+                    if is_trend_feed and not self._is_trend_ai_relevant(title, content_text, tags):
+                        trend_filtered += 1
+                        continue
 
                     # Handle author as list (some feeds)
                     if isinstance(author, list):
@@ -391,7 +422,7 @@ class ResearchGatherer(BaseGatherer):
                         published=pub_date.isoformat(),
                         source=feed_title,
                         source_type='research_blog',
-                        tags=[tag.term for tag in entry.get('tags', [])],
+                        tags=tags,
                         metadata={
                             'feed_url': feed_url,
                             'raw_summary': entry.get('summary', '')[:500]
@@ -400,16 +431,34 @@ class ResearchGatherer(BaseGatherer):
                     )
 
                     posts.append(post)
+                    if is_trend_feed:
+                        trend_retained += 1
 
                 except Exception as e:
                     logger.error(f"Error processing entry from {feed_url}: {e}")
 
+            if is_trend_feed:
+                logger.info(
+                    "Trend Micro AI/security filter retained %s posts and filtered %s posts",
+                    trend_retained,
+                    trend_filtered
+                )
             logger.info(f"Collected {len(posts)} posts from {feed_title}")
 
         except Exception as e:
             logger.error(f"Error fetching research feed {feed_url}: {e}")
 
         return posts
+
+    def _is_trend_research_feed(self, feed_url: str, feed_title: str = '') -> bool:
+        """Identify Trend Micro's broad threat-research feed for source-specific filtering."""
+        marker_text = f"{feed_url} {feed_title}".lower()
+        return any(marker in marker_text for marker in self.TREND_RESEARCH_FEED_MARKERS)
+
+    def _is_trend_ai_relevant(self, title: str, content: str, tags: List[str]) -> bool:
+        """Keep Trend threat research only when it intersects AI/security topics."""
+        text = f"{title} {content} {' '.join(tags)}".lower()
+        return any(re.search(pattern, text) for pattern in self.TREND_AI_RELEVANCE_PATTERNS)
 
     def _fetch_lesswrong_graphql(self) -> List[CollectedItem]:
         """Fetch posts from LessWrong using GraphQL API for date-range queries.
