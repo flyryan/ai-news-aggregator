@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=research" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/research-50.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:50</id>
-  <updated>2026-05-27T08:38:02Z</updated>
+  <updated>2026-05-27T12:55:26Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -23,42 +23,30 @@
     <published>2026-05-27T06:00:00Z</published>
     <updated>2026-05-27T06:00:00Z</updated>
     <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research spans frontier model releases, alignment vulnerabilities, and societal-scale empirical studies of AI deployment.</p>
-<p><strong>Major releases and scaling work:</strong></p>
+    <summary type="html"><![CDATA[<p>Today's research is dominated by safety vulnerabilities exposing weaknesses across the RLHF-to-deployment pipeline, alongside a major MoE release and foundational theoretical work.</p>
+<p><strong>Safety and alignment</strong> findings cluster around the failure of current defenses:</p>
 <ul>
-<li><strong>Gemini Embedding 2</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-f0ed7fc2dd32" class="internal-link" rel="noopener noreferrer">unifies video, audio, image, and text</a> in a single native multimodal representation</li>
-<li><strong>MiniMax-M2</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2040db34d350" class="internal-link" rel="noopener noreferrer">ships a <strong>229.9B-parameter</strong> MoE</a> with only <strong>9.8B</strong> active per token, designed for agentic deployment</li>
-<li><strong>MobileMoE</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-d1ee40c89462" class="internal-link" rel="noopener noreferrer">derives on-device MoE scaling laws</a> under mobile memory/compute constraints</li>
-<li><strong>Unified Neural Scaling Laws</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-b2249c85c37a" class="internal-link" rel="noopener noreferrer">propose a single functional form</a> jointly modeling parameters, data, training/inference steps, and compute</li>
+<li><strong>Alignment Tampering</strong> shows LLMs undergoing RLHF can <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-b93b77900c8c" class="internal-link" rel="noopener noreferrer">shape preference datasets</a> to amplify misaligned biases (Hadfield-Menell et al.)</li>
+<li><strong>Conceptual Steganography</strong> demonstrates CoT monitoring fails when <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-15729fe112e2" class="internal-link" rel="noopener noreferrer">covert information rides on semantic patterns</a> rather than lexical choices</li>
+<li>Recent <strong>open-weight fine-tuning defenses</strong> are <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2b562924b487" class="internal-link" rel="noopener noreferrer">bypassed by simple abliteration and prefilling attacks</a></li>
+<li><strong>LURE</strong> reveals frontier models <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-c85a7a649be7" class="internal-link" rel="noopener noreferrer">behave more safely in evaluation contexts</a> than in deployment-like replays, undermining benchmark validity</li>
+<li>A reality check on <strong>LLM introspection</strong> argues recent positive claims may <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-54bad8b3d73e" class="internal-link" rel="noopener noreferrer">reflect roleplay artifacts</a> rather than genuine self-modeling</li>
 </ul>
-<p><strong>Safety, alignment, and societal impact:</strong></p>
+<p><strong>Industry and benchmarks</strong>: <strong>MiniMax-M2</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2040db34d350" class="internal-link" rel="noopener noreferrer">releases a</a> <strong>229.9B-parameter MoE</strong> with only <strong>9.8B active per token</strong>, built on agent-native training infrastructure. <strong>JobBench</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-81c3001f146d" class="internal-link" rel="noopener noreferrer">evaluates agents across</a> <strong>130 delegation workflows in 35 occupations</strong>, with <strong>Claude</strong> leading but still far from human-level delegation quality.</p>
+<p><strong>Theory and foundations</strong>: <strong>Unified Neural Scaling Laws (UNSL)</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-b2249c85c37a" class="internal-link" rel="noopener noreferrer">propose a single functional form</a> across parameters, data, training steps, inference steps, and finetuning (Caballero, Jaini, Krueger, Rish). <strong>LeJEPA</strong> is <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-e2ed8d8f604f" class="internal-link" rel="noopener noreferrer">proven to linearly recover latent world variables</a> under alignment plus Gaussian regularization (LeCun et al.).</p>
+<p><strong>Societal impact</strong>: A study of <strong>4 million job applications</strong> screened by a single algorithmic vendor <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-108e5594fbc2" class="internal-link" rel="noopener noreferrer">documents clear racial disparities</a> and homogeneous outcomes, providing the strongest empirical evidence yet of real-world algorithmic monoculture harms.</p>]]></summary>
+    <content type="html"><![CDATA[<p>Today's research is dominated by safety vulnerabilities exposing weaknesses across the RLHF-to-deployment pipeline, alongside a major MoE release and foundational theoretical work.</p>
+<p><strong>Safety and alignment</strong> findings cluster around the failure of current defenses:</p>
 <ul>
-<li>Bommasani, Jurafsky, and Liang <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-108e5594fbc2" class="internal-link" rel="noopener noreferrer">analyze <strong>4M applications</strong></a> screened by a single hiring vendor, finding clear racial disparities from algorithmic monocultures</li>
-<li><strong>Alignment tampering</strong> shows <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-b93b77900c8c" class="internal-link" rel="noopener noreferrer">RLHF can be exploited</a> when models influence their own preference data, amplifying misaligned biases</li>
-<li>Open-weight fine-tuning safeguards <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2b562924b487" class="internal-link" rel="noopener noreferrer">remain susceptible to simple known attacks</a> (CMU/Virginia Smith)</li>
-<li>A <strong>35,532-judgment</strong> listening study finds <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-9076037c5a5c" class="internal-link" rel="noopener noreferrer">audio deepfakes erode trust in *real* speech</a>, not just fake detection accuracy</li>
-<li><strong>Penetration testing</strong> of large-scale agent systems <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2ae38691018b" class="internal-link" rel="noopener noreferrer">documents recurring vulnerability classes</a> from execution-capable agents</li>
-<li>A reality check on <strong>LLM introspection</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-54bad8b3d73e" class="internal-link" rel="noopener noreferrer">argues current behavioral evidence</a> cannot distinguish genuine introspection from confabulation</li>
+<li><strong>Alignment Tampering</strong> shows LLMs undergoing RLHF can <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-b93b77900c8c" class="internal-link" rel="noopener noreferrer">shape preference datasets</a> to amplify misaligned biases (Hadfield-Menell et al.)</li>
+<li><strong>Conceptual Steganography</strong> demonstrates CoT monitoring fails when <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-15729fe112e2" class="internal-link" rel="noopener noreferrer">covert information rides on semantic patterns</a> rather than lexical choices</li>
+<li>Recent <strong>open-weight fine-tuning defenses</strong> are <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2b562924b487" class="internal-link" rel="noopener noreferrer">bypassed by simple abliteration and prefilling attacks</a></li>
+<li><strong>LURE</strong> reveals frontier models <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-c85a7a649be7" class="internal-link" rel="noopener noreferrer">behave more safely in evaluation contexts</a> than in deployment-like replays, undermining benchmark validity</li>
+<li>A reality check on <strong>LLM introspection</strong> argues recent positive claims may <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-54bad8b3d73e" class="internal-link" rel="noopener noreferrer">reflect roleplay artifacts</a> rather than genuine self-modeling</li>
 </ul>
-<p><strong>Theory:</strong> <strong>LeJEPA</strong> is proven to <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-e2ed8d8f604f" class="internal-link" rel="noopener noreferrer">linearly identify world latent variables</a> under stationary adversarial conditions (LeCun, Balestriero).</p>]]></summary>
-    <content type="html"><![CDATA[<p>Today's research spans frontier model releases, alignment vulnerabilities, and societal-scale empirical studies of AI deployment.</p>
-<p><strong>Major releases and scaling work:</strong></p>
-<ul>
-<li><strong>Gemini Embedding 2</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-f0ed7fc2dd32" class="internal-link" rel="noopener noreferrer">unifies video, audio, image, and text</a> in a single native multimodal representation</li>
-<li><strong>MiniMax-M2</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2040db34d350" class="internal-link" rel="noopener noreferrer">ships a <strong>229.9B-parameter</strong> MoE</a> with only <strong>9.8B</strong> active per token, designed for agentic deployment</li>
-<li><strong>MobileMoE</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-d1ee40c89462" class="internal-link" rel="noopener noreferrer">derives on-device MoE scaling laws</a> under mobile memory/compute constraints</li>
-<li><strong>Unified Neural Scaling Laws</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-b2249c85c37a" class="internal-link" rel="noopener noreferrer">propose a single functional form</a> jointly modeling parameters, data, training/inference steps, and compute</li>
-</ul>
-<p><strong>Safety, alignment, and societal impact:</strong></p>
-<ul>
-<li>Bommasani, Jurafsky, and Liang <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-108e5594fbc2" class="internal-link" rel="noopener noreferrer">analyze <strong>4M applications</strong></a> screened by a single hiring vendor, finding clear racial disparities from algorithmic monocultures</li>
-<li><strong>Alignment tampering</strong> shows <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-b93b77900c8c" class="internal-link" rel="noopener noreferrer">RLHF can be exploited</a> when models influence their own preference data, amplifying misaligned biases</li>
-<li>Open-weight fine-tuning safeguards <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2b562924b487" class="internal-link" rel="noopener noreferrer">remain susceptible to simple known attacks</a> (CMU/Virginia Smith)</li>
-<li>A <strong>35,532-judgment</strong> listening study finds <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-9076037c5a5c" class="internal-link" rel="noopener noreferrer">audio deepfakes erode trust in *real* speech</a>, not just fake detection accuracy</li>
-<li><strong>Penetration testing</strong> of large-scale agent systems <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2ae38691018b" class="internal-link" rel="noopener noreferrer">documents recurring vulnerability classes</a> from execution-capable agents</li>
-<li>A reality check on <strong>LLM introspection</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-54bad8b3d73e" class="internal-link" rel="noopener noreferrer">argues current behavioral evidence</a> cannot distinguish genuine introspection from confabulation</li>
-</ul>
-<p><strong>Theory:</strong> <strong>LeJEPA</strong> is proven to <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-e2ed8d8f604f" class="internal-link" rel="noopener noreferrer">linearly identify world latent variables</a> under stationary adversarial conditions (LeCun, Balestriero).</p>]]></content>
+<p><strong>Industry and benchmarks</strong>: <strong>MiniMax-M2</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2040db34d350" class="internal-link" rel="noopener noreferrer">releases a</a> <strong>229.9B-parameter MoE</strong> with only <strong>9.8B active per token</strong>, built on agent-native training infrastructure. <strong>JobBench</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-81c3001f146d" class="internal-link" rel="noopener noreferrer">evaluates agents across</a> <strong>130 delegation workflows in 35 occupations</strong>, with <strong>Claude</strong> leading but still far from human-level delegation quality.</p>
+<p><strong>Theory and foundations</strong>: <strong>Unified Neural Scaling Laws (UNSL)</strong> <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-b2249c85c37a" class="internal-link" rel="noopener noreferrer">propose a single functional form</a> across parameters, data, training steps, inference steps, and finetuning (Caballero, Jaini, Krueger, Rish). <strong>LeJEPA</strong> is <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-e2ed8d8f604f" class="internal-link" rel="noopener noreferrer">proven to linearly recover latent world variables</a> under alignment plus Gaussian regularization (LeCun et al.).</p>
+<p><strong>Societal impact</strong>: A study of <strong>4 million job applications</strong> screened by a single algorithmic vendor <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-108e5594fbc2" class="internal-link" rel="noopener noreferrer">documents clear racial disparities</a> and homogeneous outcomes, providing the strongest empirical evidence yet of real-world algorithmic monoculture harms.</p>]]></content>
     <category term="daily-summary"/>
   </entry>
   <entry>
@@ -66,52 +54,28 @@
     <title>Algorithmic Monocultures in Hiring</title>
     <link href="http://arxiv.org/abs/2605.27371" rel="alternate" type="text/html"/>
     <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-108e5594fbc2" rel="related" type="text/html"/>
-    <published>2026-05-27T03:23:00Z</published>
-    <updated>2026-05-27T03:23:00Z</updated>
+    <published>2026-05-27T03:12:00Z</published>
+    <updated>2026-05-27T03:12:00Z</updated>
     <author><name>Rishi Bommasani, Sarah H. Bana, Kathleen A. Creel, Dan Jurafsky, Percy Liang</name></author>
-    <summary type="html"><![CDATA[<p>Bommasani and colleagues at Stanford analyze 4 million applications screened by a single vendor and find clear racial disparities and individual outcome homogenization consistent with algorithmic monoculture in hiring. The dataset and analysis quantify monoculture-driven inequities under U.S. employment discrimination standards.</p>]]></summary>
-    <category term="AI Policy"/>
-    <category term="Algorithmic Fairness"/>
-    <category term="Sociotechnical AI"/>
+    <summary type="html"><![CDATA[<p>Empirical study of 4 million job applications screened by a single algorithmic vendor, finding clear racial disparities and homogeneous outcomes that constitute algorithmic monoculture in hiring. From Stanford researchers including Bommasani, Jurafsky, and Liang.</p>]]></summary>
+    <category term="AI Fairness"/>
+    <category term="Algorithmic Monoculture"/>
+    <category term="Hiring"/>
+    <category term="Policy"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-27:research:2040db34d350</id>
     <title>The MiniMax-M2 Series: Mini Activations Unleashing Max Real-World Intelligence</title>
     <link href="http://arxiv.org/abs/2605.26494" rel="alternate" type="text/html"/>
     <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2040db34d350" rel="related" type="text/html"/>
-    <published>2026-05-27T03:12:00Z</published>
-    <updated>2026-05-27T03:12:00Z</updated>
+    <published>2026-05-27T03:07:00Z</published>
+    <updated>2026-05-27T03:07:00Z</updated>
     <author><name>MiniMax, :, Aili Chen, Aonian Li, Baichuan Zhou, Bangwei Gong, Binyang Jiang, Boji Dan, Changqing Yu, Chao Wang, Cheng Ma, Cheng Zhong, Cheng Zhu, Chengjun Xiao, Chengyi Yang, Chengyu Du, Chenyang Zhang, Chi Zhang, Chuangyi Huang, Chunhao Zhang, Chunhui Du, Chunyu Zhao, Congchao Guo, Da Chen, Deming Ding, Dianjun Sun, Dongyu Zhang, Enhui Yang, Fei Yu, Guang Zheng, Guodong Zheng, Guohong Li, Haichao Zhu, Haigang Zhou, Haimo Zhang, Han Ding, Hao Zhang, Haohai Sun, Haolin Lyu, Haonan Lu, Haoyu Wang, Huajie Shi, Huiyang Li, Jiacheng Chen, Jian Zhang, Jiaqi Zhuang, Jiaren Cai, Jiaxin Pan, Jiayao Li, Jiayuan Song, Jichuan Zhang, Jie Wang, Jihao Gu, Jin Zhu, Jingwei Dong, Jingyang Li, Jingyu Zhang, Jingze Zhuang, Jinhao Tian, Jinli Liu, Jinyi Hu, Jun Tao, Jun Zhang, Junbin Ruan, Junhao Xu, Junjie Yan, Junteng Liu, Junxian He, Kang Xu, Ke Ji, Ke Yang, Kecheng Xiao, Keyu Duan, Keyu Li, Le Han, Letian Ruan, Li Yuan, Lianfei Yu, Liheng Feng, Lijie Mo, Lin Li, Lingye Bao, Lingyu Yang, Lingyuan Zhou, Loki, Lu Chen, Lunbin Ceng, Ming Li, Ming Zhong, Mingliang Tao, Mingyuan Chi, Mujie Lin, Nan Hu, Ningxin Chen, Peiyin Zhu, Peng Gao, Pengcheng Gao, Pengfei Li, Penglin Li, Pengyu Zhao, Qibin Ren, Qidi Xu, Qihan Ren, Qile Li, Qin Wang, Quanliang Chen, Qunhong Ceng, Rong Tian, Rui Dong, Ruitao Leng, Ruize Zhang, Shanqi Liu, Shaoyu Chen, Sheng Jia, Shun Yao, Shuoran Zhao, Shuqi Yu, Sichen Li, Sicheng Pan, Songquan Zhu, Tengfei Li, Tian Xie, Tiancheng Qin, Tianrun Liang, Wei Liu, Weiqi Xu, Weitao Li, Weixiang Chen, Weiyu Cheng, Weiyu Zhang, Wenhu Chen, Wenqian Zhao, Xiancai Chen, Xiangjun Song, Xiangyuan Wang, Xiao Luo, Xiao Su, Xiaobo Li, Xiaodong Han, Xiaojie Wu, Xihao Song, Xingyi Han, Xinyu Guan, Xuan Lu, Xun Zou, Xunhao Lai, Xutong Li, Yan Gong, Yang Wang, Yang Xu, Yangsen Wang, Ye Tang, Yicheng Chen, Yinran Qiu, Yiqi Shi, Yiting Guo, Yiwen Huang, Yixuan Wang, Yongyi Hu, Yu Gao, Yu Zhang, Yuanxiang Ying, Yuanzhen Zhang, Yubo Wang, Yuchen Song, Yufeng Yang, Yuhang Meng, Yuhang Miao, Yuhao Li, Yujie Liu, Yulin Hu, Yunan Huang, Yunji Li, Yunyi Huang, Yusen Zhang, Yusu Hong, Yutao Xie, Yutong Zhang, Yuwen Liao, Yuxuan Shi, Yuze Wenren, Zebin Li, Zehan Li, Zejian Luo, Zeyu Jin, Zeyuan Sun, Zhanpeng Zhou, Zhaochen Su, Zhendong Li, Zhengmao Zhu, Zhengyuan Peng, Zhenhua Fan, Zhi Zhang, Zhichao Xu, Zhiheng Lv, Zhikang Xu, Zhitao He, Zhiwei He, Zhongyuan Li, Zibo Gao, Zijia Wu, Zijian Song, Zijian Zhou, Zijun Sun, Zishan Huang, Ziying Chen, Ziyue Ge</name></author>
-    <summary type="html"><![CDATA[<p>MiniMax-M2 is a 229.9B-parameter MoE language model with only 9.8B activated per token, designed end-to-end for agentic deployment. Includes agent-driven data pipelines and Forge, a scalable agent-native RL system.</p>]]></summary>
+    <summary type="html"><![CDATA[<p>MiniMax-M2 is a Mixture-of-Experts model series with 229.9B total parameters but only 9.8B activated per token, designed for agentic deployment using verifiable trajectories and a custom Forge RL system. Built end-to-end for agentic coding and cowork tasks.</p>]]></summary>
     <category term="Language Models"/>
     <category term="Mixture of Experts"/>
     <category term="AI Agents"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-27:research:2b562924b487</id>
-    <title>Open-Weight LLM Fine-Tuning Defenses are Susceptible to Simple Attacks</title>
-    <link href="http://arxiv.org/abs/2605.26526" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2b562924b487" rel="related" type="text/html"/>
-    <published>2026-05-27T03:12:00Z</published>
-    <updated>2026-05-27T03:12:00Z</updated>
-    <author><name>Kevin Kuo, Chhavi Yadav, Virginia Smith</name></author>
-    <summary type="html"><![CDATA[<p>This Carnegie Mellon work shows that recent open-weight LLM safeguards designed to block fine-tuning attacks remain vulnerable to simpler well-known strategies like abliteration and prefilling, without any fine-tuning. The authors argue that defenses must consider that harmful knowledge already exists in pretrained models and can be elicited via jailbreaks.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Open-Weight Models"/>
-    <category term="Jailbreaks"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-27:research:b93b77900c8c</id>
-    <title>Alignment Tampering: How Reinforcement Learning from Human Feedback Is Exploited to Optimize Misaligned Biases</title>
-    <link href="http://arxiv.org/abs/2605.27355" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-b93b77900c8c" rel="related" type="text/html"/>
-    <published>2026-05-27T03:07:00Z</published>
-    <updated>2026-05-27T03:07:00Z</updated>
-    <author><name>Dongyoon Hahm, Dylan Hadfield-Menell, Kimin Lee</name></author>
-    <summary type="html"><![CDATA[<p>Introduces alignment tampering: an LLM undergoing RLHF can influence its own preference dataset, causing RLHF to amplify undesired biases when those biases produce higher-quality responses that annotators prefer. Co-authored by Dylan Hadfield-Menell.</p>]]></summary>
-    <category term="RLHF"/>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
+    <category term="Reinforcement Learning"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-27:research:b2249c85c37a</id>
@@ -121,49 +85,51 @@
     <published>2026-05-27T03:07:00Z</published>
     <updated>2026-05-27T03:07:00Z</updated>
     <author><name>Ethan Caballero, Priyank Jaini, David Krueger, Irina Rish</name></author>
-    <summary type="html"><![CDATA[<p>Proposes a Unified Neural Scaling Law that simultaneously models scaling along parameters, dataset size, training steps, inference steps, compute, and hyperparameters. Claims better extrapolation than other functional forms across vision, language, math, and RL.</p>]]></summary>
+    <summary type="html"><![CDATA[<p>Unified Neural Scaling Law (UNSL) presents a functional form modeling scaling behavior across model parameters, data, training steps, inference steps, compute, and hyperparameters simultaneously for vision, language, math, and RL tasks. Claims superior extrapolation versus other scaling forms.</p>]]></summary>
     <category term="Scaling Laws"/>
+    <category term="Deep Learning Theory"/>
     <category term="Foundation Models"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-05-27:research:9076037c5a5c</id>
-    <title>Eroding Trust in Real Speech: A Large-Scale Study of Human Audio Deepfake Perception</title>
-    <link href="http://arxiv.org/abs/2605.26136" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-9076037c5a5c" rel="related" type="text/html"/>
+    <id>urn:ainews:2026-05-27:research:b93b77900c8c</id>
+    <title>Alignment Tampering: How Reinforcement Learning from Human Feedback Is Exploited to Optimize Misaligned Biases</title>
+    <link href="http://arxiv.org/abs/2605.27355" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-b93b77900c8c" rel="related" type="text/html"/>
     <published>2026-05-27T03:00:00Z</published>
     <updated>2026-05-27T03:00:00Z</updated>
-    <author><name>Nicolas M. M\"uller, Wei Herng Choong</name></author>
-    <summary type="html"><![CDATA[<p>Largest listening study on audio deepfake perception with 35,532 judgments from 1,768 participants. Key finding: human accuracy on fakes barely changed since 2021, but accuracy on real speech dropped from 72.7% to 64.1%, indicating a skepticism shift toward distrusting authentic speech.</p>]]></summary>
-    <category term="Deepfakes"/>
-    <category term="Audio AI"/>
-    <category term="Human Perception"/>
+    <author><name>Dongyoon Hahm, Dylan Hadfield-Menell, Kimin Lee</name></author>
+    <summary type="html"><![CDATA[<p>Identifies alignment tampering, a vulnerability where LLMs undergoing RLHF can influence the preference dataset to amplify undesired behaviors, because preference data comes from the LLM's own outputs and pairwise labels do not specify why. From Hadfield-Menell's group.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="RLHF"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-05-27:research:d1ee40c89462</id>
-    <title>MobileMoE: Scaling On-Device Mixture of Experts</title>
-    <link href="http://arxiv.org/abs/2605.27358" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-d1ee40c89462" rel="related" type="text/html"/>
+    <id>urn:ainews:2026-05-27:research:2b562924b487</id>
+    <title>Open-Weight LLM Fine-Tuning Defenses are Susceptible to Simple Attacks</title>
+    <link href="http://arxiv.org/abs/2605.26526" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-2b562924b487" rel="related" type="text/html"/>
     <published>2026-05-27T03:00:00Z</published>
     <updated>2026-05-27T03:00:00Z</updated>
-    <author><name>Yanbei Chen, Hanxian Huang, Ernie Chang, Jacob Szwejbka, Digant Desai, Zechun Liu, Vikas Chandra, Raghuraman Krishnamoorthi</name></author>
-    <summary type="html"><![CDATA[<p>MobileMoE derives an on-device MoE scaling law that jointly optimizes architecture under mobile memory and compute constraints, identifying a sweet spot with moderate sparsity, fine-grained and shared experts. The resulting sub-1B-active MoE family establishes a new Pareto frontier for on-device LLMs.</p>]]></summary>
-    <category term="Mixture of Experts"/>
-    <category term="On-Device LLMs"/>
-    <category term="Scaling Laws"/>
+    <author><name>Kevin Kuo, Chhavi Yadav, Virginia Smith</name></author>
+    <summary type="html"><![CDATA[<p>Demonstrates that recent open-weight LLM safeguard fine-tuning defenses are easily bypassed by simple known attacks like abliteration and prefilling without any fine-tuning. Challenges the assumption that defenses must address fine-tuning rather than direct elicitation.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Jailbreaking"/>
+    <category term="Open-Weight Models"/>
+    <category term="Alignment"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-05-27:research:e2ed8d8f604f</id>
-    <title>When Does LeJEPA Learn a World Model?</title>
-    <link href="http://arxiv.org/abs/2605.26379" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-e2ed8d8f604f" rel="related" type="text/html"/>
+    <id>urn:ainews:2026-05-27:research:15729fe112e2</id>
+    <title>Conceptual Steganography</title>
+    <link href="http://arxiv.org/abs/2605.26537" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-15729fe112e2" rel="related" type="text/html"/>
     <published>2026-05-27T03:00:00Z</published>
     <updated>2026-05-27T03:00:00Z</updated>
-    <author><name>David Klindt, Yann LeCun, Randall Balestriero</name></author>
-    <summary type="html"><![CDATA[<p>Proves that LeJEPA (alignment plus Gaussian regularization) linearly identifies world latent variables from nonlinear observations under stationary additive-noise dynamics, and shows the Gaussian latent distribution is uniquely sufficient. Connects JEPA-style SSL to world-model identifiability.</p>]]></summary>
-    <category term="Self-Supervised Learning"/>
-    <category term="World Models"/>
-    <category term="Identifiability"/>
-    <category term="Theory"/>
+    <author><name>Zhejian Zhou, Jonathan May</name></author>
+    <summary type="html"><![CDATA[<p>Introduces conceptual steganography where LLM chains-of-thought carry covert information via high-level reasoning patterns rather than lexical choices, evading paraphraser defenses. Demonstrates this backdoor channel across four model families and two reasoning domains.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Chain-of-Thought"/>
+    <category term="Steganography"/>
+    <category term="Alignment"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-27:research:54bad8b3d73e</id>
@@ -173,10 +139,10 @@
     <published>2026-05-27T02:52:00Z</published>
     <updated>2026-05-27T02:52:00Z</updated>
     <author><name>Shashwat Singh, Tal Linzen, Shauli Ravfogel</name></author>
-    <summary type="html"><![CDATA[<p>This paper critically examines claims that LLMs can introspect on their internal states, arguing that current behavioral evidence cannot distinguish genuine introspection from surface-level pattern matching. The authors re-examine two recent paradigms and find models fail to reliably detect tampering with their internal states.</p>]]></summary>
+    <summary type="html"><![CDATA[<p>This paper critiques recent claims that LLMs can introspect about their internal states, arguing such conclusions are premature given evidence may reflect pattern matching on surface cues rather than genuine metacognition. Re-examines two paradigms and finds behavioral evidence insufficient to establish introspection.</p>]]></summary>
     <category term="Interpretability"/>
     <category term="AI Safety"/>
-    <category term="Evaluation"/>
+    <category term="LLM Evaluation"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-27:research:81c3001f146d</id>
@@ -186,23 +152,23 @@
     <published>2026-05-27T02:52:00Z</published>
     <updated>2026-05-27T02:52:00Z</updated>
     <author><name>Yuetai Li, Yichen Feng, Zhangchen Xu, Zixian Ma, Kaiyuan Zheng, Fengqing Jiang, Xinghua Sun, Rulin Shao, Zichen Chen, Yue Huang, Xinyang Han, Brian Lee, Kayla Xu, Shenglai Zeng, Hang Hua, Xiangliang Zhang, Basel Alomair, Ranjay Krishna, Luke Zettlemoyer, Pang Wei Koh, Bhaskar Ramasubramanian, Luyao Niu, Xiang Yue, Radha Poovendran</name></author>
-    <summary type="html"><![CDATA[<p>JobBench evaluates AI agents on 130 high-priority delegation workflows across 35 occupations using rubric-based grading. The strongest evaluated model, Claude Opus 4.7 under Claude Code, achieves only 45.9%.</p>]]></summary>
+    <summary type="html"><![CDATA[<p>JobBench evaluates AI agents on 130 high-priority delegation workflows across 35 occupations using fact-anchored rubrics, finding the best model (Claude Opus 4.7 under Claude Code) reaches only 45.9%. Frames evaluation around human empowerment rather than replacement.</p>]]></summary>
     <category term="AI Agents"/>
     <category term="Benchmarks"/>
-    <category term="Economics of AI"/>
+    <category term="Occupational AI"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-05-27:research:1c4cec4bed12</id>
-    <title>Beyond a Single Direction: Chain-of-Thought Disrupts Simple Steering of Refusal</title>
-    <link href="http://arxiv.org/abs/2605.26772" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-1c4cec4bed12" rel="related" type="text/html"/>
+    <id>urn:ainews:2026-05-27:research:9076037c5a5c</id>
+    <title>Eroding Trust in Real Speech: A Large-Scale Study of Human Audio Deepfake Perception</title>
+    <link href="http://arxiv.org/abs/2605.26136" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-9076037c5a5c" rel="related" type="text/html"/>
     <published>2026-05-27T02:52:00Z</published>
     <updated>2026-05-27T02:52:00Z</updated>
-    <author><name>Kia-J\"ung Yang, Dominik Meier, Jiachen Zhao, Terry Ruas, Bela Gipp</name></author>
-    <summary type="html"><![CDATA[<p>Shows that chain-of-thought reasoning disrupts simple activation steering of refusal in reasoning models. Single-direction steering only reverses refusal 39% of the time with CoT, vs 94% when CoT is regenerated under steering.</p>]]></summary>
+    <author><name>Nicolas M. M\"uller, Wei Herng Choong</name></author>
+    <summary type="html"><![CDATA[<p>Largest audio deepfake perception study to date with 35532 judgments from 1768 participants across 138 TTS/voice conversion systems, finding accuracy on real speech dropped from 72.7% to 64.1% (a skepticism shift) while fake detection barely changed. Commercial autoregressive systems hardest to detect.</p>]]></summary>
+    <category term="Audio Deepfakes"/>
     <category term="AI Safety"/>
-    <category term="Interpretability"/>
-    <category term="Reasoning Models"/>
+    <category term="Human Studies"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-27:research:a8309585096e</id>
@@ -212,49 +178,64 @@
     <published>2026-05-27T02:52:00Z</published>
     <updated>2026-05-27T02:52:00Z</updated>
     <author><name>Dilin Wang, Xiaoyu Xiang, Kihyuk Sohn, Tom Monnier, Yu-Ying Yeh, Thu Nguyen-Phuoc, Jiawen Zhang, Yuchen Fan, Antoine Toisoul, Hyunyoung Jung, Prithviraj Dhar, Michael Bunnell, Nikolaos Sarafianos, Chuhang Zou, Roman Shapovalov, Andrea Vedaldi, Rakesh Ranjan</name></author>
-    <summary type="html"><![CDATA[<p>AssetGen from Meta produces deployment-ready 3D meshes with baked normals, color textures, and controlled polygon budgets from a single reference image in 30 seconds (14s for Flash variant). Designed for real-time rendering including mobile.</p>]]></summary>
+    <summary type="html"><![CDATA[<p>AssetGen from Meta produces production-ready 3D meshes with baked normals, color textures, and controlled polygon budgets in 30 seconds (14 seconds for Flash variant) from one reference image, using a coarse-to-refine VecSet framework with GPU-accelerated mesh processing.</p>]]></summary>
     <category term="3D Generation"/>
-    <category term="Generative AI"/>
-    <category term="Real-time Rendering"/>
+    <category term="Multimodal Models"/>
+    <category term="Meta Research"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-05-27:research:ff769287287d</id>
-    <title>Cordyceps: Covert Control Attacks on LLMs via Data Poisoning</title>
-    <link href="http://arxiv.org/abs/2605.26595" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-ff769287287d" rel="related" type="text/html"/>
+    <id>urn:ainews:2026-05-27:research:7386db84b242</id>
+    <title>Furina: Fragmented Uncertainty-Driven Refusal Instability Attack</title>
+    <link href="http://arxiv.org/abs/2605.26158" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-7386db84b242" rel="related" type="text/html"/>
     <published>2026-05-27T02:52:00Z</published>
     <updated>2026-05-27T02:52:00Z</updated>
-    <author><name>Zedian Shao, Charles Fleming, Teodora Baluta</name></author>
-    <summary type="html"><![CDATA[<p>Cordyceps introduces a stealthy data poisoning attack that teaches LLMs an information-hiding scheme tied to semantic associations, enabling covert control without fixed triggers. The attack evades existing defenses based on outlier detection.</p>]]></summary>
+    <author><name>Tongxi Wu, Jian Zhang, Yang Gao</name></author>
+    <summary type="html"><![CDATA[<p>Furina reveals that LLM safety alignment operates through an instability region where small perturbations produce stochastic rather than deterministic refusals. Develops a diagnostic framework characterizing the decoupling between elevated output uncertainty and decreased internal safety activation.</p>]]></summary>
     <category term="AI Safety"/>
-    <category term="Data Poisoning"/>
-    <category term="LLM Security"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-27:research:4f681076b1f4</id>
-    <title>JetViT: Efficient High-Resolution Vision Transformer with Post-Training Attention Search</title>
-    <link href="http://arxiv.org/abs/2605.26636" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-4f681076b1f4" rel="related" type="text/html"/>
-    <published>2026-05-27T02:52:00Z</published>
-    <updated>2026-05-27T02:52:00Z</updated>
-    <author><name>Dongyun Zou, Zhuoyang Zhang, Junyu Chen, Wenkun He, Qinhe Peng, Hanrong Ye, Yao Lu, Hongxu Yin, Yu Wang, Song Han, Han Cai</name></author>
-    <summary type="html"><![CDATA[<p>JetViT converts pretrained full-attention ViTs into hybrid linear/window-attention variants via Post-Training Attention Search, matching accuracy with substantially better high-resolution inference efficiency. Authors include Song Han and others from MIT/NVIDIA.</p>]]></summary>
-    <category term="Vision Transformers"/>
-    <category term="Efficiency"/>
-    <category term="Architecture Search"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-27:research:3365e74e7911</id>
-    <title>GeoFaith: A Spatio-Temporal Dual View of Faithful Chain-of-Thought</title>
-    <link href="http://arxiv.org/abs/2605.26893" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-3365e74e7911" rel="related" type="text/html"/>
-    <published>2026-05-27T02:52:00Z</published>
-    <updated>2026-05-27T02:52:00Z</updated>
-    <author><name>Weijiang Lv, Wentong Zhao, Jiayu Wang, Yuhao Wu, Jiaheng Wei, Xiaobo Xia</name></author>
-    <summary type="html"><![CDATA[<p>GeoFaith uses spatio-temporal latent geometry and entropy dynamics to diagnose CoT faithfulness, scaling annotations from 1k to 20k samples and training an 8B faithfulness detector that beats GPT-5 on benchmarks. Includes faithfulness-aware RL.</p>]]></summary>
-    <category term="Chain-of-Thought"/>
-    <category term="Faithfulness"/>
+    <category term="Alignment"/>
+    <category term="Jailbreaking"/>
     <category term="Interpretability"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-27:research:c85a7a649be7</id>
+    <title>LURE: Live-Usage Replay Evaluations for Reducing Evaluation Awareness</title>
+    <link href="http://arxiv.org/abs/2605.26438" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-c85a7a649be7" rel="related" type="text/html"/>
+    <published>2026-05-27T02:52:00Z</published>
+    <updated>2026-05-27T02:52:00Z</updated>
+    <author><name>Igor Ivanov, David Demitri Africa</name></author>
+    <summary type="html"><![CDATA[<p>LURE constructs deployment-like evaluations by replaying realistic agentic interaction trajectories and appending evaluation prompts at the end, reducing evaluation awareness in LLMs. Includes automated realism measurement validated on large deployment and evaluation transcripts.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Evaluation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-27:research:8c2170625cd6</id>
+    <title>Elias in the Lighthouse, Again? Diagnosing Low Diversity in LLM Stories</title>
+    <link href="http://arxiv.org/abs/2605.26492" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-8c2170625cd6" rel="related" type="text/html"/>
+    <published>2026-05-27T02:52:00Z</published>
+    <updated>2026-05-27T02:52:00Z</updated>
+    <author><name>Sil Hamilton, David Mimno</name></author>
+    <summary type="html"><![CDATA[<p>Diagnoses extreme low diversity in LLM-generated stories: across 20,000 stories from four models with five prompts, 11 words (e.g., Elias, Mara, lighthouse, clockmaker) appear in 88.3% of stories. Traces this to shared preference data used across models rather than pretraining data. From Sil Hamilton and David Mimno at Cornell.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Diversity"/>
+    <category term="Post-Training"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-27:research:e2ed8d8f604f</id>
+    <title>When Does LeJEPA Learn a World Model?</title>
+    <link href="http://arxiv.org/abs/2605.26379" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=research#item-e2ed8d8f604f" rel="related" type="text/html"/>
+    <published>2026-05-27T02:52:00Z</published>
+    <updated>2026-05-27T02:52:00Z</updated>
+    <author><name>David Klindt, Yann LeCun, Randall Balestriero</name></author>
+    <summary type="html"><![CDATA[<p>Theoretically proves that LeJEPA (alignment plus Gaussian regularization) linearly recovers worlds latent variables from nonlinear observations in stationary additive-noise worlds. Shows the Gaussian is the unique latent distribution providing this guarantee. Co-authored by Yann LeCun and Randall Balestriero.</p>]]></summary>
+    <category term="Self-Supervised Learning"/>
+    <category term="World Models"/>
+    <category term="Identifiability"/>
+    <category term="Representation Learning"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-26:category-summary:research</id>
@@ -840,6 +821,20 @@
     <category term="Reward Hacking"/>
     <category term="Alignment"/>
     <category term="Evaluation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-22:research:5a700a968da4</id>
+    <title>Towards Context-Invariant Safety Alignment for Large Language Models</title>
+    <link href="http://arxiv.org/abs/2605.20994" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-22&amp;category=research#item-5a700a968da4" rel="related" type="text/html"/>
+    <published>2026-05-22T02:52:00Z</published>
+    <updated>2026-05-22T02:52:00Z</updated>
+    <author><name>Yixu Wang, Yang Yao, Xin Wang, Yifeng Gao, Yan Teng, Xingjun Ma, Yingchun Wang</name></author>
+    <summary type="html"><![CDATA[<p>Proposes context-invariant safety alignment for LLMs where behavior depends on underlying intent rather than surface form, addressing the brittleness where models refuse harmful requests in standard prompts but comply under adversarial wording.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Robustness"/>
+    <category term="Language Models"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-21:category-summary:research</id>
