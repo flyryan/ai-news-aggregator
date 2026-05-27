@@ -408,6 +408,9 @@ class BaseAnalyzer(ABC):
         llm_client: Optional[AnthropicClient] = None,
         async_client: Optional[AsyncAnthropicClient] = None,
         data_dir: str = './data',
+        config_dir: str = './config',
+        target_date: Optional[str] = None,
+        web_dir: str = './web',
         grounding_context: Optional[str] = None,
         prompt_accessor: Optional['PromptAccessor'] = None
     ):
@@ -418,12 +421,18 @@ class BaseAnalyzer(ABC):
             llm_client: Anthropic client for LLM calls (sync).
             async_client: Async Anthropic client for parallel LLM calls.
             data_dir: Directory containing collected data.
+            config_dir: Directory containing pipeline configuration.
+            target_date: Report date used for freshness policy.
+            web_dir: Directory containing generated web data.
             grounding_context: System prompt with AI ecosystem context for grounding.
             prompt_accessor: Optional PromptAccessor for config-based prompts.
         """
         self.llm_client = llm_client
         self.async_client = async_client
         self.data_dir = data_dir
+        self.config_dir = config_dir
+        self.target_date = target_date or os.getenv('TARGET_DATE') or datetime.now().strftime('%Y-%m-%d')
+        self.web_dir = web_dir
         self.grounding_context = grounding_context
         self.prompt_accessor = prompt_accessor
 
@@ -812,6 +821,27 @@ class BaseAnalyzer(ABC):
         if not analyzed_items:
             return self._empty_report()
 
+        try:
+            from .staleness_checker import StalenessChecker
+
+            freshness_checker = StalenessChecker(
+                config_dir=self.config_dir,
+                target_date=self.target_date,
+                web_dir=self.web_dir,
+            )
+            demoted = await freshness_checker.process_items(
+                self.category,
+                analyzed_items,
+                async_client=self.async_client,
+            )
+            if demoted:
+                logger.info(
+                    f"  {self.category} REDUCE: freshness policy demoted/excluded "
+                    f"{demoted} item(s) before ranking and summary generation"
+                )
+        except Exception as exc:
+            logger.warning(f"  {self.category} REDUCE: freshness policy failed: {exc}")
+
         # Select top candidates for final ranking (top 50 by score)
         eligible_items = [item for item in analyzed_items if not self._exclude_from_top(item)]
         excluded_count = len(analyzed_items) - len(eligible_items)
@@ -835,6 +865,17 @@ class BaseAnalyzer(ABC):
 
         # Build ranking context
         ranking_context = self._build_ranking_context(top_candidates, themes)
+        excluded_summary_items = [
+            item for item in analyzed_items
+            if self._exclude_from_summaries(item)
+        ]
+        if excluded_summary_items:
+            ranking_context += "\n\nFRESHNESS-EXCLUDED ITEMS (do not include in top_10 or category_summary):\n"
+            for item in excluded_summary_items[:12]:
+                metadata = item.item.metadata if isinstance(item.item.metadata, dict) else {}
+                freshness = metadata.get('freshness') if isinstance(metadata.get('freshness'), dict) else {}
+                reason = freshness.get('reason', 'freshness policy')
+                ranking_context += f"- [{item.item.id}] {item.item.title} ({reason})\n"
         ranking_prompt = self._get_ranking_prompt(ranking_context)
 
         try:
@@ -899,6 +940,12 @@ class BaseAnalyzer(ABC):
         metadata = item.item.metadata if isinstance(item.item.metadata, dict) else {}
         freshness = metadata.get('freshness') if isinstance(metadata.get('freshness'), dict) else {}
         return bool(freshness.get('exclude_from_top'))
+
+    def _exclude_from_summaries(self, item: AnalyzedItem) -> bool:
+        """Return True when an item must not shape summaries or topic context."""
+        metadata = item.item.metadata if isinstance(item.item.metadata, dict) else {}
+        freshness = metadata.get('freshness') if isinstance(metadata.get('freshness'), dict) else {}
+        return bool(freshness.get('exclude_from_summaries'))
 
     def _empty_report(self) -> CategoryReport:
         """Return an empty CategoryReport."""

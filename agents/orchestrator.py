@@ -184,24 +184,34 @@ class MainOrchestrator:
                 data_dir=data_dir,
                 config_dir=config_dir,
                 target_date=self.target_date,
+                web_dir=web_dir,
                 prompt_accessor=prompt_accessor
             ),
             'research': ResearchAnalyzer(
                 llm_client=self.llm_client,
                 async_client=self.async_client,
                 data_dir=data_dir,
+                config_dir=config_dir,
+                target_date=self.target_date,
+                web_dir=web_dir,
                 prompt_accessor=prompt_accessor
             ),
             'social': SocialAnalyzer(
                 llm_client=self.llm_client,
                 async_client=self.async_client,
                 data_dir=data_dir,
+                config_dir=config_dir,
+                target_date=self.target_date,
+                web_dir=web_dir,
                 prompt_accessor=prompt_accessor
             ),
             'reddit': RedditAnalyzer(
                 llm_client=self.llm_client,
                 async_client=self.async_client,
                 data_dir=data_dir,
+                config_dir=config_dir,
+                target_date=self.target_date,
+                web_dir=web_dir,
                 prompt_accessor=prompt_accessor
             )
         }
@@ -293,6 +303,15 @@ class MainOrchestrator:
             if not checkpoint:
                 raise RuntimeError("Cannot resume: no checkpoint for Phase 2 (analysis)")
             category_reports = self._restore_category_reports(checkpoint)
+            try:
+                staleness_checker = StalenessChecker(
+                    config_dir=self.config_dir,
+                    target_date=self.target_date,
+                    web_dir=self.web_dir,
+                )
+                category_reports = staleness_checker.process(category_reports)
+            except Exception as e:
+                logger.warning(f"Resume freshness repair failed (non-fatal): {e}")
             total_analyzed = sum(len(r.all_items) for r in category_reports.values())
             phases.skip_phase("Phase 2: Analysis", f"loaded from checkpoint ({total_analyzed} items)")
             phases.skip_phase("Phase 2.5: Continuity Detection", "loaded from checkpoint")
@@ -331,6 +350,7 @@ class MainOrchestrator:
                 staleness_checker = StalenessChecker(
                     config_dir=self.config_dir,
                     target_date=self.target_date,
+                    web_dir=self.web_dir,
                 )
                 category_reports = staleness_checker.process(category_reports)
                 phases.end_phase('success')
@@ -769,6 +789,7 @@ class MainOrchestrator:
                 data_dir=self.data_dir,
                 config_dir=self.config_dir,
                 target_date=self.target_date,
+                web_dir=self.web_dir,
                 grounding_context=self.grounding_context,
                 prompt_accessor=self.prompt_accessor
             ),
@@ -776,6 +797,9 @@ class MainOrchestrator:
                 llm_client=self.llm_client,
                 async_client=self.async_client,
                 data_dir=self.data_dir,
+                config_dir=self.config_dir,
+                target_date=self.target_date,
+                web_dir=self.web_dir,
                 grounding_context=self.grounding_context,
                 prompt_accessor=self.prompt_accessor
             ),
@@ -783,6 +807,9 @@ class MainOrchestrator:
                 llm_client=self.llm_client,
                 async_client=self.async_client,
                 data_dir=self.data_dir,
+                config_dir=self.config_dir,
+                target_date=self.target_date,
+                web_dir=self.web_dir,
                 grounding_context=self.grounding_context,
                 prompt_accessor=self.prompt_accessor
             ),
@@ -790,6 +817,9 @@ class MainOrchestrator:
                 llm_client=self.llm_client,
                 async_client=self.async_client,
                 data_dir=self.data_dir,
+                config_dir=self.config_dir,
+                target_date=self.target_date,
+                web_dir=self.web_dir,
                 grounding_context=self.grounding_context,
                 prompt_accessor=self.prompt_accessor
             )
@@ -833,6 +863,11 @@ class MainOrchestrator:
         pattern = r'\[([^\]]+)\]\(([^)]+)\)'
         return re.sub(pattern, r'<a href="\2" target="_blank">\1</a>', text)
 
+    def _exclude_from_summaries(self, item: AnalyzedItem) -> bool:
+        metadata = item.item.metadata if isinstance(item.item.metadata, dict) else {}
+        freshness = metadata.get('freshness') if isinstance(metadata.get('freshness'), dict) else {}
+        return bool(freshness.get('exclude_from_summaries'))
+
     async def _detect_cross_category_topics(
         self,
         category_reports: Dict[str, CategoryReport]
@@ -851,8 +886,12 @@ class MainOrchestrator:
             context_parts.append(f"=== {category.upper()} ===")
             context_parts.append(f"Summary: {report.category_summary}")
             context_parts.append(f"Themes: {', '.join(t.name for t in report.themes)}")
-            context_parts.append(f"Top items ({len(report.top_items)}):")
-            for i, item in enumerate(report.top_items[:10], 1):
+            summary_items = [
+                item for item in report.top_items
+                if not self._exclude_from_summaries(item)
+            ]
+            context_parts.append(f"Top items ({len(summary_items)}):")
+            for i, item in enumerate(summary_items[:10], 1):
                 # Include URL so LLM can create inline links
                 context_parts.append(f"  {i}. {item.item.title}")
                 context_parts.append(f"     URL: {item.item.url}")
@@ -1013,8 +1052,12 @@ RELEASE-DATE GROUNDING (mandatory check for any topic that names or implies a mo
         for category, report in category_reports.items():
             context_parts.append(f"--- {category.upper()} ---")
             context_parts.append(f"Summary: {report.category_summary}")
-            if report.top_items:
-                context_parts.append("Top story: " + report.top_items[0].item.title)
+            summary_items = [
+                item for item in report.top_items
+                if not self._exclude_from_summaries(item)
+            ]
+            if summary_items:
+                context_parts.append("Top story: " + summary_items[0].item.title)
             context_parts.append("")
 
         context = "\n".join(context_parts)

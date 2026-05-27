@@ -1,11 +1,12 @@
 """
-Staleness Checker — Post-Analysis Date Enforcement
+Staleness Checker — Date and Old-Anchor Enforcement
 
 Cross-references analyzed items against model_releases.yaml to detect
 articles that report old model releases as new. Deterministic — no LLM
-calls required.
+calls required for release checks.
 
-Hooked into the orchestrator after Phase 2.5 (continuity detection).
+Applied before reduce-phase ranking/summaries, then run again after continuity
+as a defensive backstop.
 """
 
 import logging
@@ -17,13 +18,14 @@ import yaml
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import requests
 from bs4 import BeautifulSoup
 from dateutil import parser as date_parser
 
 from .base import CategoryReport, AnalyzedItem
+from .llm_client import ThinkingLevel
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +35,15 @@ FRESHNESS_WINDOW_DAYS = 3
 # Score caps for freshness enforcement
 STALE_RELEASE_SCORE_CAP = 40.0
 STALE_FOLLOWUP_SCORE_CAP = 55.0
+STALE_ANCHOR_SCORE_CAP = 55.0
 
 # How many days after a primary-source post a secondary recap is still fresh
 PRIMARY_FOLLOWUP_WINDOW_DAYS = 7
+
+# How far back to search for prior coverage of a stale anchor fact.
+OLD_ANCHOR_LOOKBACK_DAYS = 45
+OLD_ANCHOR_MAX_LLM_CHECKS = int(os.getenv("OLD_ANCHOR_MAX_LLM_CHECKS", "4"))
+OLD_ANCHOR_LLM_ENABLED = os.getenv("OLD_ANCHOR_LLM_ENABLED", "true").lower() not in {"0", "false", "no"}
 
 # Minimum original score to bother checking (skip low-scoring items)
 MIN_SCORE_THRESHOLD = 50.0
@@ -93,6 +101,65 @@ FOLLOWUP_SIGNALS = (
     "unveiled",
 )
 
+OLD_ANCHOR_SIGNALS = (
+    "after reportedly",
+    "already",
+    "earlier",
+    "earlier this month",
+    "following reports",
+    "had already",
+    "last month",
+    "last week",
+    "previously",
+    "reportedly",
+    "weeks after",
+)
+
+MATERIAL_NEW_DEVELOPMENT_SIGNALS = (
+    "acquired",
+    "announced",
+    "approved",
+    "banned",
+    "blocked",
+    "canceled",
+    "cancelled",
+    "filed",
+    "fixed",
+    "launched",
+    "merged",
+    "open-sourced",
+    "ordered",
+    "patched",
+    "published",
+    "raised",
+    "released",
+    "rolled out",
+    "signed",
+    "sued",
+    "unveiled",
+    "updated",
+)
+
+OLD_ANCHOR_STOPWORDS = {
+    "about", "after", "also", "amid", "and", "are", "article", "been",
+    "but", "can", "company", "could", "from", "has", "have", "into",
+    "its", "more", "new", "news", "not", "now", "said", "says", "that",
+    "the", "their", "them", "then", "there", "these", "this", "through",
+    "today", "was", "were", "what", "when", "where", "which", "while",
+    "with", "would", "you", "your",
+}
+
+OLD_ANCHOR_ENTITY_TERMS = {
+    "anthropic", "claude", "google", "gemini", "microsoft", "openai", "uber"
+}
+
+OLD_ANCHOR_FACT_TERMS = {
+    "budget", "burned", "burnt", "cost", "costs", "exhausted",
+    "justify", "roi", "spend", "spending", "token", "tokens"
+}
+
+OLD_ANCHOR_CATEGORIES = {"news", "social", "reddit"}
+
 
 class StalenessChecker:
     """
@@ -103,20 +170,24 @@ class StalenessChecker:
     cap its importance score and annotate its summary.
     """
 
-    def __init__(self, config_dir: str, target_date: str):
+    def __init__(self, config_dir: str, target_date: str, web_dir: str = "./web"):
         """
         Args:
             config_dir: Path to config/ directory containing model_releases.yaml.
             target_date: Report date (YYYY-MM-DD). Coverage date = target_date - 1.
+            web_dir: Path to generated web output, used for old-anchor history.
         """
         self.config_dir = Path(config_dir)
+        self.web_dir = Path(web_dir)
         self.target_date = target_date
         target_dt = datetime.strptime(target_date, "%Y-%m-%d")
+        self.target_day = target_dt.date()
         self.coverage_date = (target_dt - timedelta(days=1)).date()
         self.cutoff_date = self.coverage_date - timedelta(days=FRESHNESS_WINDOW_DAYS)
         self.releases = self._load_releases()
         self._article_page_cache: Dict[str, Optional[str]] = {}
         self._primary_date_cache: Dict[str, Optional[date]] = {}
+        self._historical_anchor_items: Optional[List[Dict[str, Any]]] = None
         self._session = requests.Session()
         self._session.headers.update({
             "User-Agent": FRESHNESS_USER_AGENT,
@@ -242,6 +313,185 @@ class StalenessChecker:
     def _has_followup_signal(self, item: AnalyzedItem) -> bool:
         combined = f"{item.item.title} {item.summary} {item.item.content}".lower()
         return any(signal in combined for signal in FOLLOWUP_SIGNALS)
+
+    def _has_old_anchor_signal(self, item: AnalyzedItem) -> bool:
+        combined = f"{item.item.title} {item.summary} {item.item.content}".lower()
+        return any(signal in combined for signal in OLD_ANCHOR_SIGNALS)
+
+    def _has_material_new_development_signal(self, item: AnalyzedItem) -> bool:
+        combined = f"{item.item.title} {item.summary}".lower()
+        return any(signal in combined for signal in MATERIAL_NEW_DEVELOPMENT_SIGNALS)
+
+    def _anchor_terms(self, text: str) -> Set[str]:
+        terms = set()
+        for token in re.findall(r"[a-z0-9][a-z0-9.-]*", text.lower()):
+            normalized = token.strip(".-")
+            if len(normalized) < 3:
+                continue
+            if normalized in OLD_ANCHOR_STOPWORDS:
+                continue
+            terms.add(normalized)
+        return terms
+
+    def _anchor_term_sequence(self, text: str) -> List[str]:
+        terms: List[str] = []
+        for token in re.findall(r"[a-z0-9][a-z0-9.-]*", text.lower()):
+            normalized = token.strip(".-")
+            if len(normalized) < 3:
+                continue
+            if normalized in OLD_ANCHOR_STOPWORDS:
+                continue
+            terms.append(normalized)
+        return terms
+
+    def _anchor_signature(self, item: AnalyzedItem) -> Set[str]:
+        return self._anchor_terms(
+            f"{item.item.title} {item.summary} {item.item.content[:1200]}"
+        )
+
+    def _parse_item_date(self, value: object) -> Optional[date]:
+        parsed = self._parse_date_value(value)
+        return parsed
+
+    def _history_window_start(self) -> date:
+        return self.target_day - timedelta(days=OLD_ANCHOR_LOOKBACK_DAYS)
+
+    def _load_history_from_search_documents(self) -> List[Dict[str, Any]]:
+        path = self.web_dir / "data" / "search-documents.json"
+        if not path.exists():
+            return []
+
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+        except Exception as exc:
+            logger.debug(f"Freshness check could not load search history {path}: {exc}")
+            return []
+
+        records = raw.values() if isinstance(raw, dict) else raw
+        items: List[Dict[str, Any]] = []
+        for record in records:
+            if not isinstance(record, dict):
+                continue
+            item_date = self._parse_item_date(record.get("date"))
+            if not item_date:
+                continue
+            if item_date >= self.target_day or item_date < self._history_window_start():
+                continue
+            title = record.get("title", "")
+            summary = record.get("summary", "")
+            if not title and not summary:
+                continue
+            items.append({
+                "id": record.get("id", ""),
+                "date": item_date.isoformat(),
+                "category": record.get("category", ""),
+                "title": title,
+                "summary": summary,
+                "source": record.get("source", ""),
+                "url": record.get("url", ""),
+                "terms": self._anchor_terms(f"{title} {summary}"),
+            })
+        return items
+
+    def _load_history_from_category_files(self) -> List[Dict[str, Any]]:
+        items: List[Dict[str, Any]] = []
+        data_dir = self.web_dir / "data"
+        if not data_dir.exists():
+            return items
+
+        current = self.target_day - timedelta(days=1)
+        oldest = self._history_window_start()
+        while current >= oldest:
+            date_dir = data_dir / current.isoformat()
+            for category in ("news", "research", "social", "reddit"):
+                path = date_dir / f"{category}.json"
+                if not path.exists():
+                    continue
+                try:
+                    with open(path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                except Exception as exc:
+                    logger.debug(f"Freshness check could not load history file {path}: {exc}")
+                    continue
+                for record in data.get("items", []):
+                    if not isinstance(record, dict):
+                        continue
+                    title = record.get("title", "")
+                    summary = record.get("summary", "")
+                    if not title and not summary:
+                        continue
+                    items.append({
+                        "id": record.get("id", ""),
+                        "date": current.isoformat(),
+                        "category": category,
+                        "title": title,
+                        "summary": summary,
+                        "source": record.get("source", ""),
+                        "url": record.get("url", ""),
+                        "terms": self._anchor_terms(f"{title} {summary}"),
+                    })
+            current -= timedelta(days=1)
+        return items
+
+    def _load_historical_anchor_items(self) -> List[Dict[str, Any]]:
+        if self._historical_anchor_items is not None:
+            return self._historical_anchor_items
+
+        items = self._load_history_from_search_documents()
+        if not items:
+            items = self._load_history_from_category_files()
+
+        seen = set()
+        deduped = []
+        for item in items:
+            key = item.get("id") or (item.get("date"), item.get("title"))
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(item)
+
+        self._historical_anchor_items = deduped
+        logger.info(f"Old-anchor freshness: loaded {len(deduped)} historical item(s)")
+        return deduped
+
+    def _find_old_anchor_matches(self, item: AnalyzedItem) -> List[Dict[str, Any]]:
+        today_terms = self._anchor_signature(item)
+        if len(today_terms) < 4:
+            return []
+
+        matches = []
+        for historical in self._load_historical_anchor_items():
+            if historical.get("id") == item.item.id or historical.get("url") == item.item.url:
+                continue
+
+            history_terms = historical.get("terms") or set()
+            if not history_terms:
+                continue
+
+            overlap = today_terms & history_terms
+            if len(overlap) < 4:
+                continue
+
+            overlap_ratio = len(overlap) / max(1, min(len(today_terms), len(history_terms)))
+            strong_entity_overlap = any(term in overlap for term in OLD_ANCHOR_ENTITY_TERMS)
+            strong_anchor_overlap = any(term in overlap for term in OLD_ANCHOR_FACT_TERMS)
+            if overlap_ratio < 0.30 and not (strong_entity_overlap and strong_anchor_overlap):
+                continue
+
+            matches.append({
+                "id": historical.get("id", ""),
+                "date": historical.get("date", ""),
+                "category": historical.get("category", ""),
+                "title": historical.get("title", ""),
+                "source": historical.get("source", ""),
+                "url": historical.get("url", ""),
+                "overlap_terms": sorted(overlap)[:20],
+                "overlap_ratio": round(overlap_ratio, 3),
+            })
+
+        matches.sort(key=lambda match: (match["overlap_ratio"], match["date"]), reverse=True)
+        return matches[:5]
 
     def _hostname(self, url: str) -> str:
         try:
@@ -395,6 +645,7 @@ class StalenessChecker:
         primary_url: Optional[str] = None,
         primary_published=None,
         age_days: Optional[int] = None,
+        matched_prior_items: Optional[List[Dict[str, Any]]] = None,
     ) -> bool:
         old_score = float(item.importance_score or 0)
         item.importance_score = min(old_score, score_cap)
@@ -407,6 +658,7 @@ class StalenessChecker:
             "reason": reason,
             "score_cap": score_cap,
             "exclude_from_top": True,
+            "exclude_from_summaries": True,
         }
         if primary_url:
             freshness["primary_url"] = primary_url
@@ -414,6 +666,15 @@ class StalenessChecker:
             freshness["primary_published"] = primary_published.isoformat()
         if age_days is not None:
             freshness["age_days"] = age_days
+        if matched_prior_items:
+            freshness["matched_prior_items"] = [
+                {
+                    key: match.get(key)
+                    for key in ("id", "date", "category", "title", "source", "url")
+                    if match.get(key)
+                }
+                for match in matched_prior_items[:3]
+            ]
         metadata["freshness"] = freshness
 
         if not item.reasoning.startswith("[Freshness check:"):
@@ -426,8 +687,106 @@ class StalenessChecker:
         freshness = metadata.get("freshness") if isinstance(metadata.get("freshness"), dict) else {}
         return bool(freshness.get("exclude_from_top"))
 
-    def process_news_items(self, items: List[AnalyzedItem]) -> int:
-        """Apply freshness policy to analyzed news items before final ranking."""
+    def _is_excluded_from_summaries(self, item: AnalyzedItem) -> bool:
+        metadata = item.item.metadata if isinstance(item.item.metadata, dict) else {}
+        freshness = metadata.get("freshness") if isinstance(metadata.get("freshness"), dict) else {}
+        return bool(freshness.get("exclude_from_summaries"))
+
+    def _contains_title_phrase(
+        self,
+        segment_terms: List[str],
+        item: AnalyzedItem,
+        min_terms: int = 3,
+    ) -> bool:
+        title_terms = self._anchor_term_sequence(item.item.title)
+        if len(title_terms) < min_terms or len(segment_terms) < min_terms:
+            return False
+
+        segment = " ".join(segment_terms)
+        for i in range(0, len(title_terms) - min_terms + 1):
+            phrase = " ".join(title_terms[i:i + min_terms])
+            if phrase in segment:
+                return True
+        return False
+
+    def _summary_segment_matches_excluded(
+        self,
+        segment: str,
+        excluded_item: AnalyzedItem,
+    ) -> bool:
+        metadata = excluded_item.item.metadata if isinstance(excluded_item.item.metadata, dict) else {}
+        freshness = metadata.get("freshness") if isinstance(metadata.get("freshness"), dict) else {}
+        status = freshness.get("status", "")
+
+        segment_terms_list = self._anchor_term_sequence(segment)
+        segment_terms = set(segment_terms_list)
+        if not segment_terms:
+            return False
+
+        item_terms = self._anchor_signature(excluded_item)
+        overlap = segment_terms & item_terms
+        has_entity_fact_overlap = (
+            any(term in segment_terms for term in OLD_ANCHOR_ENTITY_TERMS)
+            and any(term in segment_terms for term in OLD_ANCHOR_FACT_TERMS)
+            and any(term in item_terms for term in OLD_ANCHOR_ENTITY_TERMS)
+        )
+
+        if status == "stale_anchor" and has_entity_fact_overlap:
+            return True
+
+        if status == "stale_release" and self._contains_title_phrase(
+            segment_terms_list, excluded_item, min_terms=2
+        ):
+            return True
+
+        if self._contains_title_phrase(segment_terms_list, excluded_item, min_terms=3):
+            return True
+
+        overlap_ratio = len(overlap) / max(1, min(len(segment_terms), len(item_terms)))
+        return len(overlap) >= 5 and overlap_ratio >= 0.28
+
+    def _sanitize_category_summary(self, category: str, report: CategoryReport) -> bool:
+        """Remove summary sentences that refer to freshness-excluded items."""
+        excluded_items = [
+            item for item in report.all_items
+            if self._is_excluded_from_summaries(item)
+        ]
+        if not excluded_items or not report.category_summary:
+            return False
+
+        changed = False
+        sanitized_lines = []
+        for line in report.category_summary.splitlines():
+            if not line.strip():
+                sanitized_lines.append(line)
+                continue
+
+            segments = re.split(r"(?<=[.!?])\s+(?=[A-Z0-9_*`\[])", line)
+            kept_segments = []
+            for segment in segments:
+                if any(
+                    self._summary_segment_matches_excluded(segment, item)
+                    for item in excluded_items
+                ):
+                    changed = True
+                    continue
+                kept_segments.append(segment)
+
+            sanitized_line = " ".join(part.strip() for part in kept_segments if part.strip())
+            if sanitized_line:
+                sanitized_lines.append(sanitized_line)
+            elif line.strip():
+                changed = True
+
+        if changed:
+            report.category_summary = "\n".join(sanitized_lines).strip()
+            logger.info(
+                f"Freshness summary sanitizer: removed stale references from {category} summary"
+            )
+        return changed
+
+    def _process_stale_releases(self, category: str, items: List[AnalyzedItem]) -> int:
+        """Apply model-release freshness policy to analyzed items."""
         demoted = 0
 
         for item in items:
@@ -448,17 +807,28 @@ class StalenessChecker:
                         item,
                         "stale_release",
                         "Stale release",
-                        reason,
+                        reason if category == "news" else f"primary subject released {days_old} days ago (GA: {ga_date})",
                         STALE_RELEASE_SCORE_CAP,
                         age_days=days_old,
                     ):
                         logger.info(
-                            f"STALE RELEASE: [news] \"{item.item.title}\" — {reason}, "
+                            f"STALE RELEASE: [{category}] \"{item.item.title}\" — {reason}, "
                             f"score capped at {item.importance_score:.0f}"
                         )
                         demoted += 1
                     continue
 
+        return demoted
+
+    def _process_news_primary_followups(self, items: List[AnalyzedItem]) -> int:
+        """Detect secondary coverage whose primary-source post is old."""
+        demoted = 0
+
+        for item in items:
+            if item.importance_score < MIN_SCORE_THRESHOLD:
+                continue
+            if self._is_excluded_from_top(item):
+                continue
             if not self._has_followup_signal(item):
                 continue
 
@@ -496,82 +866,261 @@ class StalenessChecker:
 
         return demoted
 
+    def _old_anchor_candidate_state(
+        self,
+        item: AnalyzedItem,
+        matches: List[Dict[str, Any]],
+        category: str = "news",
+    ) -> str:
+        """Classify a matched history candidate as stale, ambiguous, or fresh."""
+        if not matches:
+            return "fresh"
+
+        has_old_anchor_language = self._has_old_anchor_signal(item)
+        has_material_signal = self._has_material_new_development_signal(item)
+        best_ratio = matches[0].get("overlap_ratio", 0)
+        best_terms = set(matches[0].get("overlap_terms", []))
+        has_entity_fact_overlap = (
+            any(term in best_terms for term in OLD_ANCHOR_ENTITY_TERMS)
+            and any(term in best_terms for term in OLD_ANCHOR_FACT_TERMS)
+        )
+
+        # Social/community streams repeat phrases and memes constantly. For those
+        # categories, only demote direct entity+fact duplicates instead of
+        # treating old-anchor phrasing or high lexical overlap alone as stale.
+        if category != "news":
+            if has_entity_fact_overlap and not has_material_signal:
+                return "stale"
+            return "fresh"
+
+        if has_old_anchor_language and not has_material_signal:
+            return "stale"
+        if has_entity_fact_overlap and not has_material_signal:
+            return "stale"
+        if best_ratio >= 0.50 and not has_material_signal:
+            return "stale"
+        if has_old_anchor_language or best_ratio >= 0.30:
+            return "ambiguous"
+
+        return "fresh"
+
+    def _build_old_anchor_adjudication_prompt(
+        self,
+        item: AnalyzedItem,
+        matches: List[Dict[str, Any]],
+    ) -> str:
+        history = [
+            {
+                "date": match.get("date"),
+                "category": match.get("category"),
+                "title": match.get("title"),
+                "source": match.get("source"),
+                "overlap_terms": match.get("overlap_terms", []),
+            }
+            for match in matches[:3]
+        ]
+        today = {
+            "title": item.item.title,
+            "source": item.item.source,
+            "published": item.item.published,
+            "summary": item.summary,
+            "content_excerpt": item.item.content[:900],
+        }
+        return f"""You are a freshness editor for an AI news briefing.
+
+Decide whether today's article is primarily an old-anchor follow-up: a fresh article whose main briefing-worthy claim was already covered previously, with only color/commentary added.
+
+TODAY:
+{json.dumps(today, ensure_ascii=False, indent=2)}
+
+PRIOR COVERAGE:
+{json.dumps(history, ensure_ascii=False, indent=2)}
+
+Return JSON only:
+{{
+  "stale_anchor": true,
+  "reason": "one sentence",
+  "new_material_development": "briefly name the concrete new event, or empty string"
+}}
+
+Mark stale_anchor=false when today's item has a concrete new action, release, filing, outage, policy change, measured result, or official announcement beyond commentary around the old fact."""
+
+    async def _adjudicate_old_anchor(
+        self,
+        item: AnalyzedItem,
+        matches: List[Dict[str, Any]],
+        async_client,
+    ) -> Tuple[bool, str]:
+        if not async_client or not OLD_ANCHOR_LLM_ENABLED:
+            return False, ""
+
+        prompt = self._build_old_anchor_adjudication_prompt(item, matches)
+        try:
+            response = await async_client.call_with_thinking(
+                messages=[{"role": "user", "content": prompt}],
+                system="You make concise editorial freshness decisions. Return valid JSON only.",
+                profile=ThinkingLevel.QUICK,
+                caller="freshness.old_anchor"
+            )
+            content = response.content.strip()
+            json_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", content)
+            if json_match:
+                content = json_match.group(1).strip()
+            if not content.startswith("{"):
+                start = content.find("{")
+                if start != -1:
+                    content = content[start:]
+            result = json.loads(content)
+            return bool(result.get("stale_anchor")), str(result.get("reason", ""))
+        except Exception as exc:
+            logger.debug(f"Old-anchor LLM adjudication failed for {item.item.id}: {exc}")
+            return False, ""
+
+    def _mark_old_anchor_item(
+        self,
+        category: str,
+        item: AnalyzedItem,
+        matches: List[Dict[str, Any]],
+        reason: str = "",
+    ) -> bool:
+        """Annotate one old-anchor item and log the freshness decision."""
+        if not matches:
+            return False
+
+        if not reason:
+            prior = matches[0]
+            reason = (
+                f"main claim overlaps prior {prior.get('category', 'coverage')} coverage "
+                f"from {prior.get('date', 'unknown date')}"
+            )
+
+        primary_match_date = self._parse_item_date(matches[0].get("date"))
+        age_days = (self.coverage_date - primary_match_date).days if primary_match_date else None
+
+        marked = self._mark_freshness(
+            item,
+            "stale_anchor",
+            "Old anchor",
+            reason,
+            STALE_ANCHOR_SCORE_CAP,
+            age_days=age_days,
+            matched_prior_items=matches,
+        )
+        if marked:
+            logger.info(
+                f"STALE ANCHOR: [{category}] \"{item.item.title}\" — {reason}, "
+                f"score capped at {item.importance_score:.0f}"
+            )
+        return marked
+
+    async def _process_old_anchors(
+        self,
+        category: str,
+        items: List[AnalyzedItem],
+        async_client=None,
+    ) -> int:
+        """Detect items whose main claim is an already-covered anchor fact."""
+        demoted = 0
+        llm_checks = 0
+
+        for item in items:
+            if item.importance_score < MIN_SCORE_THRESHOLD:
+                continue
+            if self._is_excluded_from_top(item):
+                continue
+
+            matches = self._find_old_anchor_matches(item)
+            state = self._old_anchor_candidate_state(item, matches, category)
+            if state == "fresh":
+                continue
+
+            reason = ""
+            should_mark = state == "stale"
+            if state == "ambiguous" and llm_checks < OLD_ANCHOR_MAX_LLM_CHECKS:
+                llm_checks += 1
+                should_mark, reason = await self._adjudicate_old_anchor(item, matches, async_client)
+
+            if not should_mark:
+                continue
+
+            if self._mark_old_anchor_item(category, item, matches, reason):
+                demoted += 1
+
+        return demoted
+
+    def _process_old_anchors_sync(
+        self,
+        category: str,
+        items: List[AnalyzedItem],
+    ) -> int:
+        """Synchronous old-anchor pass for resume/checkpoint repair paths."""
+        demoted = 0
+
+        for item in items:
+            if item.importance_score < MIN_SCORE_THRESHOLD:
+                continue
+            if self._is_excluded_from_top(item):
+                continue
+
+            matches = self._find_old_anchor_matches(item)
+            if self._old_anchor_candidate_state(item, matches, category) != "stale":
+                continue
+
+            if self._mark_old_anchor_item(category, item, matches):
+                demoted += 1
+
+        return demoted
+
+    async def process_items(
+        self,
+        category: str,
+        items: List[AnalyzedItem],
+        async_client=None,
+    ) -> int:
+        """Apply all freshness policies before reduce writes summaries."""
+        demoted = self._process_stale_releases(category, items)
+        if category == "news":
+            demoted += self._process_news_primary_followups(items)
+        if category in OLD_ANCHOR_CATEGORIES:
+            demoted += await self._process_old_anchors(category, items, async_client=async_client)
+        if demoted:
+            items.sort(key=lambda x: x.importance_score, reverse=True)
+        return demoted
+
+    def process_items_sync(self, category: str, items: List[AnalyzedItem]) -> int:
+        """Synchronous fallback for post-analysis repair paths."""
+        demoted = self._process_stale_releases(category, items)
+        if category == "news":
+            demoted += self._process_news_primary_followups(items)
+        if category in OLD_ANCHOR_CATEGORIES:
+            demoted += self._process_old_anchors_sync(category, items)
+        if demoted:
+            items.sort(key=lambda x: x.importance_score, reverse=True)
+        return demoted
+
+    def process_news_items(self, items: List[AnalyzedItem]) -> int:
+        """Backward-compatible sync entry point for news freshness."""
+        return self.process_items_sync("news", items)
+
     def process(
         self, category_reports: Dict[str, CategoryReport]
     ) -> Dict[str, CategoryReport]:
         """
-        Check all category reports for stale model release coverage.
+        Check all category reports for stale model release and old-anchor coverage.
 
-        Caps importance scores and annotates summaries for stale items.
+        Caps importance scores and annotates stale items.
 
         Args:
             category_reports: Dict of category -> CategoryReport.
 
         Returns:
-            Updated category_reports with stale items demoted.
+            Updated category_reports with stale/old-anchor items demoted.
         """
         total_demoted = 0
 
         for category, report in category_reports.items():
-            category_demoted = 0
-
-            if category == "news":
-                category_demoted = self.process_news_items(report.all_items)
-                total_demoted += category_demoted
-                if category_demoted > 0:
-                    all_sorted = sorted(
-                        report.all_items,
-                        key=lambda x: x.importance_score,
-                        reverse=True,
-                    )
-                    report.top_items = [
-                        item
-                        for item in all_sorted
-                        if not (item.continuation and item.continuation.should_demote)
-                        and not self._is_excluded_from_top(item)
-                    ][:10]
-                continue
-
-            for item in report.all_items:
-                if item.importance_score < MIN_SCORE_THRESHOLD:
-                    continue
-                if self._is_excluded_from_top(item):
-                    continue
-
-                # Check title + summary for stale release references
-                text = f"{item.item.title} {item.summary}"
-                match = self._find_stale_release_in_text(text)
-                if not match:
-                    continue
-
-                model_variant, ga_date, provider = match
-
-                if not self._is_primarily_about_release(item, model_variant):
-                    continue
-
-                # Demote: cap score and annotate
-                old_score = item.importance_score
-                item.importance_score = min(item.importance_score, STALE_RELEASE_SCORE_CAP)
-
-                days_old = (self.coverage_date - datetime.strptime(ga_date, "%Y-%m-%d").date()).days
-                logger.info(
-                    f"STALE RELEASE: [{category}] \"{item.item.title}\" "
-                    f"— model GA was {ga_date} ({days_old}d ago), "
-                    f"score {old_score:.0f} -> {item.importance_score:.0f}"
-                )
-
-                # Annotate reasoning
-                self._mark_freshness(
-                    item,
-                    "stale_release",
-                    "Stale release",
-                    f"primary subject released {days_old} days ago (GA: {ga_date})",
-                    STALE_RELEASE_SCORE_CAP,
-                    age_days=days_old,
-                )
-
-                category_demoted += 1
-                total_demoted += 1
+            category_demoted = self.process_items_sync(category, report.all_items)
+            total_demoted += category_demoted
 
             # Re-sort top_items after score changes and backfill if needed
             if category_demoted > 0:
@@ -587,12 +1136,14 @@ class StalenessChecker:
                     and not self._is_excluded_from_top(item)
                 ][:10]
 
+            self._sanitize_category_summary(category, report)
+
         if total_demoted > 0:
             logger.info(
                 f"Staleness checker: demoted {total_demoted} item(s) "
-                f"with stale release coverage"
+                f"with stale or old-anchor coverage"
             )
         else:
-            logger.info("Staleness checker: no stale release coverage detected")
+            logger.info("Staleness checker: no stale or old-anchor coverage detected")
 
         return category_reports

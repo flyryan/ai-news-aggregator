@@ -161,6 +161,21 @@ class LinkEnricher:
     # gives the enricher a realistic chance of finding matches.
     ITEMS_PER_CATEGORY = 30
 
+    def _exclude_from_summaries(self, analyzed_item: Any) -> bool:
+        """Return True if freshness metadata says the item must not shape summaries."""
+        metadata = {}
+        if hasattr(analyzed_item, 'item'):
+            item = analyzed_item.item
+            metadata = item.metadata if hasattr(item, 'metadata') else {}
+        elif isinstance(analyzed_item, dict):
+            item = analyzed_item.get('item', analyzed_item)
+            metadata = item.get('metadata', {}) if isinstance(item, dict) else {}
+            if not metadata and isinstance(analyzed_item.get('freshness'), dict):
+                metadata = {'freshness': analyzed_item.get('freshness')}
+
+        freshness = metadata.get('freshness') if isinstance(metadata, dict) else {}
+        return bool(isinstance(freshness, dict) and freshness.get('exclude_from_summaries'))
+
     def _build_item_list(self, category_reports: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Build a simplified list of items for LLM context.
 
@@ -183,7 +198,12 @@ class LinkEnricher:
                 source_items = report.get('all_items') or report.get('top_items', [])
             source_items = source_items or []
 
-            for analyzed_item in source_items[:self.ITEMS_PER_CATEGORY]:
+            added_for_category = 0
+            for analyzed_item in source_items:
+                if self._exclude_from_summaries(analyzed_item):
+                    continue
+                if added_for_category >= self.ITEMS_PER_CATEGORY:
+                    break
                 # Handle both object and dict formats
                 if hasattr(analyzed_item, 'item'):
                     item = analyzed_item.item
@@ -205,6 +225,7 @@ class LinkEnricher:
                         'category': category,
                         'summary': summary[:200] if summary else ''
                     })
+                    added_for_category += 1
 
         return items
 

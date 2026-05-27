@@ -143,10 +143,22 @@ The summary should read like a technical briefing for researchers and practition
         llm_client: Optional[AnthropicClient] = None,
         async_client: Optional[AsyncAnthropicClient] = None,
         data_dir: str = './data',
+        config_dir: str = './config',
+        target_date: Optional[str] = None,
+        web_dir: str = './web',
         grounding_context: Optional[str] = None,
         prompt_accessor=None
     ):
-        super().__init__(llm_client, async_client, data_dir, grounding_context, prompt_accessor)
+        super().__init__(
+            llm_client=llm_client,
+            async_client=async_client,
+            data_dir=data_dir,
+            config_dir=config_dir,
+            target_date=target_date,
+            web_dir=web_dir,
+            grounding_context=grounding_context,
+            prompt_accessor=prompt_accessor
+        )
 
     @property
     def category(self) -> str:
