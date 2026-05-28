@@ -101,11 +101,12 @@
 - Cause: _analyze_batch uses await in loop instead of asyncio.gather. LLM calls are I/O bound so parallelism would help.
 - Improvement path: Use asyncio.gather() to parallelize LLM calls within each batch. Could reduce analysis time by 50-70%.
 
-**Full Index Rebuild on Every Run:**
-- Problem: Search index (`search-index.json`) is regenerated from scratch on every pipeline run, even if only 1 day's data changed.
-- Files: `generators/search_indexer.py:146` (loops through all dates in rolling window)
-- Cause: No incremental update logic. Lunr.js index is serialized/deserialized entirely.
-- Improvement path: Add incremental index update. Store per-date index segments, merge at query time. For 30-day window with daily runs, saves 96% of indexing work.
+**Full Corpus Rebuild on Every Run:**
+- Problem: The search corpus (`search-corpus.json`) is regenerated from scratch on every pipeline run, even if only 1 day's data changed.
+- Files: `generators/search_indexer.py` (loops through all dates in rolling window)
+- Cause: No incremental update logic. The corpus is rewritten in full each run.
+- Note: The corpus is now a compact ~21 MB JSON array (no serialized index), so rebuild cost is low. The former 106 MB Lunr index + LFS dependency is resolved — the index is now built in-browser in a Web Worker.
+- Improvement path: Incremental corpus update would still save some work, but the rebuild is cheap now and lower priority.
 
 **Hero Image Generation Blocking:**
 - Problem: Hero image generation (Gemini API call + image optimization) blocks pipeline completion. Takes 15-30 seconds per image.
@@ -164,9 +165,9 @@
 - Scaling path: Stream data to disk during collection. Use SQLite or DuckDB for intermediate storage. Set Docker memory limits (e.g., 2GB).
 
 **Client-Side Search Index:**
-- Current capacity: 30-day rolling window produces ~150KB Lunr.js index + 500KB document store. Loads in <1s on broadband.
-- Limit: If extending to 90-day or 365-day window, index size could exceed 5MB. Mobile users would see slow initial load.
-- Scaling path: Move search to backend API (Elasticsearch or Typesense). Keep client-side for offline access but paginate results. Add service worker for offline caching.
+- Current capacity: 30-day rolling window produces a ~21 MB `search-corpus.json` (~6 MB gzipped over the wire; nginx gzips JSON). The MiniSearch index is built in a Web Worker (~1.4s for ~50k docs) so the main thread never blocks.
+- Limit: Extending to a 90-day or 365-day window would grow the corpus roughly linearly; corpus download (not index build) becomes the constraint first. Consider Pagefind (sharded, fetch-on-demand) at that point.
+- Scaling path: Pagefind for sharded chunked fetching, or a backend search API (Typesense/Elasticsearch) if interactivity demands grow. Add a service worker for offline caching of the corpus.
 
 **Static File Serving:**
 - Current capacity: Nginx serves pre-generated JSON files. With ~30 dates × 5 files/date = 150 JSON files. Total ~20MB.

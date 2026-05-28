@@ -92,7 +92,7 @@
 1. JSONGenerator creates `web/data/{date}/` directory structure
 2. Generates `summary.json`, `{category}.json` for each category
 3. Updates `index.json` with date manifest
-4. SearchIndexer builds Lunr.js index from all items
+4. SearchIndexer builds the MiniSearch corpus (single search-corpus.json) from items in the 30-day window
 5. FeedGenerator creates Atom RSS feeds with Media RSS thumbnails
 
 **Frontend Flow:**

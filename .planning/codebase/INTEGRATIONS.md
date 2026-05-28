@@ -78,7 +78,7 @@
   - Processed data: `data/processed/{date}/{category}.json`
   - Web output: `web/data/{date}/*.json` and `web/data/feeds/*.xml`
   - Hero images: `web/data/{date}/hero.webp`
-  - Search indexes: `web/data/search-index.json`, `web/data/search-documents.json`
+  - Search corpus: `web/data/search-corpus.json` (MiniSearch index built in-browser)
   - Static assets: `assets/skunk-reference.png`
 
 **Caching:**

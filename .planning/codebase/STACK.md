@@ -54,14 +54,13 @@
 
 **Frontend:**
 - `@sveltejs/adapter-static@^3.0.0` - SvelteKit static site generation
-- `lunr@^2.3.9` - Client-side full-text search
+- `minisearch@^7.1.0` - Client-side full-text search (index built in a Web Worker)
 - `dompurify@^3.0.0` - XSS sanitization for markdown rendering
 - `date-fns@^4.1.0` - Date formatting and manipulation
 
 **Data Processing:**
 - `python-dateutil==2.8.2` - Date parsing from various formats
 - `PyYAML>=6.0` - YAML config parsing (model releases, ecosystem context)
-- `lunr>=0.7.0` - Python-side search index generation
 - `Pillow>=10.0.0` - Image optimization for hero images
 - `nh3>=0.2.0` - HTML sanitization (Mozilla's ammonia in Python)
 

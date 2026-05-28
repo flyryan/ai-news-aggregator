@@ -99,7 +99,7 @@ Phase 6: JSON Data Generation (for SPA frontend)
     ↓
 Phase 6.5: RSS Feed Generation (Atom 1.0 with Media RSS)
     ↓
-Phase 7: Search Index Update (Lunr.js compatible)
+Phase 7: Search Corpus Update (client-built MiniSearch index)
 ```
 
 ### Agent Pairs
@@ -137,7 +137,7 @@ agents/
 
 generators/
 ├── json_generator.py          # Generates JSON data for SPA frontend
-├── search_indexer.py          # Builds Lunr.js search index
+├── search_indexer.py          # Builds the MiniSearch corpus
 ├── hero_generator.py          # Daily hero image with skunk mascot
 └── feed_generator.py          # Atom RSS feeds with Media RSS support
 
@@ -170,7 +170,7 @@ frontend/                       # Svelte SPA frontend
 - `agents/ecosystem_context.py` - Model release tracking for LLM grounding
 - `agents/phase_tracker.py` - Phase status tracking, timing, and end-of-run summary
 - `generators/json_generator.py` - JSON data for SPA frontend
-- `generators/search_indexer.py` - Builds Lunr.js search index
+- `generators/search_indexer.py` - Builds the MiniSearch corpus (single search-corpus.json)
 - `generators/hero_generator.py` - Daily hero image generation via Gemini
 - `generators/feed_generator.py` - Atom RSS feeds with Media RSS namespace
 - `scripts/regenerate_hero.py` - Manual hero image regeneration script
@@ -386,7 +386,7 @@ Create a new file in `agents/analyzers/` following the pattern:
 The Svelte 5 + SvelteKit SPA frontend provides:
 - **AATF Branding**: Trend Red (#E63946) color scheme, skunk logo
 - **Calendar Navigation**: Interactive date picker, prev/next navigation
-- **Full-text Search**: Client-side search using pre-built Lunr.js indexes
+- **Full-text Search**: Client-side MiniSearch index built in a Web Worker from a compact corpus
 - **Dark Mode**: System-aware theme toggle with manual override
 - **Responsive Design**: Mobile-first with Tailwind CSS
 
@@ -420,7 +420,8 @@ frontend/src/lib/
 │   └── themeStore.ts           # Dark/light mode state
 ├── services/
 │   ├── dataLoader.ts           # Fetch JSON data with caching
-│   ├── searchIndex.ts          # Lunr.js search integration
+│   ├── searchIndex.ts          # MiniSearch worker proxy
+│   ├── searchWorker.ts         # Web Worker: builds + queries MiniSearch index
 │   └── dateUtils.ts            # Date formatting helpers
 └── types/
     └── index.ts                # TypeScript interfaces
@@ -433,8 +434,7 @@ Data is output to `web/data/`. The dev server serves from there via Vite alias.
 ```
 web/data/
 ├── index.json              # Date manifest (list of available dates)
-├── search-index.json       # Pre-built Lunr.js index
-├── search-documents.json   # Document lookup for search results
+├── search-corpus.json      # Search corpus (30-day window); index built in-browser
 ├── feeds/                  # Atom RSS feeds
 │   ├── main.xml            # Main feed (executive + top items)
 │   ├── summaries*.xml      # Summary-only feeds (6 variants)

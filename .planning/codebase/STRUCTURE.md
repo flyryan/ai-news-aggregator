@@ -73,7 +73,7 @@ ai-news-aggregator/
 - Key files:
   - `json_generator.py`: Generates summary.json, category.json files with HTML sanitization
   - `feed_generator.py`: Atom RSS feeds with Media RSS namespace
-  - `search_indexer.py`: Builds Lunr.js search index with rolling 30-day window
+  - `search_indexer.py`: Builds the MiniSearch corpus (search-corpus.json) with rolling 30-day window
   - `hero_generator.py`: Daily hero images via Gemini 3 Pro with AATF skunk mascot
 
 **frontend/src/lib/components/:**
@@ -88,10 +88,11 @@ ai-news-aggregator/
 
 **frontend/src/lib/services/:**
 - Purpose: Data fetching and client-side utilities
-- Contains: dataLoader.ts, searchIndex.ts, dateUtils.ts, markdown.ts, sanitize.ts
+- Contains: dataLoader.ts, searchIndex.ts, searchWorker.ts, dateUtils.ts, markdown.ts, sanitize.ts
 - Key files:
   - `dataLoader.ts`: Fetch JSON with caching, preload adjacent dates
-  - `searchIndex.ts`: Lunr.js integration for client-side search
+  - `searchIndex.ts`: Async proxy to the MiniSearch Web Worker (main-thread substring fallback)
+  - `searchWorker.ts`: Web Worker that fetches the corpus and builds/queries the MiniSearch index
   - `dateUtils.ts`: Date parsing, formatting, navigation helpers
   - `safeHtml.ts`: HTML sanitization for user-facing content
 
@@ -134,12 +135,12 @@ ai-news-aggregator/
 
 **web/data/:**
 - Purpose: Generated JSON for frontend consumption
-- Contains: Date-specific directories, feeds/, index.json, search-index.json
+- Contains: Date-specific directories, feeds/, index.json, search-corpus.json
 - Structure:
   - `{date}/`: summary.json, {category}.json, hero.webp
   - `feeds/`: Atom RSS feeds (main.xml, summaries*.xml, category feeds)
   - `index.json`: Date manifest with available dates
-  - `search-index.json`, `search-documents.json`: Lunr.js index
+  - `search-corpus.json`: Search corpus (30-day window); MiniSearch index built in-browser
 
 **scripts/:**
 - Purpose: Maintenance and utility scripts

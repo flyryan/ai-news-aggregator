@@ -42,9 +42,13 @@
 		}
 	}
 
-	function performSearch() {
+	async function performSearch() {
 		if (!isSearchInitialized()) return;
-		results = search(query, category || undefined);
+		const currentQuery = query;
+		const found = await search(query, category || undefined);
+		// Ignore stale responses if the query changed while awaiting.
+		if (currentQuery !== query) return;
+		results = found;
 		selectedIndex = -1;
 	}
 

@@ -1,59 +1,67 @@
 /**
- * Search index service using Lunr.js
+ * Search service.
+ *
+ * Loads a compact corpus (web/data/search-corpus.json) and builds a MiniSearch
+ * index inside a Web Worker so the ~1-2s build never blocks the main thread.
+ * If the worker or corpus is unavailable, falls back to a main-thread substring
+ * search over the same corpus.
  */
 
 import type { SearchDocument, SearchResult, Category } from '$lib/types';
-import lunr from 'lunr';
 
-let index: lunr.Index | null = null;
-let documents: Map<string, SearchDocument> = new Map();
-let initialized = false;
-
-/**
- * Initialize the search index
- */
-export async function initializeSearch(): Promise<boolean> {
-	if (initialized) return true;
-
-	try {
-		// Try to load pre-built index
-		const [indexResponse, docsResponse] = await Promise.all([
-			fetch('/data/search-index.json'),
-			fetch('/data/search-documents.json')
-		]);
-
-		if (indexResponse.ok && docsResponse.ok) {
-			// Load pre-built lunr index
-			const indexData = await indexResponse.json();
-			index = lunr.Index.load(indexData);
-
-			// Load document lookup
-			const docsData = await docsResponse.json();
-			documents = new Map(Object.entries(docsData));
-
-			initialized = true;
-			return true;
-		}
-
-		// Fall back to simple search if lunr index not available
-		return await initializeSimpleSearch();
-	} catch (e) {
-		console.warn('Failed to load search index:', e);
-		return await initializeSimpleSearch();
-	}
+interface CorpusDoc extends SearchDocument {
+	ref: string;
 }
 
-/**
- * Initialize simple search as fallback
- */
-async function initializeSimpleSearch(): Promise<boolean> {
+let worker: Worker | null = null;
+let initialized = false;
+let docCount = 0;
+
+// Fallback state (only populated if the worker path fails).
+let fallbackDocs: CorpusDoc[] | null = null;
+
+let nextSearchId = 0;
+const pending = new Map<number, (results: SearchResult[]) => void>();
+
+function spawnWorker(): Promise<boolean> {
+	return new Promise((resolve) => {
+		try {
+			worker = new Worker(new URL('./searchWorker.ts', import.meta.url), { type: 'module' });
+		} catch {
+			resolve(false);
+			return;
+		}
+
+		const onMessage = (event: MessageEvent) => {
+			const msg = event.data;
+			if (msg.type === 'ready') {
+				docCount = msg.count;
+				initialized = true;
+				resolve(true);
+			} else if (msg.type === 'error') {
+				console.warn('Search worker error:', msg.message);
+				resolve(false);
+			} else if (msg.type === 'results') {
+				const cb = pending.get(msg.id);
+				if (cb) {
+					pending.delete(msg.id);
+					cb(msg.results as SearchResult[]);
+				}
+			}
+		};
+
+		worker.addEventListener('message', onMessage);
+		worker.addEventListener('error', () => resolve(false));
+		worker.postMessage({ type: 'init' });
+	});
+}
+
+async function initializeFallback(): Promise<boolean> {
 	try {
-		const response = await fetch('/data/search-documents.json');
+		const response = await fetch('/data/search-corpus.json');
 		if (!response.ok) return false;
-
-		const docsData = await response.json();
-		documents = new Map(Object.entries(docsData));
-
+		fallbackDocs = await response.json();
+		docCount = fallbackDocs?.length ?? 0;
 		initialized = true;
 		return true;
 	} catch {
@@ -61,56 +69,42 @@ async function initializeSimpleSearch(): Promise<boolean> {
 	}
 }
 
-/**
- * Search for documents
- */
-export function search(query: string, category?: Category, limit: number = 50): SearchResult[] {
-	if (!initialized || !query.trim()) return [];
+export async function initializeSearch(): Promise<boolean> {
+	if (initialized) return true;
 
-	const results: SearchResult[] = [];
+	if (await spawnWorker()) return true;
 
-	if (index) {
-		// Use lunr index
-		try {
-			const lunrResults = index.search(query);
-
-			for (const result of lunrResults) {
-				const doc = documents.get(result.ref);
-				if (doc && (!category || doc.category === category)) {
-					results.push({
-						ref: result.ref,
-						score: result.score,
-						doc
-					});
-				}
-			}
-		} catch {
-			// Fall back to simple search on lunr error
-			return simpleSearch(query, category, limit);
-		}
-	} else {
-		// Simple search fallback
-		return simpleSearch(query, category, limit);
-	}
-
-	// Sort by score descending, then by importance
-	results.sort((a, b) => {
-		const scoreDiff = b.score - a.score;
-		if (Math.abs(scoreDiff) > 0.1) return scoreDiff;
-		return (b.doc?.importance || 0) - (a.doc?.importance || 0);
-	});
-
-	return results.slice(0, limit);
+	// Worker failed — tear it down and fall back to main-thread search.
+	worker?.terminate();
+	worker = null;
+	return await initializeFallback();
 }
 
-/**
- * Simple string matching search
- */
+export function search(
+	query: string,
+	category?: Category,
+	limit: number = 50
+): Promise<SearchResult[]> {
+	if (!initialized || !query.trim()) return Promise.resolve([]);
+
+	if (worker) {
+		return new Promise((resolve) => {
+			const id = nextSearchId++;
+			pending.set(id, resolve);
+			worker!.postMessage({ type: 'search', id, query, category, limit });
+		});
+	}
+
+	return Promise.resolve(simpleSearch(query, category, limit));
+}
+
 function simpleSearch(query: string, category?: Category, limit: number = 50): SearchResult[] {
+	if (!fallbackDocs) return [];
+
 	const queryLower = query.toLowerCase();
 	const results: SearchResult[] = [];
 
-	for (const [id, doc] of documents) {
+	for (const doc of fallbackDocs) {
 		if (category && doc.category !== category) continue;
 
 		const titleMatch = doc.title?.toLowerCase().includes(queryLower);
@@ -118,21 +112,15 @@ function simpleSearch(query: string, category?: Category, limit: number = 50): S
 		const sourceMatch = doc.source?.toLowerCase().includes(queryLower);
 
 		if (titleMatch || summaryMatch || sourceMatch) {
-			// Calculate a simple relevance score
 			let score = 0;
 			if (titleMatch) score += 10;
 			if (summaryMatch) score += 5;
 			if (sourceMatch) score += 2;
 
-			results.push({
-				ref: id,
-				score,
-				doc
-			});
+			results.push({ ref: doc.ref, score, doc });
 		}
 	}
 
-	// Sort by score and importance
 	results.sort((a, b) => {
 		const scoreDiff = b.score - a.score;
 		if (scoreDiff !== 0) return scoreDiff;
@@ -142,17 +130,13 @@ function simpleSearch(query: string, category?: Category, limit: number = 50): S
 	return results.slice(0, limit);
 }
 
-/**
- * Get search suggestions based on partial query
- */
 export function getSuggestions(query: string, limit: number = 5): string[] {
-	if (!initialized || query.length < 2) return [];
+	if (!initialized || query.length < 2 || !fallbackDocs) return [];
 
 	const queryLower = query.toLowerCase();
 	const suggestions = new Set<string>();
 
-	for (const doc of documents.values()) {
-		// Extract potential suggestions from titles
+	for (const doc of fallbackDocs) {
 		const words = doc.title?.toLowerCase().split(/\s+/) || [];
 		for (const word of words) {
 			if (word.startsWith(queryLower) && word.length > query.length) {
@@ -166,16 +150,10 @@ export function getSuggestions(query: string, limit: number = 5): string[] {
 	return Array.from(suggestions);
 }
 
-/**
- * Check if search is initialized
- */
 export function isSearchInitialized(): boolean {
 	return initialized;
 }
 
-/**
- * Get total document count
- */
 export function getDocumentCount(): number {
-	return documents.size;
+	return docCount;
 }

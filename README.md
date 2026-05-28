@@ -62,7 +62,7 @@ A Python-based pipeline that collects AI/ML news from multiple sources, analyzes
 | **4.5. Link Enrichment** | Inject internal links to referenced items | STANDARD |
 | **4.6. Ecosystem Enrichment** | Auto-detect new model releases from news | STANDARD |
 | **4.7. Hero Image** | Generate branded banner with Gemini 3 Pro | - |
-| **5-7. Output** | JSON data generation + RSS feeds + Lunr.js search index | - |
+| **5-7. Output** | JSON data generation + RSS feeds + MiniSearch corpus (client-built index) | - |
 
 ### Adaptive Thinking Profiles
 
@@ -508,7 +508,7 @@ Each pipeline run tracks collection status per source:
 ### Frontend Features
 - **AATF Branding** - Trend Red (#E63946) color scheme with skunk mascot
 - **Calendar Navigation** - Browse historical reports by date
-- **Full-text Search** - Client-side search using Lunr.js indexes
+- **Full-text Search** - Client-side MiniSearch index built in a Web Worker from a compact corpus
 - **Dark Mode** - System-aware with manual toggle
 - **Responsive Design** - Mobile-first with Tailwind CSS
 
@@ -545,7 +545,7 @@ ai-news-aggregator/
 │   └── continuity/            # Story tracking across days
 ├── generators/
 │   ├── json_generator.py      # JSON data for SPA frontend
-│   ├── search_indexer.py      # Lunr.js search index builder
+│   ├── search_indexer.py      # MiniSearch corpus builder
 │   ├── feed_generator.py      # Atom RSS feeds
 │   └── hero_generator.py      # Daily hero image with skunk mascot
 ├── frontend/                  # Svelte SPA
@@ -586,8 +586,7 @@ ai-news-aggregator/
 ```
 web/data/
 ├── index.json              # Date manifest
-├── search-index.json       # Lunr.js index (30-day window)
-├── search-documents.json   # Document lookup
+├── search-corpus.json      # Search corpus (30-day window); index built in-browser
 ├── feeds/                  # Atom RSS feeds
 │   ├── main.xml
 │   ├── summaries-executive.xml
