@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Project Overview
 
-AI News Aggregator - A Python-based multi-agent pipeline that collects AI/ML news from multiple sources (RSS feeds, arXiv API, Twitter, Reddit, Bluesky, Mastodon), analyzes them using Claude Opus 4.7 with adaptive thinking, and serves a modern Svelte SPA frontend with AATF branding.
+AI News Aggregator - A Python-based multi-agent pipeline that collects AI/ML news from multiple sources (RSS feeds, arXiv API, Twitter, Reddit, Bluesky, Mastodon), analyzes them using Claude Opus 4.8 with adaptive thinking, and serves a modern Svelte SPA frontend with AATF branding.
 
 **Testing:** The user always runs tests themselves. Do not run the pipeline or tests unless explicitly asked.
 
@@ -193,7 +193,7 @@ frontend/                       # Svelte SPA frontend
 ```
 ANTHROPIC_API_BASE    # Anthropic API endpoint (no /v1 suffix)
 ANTHROPIC_API_KEY     # Bearer token for authentication
-ANTHROPIC_MODEL       # Legacy single-provider model name (default: claude-4.7-opus-aws)
+ANTHROPIC_MODEL       # Legacy single-provider model name (default: claude-4.8-opus-aws)
 TWITTERAPI_IO_KEY     # TwitterAPI.io API key
 REDDIT_PROXY_URL      # HTTP(S) or SOCKS proxy for Reddit requests (optional)
 REDDIT_USER_AGENT     # User-Agent sent to Reddit (optional)
@@ -222,9 +222,9 @@ TZ                    # Timezone (default: America/New_York)
 
 ## Adaptive Thinking Profiles
 
-The pipeline uses internal AATF analysis profiles that map to Claude Opus 4.7 adaptive `output_config.effort`. QUICK/STANDARD/DEEP/ULTRATHINK are not provider thinking levels for Opus 4.7. `LLM_ADAPTIVE_MAX_TOKENS` controls the response output ceiling separately; `budget_tokens` is only used for older Claude models that still support manual thinking.
+The pipeline uses internal AATF analysis profiles that map to Claude Opus 4.8 adaptive `output_config.effort`. QUICK/STANDARD/DEEP/ULTRATHINK are not provider thinking levels for Opus 4.8. `LLM_ADAPTIVE_MAX_TOKENS` controls the response output ceiling separately; `budget_tokens` is only used for older Claude models that still support manual thinking.
 
-| Component | Profile | Opus 4.7 Effort |
+| Component | Profile | Opus 4.8 Effort |
 |-----------|---------|-----------------|
 | Link relevance check | QUICK | high |
 | Item summarization | QUICK | high |

@@ -90,7 +90,7 @@ def migrate_from_env(config_dir: str) -> bool:
 
     # Determine values based on mode
     llm_mode = 'openai-compatible' if using_proxy else 'anthropic'
-    model_value = '${ANTHROPIC_MODEL}' if has_custom_model else 'claude-4.7-opus-aws'
+    model_value = '${ANTHROPIC_MODEL}' if has_custom_model else 'claude-4.8-opus-aws'
 
     # For proxy users: image uses same endpoint/key as LLM
     # For direct API users: image needs separate Gemini config

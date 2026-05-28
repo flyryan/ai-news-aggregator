@@ -3,7 +3,7 @@ Anthropic Client with Adaptive/Manual Thinking Support
 
 This module provides a wrapper around the Anthropic SDK that:
 1. Uses Bearer token authentication (custom httpx transport)
-2. Supports Opus 4.7 adaptive thinking and legacy manual thinking budgets
+2. Supports Opus 4.8 adaptive thinking and legacy manual thinking budgets
 3. Returns structured responses including thinking blocks
 4. Automatically tracks token usage and costs
 """
@@ -83,7 +83,7 @@ def _env_bool(name: str, default: bool = False) -> bool:
 class ThinkingLevel(IntEnum):
     """Internal analysis profiles.
 
-    On Opus 4.7+, these legacy budget values are mapped to adaptive effort
+    On Opus 4.8+, these legacy budget values are mapped to adaptive effort
     levels. On older Claude models, they remain manual thinking budgets.
     """
     QUICK = 4096       # Simple tasks (summarization)
@@ -92,7 +92,7 @@ class ThinkingLevel(IntEnum):
     ULTRATHINK = 32000 # Cross-category synthesis
 
 
-# Map internal pipeline analysis profiles to Opus 4.7+ effort levels. Effort is
+# Map internal pipeline analysis profiles to Opus 4.8+ effort levels. Effort is
 # the provider-facing reasoning knob; the enum values only remain for older
 # manual-thinking models and backwards-compatible call sites.
 BUDGET_TO_EFFORT = {
@@ -102,7 +102,7 @@ BUDGET_TO_EFFORT = {
     ThinkingLevel.ULTRATHINK: "max",
 }
 
-# Opus 4.7 adaptive thinking does not use fixed thinking budgets. Keep the
+# Opus 4.8 adaptive thinking does not use fixed thinking budgets. Keep the
 # response ceiling separate from internal profiles so logs do not imply that
 # QUICK/STANDARD/DEEP/ULTRATHINK are Anthropic token-budget settings.
 DEFAULT_ADAPTIVE_MAX_TOKENS = 65536
@@ -129,12 +129,12 @@ def _messages_char_count(messages: List[Dict[str, Any]]) -> int:
 
 
 def _uses_adaptive_thinking(model: str) -> bool:
-    """True if model requires adaptive thinking (Opus 4.7 and later).
+    """True if model requires adaptive thinking (Opus 4.8 and later).
 
-    Opus 4.7 removed manual thinking (`type: enabled` + budget_tokens)
+    Opus 4.8 removed manual thinking (`type: enabled` + budget_tokens)
     and sampling parameters. Opus 4.6 and earlier still accept manual thinking,
     so we keep the legacy path for them. Regex is permissive to handle the
-    alias space: claude-opus-4-7, claude-4.7-opus, claude-opus-4-7-20260416,
+    alias space: claude-opus-4-8, claude-4.8-opus, claude-opus-4-8-20260416,
     claude-4.6-opus-aws, etc.
     """
     match = re.search(r'(\d+)[-.](\d+)', model.lower())
@@ -217,7 +217,7 @@ class AnthropicClient:
         """
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
-        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.7-opus-aws')
+        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.8-opus-aws')
         self.timeout = _env_float("LLM_TIMEOUT_SECONDS", timeout, minimum=1.0)
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
@@ -292,14 +292,14 @@ class AnthropicClient:
         """
         Make a plain API call.
 
-        Opus 4.7+ still receives adaptive thinking request metadata here; this
+        Opus 4.8+ still receives adaptive thinking request metadata here; this
         method only means the caller does not need returned thinking text.
 
         Args:
             messages: List of message dicts with 'role' and 'content'.
             system: Optional system prompt.
             max_tokens: Maximum tokens in response.
-            temperature: Sampling temperature (ignored on Opus 4.7+).
+            temperature: Sampling temperature (ignored on Opus 4.8+).
 
         Returns:
             LLMResponse with content and no returned thinking text.
@@ -361,7 +361,7 @@ class AnthropicClient:
             messages: List of message dicts with 'role' and 'content'.
             system: Optional system prompt.
             budget_tokens: Backward-compatible manual thinking budget/profile.
-            profile: Analysis profile (use ThinkingLevel enum). Opus 4.7+
+            profile: Analysis profile (use ThinkingLevel enum). Opus 4.8+
                      maps this to adaptive effort; older models use it as a
                      manual thinking budget.
             max_tokens: Maximum response output tokens. On adaptive models this
@@ -412,10 +412,10 @@ class AnthropicClient:
         }
 
         if use_adaptive:
-            # Opus 4.7+ path: adaptive thinking with effort. Manual thinking
+            # Opus 4.8+ path: adaptive thinking with effort. Manual thinking
             # and non-default sampling parameters return 400 on these models.
             # `thinking` is a typed SDK param in anthropic>=0.75.0; keep it
-            # top-level so Opus 4.7 cannot silently run with thinking disabled.
+            # top-level so Opus 4.8 cannot silently run with thinking disabled.
             # `output_config` is not typed in this SDK yet, so effort goes
             # through extra_body as a passthrough.
             kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
@@ -583,7 +583,7 @@ class AsyncAnthropicClient:
     ):
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
-        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.7-opus-aws')
+        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.8-opus-aws')
         self.provider_id = provider_id or self.model
         self.timeout = _env_float("LLM_TIMEOUT_SECONDS", timeout, minimum=1.0)
         self.mode = mode
@@ -1015,7 +1015,7 @@ class AsyncAnthropicClient:
         }
 
         if use_adaptive:
-            # Opus 4.7+ path: adaptive thinking with effort. See the sync
+            # Opus 4.8+ path: adaptive thinking with effort. See the sync
             # method for the thinking/output_config rationale.
             kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
             kwargs["extra_body"] = {"output_config": {"effort": effort}}
@@ -1132,7 +1132,7 @@ class AsyncAnthropicClient:
         caller: Optional[str] = None,
         routing_context: Optional[Dict[str, Any]] = None
     ) -> LLMResponse:
-        """Async plain call; Opus 4.7+ still uses adaptive thinking metadata."""
+        """Async plain call; Opus 4.8+ still uses adaptive thinking metadata."""
         kwargs = {
             "model": self.model,
             "max_tokens": max_tokens,

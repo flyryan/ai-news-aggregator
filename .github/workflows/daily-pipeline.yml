@@ -44,7 +44,7 @@ jobs:
       TZ: America/New_York
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       ANTHROPIC_API_BASE: ${{ secrets.ANTHROPIC_API_BASE }}
-      ANTHROPIC_MODEL: ${{ inputs.anthropic_model || vars.ANTHROPIC_MODEL || 'claude-4.7-opus-aws' }}
+      ANTHROPIC_MODEL: ${{ inputs.anthropic_model || vars.ANTHROPIC_MODEL || 'claude-4.8-opus-aws' }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       TWITTERAPI_IO_KEY: ${{ secrets.TWITTERAPI_IO_KEY }}
       REDDIT_PROXY_URL: ${{ secrets.REDDIT_PROXY_URL }}
@@ -185,11 +185,11 @@ jobs:
             timeout: 600
             routes:
               - id: "aws"
-                model: "claude-4.7-opus-aws"
+                model: "claude-4.8-opus-aws"
               - id: "gcp"
-                model: "claude-4.7-opus-gcp"
+                model: "claude-4.8-opus-gcp"
               - id: "anthropic"
-                model: "claude-4.7-opus-anthropic"
+                model: "claude-4.8-opus-anthropic"
 
           image:
             mode: "openai-compatible"

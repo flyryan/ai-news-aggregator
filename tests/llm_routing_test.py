@@ -1,4 +1,4 @@
-"""Focused tests for Opus 4.7 adaptive thinking and async LLM routing."""
+"""Focused tests for Opus 4.8 adaptive thinking and async LLM routing."""
 
 import asyncio
 import os
@@ -32,14 +32,14 @@ class FakeTextBlock:
 class FakeAnthropicResponse:
     content = [FakeTextBlock()]
     usage = FakeUsage()
-    model = "claude-4.7-opus-aws"
+    model = "claude-4.8-opus-aws"
     stop_reason = "end_turn"
 
 
 class FakeRouteClient:
     def __init__(self, provider_id, model=None, failures=None):
         self.provider_id = provider_id
-        self.model = model or f"claude-4.7-opus-{provider_id}"
+        self.model = model or f"claude-4.8-opus-{provider_id}"
         self.max_concurrent_requests = 8
         self.failures = list(failures or [])
         self.calls = []
@@ -72,14 +72,14 @@ class LLMRouteConfigTests(unittest.TestCase):
             mode="openai-compatible",
             api_key="test-key",
             base_url="https://proxy.example.com/",
-            model="claude-4.7-opus-aws",
+            model="claude-4.8-opus-aws",
         )
 
         routes = config.get_route_configs()
 
         self.assertEqual(len(routes), 1)
-        self.assertEqual(routes[0].id, "claude-4.7-opus-aws")
-        self.assertEqual(routes[0].model, "claude-4.7-opus-aws")
+        self.assertEqual(routes[0].id, "claude-4.8-opus-aws")
+        self.assertEqual(routes[0].model, "claude-4.8-opus-aws")
         self.assertEqual(routes[0].mode, "openai-compatible")
         self.assertEqual(routes[0].api_key, "test-key")
         self.assertEqual(routes[0].base_url, "https://proxy.example.com")
@@ -89,11 +89,11 @@ class LLMRouteConfigTests(unittest.TestCase):
             mode="openai-compatible",
             api_key="root-key",
             base_url="https://proxy.example.com",
-            model="claude-4.7-opus-aws",
+            model="claude-4.8-opus-aws",
             routes=[
-                LLMRouteConfig(id="aws", model="claude-4.7-opus-aws"),
-                LLMRouteConfig(id="gcp", model="claude-4.7-opus-gcp"),
-                LLMRouteConfig(id="anthropic", model="claude-4.7-opus-anthropic"),
+                LLMRouteConfig(id="aws", model="claude-4.8-opus-aws"),
+                LLMRouteConfig(id="gcp", model="claude-4.8-opus-gcp"),
+                LLMRouteConfig(id="anthropic", model="claude-4.8-opus-anthropic"),
             ],
         )
 
@@ -105,9 +105,9 @@ class LLMRouteConfigTests(unittest.TestCase):
         self.assertEqual(
             [route.model for route in routes],
             [
-                "claude-4.7-opus-aws",
-                "claude-4.7-opus-gcp",
-                "claude-4.7-opus-anthropic",
+                "claude-4.8-opus-aws",
+                "claude-4.8-opus-gcp",
+                "claude-4.8-opus-anthropic",
             ],
         )
 
@@ -119,9 +119,9 @@ class LLMRouteConfigTests(unittest.TestCase):
 
     def test_all_hosted_opus_47_aliases_use_adaptive_thinking(self):
         for model in (
-            "claude-4.7-opus-aws",
-            "claude-4.7-opus-gcp",
-            "claude-4.7-opus-anthropic",
+            "claude-4.8-opus-aws",
+            "claude-4.8-opus-gcp",
+            "claude-4.8-opus-anthropic",
         ):
             with self.subTest(model=model):
                 self.assertTrue(_uses_adaptive_thinking(model))
@@ -158,11 +158,11 @@ class AsyncLLMRouterTests(unittest.TestCase):
                     mode="openai-compatible",
                     api_key="test-key",
                     base_url="https://proxy.example.com",
-                    model="claude-4.7-opus-aws",
+                    model="claude-4.8-opus-aws",
                     routes=[
-                        LLMRouteConfig(id="aws", model="claude-4.7-opus-aws"),
-                        LLMRouteConfig(id="gcp", model="claude-4.7-opus-gcp"),
-                        LLMRouteConfig(id="anthropic", model="claude-4.7-opus-anthropic"),
+                        LLMRouteConfig(id="aws", model="claude-4.8-opus-aws"),
+                        LLMRouteConfig(id="gcp", model="claude-4.8-opus-gcp"),
+                        LLMRouteConfig(id="anthropic", model="claude-4.8-opus-anthropic"),
                     ],
                 )
                 router = AsyncLLMRouter.from_config(config)
@@ -189,21 +189,21 @@ class AsyncLLMRouterTests(unittest.TestCase):
                 mode="openai-compatible",
                 api_key="test-key",
                 base_url="https://proxy.example.com",
-                model="claude-4.7-opus-aws",
+                model="claude-4.8-opus-aws",
                 routes=[
                     LLMRouteConfig(
                         id="aws",
-                        model="claude-4.7-opus-aws",
+                        model="claude-4.8-opus-aws",
                         max_concurrent_requests=8,
                     ),
                     LLMRouteConfig(
                         id="gcp",
-                        model="claude-4.7-opus-gcp",
+                        model="claude-4.8-opus-gcp",
                         max_concurrent_requests=8,
                     ),
                     LLMRouteConfig(
                         id="anthropic",
-                        model="claude-4.7-opus-anthropic",
+                        model="claude-4.8-opus-anthropic",
                         max_concurrent_requests=8,
                     ),
                 ],
@@ -260,7 +260,7 @@ class AsyncLLMRouterTests(unittest.TestCase):
             client = AsyncAnthropicClient(
                 api_key="test-key",
                 base_url="https://proxy.example.com",
-                model="claude-4.7-opus-aws",
+                model="claude-4.8-opus-aws",
                 mode="openai-compatible",
                 max_retries=0,
             )
@@ -305,7 +305,7 @@ class AsyncLLMRouterTests(unittest.TestCase):
             client = AsyncAnthropicClient(
                 api_key="test-key",
                 base_url="https://proxy.example.com",
-                model="claude-4.7-opus-gcp",
+                model="claude-4.8-opus-gcp",
                 mode="openai-compatible",
                 max_retries=0,
             )

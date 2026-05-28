@@ -45,10 +45,10 @@ llm:
   # Uncomment to override the default:
   # base_url: "https://api.anthropic.com"
 
-  # Model identifier. Use whatever Opus 4.7 alias your endpoint expects.
-  # AATF's hosted proxy currently uses claude-4.7-opus-aws as the
+  # Model identifier. Use whatever Opus 4.8 alias your endpoint expects.
+  # AATF's hosted proxy currently uses claude-4.8-opus-aws as the
   # single-provider fallback.
-  model: "claude-4.7-opus-aws"
+  model: "claude-4.8-opus-aws"
 
   # Request timeout in seconds (1-600)
   timeout: 600
@@ -61,11 +61,11 @@ llm:
   #
   # routes:
   #   - id: "aws"
-  #     model: "claude-4.7-opus-aws"
+  #     model: "claude-4.8-opus-aws"
   #   - id: "gcp"
-  #     model: "claude-4.7-opus-gcp"
+  #     model: "claude-4.8-opus-gcp"
   #   - id: "anthropic"
-  #     model: "claude-4.7-opus-anthropic"
+  #     model: "claude-4.8-opus-anthropic"
   #     # Optional per-route overrides:
   #     # mode: "anthropic"
   #     # api_key: "${ANTHROPIC_DIRECT_API_KEY}"
@@ -140,15 +140,15 @@ pipeline:
 #   mode: "openai-compatible"
 #   api_key: "${PROXY_API_KEY}"
 #   base_url: "https://your-litellm-proxy.example.com"
-#   model: "claude-4.7-opus-aws"  # Legacy single-provider fallback
+#   model: "claude-4.8-opus-aws"  # Legacy single-provider fallback
 #   timeout: 600
 #   routes:
 #     - id: "aws"
-#       model: "claude-4.7-opus-aws"
+#       model: "claude-4.8-opus-aws"
 #     - id: "gcp"
-#       model: "claude-4.7-opus-gcp"
+#       model: "claude-4.8-opus-gcp"
 #     - id: "anthropic"
-#       model: "claude-4.7-opus-anthropic"
+#       model: "claude-4.8-opus-anthropic"
 #
 # image:
 #   mode: "openai-compatible"
