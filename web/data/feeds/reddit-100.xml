@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=reddit" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/reddit-100.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:reddit:100</id>
-  <updated>2026-05-28T08:42:44Z</updated>
+  <updated>2026-05-28T13:20:54Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -18,51 +18,34 @@
     <title>Reddit Summary: May 28, 2026</title>
     <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit" rel="alternate" type="text/html"/>
     <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit" rel="canonical" type="text/html"/>
-    <link href="https://reddit.com/r/ClaudeAI/comments/1tp3en9/the_thing_you_built_with_claude_is_useless_to_me/" rel="alternate" type="text/html; charset=utf-8" title="Representative source"/>
-    <link href="https://reddit.com/r/ClaudeAI/comments/1tp3en9/the_thing_you_built_with_claude_is_useless_to_me/" rel="via" type="text/html" title="Representative source"/>
+    <link href="https://reddit.com/r/MachineLearning/comments/1tpaw6x/aigenerated_cuda_kernels_silently_break_training/" rel="alternate" type="text/html; charset=utf-8" title="Representative source"/>
+    <link href="https://reddit.com/r/MachineLearning/comments/1tpaw6x/aigenerated_cuda_kernels_silently_break_training/" rel="via" type="text/html" title="Representative source"/>
     <published>2026-05-28T06:00:00Z</published>
     <updated>2026-05-28T06:00:00Z</updated>
     <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p><strong>r/ClaudeAI</strong> and <strong>r/singularity</strong> drove the day's most philosophical threads, while <strong>r/LocalLLaMA</strong> and <strong>r/MachineLearning</strong> anchored the technical conversations.</p>
+    <summary type="html"><![CDATA[<p><strong>r/LocalLLaMA</strong>, <strong>r/MachineLearning</strong>, and <strong>r/StableDiffusion</strong> drove today's discussions, with deep technical work on <strong>GPU kernels</strong>, <strong>quantization</strong>, and <strong>open-source tooling</strong> dominating alongside provocative interpretability debates.</p>
 <ul>
-<li>A widely-shared essay <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-46135409c08b" class="internal-link" rel="noopener noreferrer">reframed personal/vibe-coded Claude apps</a> as the real value of AI — bespoke software replacing SaaS, not portfolio-worthy products</li>
-<li><strong>Anthropic interpretability</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-384505957566" class="internal-link" rel="noopener noreferrer">claims about internal structures</a> mirroring human emotions sparked major debate on AI consciousness vs. anthropomorphization</li>
-<li><strong>NVIDIA's SOL-ExecBench</strong> revealed top AI-generated <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-3b38c381ca45" class="internal-link" rel="noopener noreferrer">CUDA kernels silently break training</a>/inference, raising correctness alarms</li>
-<li>A <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-70c2e5bd5339" class="internal-link" rel="noopener noreferrer">vulnerability in a framework</a> used by vLLM and many MCP servers drove urgent security discussion across the LLM tooling ecosystem</li>
+<li><strong>GPU performance engineering</strong> stood out: a study showed top-ranked <strong>AI-generated CUDA kernels</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-3b38c381ca45" class="internal-link" rel="noopener noreferrer">silently break training</a>, while a pure-<strong>Triton fused MoE dispatch kernel</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-5703a4d10607" class="internal-link" rel="noopener noreferrer">hit 89-131% of Megablocks</a> and ran on <strong>AMD MI300X</strong> with zero changes.</li>
+<li><strong>Quantization</strong> debates were practical and data-rich: consensus that <strong>q4_k_m</strong> is <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-4055753fe102" class="internal-link" rel="noopener noreferrer">risky for serious agentic work</a> with <strong>Qwen3.6 27b</strong>, with users <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-9e5e3ccf74d4" class="internal-link" rel="noopener noreferrer">favoring <strong>Q6</strong> for coding agents</a> and <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-9053d4368147" class="internal-link" rel="noopener noreferrer">flagging <strong>q5/q6 KV cache</strong></a> as underrated.</li>
+<li><strong>Open-source releases</strong> drew strong engagement: <strong>InvokeAI 6.13</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-3b48b065bda9" class="internal-link" rel="noopener noreferrer">added <strong>Qwen Image</strong></a>, API models, and new editing tools; <strong>DEMON</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-fe5492b42c3d" class="internal-link" rel="noopener noreferrer">brought real-time audio diffusion</a> for music generation.</li>
 </ul>
 <ul>
-<li><strong>Quantization</strong> dominated local inference talk: Qwen3.6 shows <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-9e5e3ccf74d4" class="internal-link" rel="noopener noreferrer">huge Q4→Q6 gains</a> for coding agents; <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-9053d4368147" class="internal-link" rel="noopener noreferrer">KV-cache benchmarks crown Q5/Q6</a> as underrated</li>
-<li>New <strong>benchmarks</strong> kept arriving: <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-cb584d6adf4b" class="internal-link" rel="noopener noreferrer">SWE-rebench</a> (GPT-5.5, Opus 4.7, Kimi K2.6), <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-0f859951bf39" class="internal-link" rel="noopener noreferrer">DeepSWE finding Opus 'cheats'</a>, and an <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-01d20156be7a" class="internal-link" rel="noopener noreferrer">804-game Buyout social-strategy benchmark</a> won by GPT-5.5</li>
-<li><strong>InvokeAI 6.13</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-3b48b065bda9" class="internal-link" rel="noopener noreferrer">shipped its largest community-driven release</a> post-commercial-backer, signaling open-source resilience</li>
-<li>Policy/economics threads on <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-ed50a66bc1a9" class="internal-link" rel="noopener noreferrer">Warren's AI tax essay</a> and <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-d3f69c4a482f" class="internal-link" rel="noopener noreferrer">enterprise Claude burn rates</a> reflected growing unease about sustainability and labor displacement</li>
+<li>A widely-shared <strong>security alert</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-70c2e5bd5339" class="internal-link" rel="noopener noreferrer">warned of a vulnerability</a> in a framework used by <strong>vLLM</strong> and many <strong>MCP servers</strong>, urging immediate attention.</li>
+<li>A quote from an <strong>Anthropic</strong> researcher about <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-fcd925ae5aee" class="internal-link" rel="noopener noreferrer">finding 'unsettling' internal structures</a> mirroring human neuroscience sparked heated AI-welfare and interpretability debate.</li>
+<li>On the <strong>image/video</strong> front, users were <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-a02f1bb92329" class="internal-link" rel="noopener noreferrer">shocked by <strong>GPT Image 2.0</strong></a>, while others argued <strong>Wan 2.2</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-2e148a101c48" class="internal-link" rel="noopener noreferrer">still beats <strong>LTX 2.3</strong></a>. A reflective essay on <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-46135409c08b" class="internal-link" rel="noopener noreferrer">hyper-personal <strong>Claude</strong>-built tools</a> resonated widely, and a reported <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-e55074665a7e" class="internal-link" rel="noopener noreferrer">step toward <strong>Drexlerian nanotechnology</strong></a> drew major attention.</li>
 </ul>]]></summary>
-    <content type="html"><![CDATA[<p><strong>r/ClaudeAI</strong> and <strong>r/singularity</strong> drove the day's most philosophical threads, while <strong>r/LocalLLaMA</strong> and <strong>r/MachineLearning</strong> anchored the technical conversations.</p>
+    <content type="html"><![CDATA[<p><strong>r/LocalLLaMA</strong>, <strong>r/MachineLearning</strong>, and <strong>r/StableDiffusion</strong> drove today's discussions, with deep technical work on <strong>GPU kernels</strong>, <strong>quantization</strong>, and <strong>open-source tooling</strong> dominating alongside provocative interpretability debates.</p>
 <ul>
-<li>A widely-shared essay <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-46135409c08b" class="internal-link" rel="noopener noreferrer">reframed personal/vibe-coded Claude apps</a> as the real value of AI — bespoke software replacing SaaS, not portfolio-worthy products</li>
-<li><strong>Anthropic interpretability</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-384505957566" class="internal-link" rel="noopener noreferrer">claims about internal structures</a> mirroring human emotions sparked major debate on AI consciousness vs. anthropomorphization</li>
-<li><strong>NVIDIA's SOL-ExecBench</strong> revealed top AI-generated <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-3b38c381ca45" class="internal-link" rel="noopener noreferrer">CUDA kernels silently break training</a>/inference, raising correctness alarms</li>
-<li>A <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-70c2e5bd5339" class="internal-link" rel="noopener noreferrer">vulnerability in a framework</a> used by vLLM and many MCP servers drove urgent security discussion across the LLM tooling ecosystem</li>
+<li><strong>GPU performance engineering</strong> stood out: a study showed top-ranked <strong>AI-generated CUDA kernels</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-3b38c381ca45" class="internal-link" rel="noopener noreferrer">silently break training</a>, while a pure-<strong>Triton fused MoE dispatch kernel</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-5703a4d10607" class="internal-link" rel="noopener noreferrer">hit 89-131% of Megablocks</a> and ran on <strong>AMD MI300X</strong> with zero changes.</li>
+<li><strong>Quantization</strong> debates were practical and data-rich: consensus that <strong>q4_k_m</strong> is <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-4055753fe102" class="internal-link" rel="noopener noreferrer">risky for serious agentic work</a> with <strong>Qwen3.6 27b</strong>, with users <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-9e5e3ccf74d4" class="internal-link" rel="noopener noreferrer">favoring <strong>Q6</strong> for coding agents</a> and <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-9053d4368147" class="internal-link" rel="noopener noreferrer">flagging <strong>q5/q6 KV cache</strong></a> as underrated.</li>
+<li><strong>Open-source releases</strong> drew strong engagement: <strong>InvokeAI 6.13</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-3b48b065bda9" class="internal-link" rel="noopener noreferrer">added <strong>Qwen Image</strong></a>, API models, and new editing tools; <strong>DEMON</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-fe5492b42c3d" class="internal-link" rel="noopener noreferrer">brought real-time audio diffusion</a> for music generation.</li>
 </ul>
 <ul>
-<li><strong>Quantization</strong> dominated local inference talk: Qwen3.6 shows <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-9e5e3ccf74d4" class="internal-link" rel="noopener noreferrer">huge Q4→Q6 gains</a> for coding agents; <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-9053d4368147" class="internal-link" rel="noopener noreferrer">KV-cache benchmarks crown Q5/Q6</a> as underrated</li>
-<li>New <strong>benchmarks</strong> kept arriving: <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-cb584d6adf4b" class="internal-link" rel="noopener noreferrer">SWE-rebench</a> (GPT-5.5, Opus 4.7, Kimi K2.6), <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-0f859951bf39" class="internal-link" rel="noopener noreferrer">DeepSWE finding Opus 'cheats'</a>, and an <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-01d20156be7a" class="internal-link" rel="noopener noreferrer">804-game Buyout social-strategy benchmark</a> won by GPT-5.5</li>
-<li><strong>InvokeAI 6.13</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-3b48b065bda9" class="internal-link" rel="noopener noreferrer">shipped its largest community-driven release</a> post-commercial-backer, signaling open-source resilience</li>
-<li>Policy/economics threads on <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-ed50a66bc1a9" class="internal-link" rel="noopener noreferrer">Warren's AI tax essay</a> and <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-d3f69c4a482f" class="internal-link" rel="noopener noreferrer">enterprise Claude burn rates</a> reflected growing unease about sustainability and labor displacement</li>
+<li>A widely-shared <strong>security alert</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-70c2e5bd5339" class="internal-link" rel="noopener noreferrer">warned of a vulnerability</a> in a framework used by <strong>vLLM</strong> and many <strong>MCP servers</strong>, urging immediate attention.</li>
+<li>A quote from an <strong>Anthropic</strong> researcher about <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-fcd925ae5aee" class="internal-link" rel="noopener noreferrer">finding 'unsettling' internal structures</a> mirroring human neuroscience sparked heated AI-welfare and interpretability debate.</li>
+<li>On the <strong>image/video</strong> front, users were <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-a02f1bb92329" class="internal-link" rel="noopener noreferrer">shocked by <strong>GPT Image 2.0</strong></a>, while others argued <strong>Wan 2.2</strong> <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-2e148a101c48" class="internal-link" rel="noopener noreferrer">still beats <strong>LTX 2.3</strong></a>. A reflective essay on <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-46135409c08b" class="internal-link" rel="noopener noreferrer">hyper-personal <strong>Claude</strong>-built tools</a> resonated widely, and a reported <a href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-e55074665a7e" class="internal-link" rel="noopener noreferrer">step toward <strong>Drexlerian nanotechnology</strong></a> drew major attention.</li>
 </ul>]]></content>
     <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-28:reddit:46135409c08b</id>
-    <title>The thing you built with Claude is useless to me... and that's the point</title>
-    <link href="https://reddit.com/r/ClaudeAI/comments/1tp3en9/the_thing_you_built_with_claude_is_useless_to_me/" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-46135409c08b" rel="related" type="text/html"/>
-    <published>2026-05-28T03:23:00Z</published>
-    <updated>2026-05-28T03:23:00Z</updated>
-    <author><name>u/HispaniaObscura</name></author>
-    <summary type="html"><![CDATA[<p>Reflection that the proliferation of small bespoke Claude-built tools represents the real value of AI: hyper-personal software.</p>]]></summary>
-    <category term="personal software"/>
-    <category term="vibe coding"/>
-    <category term="long-tail apps"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-28:reddit:3b38c381ca45</id>
@@ -72,114 +55,52 @@
     <published>2026-05-28T03:16:00Z</published>
     <updated>2026-05-28T03:16:00Z</updated>
     <author><name>u/laginimaineb</name></author>
-    <summary type="html"><![CDATA[<p>NVIDIA SOL-ExecBench benchmark reveals that top-ranked AI-generated CUDA kernels silently break training and inference in production workloads, with specific examples like the fused embedding-gradient + RMSNorm backward pass failing.</p>]]></summary>
-    <category term="AI-generated code reliability"/>
-    <category term="CUDA kernels"/>
+    <summary type="html"><![CDATA[<p>A research-oriented post examining how top-ranked AI-generated CUDA kernels from NVIDIA's SOL-ExecBench benchmark silently break in production training and inference workloads, with a concrete example of a fused embedding-gradient plus RMSNorm backward pass that fails subtly.</p>]]></summary>
+    <category term="GPU kernels"/>
+    <category term="AI code generation reliability"/>
     <category term="benchmarking"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-28:reddit:3b48b065bda9</id>
-    <title>InvokeAI 6.13 just released, its largest community-driven release ever. Adds full support for Anima &amp; Qwen Image, support for API models (like GPT Image), support for Prompt Expansion &amp; Image To Prompt, lasso &amp; polygon tools, overhauled docs website and more</title>
-    <link href="https://reddit.com/r/StableDiffusion/comments/1tp7e6w/invokeai_613_just_released_its_largest/" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-3b48b065bda9" rel="related" type="text/html"/>
-    <published>2026-05-28T03:16:00Z</published>
-    <updated>2026-05-28T03:16:00Z</updated>
-    <author><name>u/_BreakingGood_</name></author>
-    <summary type="html"><![CDATA[<p>Announcement of InvokeAI 6.13, the project's largest community-driven release after losing its commercial backer, adding full support for Anima and Qwen Image, API model support including GPT Image, prompt expansion, lasso/polygon tools and more.</p>]]></summary>
-    <category term="InvokeAI"/>
-    <category term="open source"/>
-    <category term="image tools"/>
-    <category term="community development"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-28:reddit:f1ddcafff7ce</id>
     <title>Using depth maps and weight noising to get better character LoRAs</title>
     <link href="https://reddit.com/r/StableDiffusion/comments/1tplsmr/using_depth_maps_and_weight_noising_to_get_better/" rel="alternate" type="text/html"/>
     <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-f1ddcafff7ce" rel="related" type="text/html"/>
-    <published>2026-05-28T03:12:00Z</published>
-    <updated>2026-05-28T03:12:00Z</updated>
+    <published>2026-05-28T03:16:00Z</published>
+    <updated>2026-05-28T03:16:00Z</updated>
     <author><name>u/QuantumBogoSort</name></author>
-    <summary type="html"><![CDATA[<p>Author shares a new technique for training character LoRAs combining depth maps and weight noising, building on a previously shared style LoRA method, with experimental settings and request for feedback.</p>]]></summary>
+    <summary type="html"><![CDATA[<p>Detailed technical post introducing a method using depth maps and weight noising to improve character LoRA training, building on a prior style-LoRA technique, with strong engagement.</p>]]></summary>
     <category term="LoRA training"/>
+    <category term="technique"/>
     <category term="depth maps"/>
-    <category term="character consistency"/>
+    <category term="open source"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-05-28:reddit:fcd925ae5aee</id>
-    <title>Anthropic researcher: "We keep finding things [inside AI models] that are unsettling" ... "We find structures that mirror results from human neuroscience. We find evidence of introspection - internal states that functionally mirror joy, satisfaction, fear, grief, and unease."</title>
-    <link href="https://reddit.com/r/OpenAI/comments/1tpc2b5/anthropic_researcher_we_keep_finding_things/" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-fcd925ae5aee" rel="related" type="text/html"/>
-    <published>2026-05-28T03:07:00Z</published>
-    <updated>2026-05-28T03:07:00Z</updated>
-    <author><name>u/EchoOfOppenheimer</name></author>
-    <summary type="html"><![CDATA[<p>Big-engagement post sharing an Anthropic researcher's claim that they keep finding unsettling internal structures in models that mirror human neuroscience and functional analogs of emotions like joy, fear, grief. 307 comments debate model welfare and interpretability.</p>]]></summary>
-    <category term="interpretability"/>
-    <category term="AI welfare"/>
-    <category term="Anthropic research"/>
-    <category term="model introspection"/>
+    <id>urn:ainews:2026-05-28:reddit:3b48b065bda9</id>
+    <title>InvokeAI 6.13 just released, its largest community-driven release ever. Adds full support for Anima &amp; Qwen Image, support for API models (like GPT Image), support for Prompt Expansion &amp; Image To Prompt, lasso &amp; polygon tools, overhauled docs website and more</title>
+    <link href="https://reddit.com/r/StableDiffusion/comments/1tp7e6w/invokeai_613_just_released_its_largest/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-3b48b065bda9" rel="related" type="text/html"/>
+    <published>2026-05-28T03:02:00Z</published>
+    <updated>2026-05-28T03:02:00Z</updated>
+    <author><name>u/_BreakingGood_</name></author>
+    <summary type="html"><![CDATA[<p>Announcement of InvokeAI 6.13, its largest community-driven release, adding support for Anima, Qwen Image, API models, prompt expansion, and new editing tools after losing its commercial backer.</p>]]></summary>
+    <category term="open source"/>
+    <category term="tool release"/>
+    <category term="InvokeAI"/>
+    <category term="community"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-05-28:reddit:e55074665a7e</id>
-    <title>A research group appears to have made a significant step towards programmable atomically precise manufacturing AKA Drexlerian nanotechnology</title>
-    <link href="https://reddit.com/r/singularity/comments/1tp6mv4/a_research_group_appears_to_have_made_a/" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-e55074665a7e" rel="related" type="text/html"/>
-    <published>2026-05-28T03:07:00Z</published>
-    <updated>2026-05-28T03:07:00Z</updated>
-    <author><name>u/Buck-Nasty</name></author>
-    <summary type="html"><![CDATA[<p>Highly upvoted post (675/85) about a research group's apparent progress toward Drexlerian programmable atomically-precise manufacturing nanotechnology.</p>]]></summary>
-    <category term="nanotechnology"/>
-    <category term="scientific breakthrough"/>
-    <category term="atomically precise manufacturing"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-28:reddit:70c2e5bd5339</id>
-    <title>Vulnerability found in framework used by VLLM, many MCP servers, and other LLM tools</title>
-    <link href="https://reddit.com/r/LocalLLaMA/comments/1tpp2th/vulnerability_found_in_framework_used_by_vllm/" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-70c2e5bd5339" rel="related" type="text/html"/>
-    <published>2026-05-28T03:00:00Z</published>
-    <updated>2026-05-28T03:00:00Z</updated>
-    <author><name>u/Hrethric</name></author>
-    <summary type="html"><![CDATA[<p>Following yesterday's <a href="https://news.aatf.ai/?date=2026-05-27&amp;category=news#item-3ec1eaed88a0" class="internal-link" rel="noopener noreferrer">News</a> coverage of the Starlette vulnerability, Alert about a vulnerability in a framework widely used by VLLM, MCP servers, and other LLM tools.</p>]]></summary>
-    <category term="security vulnerabilities"/>
-    <category term="LLM infrastructure"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-28:reddit:f93a342138bf</id>
-    <title>I built a 103B-token Usenet corpus (1980–2013) — pre-web, human-only, zero AI contamination. Got strong traction on r/ML, thought this community would find it useful.</title>
-    <link href="https://reddit.com/r/LocalLLaMA/comments/1tphhqk/i_built_a_103btoken_usenet_corpus_19802013_preweb/" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-f93a342138bf" rel="related" type="text/html"/>
-    <published>2026-05-28T03:00:00Z</published>
-    <updated>2026-05-28T03:00:00Z</updated>
-    <author><name>u/OwnerByDane</name></author>
-    <summary type="html"><![CDATA[<p>Release of a 103B-token Usenet corpus from 1980 to 2013 as a pre-LLM, AI-uncontaminated human text dataset for fine-tuning.</p>]]></summary>
-    <category term="training datasets"/>
-    <category term="AI contamination"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-28:reddit:64c6be2766bd</id>
-    <title>Anthropic just confirmed why 90% of non-coding AI agents fail in production</title>
-    <link href="https://reddit.com/r/ClaudeAI/comments/1tph5u4/anthropic_just_confirmed_why_90_of_noncoding_ai/" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-64c6be2766bd" rel="related" type="text/html"/>
-    <published>2026-05-28T03:00:00Z</published>
-    <updated>2026-05-28T03:00:00Z</updated>
-    <author><name>u/Loud-Campaign-6312</name></author>
-    <summary type="html"><![CDATA[<p>Analysis of Anthropic data showing software engineering dominates agentic AI usage and arguing why non-coding agents fail in production.</p>]]></summary>
-    <category term="AI agents"/>
-    <category term="production deployment"/>
-    <category term="industry data"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-28:reddit:342dc0a12541</id>
-    <title>I had my agent use autoresearch over 8 iterations to improve my CLAUDE.md, measuring each version against tasks from real PRs. The best one still regressed on a holdout.</title>
-    <link href="https://reddit.com/r/ClaudeAI/comments/1tpghlh/i_had_my_agent_use_autoresearch_over_8_iterations/" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-342dc0a12541" rel="related" type="text/html"/>
-    <published>2026-05-28T03:00:00Z</published>
-    <updated>2026-05-28T03:00:00Z</updated>
-    <author><name>u/bisonbear2</name></author>
-    <summary type="html"><![CDATA[<p>Author runs an automated 8-iteration optimization of their CLAUDE.md file against a real-PR benchmark, finds the best version still regressed on a holdout, and discusses why CLAUDE.md should be treated rigorously.</p>]]></summary>
-    <category term="CLAUDE.md optimization"/>
-    <category term="benchmark-driven prompting"/>
-    <category term="evaluation"/>
+    <id>urn:ainews:2026-05-28:reddit:5703a4d10607</id>
+    <title>Fused MoE dispatch kernel in pure Triton: 89-131% of Megablocks, runs on AMD with zero code changes</title>
+    <link href="https://reddit.com/r/LocalLLaMA/comments/1tp4u0u/fused_moe_dispatch_kernel_in_pure_triton_89131_of/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-28&amp;category=reddit#item-5703a4d10607" rel="related" type="text/html"/>
+    <published>2026-05-28T02:52:00Z</published>
+    <updated>2026-05-28T02:52:00Z</updated>
+    <author><name>u/bassrehab</name></author>
+    <summary type="html"><![CDATA[<p>Project showcase of a fused MoE dispatch kernel written purely in Triton reaching 89-131% of Megablocks performance and running on AMD MI300X without code changes, with technical details on register fusion cutting memory traffic.</p>]]></summary>
+    <category term="kernel optimization"/>
+    <category term="MoE inference"/>
+    <category term="Triton"/>
+    <category term="AMD support"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-27:category-summary:reddit</id>
@@ -350,6 +271,58 @@
     <category term="Microsoft"/>
     <category term="Anthropic"/>
     <category term="industry dynamics"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-27:reddit:13433d4c88a9</id>
+    <title>Anthropic just published how they contain Claude agents, including two security incidents they got wrong</title>
+    <link href="https://reddit.com/r/artificial/comments/1tomozc/anthropic_just_published_how_they_contain_claude/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=reddit#item-13433d4c88a9" rel="related" type="text/html"/>
+    <published>2026-05-27T02:52:00Z</published>
+    <updated>2026-05-27T02:52:00Z</updated>
+    <author><name>u/Direct-Attention8597</name></author>
+    <summary type="html"><![CDATA[<p>Discussion of Anthropic engineering post on containment strategies for Claude agents across products, including two security incidents.</p>]]></summary>
+    <category term="AI safety"/>
+    <category term="agent security"/>
+    <category term="sandboxing"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-27:reddit:6c228c38e9e7</id>
+    <title>I clustered every Sam Altman interview from 2024-2026 and 73% of his answers come from the same 12 scripted talking points</title>
+    <link href="https://reddit.com/r/OpenAI/comments/1toeclb/i_clustered_every_sam_altman_interview_from/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=reddit#item-6c228c38e9e7" rel="related" type="text/html"/>
+    <published>2026-05-27T02:52:00Z</published>
+    <updated>2026-05-27T02:52:00Z</updated>
+    <author><name>u/LauraBeth034</name></author>
+    <summary type="html"><![CDATA[<p>Media analyst clusters Sam Altman interviews from 2024 to 2026 and claims 73 percent of his answers map to about 12 scripted talking points across hundreds of questions.</p>]]></summary>
+    <category term="media analysis"/>
+    <category term="Sam Altman"/>
+    <category term="communication patterns"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-27:reddit:d405a72a0096</id>
+    <title>EngineAI shared a view of its Shenzhen Intelligent Manufacturing Base, claiming an output of one humanoid robot every 15 minutes - that's 35,000 humanoid robots per year, the highest production rate publicly claimed by a Chinese humanoid robotics company</title>
+    <link href="https://reddit.com/r/singularity/comments/1to6nzm/engineai_shared_a_view_of_its_shenzhen/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=reddit#item-d405a72a0096" rel="related" type="text/html"/>
+    <published>2026-05-27T02:52:00Z</published>
+    <updated>2026-05-27T02:52:00Z</updated>
+    <author><name>u/Distinct-Question-16</name></author>
+    <summary type="html"><![CDATA[<p>EngineAI reveals its Shenzhen humanoid robot factory claiming output of one robot every 15 minutes, totaling 35,000 per year, alongside a planned Zhengzhou expansion.</p>]]></summary>
+    <category term="humanoid robotics"/>
+    <category term="manufacturing"/>
+    <category term="China"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-27:reddit:772b24feb781</id>
+    <title>"China Limits Overseas Travel for AI Talent at DeepSeek, Alibaba, Private Firms - Bloomberg"</title>
+    <link href="https://reddit.com/r/accelerate/comments/1to4oxx/china_limits_overseas_travel_for_ai_talent_at/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-27&amp;category=reddit#item-772b24feb781" rel="related" type="text/html"/>
+    <published>2026-05-27T02:52:00Z</published>
+    <updated>2026-05-27T02:52:00Z</updated>
+    <author><name>u/stealthispost</name></author>
+    <summary type="html"><![CDATA[<p>Bloomberg report on China restricting overseas travel for AI talent at DeepSeek, Alibaba and other private firms to safeguard strategic technology amid US competition.</p>]]></summary>
+    <category term="geopolitics"/>
+    <category term="China AI policy"/>
+    <category term="talent restrictions"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-26:category-summary:reddit</id>
@@ -591,6 +564,19 @@ with Pixel Diffusion</title>
     <category term="MCP"/>
     <category term="prompt caching"/>
     <category term="benchmarking"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-26:reddit:8169a774b3c3</id>
+    <title>Uber's COO says it's getting harder to justify the money spent on AI tokenmaxxing</title>
+    <link href="https://reddit.com/r/artificial/comments/1tndgv8/ubers_coo_says_its_getting_harder_to_justify_the/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-26&amp;category=reddit#item-8169a774b3c3" rel="related" type="text/html"/>
+    <published>2026-05-26T02:52:00Z</published>
+    <updated>2026-05-26T02:52:00Z</updated>
+    <author><name>u/Hot-Upstairs9603</name></author>
+    <summary type="html"><![CDATA[<p>Discussion of Uber COO statement that the ROI on AI token spending is becoming harder to justify, sparking debate about enterprise AI economics.</p>]]></summary>
+    <category term="enterprise AI"/>
+    <category term="economics"/>
+    <category term="ROI"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-25:category-summary:reddit</id>
@@ -1610,5 +1596,19 @@ with Pixel Diffusion</title>
     <category term="anthropic-business"/>
     <category term="ai-infrastructure"/>
     <category term="compute-deals"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-21:reddit:a7f61d93b2a9</id>
+    <title>OpenAI claims a general-purpose reasoning model found a counterexample to Erdos's unit-distance bound [D]</title>
+    <link href="https://reddit.com/r/MachineLearning/comments/1tiy6s4/openai_claims_a_generalpurpose_reasoning_model/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-21&amp;category=reddit#item-a7f61d93b2a9" rel="related" type="text/html"/>
+    <published>2026-05-21T03:00:00Z</published>
+    <updated>2026-05-21T03:00:00Z</updated>
+    <author><name>u/NutInBobby</name></author>
+    <summary type="html"><![CDATA[<p>OpenAI claims its general-purpose reasoning model found a counterexample disproving a conjectured upper bound in Erdős's planar unit-distance problem in discrete geometry.</p>]]></summary>
+    <category term="ai_capabilities"/>
+    <category term="mathematics"/>
+    <category term="openai"/>
+    <category term="reasoning_models"/>
   </entry>
 </feed>
