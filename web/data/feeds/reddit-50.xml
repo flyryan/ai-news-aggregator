@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=reddit" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/reddit-50.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:reddit:50</id>
-  <updated>2026-05-31T02:04:17Z</updated>
+  <updated>2026-05-31T03:30:22Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -23,27 +23,35 @@
     <published>2026-05-30T06:00:00Z</published>
     <updated>2026-05-30T06:00:00Z</updated>
     <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p><strong>r/LocalLLaMA</strong> and <strong>r/Anthropic</strong> dominated as the freshly released <strong>Opus 4.8</strong> drew polarized reactions, while local-inference benchmarking and <strong>llama.cpp</strong> optimization remained the technical backbone of discussion.</p>
+    <summary type="html"><![CDATA[<p><strong>r/LocalLLaMA</strong> dominated with hardware and inference engineering, while <strong>Claude Opus 4.8</strong> drove the largest reaction wave a day after its release.</p>
 <ul>
-<li>The most valuable thread was a methodical <strong>Qwen3.6-27B</strong> <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-1f1a93184a67" class="internal-link" rel="noopener noreferrer">quantization benchmark</a> (Q8→Q2) using perplexity, KLD, and top-P—highly reproducible and practical for VRAM-limited users.</li>
-<li><strong>Opus 4.8</strong> sparked contrasting sentiment: a viral rant that it's <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-bbaaa4bdaecd" class="internal-link" rel="noopener noreferrer">"too honest"</a> (flagging flaws relentlessly), a heavy 1-2B-token/day user finding <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-fa2f9857ba80" class="internal-link" rel="noopener noreferrer"><strong>GPT-5.5</strong> more autonomous</a>, plus complaints about <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-c46abd7e5a9e" class="internal-link" rel="noopener noreferrer">creative-writing regressions</a> and <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-5080d54f7f9c" class="internal-link" rel="noopener noreferrer">effort-scale quirks</a>.</li>
-<li>AI economics drew skepticism: a debated <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-82b9ab5971af" class="internal-link" rel="noopener noreferrer">"<strong>half a billion</strong> burned on Claude"</a> report and the <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-18591426d60f" class="internal-link" rel="noopener noreferrer"><strong>open-vs-closed gap</strong></a> claim that open weights now lag SOTA by ~4 months.</li>
+<li><strong>Quantization quality</strong> for <strong>Qwen3.6-27B</strong> sparked the most <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-1f1a93184a67" class="internal-link" rel="noopener noreferrer">rigorous benchmark thread</a>, using llama.cpp perplexity, mean KLD, and same-top-p metrics from Q8 down to Q2.</li>
+<li><strong>GPU and VRAM debates</strong> ran hot: a <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-1060c1177bac" class="internal-link" rel="noopener noreferrer">high-engagement PSA</a> and a <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-cde4cdb34832" class="internal-link" rel="noopener noreferrer">detailed specs comparison</a> argued that <strong>memory bandwidth isn't everything</strong>, weighing <strong>RTX 4090/5090</strong>, <strong>Intel B70</strong>, and <strong>Mac unified memory</strong>.</li>
+<li><strong>llama.cpp</strong> development stayed central with an <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-b3885ef28e13" class="internal-link" rel="noopener noreferrer">f16 flash-attention mask PR</a> cutting VRAM (maintainer participation), and a reproducible <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-88ec186df38d" class="internal-link" rel="noopener noreferrer">MTP benchmark</a> claiming <strong>3.34x faster inference</strong> on an RTX 6000 Pro.</li>
+<li><strong>ComfyUI</strong> <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-f57882ef8f47" class="internal-link" rel="noopener noreferrer">merging native MultiGPU</a> support was a notable infrastructure milestone, though users flagged mismatched-VRAM limitations.</li>
+</ul>
+<p><strong>Opus 4.8</strong> reactions were sharply split:</p>
+<ul>
+<li>Praise for its <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-bbaaa4bdaecd" class="internal-link" rel="noopener noreferrer">honesty and resistance</a> to overconfident phrasing (viral, humorous post) and a <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-fa2f9857ba80" class="internal-link" rel="noopener noreferrer">heavy-token user's verdict</a> that it beats 4.7 on long runs and tool use vs <strong>GPT-5.5</strong>.</li>
+<li>Criticism elsewhere about <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-c46abd7e5a9e" class="internal-link" rel="noopener noreferrer">creative-writing limits</a> and <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-5080d54f7f9c" class="internal-link" rel="noopener noreferrer">effort-scale quirks</a>.</li>
 </ul>
 <ul>
-<li>On the engineering side, <strong>ComfyUI's</strong> <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-f57882ef8f47" class="internal-link" rel="noopener noreferrer">native MultiGPU merge</a>, a <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-b3885ef28e13" class="internal-link" rel="noopener noreferrer"><strong>llama.cpp</strong> f16 mask PR</a> cutting Flash-Attention VRAM, and detailed <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-cde4cdb34832" class="internal-link" rel="noopener noreferrer"><strong>GPU spec comparisons</strong></a> (bandwidth isn't everything) showed strong builder engagement.</li>
-<li>Notable research surfaced too: <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-0f1ebb6bca17" class="internal-link" rel="noopener noreferrer"><strong>probe-targeted LoRA fine-tuning</strong></a> for confidence calibration, and a societal-angle thread on people becoming human <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-cb4df4d4bda4" class="internal-link" rel="noopener noreferrer"><strong>"Claude wrappers."</strong></a></li>
-<li>Security drew attention via a developer embedding a <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-dd9ba7fe431e" class="internal-link" rel="noopener noreferrer"><strong>data-nuking prompt injection</strong></a> to retaliate against vibe coders—raising real ethics debate.</li>
+<li>Broader culture/business threads gained traction: people acting as <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-cb4df4d4bda4" class="internal-link" rel="noopener noreferrer">human "Claude wrappers"</a>, and a viral cautionary tale of a company <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-3f1dd6105197" class="internal-link" rel="noopener noreferrer">burning $500M on Claude</a> with no usage limits (met with skepticism).</li>
 </ul>]]></summary>
-    <content type="html"><![CDATA[<p><strong>r/LocalLLaMA</strong> and <strong>r/Anthropic</strong> dominated as the freshly released <strong>Opus 4.8</strong> drew polarized reactions, while local-inference benchmarking and <strong>llama.cpp</strong> optimization remained the technical backbone of discussion.</p>
+    <content type="html"><![CDATA[<p><strong>r/LocalLLaMA</strong> dominated with hardware and inference engineering, while <strong>Claude Opus 4.8</strong> drove the largest reaction wave a day after its release.</p>
 <ul>
-<li>The most valuable thread was a methodical <strong>Qwen3.6-27B</strong> <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-1f1a93184a67" class="internal-link" rel="noopener noreferrer">quantization benchmark</a> (Q8→Q2) using perplexity, KLD, and top-P—highly reproducible and practical for VRAM-limited users.</li>
-<li><strong>Opus 4.8</strong> sparked contrasting sentiment: a viral rant that it's <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-bbaaa4bdaecd" class="internal-link" rel="noopener noreferrer">"too honest"</a> (flagging flaws relentlessly), a heavy 1-2B-token/day user finding <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-fa2f9857ba80" class="internal-link" rel="noopener noreferrer"><strong>GPT-5.5</strong> more autonomous</a>, plus complaints about <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-c46abd7e5a9e" class="internal-link" rel="noopener noreferrer">creative-writing regressions</a> and <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-5080d54f7f9c" class="internal-link" rel="noopener noreferrer">effort-scale quirks</a>.</li>
-<li>AI economics drew skepticism: a debated <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-82b9ab5971af" class="internal-link" rel="noopener noreferrer">"<strong>half a billion</strong> burned on Claude"</a> report and the <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-18591426d60f" class="internal-link" rel="noopener noreferrer"><strong>open-vs-closed gap</strong></a> claim that open weights now lag SOTA by ~4 months.</li>
+<li><strong>Quantization quality</strong> for <strong>Qwen3.6-27B</strong> sparked the most <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-1f1a93184a67" class="internal-link" rel="noopener noreferrer">rigorous benchmark thread</a>, using llama.cpp perplexity, mean KLD, and same-top-p metrics from Q8 down to Q2.</li>
+<li><strong>GPU and VRAM debates</strong> ran hot: a <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-1060c1177bac" class="internal-link" rel="noopener noreferrer">high-engagement PSA</a> and a <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-cde4cdb34832" class="internal-link" rel="noopener noreferrer">detailed specs comparison</a> argued that <strong>memory bandwidth isn't everything</strong>, weighing <strong>RTX 4090/5090</strong>, <strong>Intel B70</strong>, and <strong>Mac unified memory</strong>.</li>
+<li><strong>llama.cpp</strong> development stayed central with an <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-b3885ef28e13" class="internal-link" rel="noopener noreferrer">f16 flash-attention mask PR</a> cutting VRAM (maintainer participation), and a reproducible <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-88ec186df38d" class="internal-link" rel="noopener noreferrer">MTP benchmark</a> claiming <strong>3.34x faster inference</strong> on an RTX 6000 Pro.</li>
+<li><strong>ComfyUI</strong> <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-f57882ef8f47" class="internal-link" rel="noopener noreferrer">merging native MultiGPU</a> support was a notable infrastructure milestone, though users flagged mismatched-VRAM limitations.</li>
+</ul>
+<p><strong>Opus 4.8</strong> reactions were sharply split:</p>
+<ul>
+<li>Praise for its <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-bbaaa4bdaecd" class="internal-link" rel="noopener noreferrer">honesty and resistance</a> to overconfident phrasing (viral, humorous post) and a <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-fa2f9857ba80" class="internal-link" rel="noopener noreferrer">heavy-token user's verdict</a> that it beats 4.7 on long runs and tool use vs <strong>GPT-5.5</strong>.</li>
+<li>Criticism elsewhere about <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-c46abd7e5a9e" class="internal-link" rel="noopener noreferrer">creative-writing limits</a> and <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-5080d54f7f9c" class="internal-link" rel="noopener noreferrer">effort-scale quirks</a>.</li>
 </ul>
 <ul>
-<li>On the engineering side, <strong>ComfyUI's</strong> <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-f57882ef8f47" class="internal-link" rel="noopener noreferrer">native MultiGPU merge</a>, a <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-b3885ef28e13" class="internal-link" rel="noopener noreferrer"><strong>llama.cpp</strong> f16 mask PR</a> cutting Flash-Attention VRAM, and detailed <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-cde4cdb34832" class="internal-link" rel="noopener noreferrer"><strong>GPU spec comparisons</strong></a> (bandwidth isn't everything) showed strong builder engagement.</li>
-<li>Notable research surfaced too: <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-0f1ebb6bca17" class="internal-link" rel="noopener noreferrer"><strong>probe-targeted LoRA fine-tuning</strong></a> for confidence calibration, and a societal-angle thread on people becoming human <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-cb4df4d4bda4" class="internal-link" rel="noopener noreferrer"><strong>"Claude wrappers."</strong></a></li>
-<li>Security drew attention via a developer embedding a <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-dd9ba7fe431e" class="internal-link" rel="noopener noreferrer"><strong>data-nuking prompt injection</strong></a> to retaliate against vibe coders—raising real ethics debate.</li>
+<li>Broader culture/business threads gained traction: people acting as <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-cb4df4d4bda4" class="internal-link" rel="noopener noreferrer">human "Claude wrappers"</a>, and a viral cautionary tale of a company <a href="https://news.aatf.ai/?date=2026-05-30&amp;category=reddit#item-3f1dd6105197" class="internal-link" rel="noopener noreferrer">burning $500M on Claude</a> with no usage limits (met with skepticism).</li>
 </ul>]]></content>
     <category term="daily-summary"/>
   </entry>
@@ -52,12 +60,52 @@
     <title>Reddit Summary: May 29, 2026</title>
     <link href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit" rel="alternate" type="text/html"/>
     <link href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit" rel="canonical" type="text/html"/>
+    <link href="https://reddit.com/r/StableDiffusion/comments/1tpyydh/lightx2v_just_released_nvfp4_ckpt_for_wan_22_14b/" rel="alternate" type="text/html; charset=utf-8" title="Representative source"/>
+    <link href="https://reddit.com/r/StableDiffusion/comments/1tpyydh/lightx2v_just_released_nvfp4_ckpt_for_wan_22_14b/" rel="via" type="text/html" title="Representative source"/>
     <published>2026-05-29T06:00:00Z</published>
     <updated>2026-05-29T06:00:00Z</updated>
     <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>No items to analyze.</p>]]></summary>
-    <content type="html"><![CDATA[<p>No items to analyze.</p>]]></content>
+    <summary type="html"><![CDATA[<p><strong>r/LocalLLaMA</strong> and <strong>r/StableDiffusion</strong> drove the day with concrete technical releases. <strong>Lightx2v's NVFP4 checkpoint</strong> for <strong>WAN 2.2 14B</strong> <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-c1e1524b3576" class="internal-link" rel="noopener noreferrer">claimed 50x+ speedups</a> but drew scrutiny over degraded motion quality, while a detailed <strong>Qwen Edit 2511</strong> workflow guide <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-48ce9321209a" class="internal-link" rel="noopener noreferrer">explained how to fix</a> ComfyUI's default resolution handling.</p>
+<ul>
+<li><strong>MONET</strong>, a 104.9M-sample Apache 2.0 image-text dataset, was <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-239ff177872f" class="internal-link" rel="noopener noreferrer">praised in <strong>r/MachineLearning</strong></a> for full documentation and tooling</li>
+<li><strong>StepFun 3.7 Flash</strong> drew interest for <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-2d89261946cc" class="internal-link" rel="noopener noreferrer">chaotic-but-effective reasoning</a> rivaling larger models</li>
+<li><strong>Zai's zcube</strong> inference architecture for <strong>GLM-5.1</strong> <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-b34a7d65da2e" class="internal-link" rel="noopener noreferrer">sparked debate</a>, with community applauding open publication over marketing</li>
+</ul>
+<p>Anthropic's <strong>Claude Opus 4.8</strong> <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-15b225030abd" class="internal-link" rel="noopener noreferrer">launch dominated</a> model-release chatter, with users hoping it behaves like 4.6 and skeptical of benchmark-versus-real-world gaps. AI safety and security were recurring themes:</p>
+<ul>
+<li>An <strong>AI simulated society</strong> study where <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-901061eb9000" class="internal-link" rel="noopener noreferrer">Claude was safest and Grok 'committed 180 crimes'</a> fueled alignment discussion</li>
+<li>The <strong>OpenClaw</strong> agentic-AI <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-e623d328efd0" class="internal-link" rel="noopener noreferrer">security crisis</a> (chainable CVEs, 245k exposed instances) served as a detailed case study</li>
+<li>A fake <strong>OpenAI Codex</strong> <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-6588d6bb75ca" class="internal-link" rel="noopener noreferrer">malware site topping Google ads</a> raised malvertising concerns</li>
+<li><strong>Data center energy costs</strong> <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-4a98790b7125" class="internal-link" rel="noopener noreferrer">added ~€750 to Irish bills</a>, highlighting AI's real-world externalities</li>
+</ul>]]></summary>
+    <content type="html"><![CDATA[<p><strong>r/LocalLLaMA</strong> and <strong>r/StableDiffusion</strong> drove the day with concrete technical releases. <strong>Lightx2v's NVFP4 checkpoint</strong> for <strong>WAN 2.2 14B</strong> <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-c1e1524b3576" class="internal-link" rel="noopener noreferrer">claimed 50x+ speedups</a> but drew scrutiny over degraded motion quality, while a detailed <strong>Qwen Edit 2511</strong> workflow guide <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-48ce9321209a" class="internal-link" rel="noopener noreferrer">explained how to fix</a> ComfyUI's default resolution handling.</p>
+<ul>
+<li><strong>MONET</strong>, a 104.9M-sample Apache 2.0 image-text dataset, was <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-239ff177872f" class="internal-link" rel="noopener noreferrer">praised in <strong>r/MachineLearning</strong></a> for full documentation and tooling</li>
+<li><strong>StepFun 3.7 Flash</strong> drew interest for <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-2d89261946cc" class="internal-link" rel="noopener noreferrer">chaotic-but-effective reasoning</a> rivaling larger models</li>
+<li><strong>Zai's zcube</strong> inference architecture for <strong>GLM-5.1</strong> <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-b34a7d65da2e" class="internal-link" rel="noopener noreferrer">sparked debate</a>, with community applauding open publication over marketing</li>
+</ul>
+<p>Anthropic's <strong>Claude Opus 4.8</strong> <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-15b225030abd" class="internal-link" rel="noopener noreferrer">launch dominated</a> model-release chatter, with users hoping it behaves like 4.6 and skeptical of benchmark-versus-real-world gaps. AI safety and security were recurring themes:</p>
+<ul>
+<li>An <strong>AI simulated society</strong> study where <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-901061eb9000" class="internal-link" rel="noopener noreferrer">Claude was safest and Grok 'committed 180 crimes'</a> fueled alignment discussion</li>
+<li>The <strong>OpenClaw</strong> agentic-AI <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-e623d328efd0" class="internal-link" rel="noopener noreferrer">security crisis</a> (chainable CVEs, 245k exposed instances) served as a detailed case study</li>
+<li>A fake <strong>OpenAI Codex</strong> <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-6588d6bb75ca" class="internal-link" rel="noopener noreferrer">malware site topping Google ads</a> raised malvertising concerns</li>
+<li><strong>Data center energy costs</strong> <a href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-4a98790b7125" class="internal-link" rel="noopener noreferrer">added ~€750 to Irish bills</a>, highlighting AI's real-world externalities</li>
+</ul>]]></content>
     <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-05-29:reddit:c1e1524b3576</id>
+    <title>Lightx2v just released NVFP4 ckpt for WAN 2.2 14b</title>
+    <link href="https://reddit.com/r/StableDiffusion/comments/1tpyydh/lightx2v_just_released_nvfp4_ckpt_for_wan_22_14b/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-05-29&amp;category=reddit#item-c1e1524b3576" rel="related" type="text/html"/>
+    <published>2026-05-29T03:07:00Z</published>
+    <updated>2026-05-29T03:07:00Z</updated>
+    <author><name>u/wywywywy</name></author>
+    <summary type="html"><![CDATA[<p>Lightx2v released an NVFP4 sparse checkpoint for WAN 2.2 14B claiming massive speedups (over 50x), though the OP notes the example motion quality looks noticeably worse and questions whether the baseline includes Lightning.</p>]]></summary>
+    <category term="quantization"/>
+    <category term="video generation"/>
+    <category term="performance"/>
+    <category term="model release"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-28:category-summary:reddit</id>
@@ -453,19 +501,6 @@ with Pixel Diffusion</title>
     <category term="transformer architecture"/>
     <category term="post-transformer"/>
     <category term="research direction"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-05-26:reddit:0dca61edbab0</id>
-    <title>We added W8A8 activation quantization to MLX — prefill went from 2.84s to 2.52s on M5 Pro</title>
-    <link href="https://reddit.com/r/LocalLLaMA/comments/1tn2p61/we_added_w8a8_activation_quantization_to_mlx/" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-05-26&amp;category=reddit#item-0dca61edbab0" rel="related" type="text/html"/>
-    <published>2026-05-26T03:00:00Z</published>
-    <updated>2026-05-26T03:00:00Z</updated>
-    <author><name>u/Enough-Astronaut9278</name></author>
-    <summary type="html"><![CDATA[<p>Project showcase from Mininglamp AI introducing Cider SDK that adds W8A8 activation quantization to MLX, delivering modest prefill speed improvements on M5 Pro Apple Silicon.</p>]]></summary>
-    <category term="MLX"/>
-    <category term="quantization"/>
-    <category term="Apple Silicon"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-05-25:category-summary:reddit</id>
