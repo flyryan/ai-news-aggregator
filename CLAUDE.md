@@ -68,7 +68,7 @@ The production publishing workflow lives in `.github/workflows/daily-pipeline.ym
 
 The workflow writes ignored `config/providers.yaml` from the `PIPELINE_PROVIDERS_YAML` secret. `ANTHROPIC_MODEL` or the `anthropic_model` dispatch input only overrides legacy single-provider configs; it must not clobber `llm.routes`. The workflow runs the pipeline and commits only generated public outputs (`web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml`) when `commit_outputs=true`. Use `workflow_dispatch` with `commit_outputs=false` for a full hosted dry run that uploads artifacts without committing. Hosted runs also upload a `pipeline-diagnostics` artifact with LLM request metrics and cost reports when those files exist.
 
-Hosted runner egress can be proxied with `PIPELINE_PROXY_URL` for all sources, `REDDIT_PROXY_URL` for Reddit only, or `LESSWRONG_PROXY_URL` for LessWrong only. LLM clients ignore proxy environment variables by default because `LLM_TRUST_ENV_PROXY=false`; set it true only when LLM traffic should use the runner proxy too. If neither pipeline nor Reddit proxy URL is set and `MULLVAD_ACCOUNT` is configured, the workflow creates a Mullvad WireGuard tunnel and exposes Mullvad's local SOCKS proxy as both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL`. `MULLVAD_WG_PRIVATE_KEY` pins CI to one registered Mullvad device across runs.
+Hosted runner egress can be proxied with `PIPELINE_PROXY_URL` for all sources or `LESSWRONG_PROXY_URL` for LessWrong only. `REDDIT_PROXY_URL` is legacy: Reddit now collects via the ScrapeCreators API which unblocks server-side, so the Reddit gatherer goes direct (`requests` `trust_env=False`) and ignores both `REDDIT_PROXY_URL` and the pipeline-wide `ALL_PROXY` exports; use `SCRAPECREATORS_PROXY_URL` only if that specific traffic must be proxied. LLM clients ignore proxy environment variables by default because `LLM_TRUST_ENV_PROXY=false`; set it true only when LLM traffic should use the runner proxy too. If neither pipeline nor Reddit proxy URL is set and `MULLVAD_ACCOUNT` is configured, the workflow creates a Mullvad WireGuard tunnel and exposes Mullvad's local SOCKS proxy as both `PIPELINE_PROXY_URL` and `REDDIT_PROXY_URL`. `MULLVAD_WG_PRIVATE_KEY` pins CI to one registered Mullvad device across runs.
 
 Use `scripts/post_pipeline_verify.sh` for hosted-site verification. It is configured with environment variables: set `AWS_HOST` directly, or set `AWS_PROFILE` plus `AWS_INSTANCE_ID`/`AWS_INSTANCE_NAME` for EC2 lookup. Set `REBUILD_WEB=true` when the deployment includes frontend source or web-image changes.
 
@@ -109,7 +109,7 @@ Phase 7: Search Corpus Update (client-built MiniSearch index)
 | **News** | RSS feeds + articles from Twitter links | Product releases, company news |
 | **Research** | arXiv API + research blogs (LessWrong) | Research findings, breakthroughs |
 | **Social** | Twitter, Bluesky, Mastodon | Industry discussions, reactions |
-| **Reddit** | Reddit JSON API | Community discussions, debates |
+| **Reddit** | Reddit via ScrapeCreators API | Community discussions, debates |
 
 ### Directory Structure
 
@@ -183,7 +183,7 @@ frontend/                       # Svelte SPA frontend
 ### External Dependencies
 - **Anthropic SDK** - Direct Claude API with adaptive thinking support (Bearer auth)
 - **TwitterAPI.io** - Twitter/X data collection ($0.15/1000 tweets)
-- **Reddit JSON** - Free Reddit endpoint (add .json to Reddit URLs)
+- **ScrapeCreators API** - Reddit data collection (~$0.99/1000 calls; 1 call = 1 credit). Replaces the dead free Reddit `.json` endpoint; unblocks Reddit server-side. Requires `SCRAPECREATORS_API_KEY`.
 - **Bluesky Public API** - Free, no auth required
 - **Mastodon Public API** - Free, no auth required
 - **OpenRouter API** - Model discovery and API availability dates (free, no auth)
@@ -195,11 +195,21 @@ ANTHROPIC_API_BASE    # Anthropic API endpoint (no /v1 suffix)
 ANTHROPIC_API_KEY     # Bearer token for authentication
 ANTHROPIC_MODEL       # Legacy single-provider model name (default: claude-4.8-opus-aws)
 TWITTERAPI_IO_KEY     # TwitterAPI.io API key
-REDDIT_PROXY_URL      # HTTP(S) or SOCKS proxy for Reddit requests (optional)
-REDDIT_USER_AGENT     # User-Agent sent to Reddit (optional)
+SCRAPECREATORS_API_KEY # ScrapeCreators API key for Reddit collection (required for Reddit data)
+SCRAPECREATORS_BASE   # ScrapeCreators base URL (default: https://api.scrapecreators.com)
+SCRAPECREATORS_PROXY_URL # Optional proxy for ScrapeCreators traffic only; default direct (ignores ALL_PROXY)
+REDDIT_SORT           # Reddit listing sort: new|hot|top (default: new, window-bounded paging)
+REDDIT_MAX_PAGES      # Max listing pages per subreddit, safety cap (default: 20)
+REDDIT_BODY_TOP_N     # Top-scoring posts/sub to enrich with body+comments (default: 12)
+REDDIT_MIN_COMMENTS_FOR_DIGEST # Min comments before a link post gets a comment digest (default: 8)
+REDDIT_CREDIT_BUDGET  # Hard per-run ScrapeCreators call ceiling; aborts gracefully if hit (default: 600)
+REDDIT_FETCH_WORKERS  # Concurrent subreddit fetch threads (default: 6)
+REDDIT_PROXY_URL      # Legacy proxy for direct Reddit requests; now a no-op for Reddit (ScrapeCreators goes direct)
+REDDIT_USER_AGENT     # User-Agent sent on ScrapeCreators requests (optional)
 LESSWRONG_PROXY_URL   # HTTP(S) or SOCKS proxy for LessWrong GraphQL/browser fallback requests (optional)
 PIPELINE_PROXY_URL    # HTTP(S) or SOCKS proxy for the whole pipeline (optional)
-NEWS_USER_AGENT       # User-Agent sent to RSS/feed sources (optional)
+NEWS_USER_AGENT       # User-Agent sent to RSS/feed sources, incl. research blog feeds (optional)
+RESEARCH_FEED_TIMEOUT # Network timeout (seconds) for research blog feed fetches (default: 20)
 LLM_TRUST_ENV_PROXY   # Let LLM clients use HTTP(S)/ALL_PROXY env vars (default: false)
 LLM_TIMEOUT_SECONDS   # Override provider-config LLM request timeout (Actions default: 240)
 LLM_MAX_CONCURRENT_REQUESTS # Async LLM request cap per provider route; 0 disables it (default: 8)
@@ -345,6 +355,8 @@ Feeds are output to `web/data/feeds/` and accessible at `/data/feeds/*.xml` on t
 
 - **arXiv**: Uses arXiv RSS feeds for today's collection (no rate limits, more reliable) with automatic API fallback. For historical dates, uses API directly since RSS only contains current announcements. Only collects papers with `announce_type` of "new" or "cross" (skips replacements). arXiv only publishes papers on weekdays (Mon-Fri). Weekend dates will return 0 papers.
 - **LessWrong**: Uses GraphQL for date-range collection because RSS only exposes the newest posts. The helper tries direct GraphQL, cached cookies, and a Playwright browser warm-up. `LESSWRONG_PROXY_URL` can target only this source; otherwise `PIPELINE_PROXY_URL` is reused.
+- **Reddit (ScrapeCreators)**: The free Reddit `.json` endpoint and OAuth are dead, so Reddit collects via the ScrapeCreators API (`x-api-key`). Listings page `sort=new` newest→oldest and stop once the coverage window is passed (credit-cheap, complete; `REDDIT_MAX_PAGES` safety cap). The top `REDDIT_BODY_TOP_N` posts/sub are enriched via one `post/comments` call: self posts get their `selftext`; high-discussion link posts get a digest of top community comments (analyzer `content`). A hard `REDDIT_CREDIT_BUDGET` aborts calls gracefully if exceeded. Egress is direct (`trust_env=False`), bypassing the pipeline proxy/Mullvad. `sort=new` backfill of dates >2 days old is depth-limited and logs a warning.
+- **External API Usage**: Non-LLM paid APIs report per-run usage and live balance into the end-of-run cost summary (and `cost_report_{date}.json` under `external_apis`): ScrapeCreators shows calls/credits-consumed/remaining-balance, and TwitterAPI.io shows calls/tweets/`recharge_credits` balance ($1 = 100,000 credits). Balance probes are free.
 - **Link Following**: The News gatherer receives social posts and uses LLM to decide which linked articles to fetch.
 - **Link Enrichment**: Executive summaries, category summaries, and topic descriptions are enriched with internal links to referenced items. Links use format `/?date={date}&category={category}#item-{id}`.
 - **Date Semantics**: TARGET_DATE represents the report date. Coverage period is the day BEFORE the report date (00:00-23:59 ET). For example, TARGET_DATE=2026-01-05 generates a "January 5th report" covering news from January 4th.
@@ -364,7 +376,7 @@ Feeds are output to `web/data/feeds/` and accessible at `/data/feeds/*.xml` on t
 - Bluesky: Add handles to `config/bluesky_accounts.txt` (e.g., `karpathy.bsky.social`)
 - Mastodon: Add accounts to `config/mastodon_accounts.txt` (format: `username@instance.social`)
 - Twitter: Add usernames to `config/twitter_accounts.txt` (requires TWITTERAPI_IO_KEY)
-- Reddit: Add subreddits to `config/reddit_subreddits.txt` (free, no API key needed)
+- Reddit: Add subreddits to `config/reddit_subreddits.txt` (requires `SCRAPECREATORS_API_KEY`)
 
 ## Adding a New Agent
 

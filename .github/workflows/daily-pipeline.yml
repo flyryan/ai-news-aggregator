@@ -47,6 +47,8 @@ jobs:
       ANTHROPIC_MODEL: ${{ inputs.anthropic_model || vars.ANTHROPIC_MODEL || 'claude-4.8-opus-aws' }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       TWITTERAPI_IO_KEY: ${{ secrets.TWITTERAPI_IO_KEY }}
+      SCRAPECREATORS_API_KEY: ${{ secrets.SCRAPECREATORS_API_KEY }}
+      SCRAPECREATORS_BASE: ${{ vars.SCRAPECREATORS_BASE || 'https://api.scrapecreators.com' }}
       REDDIT_PROXY_URL: ${{ secrets.REDDIT_PROXY_URL }}
       REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'AI-News-Aggregator/1.0 (by u/flyryan)' }}
       LESSWRONG_PROXY_URL: ${{ secrets.LESSWRONG_PROXY_URL }}
@@ -311,15 +313,9 @@ jobs:
             echo "Mullvad SOCKS proxy did not return an external IP smoke-test response." >&2
           fi
 
-          reddit_status="$(curl -sS -o /dev/null -w '%{http_code}' \
-            -A "$REDDIT_USER_AGENT" \
-            --proxy socks5h://10.64.0.1:1080 \
-            https://www.reddit.com/.json || true)"
-          if [[ "$reddit_status" == "200" ]]; then
-            echo "Reddit probe succeeded through Mullvad."
-          else
-            echo "Reddit probe returned HTTP ${reddit_status:-unknown}; continuing so the gatherer can report detailed subreddit status." >&2
-          fi
+          # Reddit no longer hits reddit.com directly: the gatherer collects via the
+          # ScrapeCreators API (server-side unblocking, direct egress), so no .json probe
+          # through Mullvad is needed. The Mullvad tunnel above still serves LLM/other egress.
 
       - name: Run pipeline
         if: steps.schedule_gate.outputs.should_run == 'true'
@@ -333,7 +329,10 @@ jobs:
             export all_proxy="$PIPELINE_PROXY_URL"
             export https_proxy="$PIPELINE_PROXY_URL"
             export http_proxy="$PIPELINE_PROXY_URL"
-            export NO_PROXY="localhost,127.0.0.1,::1"
+            # ScrapeCreators (Reddit) unblocks server-side and must go direct, not through
+            # the Mullvad tunnel. The gatherer sets requests trust_env=False as the primary
+            # guard; this NO_PROXY entry is belt-and-suspenders.
+            export NO_PROXY="localhost,127.0.0.1,::1,api.scrapecreators.com"
             export no_proxy="$NO_PROXY"
             echo "Pipeline-wide proxy is configured."
           fi

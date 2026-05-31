@@ -523,7 +523,11 @@ class StalenessChecker:
             try:
                 response = self._session.get(item_url, timeout=12)
                 response.raise_for_status()
-                self._article_page_cache[item_url] = response.text
+                if self._is_html_response(response):
+                    self._article_page_cache[item_url] = response.text
+                else:
+                    logger.debug(f"Freshness: skipping non-HTML article page {item_url}")
+                    self._article_page_cache[item_url] = None
             except Exception as exc:
                 logger.debug(f"Freshness check could not fetch article page {item_url}: {exc}")
                 self._article_page_cache[item_url] = None
@@ -588,52 +592,72 @@ class StalenessChecker:
             self._primary_date_cache[primary_url] = None
             return None
 
-        soup = BeautifulSoup(response.text, "html.parser")
-        meta_keys = (
-            ("property", "article:published_time"),
-            ("property", "og:article:published_time"),
-            ("name", "article:published_time"),
-            ("name", "date"),
-            ("name", "datePublished"),
-            ("itemprop", "datePublished"),
-        )
-        for attr, value in meta_keys:
-            tag = soup.find("meta", attrs={attr: value})
-            parsed = self._parse_date_value(tag.get("content") if tag else None)
-            if parsed:
-                self._primary_date_cache[primary_url] = parsed
-                return parsed
+        # Only parse HTML/text. A primary URL pointing at a binary/compressed resource
+        # (PDF, image, undecoded gzip) would otherwise feed garbage bytes into the date
+        # parser and raise (e.g. int() on binary), disabling the freshness policy.
+        if not self._is_html_response(response):
+            logger.debug(f"Freshness: skipping non-HTML primary page {primary_url}")
+            self._primary_date_cache[primary_url] = None
+            return None
 
-        for script in soup.find_all("script", type="application/ld+json"):
-            raw = script.string or script.get_text()
-            if not raw:
-                continue
-            try:
-                parsed = self._json_find_date(json.loads(raw))
+        try:
+            soup = BeautifulSoup(response.text, "html.parser")
+            meta_keys = (
+                ("property", "article:published_time"),
+                ("property", "og:article:published_time"),
+                ("name", "article:published_time"),
+                ("name", "date"),
+                ("name", "datePublished"),
+                ("itemprop", "datePublished"),
+            )
+            for attr, value in meta_keys:
+                tag = soup.find("meta", attrs={attr: value})
+                parsed = self._parse_date_value(tag.get("content") if tag else None)
                 if parsed:
                     self._primary_date_cache[primary_url] = parsed
                     return parsed
-            except Exception:
-                continue
 
-        for time_tag in soup.find_all("time"):
-            parsed = self._parse_date_value(
-                time_tag.get("datetime") or time_tag.get("content") or time_tag.get_text(" ", strip=True)
+            for script in soup.find_all("script", type="application/ld+json"):
+                raw = script.string or script.get_text()
+                if not raw:
+                    continue
+                try:
+                    parsed = self._json_find_date(json.loads(raw))
+                    if parsed:
+                        self._primary_date_cache[primary_url] = parsed
+                        return parsed
+                except Exception:
+                    continue
+
+            for time_tag in soup.find_all("time"):
+                parsed = self._parse_date_value(
+                    time_tag.get("datetime") or time_tag.get("content") or time_tag.get_text(" ", strip=True)
+                )
+                if parsed:
+                    self._primary_date_cache[primary_url] = parsed
+                    return parsed
+
+            text = unescape(soup.get_text(" ", strip=True))
+            match = re.search(
+                r"\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\s+"
+                r"\d{1,2},\s+\d{4}\b",
+                text[:3000],
+                re.IGNORECASE,
             )
-            if parsed:
-                self._primary_date_cache[primary_url] = parsed
-                return parsed
-
-        text = unescape(soup.get_text(" ", strip=True))
-        match = re.search(
-            r"\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\s+"
-            r"\d{1,2},\s+\d{4}\b",
-            text[:3000],
-            re.IGNORECASE,
-        )
-        parsed = self._parse_date_value(match.group(0) if match else None)
+            parsed = self._parse_date_value(match.group(0) if match else None)
+        except Exception as exc:
+            logger.debug(f"Freshness: failed to parse primary page {primary_url}: {exc}")
+            parsed = None
         self._primary_date_cache[primary_url] = parsed
         return parsed
+
+    @staticmethod
+    def _is_html_response(response) -> bool:
+        """True when a response looks like HTML/XML/text (vs. binary like PDF/image)."""
+        ctype = (response.headers.get("Content-Type") or "").lower()
+        if not ctype:
+            return True  # no content-type header: fall back to parsing (caught defensively)
+        return any(token in ctype for token in ("html", "xml", "text"))
 
     def _mark_freshness(
         self,

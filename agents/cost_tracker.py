@@ -92,6 +92,10 @@ class CostTracker:
         self.calls: List[APICallRecord] = []
         self.start_time: Optional[datetime] = None
         self.end_time: Optional[datetime] = None
+        # Non-LLM/third-party API usage (e.g. ScrapeCreators, TwitterAPI.io), keyed by
+        # provider name. Each value is a flat dict of metrics (calls, credits_consumed,
+        # balance, balance_usd, est_cost_usd, items, note).
+        self.external_apis: Dict[str, Dict] = {}
 
         # Determine pricing based on model
         if "opus" in model.lower():
@@ -120,7 +124,19 @@ class CostTracker:
         """Mark the start of a pipeline run."""
         self.start_time = datetime.now()
         self.calls = []
+        self.external_apis = {}
         logger.info("Cost tracking started")
+
+    def record_external_api(self, name: str, **metrics):
+        """
+        Record (or merge) usage for a non-LLM third-party API so it shows up in the
+        run summary. Pass any of: calls, items, credits_consumed, balance, balance_usd,
+        est_cost_usd, note. Repeated calls for the same name merge their keys.
+        """
+        existing = self.external_apis.get(name, {})
+        existing.update({k: v for k, v in metrics.items() if v is not None})
+        self.external_apis[name] = existing
+        logger.debug(f"Recorded external API usage: {name} -> {existing}")
 
     def stop(self):
         """Mark the end of a pipeline run."""
@@ -308,6 +324,27 @@ class CostTracker:
             for provider, provider_cost in sorted_providers:
                 lines.append(f"  {provider:30s} ${provider_cost.total_cost:.4f}")
 
+        if self.external_apis:
+            lines.extend(["", "EXTERNAL API USAGE (non-LLM):"])
+            for name, info in self.external_apis.items():
+                parts: List[str] = []
+                if info.get('calls') is not None:
+                    parts.append(f"calls={info['calls']:,}")
+                if info.get('items') is not None:
+                    parts.append(f"items={info['items']:,}")
+                if info.get('credits_consumed') is not None:
+                    parts.append(f"credits used={info['credits_consumed']:,}")
+                if info.get('balance') is not None:
+                    bal = f"balance={info['balance']:,}"
+                    if info.get('balance_usd') is not None:
+                        bal += f" (${info['balance_usd']:.2f})"
+                    parts.append(bal)
+                if info.get('est_cost_usd') is not None:
+                    parts.append(f"est cost=${info['est_cost_usd']:.4f}")
+                if info.get('note'):
+                    parts.append(str(info['note']))
+                lines.append(f"  {name}: " + "  |  ".join(parts) if parts else f"  {name}")
+
         lines.extend([
             "",
             "PRICING (Claude Opus 4.8):",
@@ -350,6 +387,7 @@ class CostTracker:
                 provider: round(c.total_cost, 6)
                 for provider, c in by_provider.items()
             },
+            "external_apis": self.external_apis,
             "calls": [
                 {
                     "timestamp": call.timestamp,

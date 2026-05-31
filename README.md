@@ -217,7 +217,8 @@ Set these on the publishing repository:
 | `ANTHROPIC_API_KEY` | LLM/proxy API key, also used by the fallback generated provider config |
 | `ANTHROPIC_API_BASE` | OpenAI-compatible proxy base URL when used |
 | `TWITTERAPI_IO_KEY` | Optional Twitter/X collection |
-| `REDDIT_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for Reddit requests if runner egress is blocked |
+| `SCRAPECREATORS_API_KEY` | Reddit collection via the ScrapeCreators API (replaces the dead free Reddit `.json` endpoint); required for Reddit data |
+| `REDDIT_PROXY_URL` | Legacy proxy for direct Reddit requests; no longer used by the Reddit gatherer (ScrapeCreators goes direct) |
 | `LESSWRONG_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for LessWrong GraphQL/browser fallback requests |
 | `PIPELINE_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for the whole pipeline; useful when hosted runner egress is blocked by multiple sources |
 | `MULLVAD_ACCOUNT` | Optional Mullvad account number; used to create a WireGuard tunnel when neither `PIPELINE_PROXY_URL` nor `REDDIT_PROXY_URL` is set |
@@ -286,9 +287,9 @@ Runtime scrape data, checkpoints, and logs under `data/**` and `logs/**` stay ig
 
 ### Reddit Collection on Hosted Runners
 
-The Reddit gatherer uses Reddit's public `.json` endpoints and does not require Reddit app credentials.
+The Reddit gatherer collects via the **ScrapeCreators API** (`SCRAPECREATORS_API_KEY`), which unblocks Reddit server-side. Reddit's free `.json` endpoint and OAuth are both dead, so this is required for Reddit data. The gatherer sends its requests directly (`requests` `trust_env=False`) and ignores `REDDIT_PROXY_URL` and the pipeline-wide `ALL_PROXY` exports; set `SCRAPECREATORS_PROXY_URL` only if that specific traffic must be proxied. Per-run credit usage and the remaining balance are logged and shown in the end-of-run cost summary.
 
-If a CI provider's IP ranges are blocked only for Reddit, set `REDDIT_PROXY_URL` to an HTTP(S) or SOCKS proxy URL. If multiple sources block hosted runner egress, set `PIPELINE_PROXY_URL` instead; the workflow exports it as the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` variables for the pipeline process. The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed. LLM clients bypass those proxy environment variables by default; set `LLM_TRUST_ENV_PROXY=true` only when LLM traffic should also use the runner proxy.
+If multiple sources block hosted runner egress, set `PIPELINE_PROXY_URL`; the workflow exports it as the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` variables for the pipeline process (with `api.scrapecreators.com` in `NO_PROXY` so Reddit stays direct). The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed. LLM clients bypass those proxy environment variables by default; set `LLM_TRUST_ENV_PROXY=true` only when LLM traffic should also use the runner proxy.
 
 LessWrong uses GraphQL for date-range research collection. The LessWrong helper tries direct GraphQL first, then cached cookies, then a browser cookie warm-up only if needed. If hosted egress is blocked only for LessWrong, set `LESSWRONG_PROXY_URL`; otherwise `PIPELINE_PROXY_URL` is reused for direct GraphQL, cached-cookie requests, and the Playwright browser fallback.
 
@@ -369,6 +370,7 @@ You can reference environment variables in your YAML config using `${VAR_NAME}` 
 export ANTHROPIC_API_KEY="your-key-here"
 export GOOGLE_API_KEY="your-key-here"
 export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
+export SCRAPECREATORS_API_KEY="your-key-here"  # For Reddit collection
 ```
 
 | Variable | Description | Required |
@@ -376,7 +378,8 @@ export TWITTERAPI_IO_KEY="your-key-here"  # Optional, for Twitter collection
 | `ANTHROPIC_API_KEY` | Anthropic API key | Yes |
 | `GOOGLE_API_KEY` | Google AI API key | No (hero images) |
 | `TWITTERAPI_IO_KEY` | TwitterAPI.io key ($0.15/1000 tweets) | No |
-| `REDDIT_PROXY_URL` | HTTP(S) or SOCKS proxy for Reddit requests | No |
+| `SCRAPECREATORS_API_KEY` | ScrapeCreators key for Reddit (~$0.99/1000 calls) | For Reddit |
+| `REDDIT_PROXY_URL` | Legacy; no longer used for Reddit (ScrapeCreators goes direct) | No |
 | `REDDIT_USER_AGENT` | User-Agent for Reddit requests | No |
 | `LESSWRONG_PROXY_URL` | HTTP(S) or SOCKS proxy for LessWrong requests | No |
 | `PIPELINE_PROXY_URL` | HTTP(S) or SOCKS proxy for the whole pipeline | No |
@@ -503,7 +506,7 @@ Each pipeline run tracks collection status per source:
 | **News** | 26 curated RSS/Atom feeds + linked articles | RSS/Atom + LLM-guided link following |
 | **Research** | 19 research feeds + 7 arXiv categories | RSS/Atom + arXiv RSS/OAI-PMH + LessWrong GraphQL |
 | **Social** | Twitter, Bluesky, Mastodon | TwitterAPI.io + free APIs |
-| **Reddit** | Configurable subreddits | Public JSON endpoints |
+| **Reddit** | Configurable subreddits | ScrapeCreators API (listings + post comments) |
 
 ### Frontend Features
 - **AATF Branding** - Trend Red (#E63946) color scheme with skunk mascot
@@ -579,7 +582,7 @@ ai-news-aggregator/
 | **News** | RSS + linked articles from social | Product releases, company news |
 | **Research** | arXiv + LessWrong GraphQL | Papers, breakthroughs |
 | **Social** | Twitter, Bluesky, Mastodon | Discussions, reactions |
-| **Reddit** | Reddit JSON API | Community debates |
+| **Reddit** | Reddit via ScrapeCreators API | Community debates |
 
 ### Data Output
 

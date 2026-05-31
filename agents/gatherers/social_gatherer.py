@@ -50,6 +50,10 @@ class SocialGatherer(BaseGatherer):
             'mastodon': {'status': 'pending', 'count': 0, 'error': None},
         }
 
+        # TwitterAPI.io usage accounting (surfaced in the end-of-run cost summary)
+        self._twitter_calls = 0          # billable API requests issued
+        self._twitter_tweets_billed = 0  # raw tweets returned (TwitterAPI.io bills per tweet)
+
         logger.info(f"Loaded {len(self.twitter_users)} Twitter, {len(self.bluesky_handles)} Bluesky, {len(self.mastodon_accounts)} Mastodon accounts")
 
     @property
@@ -155,7 +159,44 @@ class SocialGatherer(BaseGatherer):
             self.collection_status['twitter']['error'] = str(e)
             logger.error(f"Twitter collection failed: {e}")
 
+        # Surface TwitterAPI.io usage + balance in the end-of-run cost summary.
+        try:
+            from ..cost_tracker import get_tracker
+            balance = self._fetch_twitter_balance()
+            # TwitterAPI.io bills ~$0.15 / 1000 tweets; credits are $1 / 100,000 units.
+            logger.info(
+                f"TwitterAPI.io usage: {self._twitter_calls} calls, "
+                f"{self._twitter_tweets_billed} tweets billed; recharge_credits={balance}"
+            )
+            get_tracker().record_external_api(
+                "TwitterAPI.io (Twitter)",
+                calls=self._twitter_calls,
+                items=self._twitter_tweets_billed,
+                balance=balance,
+                balance_usd=(balance / 100000) if balance is not None else None,
+                est_cost_usd=round(self._twitter_tweets_billed * 0.15 / 1000, 4),
+            )
+        except Exception as e:  # never let reporting break collection
+            logger.debug(f"Could not record TwitterAPI.io usage: {e}")
+
         return all_tweets
+
+    def _fetch_twitter_balance(self) -> Optional[int]:
+        """Best-effort TwitterAPI.io recharge-credit balance (free /oapi/my/info endpoint)."""
+        if not TWITTERAPI_IO_KEY:
+            return None
+        try:
+            resp = requests.get(
+                f"{TWITTERAPI_IO_BASE}/oapi/my/info",
+                headers={"X-API-Key": TWITTERAPI_IO_KEY},
+                timeout=30,
+            )
+            if resp.status_code == 200:
+                return resp.json().get("recharge_credits")
+            logger.warning(f"TwitterAPI.io balance probe returned HTTP {resp.status_code}")
+        except Exception as e:
+            logger.warning(f"Could not fetch TwitterAPI.io balance: {e}")
+        return None
 
     def _twitter_search(self, usernames: List[str]) -> List[CollectedItem]:
         """Use Twitter advanced search to collect from multiple users."""
@@ -201,6 +242,7 @@ class SocialGatherer(BaseGatherer):
                         timeout=30
                     )
                     response.raise_for_status()
+                    self._twitter_calls += 1
                     data = response.json()
 
                     tweets_data = data.get('tweets', [])
@@ -209,6 +251,9 @@ class SocialGatherer(BaseGatherer):
 
                     if not tweets_data:
                         break
+
+                    # TwitterAPI.io bills per tweet returned.
+                    self._twitter_tweets_billed += len(tweets_data)
 
                     for tweet_data in tweets_data:
                         try:

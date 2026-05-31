@@ -45,6 +45,10 @@ logger = logging.getLogger(__name__)
 # arXiv rate limit for API: minimum 3 seconds between requests
 ARXIV_REQUEST_DELAY = 3.5  # seconds
 
+# Network timeout (seconds) for research blog feed fetches. feedparser.parse(url) has no
+# network timeout, so a single unresponsive feed would hang the whole gatherer (and Phase 1).
+RESEARCH_FEED_TIMEOUT = float(os.getenv('RESEARCH_FEED_TIMEOUT', '20'))
+
 
 class ResearchGatherer(BaseGatherer):
     """Gathers research content from arXiv and research blogs."""
@@ -360,7 +364,13 @@ class ResearchGatherer(BaseGatherer):
 
         try:
             logger.debug(f"Fetching research feed: {feed_url}")
-            feed = feedparser.parse(feed_url)
+            # Fetch with an explicit timeout (feedparser.parse(url) has none) so one
+            # unresponsive feed can't hang the gatherer. Mirrors _fetch_category_rss; a
+            # browser-ish UA avoids 403s from feeds like Nature.
+            headers = {'User-Agent': os.environ.get('NEWS_USER_AGENT') or LESSWRONG_USER_AGENT}
+            response = requests.get(feed_url, headers=headers, timeout=RESEARCH_FEED_TIMEOUT, allow_redirects=True)
+            response.raise_for_status()
+            feed = feedparser.parse(response.content)
 
             if feed.bozo:
                 # CharacterEncodingOverride is benign - feedparser handles it correctly
