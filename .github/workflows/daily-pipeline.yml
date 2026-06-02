@@ -346,6 +346,32 @@ jobs:
           fi
           python3 run_pipeline.py "${args[@]}"
 
+      - name: Validate generated report (publish gate)
+        if: steps.schedule_gate.outputs.should_run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
+          # The pipeline can exit 0 even when Topic Detection / Executive Summary
+          # failed (those phases catch their own errors and write failure sentinels
+          # into summary.json). Validate the actual user-facing artifact so we never
+          # publish a "generation failed" report. Exit 1 here fails the job and
+          # blocks the commit; the revert step below restores the prior good data.
+          python3 scripts/validate_report.py --web-dir ./web --date "$report_date"
+
+      - name: Discard invalid generated data (keep last good report)
+        if: failure() && steps.schedule_gate.outputs.should_run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # If validation (or anything before the commit) failed, do not leave a
+          # broken report staged/committed. Restore tracked files and drop any
+          # untracked generated output so the previously published report stands.
+          read -r -a commit_paths <<< "$PIPELINE_COMMIT_PATHS"
+          echo "Reverting generated paths after failure: ${commit_paths[*]}"
+          git checkout -- "${commit_paths[@]}" 2>/dev/null || true
+          git clean -fd -- "${commit_paths[@]}" 2>/dev/null || true
+
       - name: Commit generated outputs
         if: steps.schedule_gate.outputs.should_run == 'true' && env.COMMIT_OUTPUTS == 'true'
         id: commit
