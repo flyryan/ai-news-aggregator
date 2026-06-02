@@ -101,10 +101,18 @@ class ResearchGatherer(BaseGatherer):
         super().__init__(config_dir, data_dir, lookback_hours, target_date)
         self.categories = categories or list(self.CATEGORIES.keys())
 
-        # Load research blog feeds
-        self.research_feeds = self.load_config_list('research_feeds.txt')
+        # Load research blog feeds (with optional per-feed routing directives)
+        self.research_feed_specs = self.load_config_feeds('research_feeds.txt')
+        self.research_feeds = [spec.url for spec in self.research_feed_specs]
         if self.research_feeds:
             logger.info(f"Loaded {len(self.research_feeds)} research blog feeds")
+        # Direct session for feeds tagged proxy=off. trust_env=False makes requests
+        # ignore ALL_PROXY/HTTPS_PROXY/HTTP_PROXY so these feeds truly bypass the
+        # Mullvad tunnel. (An empty proxies={} dict is insufficient: requests still
+        # merges env proxies via setdefault.) Default feeds use bare requests.get
+        # below and continue to inherit the env proxy, preserving prior behavior.
+        self.direct_session = requests.Session()
+        self.direct_session.trust_env = False
 
     @property
     def category(self) -> str:
@@ -319,8 +327,8 @@ class ResearchGatherer(BaseGatherer):
         loop = asyncio.get_event_loop()
 
         # Separate LessWrong from other feeds (LessWrong needs GraphQL for date-range queries)
-        lesswrong_feeds = [f for f in self.research_feeds if 'lesswrong.com' in f.lower()]
-        other_feeds = [f for f in self.research_feeds if 'lesswrong.com' not in f.lower()]
+        lesswrong_feeds = [s for s in self.research_feed_specs if 'lesswrong.com' in s.url.lower()]
+        other_feeds = [s for s in self.research_feed_specs if 'lesswrong.com' not in s.url.lower()]
 
         all_posts = []
         seen_urls = set()
@@ -340,14 +348,14 @@ class ResearchGatherer(BaseGatherer):
         # Fetch other feeds via RSS (existing behavior)
         if other_feeds:
             tasks = [
-                loop.run_in_executor(None, self._fetch_research_feed, feed_url)
-                for feed_url in other_feeds
+                loop.run_in_executor(None, self._fetch_research_feed, spec)
+                for spec in other_feeds
             ]
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
-            for feed_url, result in zip(other_feeds, results):
+            for spec, result in zip(other_feeds, results):
                 if isinstance(result, Exception):
-                    logger.error(f"Failed to fetch research feed {feed_url}: {result}")
+                    logger.error(f"Failed to fetch research feed {spec.url}: {result}")
                     continue
 
                 for post in result:
@@ -358,17 +366,36 @@ class ResearchGatherer(BaseGatherer):
         logger.info(f"Collected {len(all_posts)} posts from research blogs")
         return all_posts
 
-    def _fetch_research_feed(self, feed_url: str) -> List[CollectedItem]:
-        """Fetch and parse a research blog RSS feed."""
+    def _fetch_research_feed(self, feed) -> List[CollectedItem]:
+        """Fetch and parse a research blog RSS feed.
+
+        Accepts a FeedSpec (preferred) or a bare URL string. Feeds tagged
+        proxy=off bypass any ambient *_PROXY env (e.g. the Mullvad tunnel) by
+        using a trust_env=False session that fetches direct.
+        """
         posts = []
 
+        # Accept either a FeedSpec or a plain URL for backward compatibility.
+        feed_url = getattr(feed, 'url', feed)
+        use_proxy = getattr(feed, 'use_proxy', None)
+
         try:
-            logger.debug(f"Fetching research feed: {feed_url}")
+            logger.debug(
+                f"Fetching research feed: {feed_url} "
+                f"(proxy={'direct' if use_proxy is False else 'default'})"
+            )
             # Fetch with an explicit timeout (feedparser.parse(url) has none) so one
             # unresponsive feed can't hang the gatherer. Mirrors _fetch_category_rss; a
             # browser-ish UA avoids 403s from feeds like Nature.
             headers = {'User-Agent': os.environ.get('NEWS_USER_AGENT') or LESSWRONG_USER_AGENT}
-            response = requests.get(feed_url, headers=headers, timeout=RESEARCH_FEED_TIMEOUT, allow_redirects=True)
+            # proxy=off -> use the trust_env=False session so requests ignores all
+            # ambient *_PROXY env vars (incl. ALL_PROXY) and fetches direct.
+            # Otherwise use the module-level requests (inherits env, default behavior).
+            requester = self.direct_session if use_proxy is False else requests
+            response = requester.get(
+                feed_url, headers=headers, timeout=RESEARCH_FEED_TIMEOUT,
+                allow_redirects=True
+            )
             response.raise_for_status()
             feed = feedparser.parse(response.content)
 

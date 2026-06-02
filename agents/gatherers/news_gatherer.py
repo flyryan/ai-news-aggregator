@@ -58,11 +58,18 @@ class NewsGatherer(BaseGatherer):
         self.llm_client = llm_client
         self.max_workers = max_workers
         self.link_follower = LinkFollower(llm_client=llm_client, prompt_accessor=prompt_accessor)
-        self.feed_session = requests.Session()
-        self.feed_session.headers.update({
+        _feed_headers = {
             "User-Agent": NEWS_USER_AGENT,
             "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
-        })
+        }
+        # Proxied session (default route). Used unless a feed is tagged proxy=off.
+        self.feed_session = requests.Session()
+        self.feed_session.headers.update(_feed_headers)
+        # Direct session: never carries the proxy, and ignores ambient *_PROXY env
+        # (trust_env=False) so a feed tagged proxy=off truly bypasses Mullvad.
+        self.direct_session = requests.Session()
+        self.direct_session.headers.update(_feed_headers)
+        self.direct_session.trust_env = False
         if PIPELINE_PROXY_URL:
             self.feed_session.proxies.update({
                 "http": PIPELINE_PROXY_URL,
@@ -70,8 +77,9 @@ class NewsGatherer(BaseGatherer):
             })
             logger.info("News gatherer using configured pipeline proxy for RSS")
 
-        # Load RSS feeds
-        self.feeds = self.load_config_list('rss_feeds.txt')
+        # Load RSS feeds (with optional per-feed routing directives)
+        self.feed_specs = self.load_config_feeds('rss_feeds.txt')
+        self.feeds = [spec.url for spec in self.feed_specs]
         if not self.feeds:
             logger.warning("No RSS feeds configured")
 
@@ -123,8 +131,8 @@ class NewsGatherer(BaseGatherer):
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             tasks = [
-                loop.run_in_executor(executor, self._fetch_feed, feed_url)
-                for feed_url in self.feeds
+                loop.run_in_executor(executor, self._fetch_feed, spec)
+                for spec in self.feed_specs
             ]
             results = await asyncio.gather(*tasks)
 
@@ -135,13 +143,24 @@ class NewsGatherer(BaseGatherer):
 
         return articles
 
-    def _fetch_feed(self, feed_url: str) -> List[CollectedItem]:
-        """Fetch and parse a single RSS feed."""
+    def _fetch_feed(self, feed) -> List[CollectedItem]:
+        """Fetch and parse a single RSS feed.
+
+        Accepts a FeedSpec (preferred) or a bare URL string. When a proxy is
+        configured, feeds tagged proxy=off are fetched via the direct session.
+        """
         articles = []
 
+        # Accept either a FeedSpec or a plain URL for backward compatibility.
+        feed_url = getattr(feed, 'url', feed)
+        use_proxy = getattr(feed, 'use_proxy', None)
+        # Default: proxied session (which only carries a proxy if one is set).
+        # proxy=off -> direct session that bypasses the proxy entirely.
+        session = self.direct_session if use_proxy is False else self.feed_session
+
         try:
-            logger.debug(f"Fetching feed: {feed_url}")
-            response = self.feed_session.get(feed_url, timeout=30)
+            logger.debug(f"Fetching feed: {feed_url} (proxy={'direct' if use_proxy is False else 'default'})")
+            response = session.get(feed_url, timeout=30)
             response.raise_for_status()
             feed = feedparser.parse(
                 response.content,

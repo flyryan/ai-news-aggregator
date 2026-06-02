@@ -26,6 +26,19 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class FeedSpec:
+    """A single configured feed plus optional per-feed routing directives.
+
+    use_proxy:
+        None  -> use the gatherer's default routing (proxied when a proxy is set)
+        True  -> always route through the configured proxy
+        False -> always fetch direct (bypass the proxy)
+    """
+    url: str
+    use_proxy: Optional[bool] = None
+
+
 class TruncatedJSONError(Exception):
     """Raised when an LLM JSON response was cut off before completion.
 
@@ -368,15 +381,68 @@ class BaseGatherer(ABC):
         return [word for word, freq in top_words]
 
     def load_config_list(self, filename: str) -> List[str]:
-        """Load a list from a config file (one item per line)."""
+        """Load a list from a config file (one item per line).
+
+        Comments (full-line `#`) are skipped. Any trailing whitespace-separated
+        directive tokens (e.g. `proxy=off`) are stripped so this stays usable for
+        plain URL/handle lists; use load_config_feeds() when you need the directives.
+        """
+        return [spec.url for spec in self.load_config_feeds(filename)]
+
+    def load_config_feeds(self, filename: str) -> List['FeedSpec']:
+        """Load feed specs from a config file, one feed per line.
+
+        Line format:
+            https://example.com/feed                  # default routing
+            https://example.com/feed   proxy=off      # bypass proxy, fetch direct
+            https://example.com/feed   proxy=on        # force proxy
+            https://example.com/feed   direct          # shorthand for proxy=off
+
+        - Full-line `#` comments and blank lines are ignored.
+        - The first whitespace-separated token is the URL.
+        - Remaining tokens are directives (`key=value` or bare flags). An inline
+          token beginning with `#` starts a trailing comment.
+        - `proxy` accepts off/no/false/direct/0 (-> direct) or on/yes/true/1 (-> proxied).
+          When unset, the gatherer's default routing applies (proxied when a proxy
+          is configured), preserving historical behavior for untagged feeds.
+        """
         filepath = os.path.join(self.config_dir, filename)
         if not os.path.exists(filepath):
             logger.warning(f"Config file not found: {filepath}")
             return []
 
+        specs: List['FeedSpec'] = []
         with open(filepath, 'r') as f:
-            items = [line.strip() for line in f if line.strip() and not line.startswith('#')]
-        return items
+            for raw in f:
+                line = raw.strip()
+                if not line or line.startswith('#'):
+                    continue
+                parts = line.split()
+                url = parts[0]
+                use_proxy: Optional[bool] = None
+                for tok in parts[1:]:
+                    if tok.startswith('#'):
+                        break  # inline comment
+                    key, sep, val = tok.partition('=')
+                    key = key.strip().lower()
+                    val = val.strip().lower()
+                    if key == 'proxy' and sep:
+                        if val in ('off', 'no', 'false', 'direct', '0'):
+                            use_proxy = False
+                        elif val in ('on', 'yes', 'true', '1'):
+                            use_proxy = True
+                        else:
+                            logger.warning(
+                                f"Unknown proxy directive '{tok}' for feed {url} in {filename}; ignoring"
+                            )
+                    elif not sep and key in ('direct', 'no-proxy', 'noproxy'):
+                        use_proxy = False
+                    else:
+                        logger.warning(
+                            f"Unknown feed directive '{tok}' for feed {url} in {filename}; ignoring"
+                        )
+                specs.append(FeedSpec(url=url, use_proxy=use_proxy))
+        return specs
 
     def save_to_file(self, items: List[CollectedItem], filename: str):
         """Save collected items to JSON file."""

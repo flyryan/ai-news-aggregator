@@ -183,6 +183,9 @@ def create_default_config_files(config_dir: str):
 
     # RSS feeds
     rss_feeds = """# AI News RSS/Atom Feeds (one per line)
+# Optional per-feed routing directive (default = proxied when a proxy is set):
+#   <url>  proxy=off -> fetch direct, bypass the Mullvad/pipeline proxy
+#   <url>  proxy=on  -> force routing through the proxy
 # Major news sites
 https://feeds.arstechnica.com/arstechnica/index
 https://www.wired.com/feed/tag/ai/latest/rss
@@ -219,10 +222,14 @@ https://semianalysis.com/feed/
 """
 
     research_feeds = """# AI research RSS/Atom feeds and technical blogs (one per line)
+# Optional per-feed routing directive (default = proxied when a proxy is set):
+#   <url>  proxy=off -> fetch direct, bypass the Mullvad/pipeline proxy
+#   <url>  proxy=on  -> force routing through the proxy
 https://www.lesswrong.com/feed.xml?view=frontpage-rss&karmaThreshold=2
 https://research.google/blog/rss/
 https://www.microsoft.com/en-us/research/blog/category/artificial-intelligence/feed/
-https://research.facebook.com/feed/
+# Meta blocks datacenter/VPN exits (400 via Mullvad), so fetch this one direct.
+https://research.facebook.com/feed/  proxy=off
 https://www.amazon.science/index.rss
 https://allenai.org/rss.xml
 https://bair.berkeley.edu/blog/feed.xml
