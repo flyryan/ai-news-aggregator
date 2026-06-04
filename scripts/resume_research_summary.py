@@ -33,6 +33,7 @@ from agents.config import load_config
 from agents.config.prompts import PromptAccessor, load_prompts
 from agents.llm_client import AsyncAnthropicClient
 from agents.ecosystem_context import EcosystemContextManager
+from agents.link_enricher import LinkEnricher
 from generators.json_generator import JSONGenerator
 
 
@@ -123,43 +124,81 @@ async def resume(target_date: str, web_dir: str = './web', config_dir: str = './
     prompt_config = load_prompts(config_dir)
     prompt_accessor = PromptAccessor(prompt_config)
 
-    grounding_context = _build_grounding_context(config_dir, target_date)
-    print(f"Grounding context: {len(grounding_context) if grounding_context else 0} chars")
+    PLACEHOLDER = "Analysis complete. Top items selected by score."
+    current_summary = (research.get('category_summary') or '').strip()
 
-    analyzer = ResearchAnalyzer(
-        async_client=async_client,
-        config_dir=config_dir,
-        target_date=target_date,
-        web_dir=web_dir,
-        grounding_context=grounding_context,
-        prompt_accessor=prompt_accessor,
-    )
+    if current_summary and current_summary != PLACEHOLDER:
+        # Summary is already real (e.g. we previously regenerated it). Skip the
+        # ranking LLM call entirely and just (re)run link enrichment on it.
+        print("Existing research summary is real (not placeholder); skipping regeneration, enriching only.")
+        new_summary = current_summary
+    else:
+        grounding_context = _build_grounding_context(config_dir, target_date)
+        print(f"Grounding context: {len(grounding_context) if grounding_context else 0} chars")
 
-    # Reproduce the reduce-phase ranking exactly: top 50 eligible candidates by
-    # current order (already score-sorted in published JSON), build the same
-    # ranking context, call the same prompt, parse with the fixed parser.
-    eligible = [it for it in items if not analyzer._exclude_from_top(it)]
-    top_candidates = eligible[:50]
-    print(f"Ranking {len(top_candidates)} candidates...")
+        analyzer = ResearchAnalyzer(
+            async_client=async_client,
+            config_dir=config_dir,
+            target_date=target_date,
+            web_dir=web_dir,
+            grounding_context=grounding_context,
+            prompt_accessor=prompt_accessor,
+        )
 
-    ranking_context = analyzer._build_ranking_context(top_candidates, themes)
-    ranking_prompt = analyzer._get_ranking_prompt(ranking_context)
+        # Reproduce the reduce-phase ranking exactly: top 50 eligible candidates
+        # by current order (already score-sorted in published JSON), build the
+        # same ranking context, call the same prompt, parse with fixed parser.
+        eligible = [it for it in items if not analyzer._exclude_from_top(it)]
+        top_candidates = eligible[:50]
+        print(f"Ranking {len(top_candidates)} candidates...")
 
-    response = await async_client.call_with_thinking(
-        messages=[{"role": "user", "content": ranking_prompt}],
-        system=analyzer.grounding_context,
-        profile=analyzer.thinking_budget,
-        caller="research_analyzer.resume_reduce_rank",
-    )
+        ranking_context = analyzer._build_ranking_context(top_candidates, themes)
+        ranking_prompt = analyzer._get_ranking_prompt(ranking_context)
 
-    result = analyzer._parse_json_response(response.content)
-    new_summary = (result.get('category_summary') or '').strip()
-    if not new_summary or new_summary == "Analysis complete. Top items selected by score.":
-        print("ERROR: regeneration still produced empty/placeholder summary")
-        print("Raw response (first 600 chars):", repr(response.content[:600]))
-        return False
+        response = await async_client.call_with_thinking(
+            messages=[{"role": "user", "content": ranking_prompt}],
+            system=analyzer.grounding_context,
+            profile=analyzer.thinking_budget,
+            caller="research_analyzer.resume_reduce_rank",
+        )
+
+        result = analyzer._parse_json_response(response.content)
+        new_summary = (result.get('category_summary') or '').strip()
+        if not new_summary or new_summary == PLACEHOLDER:
+            print("ERROR: regeneration still produced empty/placeholder summary")
+            print("Raw response (first 600 chars):", repr(response.content[:600]))
+            return False
 
     print(f"\n=== NEW RESEARCH SUMMARY ({len(new_summary)} chars) ===\n{new_summary}\n")
+
+    # Phase 4.5 (link enrichment), research-only: inject internal /?date=...#item-...
+    # links the same way the pipeline does. Build a single-category report dict
+    # from the published items so the enricher can map title->id. Category
+    # summaries only link to items from their own category, so research-only is
+    # faithful and leaves other categories untouched.
+    import re as _re
+    research_report = {
+        'category': 'research',
+        'category_summary': new_summary,
+        # enricher prefers all_items (id/title/summary dicts work directly)
+        'all_items': research.get('items', []),
+        'top_items': research.get('items', [])[:10],
+    }
+    enricher = LinkEnricher(async_client, target_date, prompt_accessor=prompt_accessor)
+    try:
+        _exec, enriched_categories, _topics = await enricher.enrich_all(
+            '', {'research': research_report}, []
+        )
+    finally:
+        pass
+    enriched_summary = (enriched_categories.get('research') or '').strip()
+    link_count = len(_re.findall(r'\]\(/\?date=', enriched_summary)) if enriched_summary else 0
+    if enriched_summary and link_count > 0:
+        print(f"Link enrichment added {link_count} internal links")
+        new_summary = enriched_summary
+    else:
+        print(f"WARNING: link enrichment produced {link_count} links; keeping unenriched summary")
+    print(f"\n=== ENRICHED RESEARCH SUMMARY ===\n{new_summary}\n")
 
     jg = JSONGenerator(output_dir=web_dir)
     new_html = jg._markdown_to_html(new_summary)
