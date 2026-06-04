@@ -1179,11 +1179,25 @@ class BaseAnalyzer(ABC):
         try:
             return json.loads(content)
         except json.JSONDecodeError as e:
+            # Models occasionally emit raw (unescaped) control characters
+            # inside string values -- most often a literal newline in a
+            # category_summary. Strict json.loads rejects these with
+            # "Invalid control character at ...", which would otherwise drop
+            # the whole ranking response into the hardcoded fallback summary.
+            # strict=False permits control chars in strings; retry before any
+            # heavier repair/recovery so we keep the model's real content.
+            if 'control character' in str(e).lower():
+                try:
+                    logger.warning(f"Retrying JSON parse with strict=False after control-char error: {e}")
+                    return json.loads(content, strict=False)
+                except json.JSONDecodeError as lenient_e:
+                    logger.warning(f"strict=False parse attempt failed: {lenient_e}")
+
             repaired = self._repair_common_json_errors(content)
             if repaired != content:
                 try:
                     logger.warning(f"Repaired malformed JSON response after parse error: {e}")
-                    return json.loads(repaired)
+                    return json.loads(repaired, strict=False)
                 except json.JSONDecodeError as repair_e:
                     logger.warning(f"JSON repair attempt failed: {repair_e}")
 
