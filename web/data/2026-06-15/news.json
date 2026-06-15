@@ -1,0 +1,412 @@
+{
+  "category": "news",
+  "date": "2026-06-15",
+  "category_summary": "Agentic infrastructure led the day's substantive developments. **Databricks** open-sourced **Omnigent** under **Apache 2.0**, [a meta-harness that composes and governs agents](/?date=2026-06-15&category=news#item-b38e38e51037) across **Claude Code**, **Codex**, and **Pi**. **Google Cloud** introduced the **Open Knowledge Format (OKF)**, [standardizing scattered docs into Markdown](/?date=2026-06-15&category=news#item-0816c49a310b) for agents. A new **SWE-Explore** benchmark [found coding agents reliably locate the right file](/?date=2026-06-15&category=news#item-7778c8674f7b) but miss the exact lines to edit.\n\n**Anthropic's** export-control saga drove geopolitics, as the [suspension of access](/?date=2026-06-15&category=news#item-30966de3af37) to its newest models pushed Indian tech leaders to debate dependence on foreign frontier labs and AI sovereignty.\n\nOn business and trust:\n- **OpenAI** launched a **Partner Network** backed by a **$150M** investment [to accelerate enterprise deployment](/?date=2026-06-15&category=news#item-e78b2f4138b5).\n- **KPMG** [pulled a pro-AI report](/?date=2026-06-15&category=news#item-52531ec1be52) containing fabricated case studies citing **UBS** and the **NHS**.\n- A **TechCrunch** podcast [examined the wave of AI companies](/?date=2026-06-15&category=news#item-cdcd8d5b88c0) preparing to go public.",
+  "category_summary_html": "<p>Agentic infrastructure led the day's substantive developments. <strong>Databricks</strong> open-sourced <strong>Omnigent</strong> under <strong>Apache 2.0</strong>, <a href=\"/?date=2026-06-15&amp;category=news#item-b38e38e51037\" class=\"internal-link\" rel=\"noopener noreferrer\">a meta-harness that composes and governs agents</a> across <strong>Claude Code</strong>, <strong>Codex</strong>, and <strong>Pi</strong>. <strong>Google Cloud</strong> introduced the <strong>Open Knowledge Format (OKF)</strong>, <a href=\"/?date=2026-06-15&amp;category=news#item-0816c49a310b\" class=\"internal-link\" rel=\"noopener noreferrer\">standardizing scattered docs into Markdown</a> for agents. A new <strong>SWE-Explore</strong> benchmark <a href=\"/?date=2026-06-15&amp;category=news#item-7778c8674f7b\" class=\"internal-link\" rel=\"noopener noreferrer\">found coding agents reliably locate the right file</a> but miss the exact lines to edit.</p>\n<p><strong>Anthropic's</strong> export-control saga drove geopolitics, as the <a href=\"/?date=2026-06-15&amp;category=news#item-30966de3af37\" class=\"internal-link\" rel=\"noopener noreferrer\">suspension of access</a> to its newest models pushed Indian tech leaders to debate dependence on foreign frontier labs and AI sovereignty.</p>\n<p>On business and trust:</p>\n<ul>\n<li><strong>OpenAI</strong> launched a <strong>Partner Network</strong> backed by a <strong>$150M</strong> investment <a href=\"/?date=2026-06-15&amp;category=news#item-e78b2f4138b5\" class=\"internal-link\" rel=\"noopener noreferrer\">to accelerate enterprise deployment</a>.</li>\n<li><strong>KPMG</strong> <a href=\"/?date=2026-06-15&amp;category=news#item-52531ec1be52\" class=\"internal-link\" rel=\"noopener noreferrer\">pulled a pro-AI report</a> containing fabricated case studies citing <strong>UBS</strong> and the <strong>NHS</strong>.</li>\n<li>A <strong>TechCrunch</strong> podcast <a href=\"/?date=2026-06-15&amp;category=news#item-cdcd8d5b88c0\" class=\"internal-link\" rel=\"noopener noreferrer\">examined the wave of AI companies</a> preparing to go public.</li>\n</ul>",
+  "themes": [
+    {
+      "name": "Anthropic export-control saga",
+      "description": "A cluster of reports on the US government forcing Anthropic's Mythos/Fable models offline via export controls, citing security risks and possible China access, with rival big-tech firms reportedly involved and global sovereignty debates following.",
+      "item_count": 3,
+      "example_items": [],
+      "importance": 73
+    },
+    {
+      "name": "Agentic AI infrastructure",
+      "description": "Tools and standards for making AI agents more capable and interoperable, including agent-readable knowledge formats, meta-harnesses for orchestrating agents, and benchmarks probing agent weaknesses.",
+      "item_count": 3,
+      "example_items": [],
+      "importance": 52
+    },
+    {
+      "name": "AI reliability and trust",
+      "description": "Incidents and studies highlighting where AI systems fail in practice, from fabricated consulting case studies to coding agents missing critical code lines.",
+      "item_count": 2,
+      "example_items": [],
+      "importance": 48
+    },
+    {
+      "name": "AI business and ecosystem",
+      "description": "Market and commercial dynamics including IPO momentum among AI companies and OpenAI's funded enterprise partner program.",
+      "item_count": 2,
+      "example_items": [],
+      "importance": 40
+    }
+  ],
+  "total_items": 10,
+  "items": [
+    {
+      "id": "b38e38e51037",
+      "title": "Databricks Open-Sources Omnigent: A Meta-Harness That Composes, Governs, and Shares AI Agents Across Claude Code, Codex, and Pi",
+      "content": "Databricks released Omnigent, an open source &#8216;meta-harness&#8217; for AI agents. The project ships under the Apache 2.0 license. The Databricks AI team built it with Neon.\n\n\n\nA harness is the wrapper around a model that turns it into an agent. Claude Code, Codex, and Pi are harnesses. Omnigent sits one level above them. It treats each harness as an interchangeable part of a larger system.\n\n\n\nMany engineers now juggle four or five agents at once. They copy text between coding agents, search tools, Docs, and Slack. Each harness only understands its own sessions. Omnigent adds a shared layer where composition, control, and collaboration live.\n\n\n\nWhat is Omnigent\n\n\n\nOmnigent is a common interface above command-line agents and agent SDKs. It wraps terminal coding agents such as Claude Code, Codex, and Pi. It also wraps SDKs like OpenAI Agents and the Claude Agents SDK.\n\n\n\nThe design rests on one observation. However a harness calls its model internally, the user-facing interface is the same. Messages and files go in. Text streams and tool calls come out. Omnigent standardizes that interface so harnesses become swappable.\n\n\n\nYou supply the models and the infrastructure. Omnigent runs the agents on top. It can coordinate several of them as interchangeable workers under one orchestrator.\n\n\n\nHow Omnigent Works\n\n\n\nThe architecture has two parts. A runner wraps any agent in a sandboxed session with a uniform API. A server provides policies and sharing. The server exposes every session over the terminal, the app, and web APIs.\n\n\n\nOne command starts a session in your terminal. It also launches a local web UI at localhost:6767. The same session appears in the browser or on a phone. Messages, sub-agents, terminals, and files stay in sync.\n\n\n\nThe CLI installs under two names, omnigent and omni. They are interchangeable. On first run, it detects model credentials already in your environment.\n\n\n\nhttps://omnigent.ai/\n\n\n\nComposition, Control, and Collaboration\n\n\n\nDatabricks team frames Omnigent around three capabilities:\n\n\n\n\nComposition means combining models, harnesses, and techniques without rewriting code. You switch between Claude Code, Codex, Pi, and custom agents with one-line changes.\n\n\n\nControl means stateful, contextual policies. They track agent actions and enforce guardrails at the meta-harness layer, not through prompts. One example pauses an agent after every $100 it spends. Another requires human approval to git push once the agent installs a new npm package.\n\n\n\nCollaboration means sharing live agent sessions by URL. Teammates watch the agent work and chat with it in real time. They can comment on files, co-drive the session, or fork the conversation.\n\n\n\n\nAn OS sandbox, called Omnibox, underpins this. It can lock down OS access and transform network requests. For instance, it can keep your GitHub token hidden from the agent. The token is injected only in the egress proxy on approved requests.\n\n\n\nUse Cases and Examples\n\n\n\nTwo example agents ship with the repository:\n\n\n\n\nPolly is a multi-agent coding orchestrator. It writes no code itself. It plans, then delegates work to coding sub-agents in parallel git worktrees. Each diff routes to a reviewer from a different vendor than the writer. You merge the result.\n\n\n\nDebby is a brainstorming partner with two heads. One head is Claude, the other GPT. Every question goes to both, with answers shown side by side. Type /debate and the heads critique each other before converging.\n\n\n\n\nOther practical patterns follow the same shape. A frontier advisor model can guide a cheaper open-source worker. A lead agent can orchestrate parallel subagents. Different LLMs can handle planning, search, and code generation in one flow.\n\n\n\nInteractive Concept Demo \n\n\n\nMarktechpost team has created a interactive demo (below) that lets you experience Omnigent&#8217;s meta-harness workflow firsthand. You pick a task for the Polly orchestrator, which plans it and delegates to three sub-agents: Claude Code, Codex, and Pi that are running in parallel and streaming their steps live. A session cost meter ticks up as they work, and the two policy toggles show Omnigent&#8217;s control layer in action: the cost budget pauses the run at $3.00 for your approval, and a contextual policy halts a git push that follows an npm install until you allow it. Once the sub-agents finish, each diff is cross-reviewed by a different vendor than the one that wrote it, then marked ready to merge. Terminal, Web, and Mobile tabs show the same session staying in sync across interfaces. It&#8217;s an illustrative simulation, no live models are called.\n\n\n\n\n\n\n  \n\n    \n    \n      \n        ◇\n        \n          Omnigent Meta-Harness\n          One orchestrator. Many harnesses. One governed session.\n        \n      \n      Interactive concept demo\n    \n\n    \n    \n      \n        1 · Pick a task for the orchestrator (Polly)\n        \n          Build REST endpoint + tests\n          Refactor auth module\n          Add caching layer\n        \n      \n\n      \n        2 · Policies (control layer)\n        \n          \n            \n            \n            Cost budget — pause at $3.00\n          \n          \n            \n            \n            Approve git push after npm install\n          \n        \n      \n\n       Run session\n    \n\n    \n    \n      ⌘ Terminal\n      ▤ Web UI\n      ▢ Mobile\n      same session · in sync\n    \n\n    \n    \n\n      \n      \n        \n          Session LLM cost\n          $0.00\n        \n        \n      \n\n      \n      \n         Orchestrator · Polly (writes no code; plans &amp; delegates)\n        \n          Idle. Pick a task and press “Run session”.\n        \n      \n\n      \n      \n        \n          Claude Codewaiting\n          \n        \n        \n          Codexwaiting\n          \n        \n        \n          Piwaiting\n          \n        \n      \n\n      \n      \n        ✓\n        \n          Ready to merge.\n          3 diffs cross-reviewed by a different vendor than the writer.\n        \n      \n\n    \n\n    \n      Illustrative simulation of the Omnigent workflow — no live models are called.\n      Learn more at omnigent.ai ·\n      GitHub · Apache 2.0 · Alpha.\n    \n\n    \n    \n      \n      Marktechpost\n      ·\n      AI Dev &amp; Research Media\n    \n\n    \n    \n      \n        \n        Policy paused the session\n        Reason goes here.\n        \n          Deny / stop\n          Approve &amp; continue\n        \n      \n    \n\n  \n\n  \n\n  &#038;&#038;&#x23f8;&#x23f8;&#x25b6;&#x23f8;&#x1f6e1;&#x25b6;",
+      "url": "https://www.marktechpost.com/2026/06/13/databricks-open-sources-omnigent-a-meta-harness-that-composes-governs-and-shares-ai-agents-across-claude-code-codex-and-pi/",
+      "author": "Asif Razzaq",
+      "published": "2026-06-14T05:01:39",
+      "source": "MarkTechPost",
+      "source_type": "rss",
+      "tags": [
+        "Agentic AI",
+        "AI Agents",
+        "AI Infrastructure",
+        "AI Shorts",
+        "Applications",
+        "Artificial Intelligence",
+        "Editors Pick",
+        "New Releases",
+        "Open Source",
+        "Python",
+        "Software Engineering",
+        "Staff",
+        "Tech News",
+        "Technology"
+      ],
+      "summary": "Databricks open-sourced Omnigent under Apache 2.0, a meta-harness that sits above individual agent harnesses like Claude Code, Codex, and Pi to enable composition, governance, and sharing across them. It addresses the fragmentation engineers face when juggling multiple coding and search agents.",
+      "importance_score": 56,
+      "reasoning": "A permissively licensed open-source agent-orchestration layer from a major data platform targets a real interoperability gap in agentic workflows. Meaningful infrastructure contribution, though not a frontier capability advance.",
+      "themes": [
+        "Open source",
+        "Agentic AI",
+        "AI infrastructure",
+        "Developer tools"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Databricks open-sourced Omnigent under Apache 2.0, a meta-harness that sits above individual agent harnesses like Claude Code, Codex, and Pi to enable composition, governance, and sharing across them. It addresses the fragmentation engineers face when juggling multiple coding and search agents.</p>",
+      "content_html": "<p>Databricks released Omnigent, an open source ‘meta-harness’ for AI agents. The project ships under the Apache 2.0 license. The Databricks AI team built it with Neon.</p>\n<p>A harness is the wrapper around a model that turns it into an agent. Claude Code, Codex, and Pi are harnesses. Omnigent sits one level above them. It treats each harness as an interchangeable part of a larger system.</p>\n<p>Many engineers now juggle four or five agents at once. They copy text between coding agents, search tools, Docs, and Slack. Each harness only understands its own sessions. Omnigent adds a shared layer where composition, control, and collaboration live.</p>\n<p>What is Omnigent</p>\n<p>Omnigent is a common interface above command-line agents and agent SDKs. It wraps terminal coding agents such as Claude Code, Codex, and Pi. It also wraps SDKs like OpenAI Agents and the Claude Agents SDK.</p>\n<p>The design rests on one observation. However a harness calls its model internally, the user-facing interface is the same. Messages and files go in. Text streams and tool calls come out. Omnigent standardizes that interface so harnesses become swappable.</p>\n<p>You supply the models and the infrastructure. Omnigent runs the agents on top. It can coordinate several of them as interchangeable workers under one orchestrator.</p>\n<p>How Omnigent Works</p>\n<p>The architecture has two parts. A runner wraps any agent in a sandboxed session with a uniform API. A server provides policies and sharing. The server exposes every session over the terminal, the app, and web APIs.</p>\n<p>One command starts a session in your terminal. It also launches a local web UI at localhost:6767. The same session appears in the browser or on a phone. Messages, sub-agents, terminals, and files stay in sync.</p>\n<p>The CLI installs under two names, omnigent and omni. They are interchangeable. On first run, it detects model credentials already in your environment.</p>\n<p>https://omnigent.ai/</p>\n<p>Composition, Control, and Collaboration</p>\n<p>Databricks team frames Omnigent around three capabilities:</p>\n<p>Composition means combining models, harnesses, and techniques without rewriting code. You switch between Claude Code, Codex, Pi, and custom agents with one-line changes.</p>\n<p>Control means stateful, contextual policies. They track agent actions and enforce guardrails at the meta-harness layer, not through prompts. One example pauses an agent after every $100 it spends. Another requires human approval to git push once the agent installs a new npm package.</p>\n<p>Collaboration means sharing live agent sessions by URL. Teammates watch the agent work and chat with it in real time. They can comment on files, co-drive the session, or fork the conversation.</p>\n<p>An OS sandbox, called Omnibox, underpins this. It can lock down OS access and transform network requests. For instance, it can keep your GitHub token hidden from the agent. The token is injected only in the egress proxy on approved requests.</p>\n<p>Use Cases and Examples</p>\n<p>Two example agents ship with the repository:</p>\n<p>Polly is a multi-agent coding orchestrator. It writes no code itself. It plans, then delegates work to coding sub-agents in parallel git worktrees. Each diff routes to a reviewer from a different vendor than the writer. You merge the result.</p>\n<p>Debby is a brainstorming partner with two heads. One head is Claude, the other GPT. Every question goes to both, with answers shown side by side. Type /debate and the heads critique each other before converging.</p>\n<p>Other practical patterns follow the same shape. A frontier advisor model can guide a cheaper open-source worker. A lead agent can orchestrate parallel subagents. Different LLMs can handle planning, search, and code generation in one flow.</p>\n<p>Interactive Concept Demo</p>\n<p>Marktechpost team has created a interactive demo (below) that lets you experience Omnigent’s meta-harness workflow firsthand. You pick a task for the Polly orchestrator, which plans it and delegates to three sub-agents: Claude Code, Codex, and Pi that are running in parallel and streaming their steps live. A session cost meter ticks up as they work, and the two policy toggles show Omnigent’s control layer in action: the cost budget pauses the run at $3.00 for your approval, and a contextual policy halts a git push that follows an npm install until you allow it. Once the sub-agents finish, each diff is cross-reviewed by a different vendor than the one that wrote it, then marked ready to merge. Terminal, Web, and Mobile tabs show the same session staying in sync across interfaces. It’s an illustrative simulation, no live models are called.</p>\n<p>◇</p>\n<p>Omnigent Meta-Harness</p>\n<p>One orchestrator. Many harnesses. One governed session.</p>\n<p>Interactive concept demo</p>\n<p>1 · Pick a task for the orchestrator (Polly)</p>\n<p>Build REST endpoint + tests</p>\n<p>Refactor auth module</p>\n<p>Add caching layer</p>\n<p>2 · Policies (control layer)</p>\n<p>Cost budget — pause at $3.00</p>\n<p>Approve git push after npm install</p>\n<p>Run session</p>\n<p>⌘ Terminal</p>\n<p>▤ Web UI</p>\n<p>▢ Mobile</p>\n<p>same session · in sync</p>\n<p>Session LLM cost</p>\n<p>$0.00</p>\n<p>Orchestrator · Polly (writes no code; plans &amp; delegates)</p>\n<p>Idle. Pick a task and press “Run session”.</p>\n<p>Claude Codewaiting</p>\n<p>Codexwaiting</p>\n<p>Piwaiting</p>\n<p>✓</p>\n<p>Ready to merge.</p>\n<p>3 diffs cross-reviewed by a different vendor than the writer.</p>\n<p>Illustrative simulation of the Omnigent workflow — no live models are called.</p>\n<p>Learn more at omnigent.ai ·</p>\n<p>GitHub · Apache 2.0 · Alpha.</p>\n<p>Marktechpost</p>\n<p>·</p>\n<p>AI Dev &amp; Research Media</p>\n<p>Policy paused the session</p>\n<p>Reason goes here.</p>\n<p>Deny / stop</p>\n<p>Approve &amp; continue</p>\n<p>&amp;&amp;⏸⏸▶⏸🛡▶</p>"
+    },
+    {
+      "id": "f9f24c043011",
+      "title": "China may have accessed Mythos",
+      "content": "\n\n\n\t\n\t\t\n\nAccording to a new report from Semafor, the White House's decision to impose export restrictions on Anthropic's Mythos was driven in part by fears that it had been accessed by a group linked to China. If the Chinese government actually had access to Mythos 5 or Fable 5, it would present a serious national security risk. The government could also attempt to reverse engineer the model through distillation, a method in which a \"student\" AI is trained on a more advanced model to replicate its behavior.\nThe White House has not confirmed this report, and a post on X by Trump advisor David Sacks did not mention China. Instead, Sacks focused on a r …\nRead the full story at The Verge.",
+      "url": "https://www.theverge.com/ai-artificial-intelligence/949644/china-white-house-anthropic-mythos",
+      "author": "Terrence O’Brien",
+      "published": "2026-06-14T18:27:55",
+      "source": "AI | The Verge",
+      "source_type": "rss",
+      "tags": [
+        "AI",
+        "Anthropic",
+        "News",
+        "Policy",
+        "Politics"
+      ],
+      "summary": "A Semafor report cited by The Verge says the White House's export restrictions on Anthropic's Mythos were partly driven by fears that a China-linked group had accessed the model, raising distillation and reverse-engineering risks. The administration has not confirmed the China angle, and a Trump advisor's public statement emphasized other concerns.",
+      "importance_score": 55.0,
+      "reasoning": "[Freshness check: main claim overlaps prior reddit coverage from 2026-06-14] National-security-driven export controls on a frontier model (Mythos 5/Fable 5, both GA 2026-06-09) is a major policy and geopolitics development with direct implications for model security and US-China AI competition. Scored high but tempered by unconfirmed claims.",
+      "themes": [
+        "AI policy",
+        "National security",
+        "Export controls",
+        "Anthropic",
+        "US-China"
+      ],
+      "continuation": null,
+      "freshness": {
+        "status": "stale_anchor",
+        "label": "Old anchor",
+        "reason": "main claim overlaps prior reddit coverage from 2026-06-14",
+        "score_cap": 55.0,
+        "exclude_from_top": true,
+        "exclude_from_summaries": true,
+        "age_days": 0,
+        "matched_prior_items": [
+          {
+            "id": "51f32740a15d",
+            "date": "2026-06-14",
+            "category": "reddit",
+            "title": "While i had access to Fable…",
+            "source": "r/ClaudeAI",
+            "url": "https://reddit.com/r/ClaudeAI/comments/1u59soz/while_i_had_access_to_fable/"
+          },
+          {
+            "id": "bfbfbfb6d750",
+            "date": "2026-06-10",
+            "category": "reddit",
+            "title": "Claude Fable & Mythos released by Anthropic",
+            "source": "r/artificial",
+            "url": "https://reddit.com/r/artificial/comments/1u1e9e4/claude_fable_mythos_released_by_anthropic/"
+          },
+          {
+            "id": "f841fcd16c78",
+            "date": "2026-06-10",
+            "category": "reddit",
+            "title": "What Anthropic calls a \"Mythos-class\" model now released to the public",
+            "source": "r/accelerate",
+            "url": "https://reddit.com/r/accelerate/comments/1u1atkp/what_anthropic_calls_a_mythosclass_model_now/"
+          }
+        ]
+      },
+      "summary_html": "<p>A Semafor report cited by The Verge says the White House's export restrictions on Anthropic's Mythos were partly driven by fears that a China-linked group had accessed the model, raising distillation and reverse-engineering risks. The administration has not confirmed the China angle, and a Trump advisor's public statement emphasized other concerns.</p>",
+      "content_html": "<p>According to a new report from Semafor, the White House's decision to impose export restrictions on Anthropic's Mythos was driven in part by fears that it had been accessed by a group linked to China. If the Chinese government actually had access to Mythos 5 or Fable 5, it would present a serious national security risk. The government could also attempt to reverse engineer the model through distillation, a method in which a \"student\" AI is trained on a more advanced model to replicate its behavior.</p>\n<p>The White House has not confirmed this report, and a post on X by Trump advisor David Sacks did not mention China. Instead, Sacks focused on a r …</p>\n<p>Read the full story at The Verge.</p>"
+    },
+    {
+      "id": "064c93920dfb",
+      "title": "Amazon and five other companies reportedly triggered the government crackdown on Anthropic's Fable model",
+      "content": "\n        Amazon CEO Andy Jassy and executives from other tech companies reportedly warned the Trump administration about security vulnerabilities in Anthropic's Fable model, even though Amazon is one of Anthropic's largest investors. Within hours, the White House forced the model offline through an export control order. The move may well be a legitimate security policy decision, but it also reads as a show of force against an inconvenient company.\nThe article Amazon and five other companies reportedly triggered the government crackdown on Anthropic&#039;s Fable model appeared first on The Decoder.",
+      "url": "https://the-decoder.com/amazon-and-five-other-companies-reportedly-triggered-the-government-crackdown-on-anthropics-fable-model/",
+      "author": "Matthias Bastian",
+      "published": "2026-06-14T08:35:02",
+      "source": "The Decoder",
+      "source_type": "rss",
+      "tags": [
+        "AI and society",
+        "Artificial Intelligence",
+        "Anthropic",
+        "Claude",
+        "White House"
+      ],
+      "summary": "Reporting indicates Amazon CEO Andy Jassy and executives from five other companies warned the Trump administration about security vulnerabilities in Anthropic's Fable model, prompting a rapid White House export-control order that forced the model offline. Notably, Amazon is one of Anthropic's largest investors, raising questions about competitive motives behind the security framing.",
+      "importance_score": 55.0,
+      "reasoning": "[Freshness check: main claim overlaps prior news coverage from 2026-06-14] Adds detail to the major Anthropic export-control saga, implicating big-tech rivals/investors in a government action against a frontier lab. Significant for AI policy, competitive dynamics, and model governance, but partly reliant on reporting.",
+      "themes": [
+        "AI policy",
+        "Export controls",
+        "Anthropic",
+        "Big Tech rivalry",
+        "Model security"
+      ],
+      "continuation": null,
+      "freshness": {
+        "status": "stale_anchor",
+        "label": "Old anchor",
+        "reason": "main claim overlaps prior news coverage from 2026-06-14",
+        "score_cap": 55.0,
+        "exclude_from_top": true,
+        "exclude_from_summaries": true,
+        "age_days": 0,
+        "matched_prior_items": [
+          {
+            "id": "be0b03f63674",
+            "date": "2026-06-14",
+            "category": "news",
+            "title": "Amazon CEO reportedly raised Anthropic model concerns before government crackdown",
+            "source": "AI News & Artificial Intelligence | TechCrunch",
+            "url": "https://techcrunch.com/2026/06/13/amazon-ceo-reportedly-raised-anthropic-model-concerns-before-government-crackdown/"
+          },
+          {
+            "id": "b8a4c7a96d13",
+            "date": "2026-06-14",
+            "category": "reddit",
+            "title": "Amazon CEO's Talks With U.S. Officials, Triggered Crackdown on Anthropic Model Fable 5",
+            "source": "r/singularity",
+            "url": "https://reddit.com/r/singularity/comments/1u4wrxb/amazon_ceos_talks_with_us_officials_triggered/"
+          },
+          {
+            "id": "2a466532352c",
+            "date": "2026-05-22",
+            "category": "reddit",
+            "title": "Donald Trump abruptly postpones AI order after White House infighting",
+            "source": "r/singularity",
+            "url": "https://reddit.com/r/singularity/comments/1tjxvhp/donald_trump_abruptly_postpones_ai_order_after/"
+          }
+        ]
+      },
+      "summary_html": "<p>Reporting indicates Amazon CEO Andy Jassy and executives from five other companies warned the Trump administration about security vulnerabilities in Anthropic's Fable model, prompting a rapid White House export-control order that forced the model offline. Notably, Amazon is one of Anthropic's largest investors, raising questions about competitive motives behind the security framing.</p>",
+      "content_html": "<p>Amazon CEO Andy Jassy and executives from other tech companies reportedly warned the Trump administration about security vulnerabilities in Anthropic's Fable model, even though Amazon is one of Anthropic's largest investors. Within hours, the White House forced the model offline through an export control order. The move may well be a legitimate security policy decision, but it also reads as a show of force against an inconvenient company.</p>\n<p>The article Amazon and five other companies reportedly triggered the government crackdown on Anthropic's Fable model appeared first on The Decoder.</p>"
+    },
+    {
+      "id": "30966de3af37",
+      "title": "As Anthropic suspends access to new models, India debates its AI future",
+      "content": "Tech leaders debate whether the Anthropic episode is a wake-up call for India’s AI ambitions.",
+      "url": "https://techcrunch.com/2026/06/13/as-anthropic-suspends-access-to-new-models-india-debates-its-ai-future/",
+      "author": "Jagmeet Singh",
+      "published": "2026-06-14T03:00:00",
+      "source": "AI News & Artificial Intelligence | TechCrunch",
+      "source_type": "rss",
+      "tags": [
+        "AI",
+        "Startups",
+        "Anthropic",
+        "india ai"
+      ],
+      "summary": "First spotted on [Reddit](/?date=2026-06-13&category=reddit#item-e13da3325158), now mainstream coverage explores India's sovereign AI debate, Following the suspension of access to Anthropic's newest models, Indian tech leaders are debating whether dependence on foreign frontier labs is a wake-up call for building sovereign AI capacity. The article ties the Anthropic export-control episode to broader questions about India's AI strategy.",
+      "importance_score": 55,
+      "reasoning": "Part of the significant Anthropic Mythos/Fable export saga and touches AI sovereignty geopolitics, but framed as regional debate/commentary rather than a primary policy action or technical development.",
+      "themes": [
+        "AI policy",
+        "AI sovereignty",
+        "Geopolitics",
+        "Anthropic"
+      ],
+      "continuation": {
+        "original_item_id": "e13da3325158",
+        "original_date": "2026-06-13",
+        "original_category": "reddit",
+        "original_title": "Anthropic is suspending access to Fabel/Mythos for ALL users, not just non-Americans",
+        "continuation_type": "new_development",
+        "should_demote": false,
+        "reference_text": "First spotted on **Reddit**, now mainstream coverage explores India's sovereign AI debate"
+      },
+      "summary_html": "<p>First spotted on <a href=\"/?date=2026-06-13&amp;category=reddit#item-e13da3325158\" class=\"internal-link\" rel=\"noopener noreferrer\">Reddit</a>, now mainstream coverage explores India's sovereign AI debate, Following the suspension of access to Anthropic's newest models, Indian tech leaders are debating whether dependence on foreign frontier labs is a wake-up call for building sovereign AI capacity. The article ties the Anthropic export-control episode to broader questions about India's AI strategy.</p>",
+      "content_html": "<p>Tech leaders debate whether the Anthropic episode is a wake-up call for India’s AI ambitions.</p>"
+    },
+    {
+      "id": "7778c8674f7b",
+      "title": "AI coding agents find the right file but miss the exact lines that matter, study shows",
+      "content": "\n        AI coding agents like Claude Code or Codex reliably find the right file but miss most of the critical lines within it. The new SWE-Explore benchmark is the first to test code search separately from the actual repair, and it shows that without enough context, even the best fix will fail.\nThe article AI coding agents find the right file but miss the exact lines that matter, study shows appeared first on The Decoder.",
+      "url": "https://the-decoder.com/ai-coding-agents-find-the-right-file-but-miss-the-exact-lines-that-matter-study-shows/",
+      "author": "Jonathan Kemper",
+      "published": "2026-06-14T08:54:47",
+      "source": "The Decoder",
+      "source_type": "rss",
+      "tags": [
+        "AI research",
+        "Artificial Intelligence",
+        "Agents",
+        "Research"
+      ],
+      "summary": "A new benchmark called SWE-Explore separates code search from code repair and finds that leading coding agents reliably locate the correct file but miss most of the critical lines within it. The study suggests insufficient context retrieval undermines fixes even when models are otherwise capable.",
+      "importance_score": 55,
+      "reasoning": "A novel benchmark isolating a real bottleneck in agentic coding offers useful diagnostic insight into a heavily commercialized capability, though it is an evaluation finding rather than a capability leap.",
+      "themes": [
+        "AI research",
+        "Coding agents",
+        "Benchmarks",
+        "Agentic AI"
+      ],
+      "continuation": null,
+      "summary_html": "<p>A new benchmark called SWE-Explore separates code search from code repair and finds that leading coding agents reliably locate the correct file but miss most of the critical lines within it. The study suggests insufficient context retrieval undermines fixes even when models are otherwise capable.</p>",
+      "content_html": "<p>AI coding agents like Claude Code or Codex reliably find the right file but miss most of the critical lines within it. The new SWE-Explore benchmark is the first to test code search separately from the actual repair, and it shows that without enough context, even the best fix will fail.</p>\n<p>The article AI coding agents find the right file but miss the exact lines that matter, study shows appeared first on The Decoder.</p>"
+    },
+    {
+      "id": "e78b2f4138b5",
+      "title": "Introducing the OpenAI Partner Network",
+      "content": "OpenAI launches the Partner Network, investing $150M to help global partners accelerate enterprise AI adoption, deployment, and transformation.",
+      "url": "https://openai.com/index/introducing-openai-partner-network",
+      "author": "Unknown",
+      "published": "2026-06-14T17:00:00",
+      "source": "OpenAI News",
+      "source_type": "rss",
+      "tags": [
+        "Product"
+      ],
+      "summary": "OpenAI launched a Partner Network backed by a $150M investment to help global partners accelerate enterprise AI deployment and transformation. The program targets scaling adoption through a structured ecosystem of integrators and consultants.",
+      "importance_score": 50,
+      "reasoning": "A meaningful enterprise go-to-market initiative with a notable funding commitment over $100M, but it is a business/ecosystem program rather than a model or capability development.",
+      "themes": [
+        "Enterprise AI",
+        "OpenAI",
+        "Ecosystem and partnerships",
+        "AI business"
+      ],
+      "continuation": null,
+      "summary_html": "<p>OpenAI launched a Partner Network backed by a $150M investment to help global partners accelerate enterprise AI deployment and transformation. The program targets scaling adoption through a structured ecosystem of integrators and consultants.</p>",
+      "content_html": "<p>OpenAI launches the Partner Network, investing $150M to help global partners accelerate enterprise AI adoption, deployment, and transformation.</p>"
+    },
+    {
+      "id": "0816c49a310b",
+      "title": "Google Cloud's Open Knowledge Format turns scattered docs into Markdown files for AI agents",
+      "content": "\n        Google Cloud's new Open Knowledge Format (OKF) standardizes scattered organizational knowledge as Markdown files with YAML frontmatter, making it portable and usable for AI agents. The minimalist spec formalizes a pattern Andrej Karpathy recently popularized as the \"LLM Wiki.\"\nThe article Google Cloud&#039;s Open Knowledge Format turns scattered docs into Markdown files for AI agents appeared first on The Decoder.",
+      "url": "https://the-decoder.com/google-clouds-open-knowledge-format-turns-scattered-docs-into-markdown-files-for-ai-agents/",
+      "author": "Matthias Bastian",
+      "published": "2026-06-14T13:29:52",
+      "source": "The Decoder",
+      "source_type": "rss",
+      "tags": [
+        "AI in practice",
+        "Artificial Intelligence",
+        "Google"
+      ],
+      "summary": "Google Cloud introduced the Open Knowledge Format (OKF), a minimalist spec that standardizes scattered organizational documents into Markdown with YAML frontmatter so AI agents can consume them. It formalizes the LLM Wiki pattern recently popularized by Andrej Karpathy.",
+      "importance_score": 45,
+      "reasoning": "A practical agent-infrastructure standard from a major cloud provider that could ease enterprise agent adoption, but it is a lightweight spec rather than a breakthrough capability or major launch.",
+      "themes": [
+        "AI agents",
+        "Enterprise AI",
+        "Standards and infrastructure",
+        "Google"
+      ],
+      "continuation": null,
+      "summary_html": "<p>Google Cloud introduced the Open Knowledge Format (OKF), a minimalist spec that standardizes scattered organizational documents into Markdown with YAML frontmatter so AI agents can consume them. It formalizes the LLM Wiki pattern recently popularized by Andrej Karpathy.</p>",
+      "content_html": "<p>Google Cloud's new Open Knowledge Format (OKF) standardizes scattered organizational knowledge as Markdown files with YAML frontmatter, making it portable and usable for AI agents. The minimalist spec formalizes a pattern Andrej Karpathy recently popularized as the \"LLM Wiki.\"</p>\n<p>The article Google Cloud's Open Knowledge Format turns scattered docs into Markdown files for AI agents appeared first on The Decoder.</p>"
+    },
+    {
+      "id": "52531ec1be52",
+      "title": "KPMG fabricated AI case studies in a report designed to sell clients on AI adoption",
+      "content": "\n        KPMG published a report on AI in business that contained fabricated case studies involving UBS, the NHS, and other organizations. GPTZero CEO Edward Tian, who helped uncover the errors, warns of \"secondary hallucinations,\" flawed claims from trusted consulting firms that spread unchecked. KPMG has since pulled the report.\nThe article KPMG fabricated AI case studies in a report designed to sell clients on AI adoption appeared first on The Decoder.",
+      "url": "https://the-decoder.com/kpmg-fabricated-ai-case-studies-in-a-report-designed-to-sell-clients-on-ai-adoption/",
+      "author": "Matthias Bastian",
+      "published": "2026-06-14T09:40:37",
+      "source": "The Decoder",
+      "source_type": "rss",
+      "tags": [
+        "AI in practice",
+        "Artificial Intelligence",
+        "Hallucination"
+      ],
+      "summary": "KPMG pulled a report promoting AI adoption after it was found to contain fabricated case studies involving organizations like UBS and the NHS. The episode highlights what GPTZero's CEO calls secondary hallucinations, where unverified AI-generated claims spread through trusted consulting channels.",
+      "importance_score": 42,
+      "reasoning": "A notable real-world illustration of AI reliability and trust failures within professional services, but it is an incident report rather than a frontier technical or policy development.",
+      "themes": [
+        "AI reliability",
+        "Hallucination",
+        "AI in practice",
+        "Trust and accountability"
+      ],
+      "continuation": null,
+      "summary_html": "<p>KPMG pulled a report promoting AI adoption after it was found to contain fabricated case studies involving organizations like UBS and the NHS. The episode highlights what GPTZero's CEO calls secondary hallucinations, where unverified AI-generated claims spread through trusted consulting channels.</p>",
+      "content_html": "<p>KPMG published a report on AI in business that contained fabricated case studies involving UBS, the NHS, and other organizations. GPTZero CEO Edward Tian, who helped uncover the errors, warns of \"secondary hallucinations,\" flawed claims from trusted consulting firms that spread unchecked. KPMG has since pulled the report.</p>\n<p>The article KPMG fabricated AI case studies in a report designed to sell clients on AI adoption appeared first on The Decoder.</p>"
+    },
+    {
+      "id": "cdcd8d5b88c0",
+      "title": "As AI companies race to go public, who else is along for the ride?",
+      "content": "Startups are trying to \"ride that SpaceX IPO wave.\"",
+      "url": "https://techcrunch.com/2026/06/14/as-ai-companies-race-to-go-public-who-else-is-along-for-the-ride/",
+      "author": "Anthony Ha",
+      "published": "2026-06-14T16:38:09",
+      "source": "AI News & Artificial Intelligence | TechCrunch",
+      "source_type": "rss",
+      "tags": [
+        "AI",
+        "Fundraising",
+        "Space",
+        "Startups",
+        "Anthropic",
+        "Elon Musk",
+        "Equity podcast",
+        "SpaceX"
+      ],
+      "summary": "A TechCrunch Equity podcast segment examines the wave of AI companies preparing to go public and which adjacent startups stand to benefit, framing it around momentum from a SpaceX IPO. The piece is commentary on market dynamics rather than a specific deal or filing.",
+      "importance_score": 30,
+      "reasoning": "Opinion/podcast coverage of IPO trends with no concrete funding figures, model news, or capability developments. Relevant to AI business climate but lacks frontier significance.",
+      "themes": [
+        "AI business",
+        "IPO and markets",
+        "Startups"
+      ],
+      "continuation": null,
+      "summary_html": "<p>A TechCrunch Equity podcast segment examines the wave of AI companies preparing to go public and which adjacent startups stand to benefit, framing it around momentum from a SpaceX IPO. The piece is commentary on market dynamics rather than a specific deal or filing.</p>",
+      "content_html": "<p>Startups are trying to \"ride that SpaceX IPO wave.\"</p>"
+    },
+    {
+      "id": "c25d013c64df",
+      "title": "A Coding Hands-On on FineWeb for Streaming, Filtering, Deduplication, Tokenization, and Large-Scale Web Corpus Analytics",
+      "content": "In this tutorial, we explore the FineWeb dataset through an advanced hands-on workflow. We stream a manageable sample of the dataset without downloading the full multi-terabyte corpus, inspect its schema and metadata, and analyze key fields such as URL, language, language score, and token count. We also reproduce simplified versions of FineWeb’s quality-filtering pipeline, apply MinHash-based near-duplicate detection, verify token counts with the GPT-2 tokenizer, and generate useful analytics on domains, language scores, document lengths, and tokenizer efficiency.\n\n\n\nCopy CodeCopiedUse a different Browserimport subprocess, sys\ndef pip(*pkgs):\n   subprocess.run([sys.executable, \"-m\", \"pip\", \"install\", \"-q\", *pkgs], check=True)\npip(\"datasets>=2.19\", \"datasketch\", \"tiktoken\", \"pandas\", \"matplotlib\", \"tqdm\")\nimport re, math, random, collections\nfrom urllib.parse import urlparse\nimport pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom tqdm.auto import tqdm\nfrom datasets import load_dataset\nrandom.seed(0); np.random.seed(0)\npd.set_option(\"display.max_colwidth\", 90)\n\n\n\n\nWe begin by installing all required libraries for streaming, analysis, deduplication, tokenization, and visualization. We import the core Python packages needed to process FineWeb documents and work with tabular data. We also set random seeds and display options so that our results remain consistent and easier to inspect.\n\n\n\nCopy CodeCopiedUse a different BrowserN_DOCS = 3000\nprint(f\"Streaming {N_DOCS} docs from FineWeb sample-10BT ...\")\nstream = load_dataset(\n   \"HuggingFaceFW/fineweb\",\n   name=\"sample-10BT\",\n   split=\"train\",\n   streaming=True,\n)\ndocs = []\nfor i, doc in enumerate(tqdm(stream, total=N_DOCS)):\n   docs.append(doc)\n   if i + 1 >= N_DOCS:\n       break\ndf = pd.DataFrame(docs)\nprint(\"\\nColumns:\", list(df.columns))\nprint(df[[\"url\", \"language\", \"language_score\", \"token_count\"]].head(5))\nex = docs[0]\nprint(\"\\n--- Example record (fields) ---\")\nfor k, v in ex.items():\n   preview = (v[:120] + \"…\") if isinstance(v, str) and len(v) > 120 else v\n   print(f\"{k:>16}: {preview}\")\n\n\n\n\nWe stream a fixed number of documents from the FineWeb sample-10BT subset without downloading the full dataset. We convert the streamed records into a DataFrame and inspect key metadata fields, including URL, language, language score, and token count. We also print a complete example record to better understand the dataset&#8217;s structure.\n\n\n\nCopy CodeCopiedUse a different BrowserWORD = re.compile(r\"\\b\\w+\\b\")\ndef gopher_quality(text):\n   words = WORD.findall(text)\n   n = len(words)\n   if n &lt; 50 or n > 100_000:\n       return False, \"word_count_out_of_range\"\n   mean_len = sum(len(w) for w in words) / n\n   if mean_len &lt; 3 or mean_len > 10:\n       return False, \"bad_mean_word_length\"\n   if (text.count(\"#\") + text.count(\"...\")) / n > 0.1:\n       return False, \"too_many_symbols\"\n   lines = text.split(\"\\n\")\n   if lines and sum(l.lstrip().startswith((\"•\", \"-\", \"*\")) for l in lines) / len(lines) > 0.9:\n       return False, \"mostly_bullets\"\n   stops = {\"the\", \"be\", \"to\", \"of\", \"and\", \"that\", \"have\", \"with\"}\n   if len(stops &amp; {w.lower() for w in words}) &lt; 2:\n       return False, \"too_few_stopwords\"\n   return True, \"ok\"\ndef c4_quality(text):\n   lines = [l for l in text.split(\"\\n\") if l.strip()]\n   if not lines:\n       return False, \"empty\"\n   low = text.lower()\n   for bad in (\"lorem ipsum\", \"javascript is disabled\"):\n       if bad in low:\n           return False, f\"boilerplate:{bad}\"\n   if text.count(\"{\") > 0 and text.count(\"{\") / max(len(lines), 1) > 0.5:\n       return False, \"too_many_braces\"\n   return True, \"ok\"\ndef fineweb_custom(text):\n   lines = [l.strip() for l in text.split(\"\\n\") if l.strip()]\n   if not lines:\n       return False, \"empty\"\n   dup_frac = 1 - len(set(lines)) / len(lines)\n   if dup_frac > 0.3:\n       return False, \"duplicated_lines\"\n   short_frac = sum(len(l) &lt; 30 for l in lines) / len(lines)\n   if short_frac > 0.67 and len(lines) > 5:\n       return False, \"list_like\"\n   return True, \"ok\"\nresults = []\nfor d in docs:\n   t = d[\"text\"]\n   g_ok, g_r = gopher_quality(t)\n   c_ok, c_r = c4_quality(t)\n   f_ok, f_r = fineweb_custom(t)\n   reason = \"kept\" if (g_ok and c_ok and f_ok) else (g_r if not g_ok else c_r if not c_ok else f_r)\n   results.append(reason)\nfilter_summary = pd.Series(results).value_counts()\nprint(\"\\n--- Quality-filter outcomes on already-clean FineWeb data ---\")\nprint(\"(Most pass: FineWeb is pre-filtered. Rejections show what the rules catch.)\")\nprint(filter_summary)\n\n\n\n\nWe recreate simplified versions of FineWeb’s quality filters using Gopher-style, C4-style, and custom text-cleaning heuristics. We check each document for issues such as abnormal word counts, poor word statistics, boilerplate text, repeated lines, and list-like structure. We summarize how many documents pass or fail these filters to understand the quality of the already-cleaned FineWeb sample.\n\n\n\nCopy CodeCopiedUse a different Browserfrom datasketch import MinHash, MinHashLSH\ndef shingles(text, k=5):\n   toks = WORD.findall(text.lower())\n   return {\" \".join(toks[i:i+k]) for i in range(max(len(toks) - k + 1, 1))}\nNUM_PERM = 128\nTHRESHOLD = 0.7\nlsh = MinHashLSH(threshold=THRESHOLD, num_perm=NUM_PERM)\nminhashes = {}\nfor idx, d in enumerate(tqdm(docs, desc=\"MinHashing\")):\n   m = MinHash(num_perm=NUM_PERM)\n   for s in shingles(d[\"text\"]):\n       m.update(s.encode(\"utf8\"))\n   minhashes[idx] = m\n   lsh.insert(str(idx), m)\ndup_pairs = set()\nfor idx, m in minhashes.items():\n   for cand in lsh.query(m):\n       c = int(cand)\n       if c != idx:\n           dup_pairs.add(tuple(sorted((idx, c))))\nprint(f\"\\nFound {len(dup_pairs)} near-duplicate pairs (Jaccard ≥ {THRESHOLD}).\")\nif dup_pairs:\n   a, b = next(iter(dup_pairs))\n   j = minhashes[a].jaccard(minhashes[b])\n   print(f\"Example pair (estimated Jaccard ≈ {j:.2f}):\")\n   print(\"  DOC A:\", docs[a][\"text\"][:160].replace(\"\\n\", \" \"), \"…\")\n   print(\"  DOC B:\", docs[b][\"text\"][:160].replace(\"\\n\", \" \"), \"…\")\nelse:\n   print(\"No near-dupes in this slice — expected, since FineWeb is dedup'd per crawl.\")\n\n\n\n\nWe implement MinHash-based near-duplicate detection to approximate how large web corpora identify repeated or highly similar documents. We convert each document into word shingles, generate MinHash signatures, and index them with Locality Sensitive Hashing. We then search for near-duplicate document pairs and inspect an example if any similar texts are found.\n\n\n\nCopy CodeCopiedUse a different Browserimport tiktoken\nenc = tiktoken.get_encoding(\"gpt2\")\ncheck = docs[:200]\nrecomputed = [len(enc.encode(d[\"text\"])) for d in tqdm(check, desc=\"Tokenizing\")]\nstored = [d[\"token_count\"] for d in check]\ndiffs = np.array(recomputed) - np.array(stored)\nprint(f\"\\n--- Verifying token_count field (gpt2) on 200 docs ---\")\nprint(f\"Mean abs diff vs stored token_count: {np.abs(diffs).mean():.2f} tokens\")\nprint(f\"Exact matches: {(diffs == 0).mean()*100:.0f}%   (small drift = tokenizer version)\")\ndf[\"chars_per_token\"] = df[\"text\"].str.len() / df[\"token_count\"].clip(lower=1)\nprint(f\"Avg characters per token: {df['chars_per_token'].mean():.2f}\")\n\n\n\n\nWe verify the dataset’s token_count field by recomputing GPT-2 token counts with the tiktoken tokenizer. We compare the recomputed token counts with the stored values and measure the average difference between them. We also calculate characters per token to understand tokenizer efficiency across the sampled documents.\n\n\n\nCopy CodeCopiedUse a different Browserdf[\"domain\"] = df[\"url\"].apply(lambda u: urlparse(u).netloc.replace(\"www.\", \"\") if isinstance(u, str) else \"?\")\ntop_domains = df[\"domain\"].value_counts().head(15)\nprint(\"\\n--- Top 15 domains in sample ---\")\nprint(top_domains)\nfig, axes = plt.subplots(2, 2, figsize=(14, 10))\naxes[0, 0].hist(df[\"token_count\"].clip(upper=4000), bins=50, color=\"#7b2d26\")\naxes[0, 0].set_title(\"Token count per document (gpt2)\")\naxes[0, 0].set_xlabel(\"tokens\"); axes[0, 0].set_ylabel(\"docs\")\naxes[0, 1].hist(df[\"language_score\"], bins=40, color=\"#2d5d7b\")\naxes[0, 1].axvline(0.65, color=\"red\", ls=\"--\", label=\"FineWeb cutoff 0.65\")\naxes[0, 1].set_title(\"fastText English language score\")\naxes[0, 1].set_xlabel(\"score\"); axes[0, 1].legend()\naxes[1, 0].hist(df[\"chars_per_token\"].clip(upper=8), bins=40, color=\"#3f7b2d\")\naxes[1, 0].set_title(\"Characters per token (compression)\")\naxes[1, 0].set_xlabel(\"chars / token\")\ntop_domains.iloc[::-1].plot(kind=\"barh\", ax=axes[1, 1], color=\"#7b5d2d\")\naxes[1, 1].set_title(\"Top domains\")\nplt.tight_layout()\nplt.show()\nprint(\"\\n\" + \"=\" * 70)\nprint(\"SUMMARY\")\nprint(\"=\" * 70)\nprint(f\"Docs streamed          : {len(df):,}\")\nprint(f\"Total gpt2 tokens       : {df['token_count'].sum():,}\")\nprint(f\"Median tokens/doc       : {int(df['token_count'].median())}\")\nprint(f\"Unique domains          : {df['domain'].nunique():,}\")\nprint(f\"Mean language_score     : {df['language_score'].mean():.3f}\")\nprint(f\"Near-duplicate pairs    : {len(dup_pairs)}\")\nprint(f\"Docs flagged by filters : {(pd.Series(results) != 'kept').sum()} / {len(results)}\")\nprint(\"\\nNext steps:\")\nprint(\"  • Swap name='sample-10BT' for a real crawl, e.g. name='CC-MAIN-2024-10'\")\nprint(\"  • Raise N_DOCS for stronger statistics\")\nprint(\"  • Use the full datatrove pipeline to reproduce FineWeb end-to-end\")\n\n\n\n\nWe extract domain names from URLs and identify the most frequent domains present in the FineWeb sample. We create visualizations for token count distribution, language score distribution, characters per token, and top domains. We finish by printing a compact summary of streamed documents, total tokens, median length, unique domains, language quality, duplicate count, and filter results.\n\n\n\nIn conclusion, we developed a practical understanding of how large-scale web datasets such as FineWeb are explored, filtered, deduplicated, and analyzed for language model training. We worked efficiently with streaming data, tested quality heuristics on real documents, identified near-duplicate text patterns, and validated token-level metadata using a production-style tokenizer. It can be used to scale the workflow to larger FineWeb crawls, perform deeper corpus analysis, and design high-quality preprocessing pipelines for LLM dataset preparation.\n\n\n\n\n\n\n\n\n\n\n\nCheck out the Full Codes with Notebook. Also, feel free to follow us on Twitter and don’t forget to join our 150k+ML SubReddit and Subscribe to our Newsletter. Wait! are you on telegram? now you can join us on telegram as well.\n\n\n\nNeed to partner with us for promoting your GitHub Repo OR Hugging Face Page OR Product Release OR Webinar etc.?&nbsp;Connect with us\nThe post A Coding Hands-On on FineWeb for Streaming, Filtering, Deduplication, Tokenization, and Large-Scale Web Corpus Analytics appeared first on MarkTechPost.",
+      "url": "https://www.marktechpost.com/2026/06/14/a-coding-hands-on-on-fineweb-for-streaming-filtering-deduplication-tokenization-and-large-scale-web-corpus-analytics/",
+      "author": "Sana Hassan",
+      "published": "2026-06-14T20:45:32",
+      "source": "MarkTechPost",
+      "source_type": "rss",
+      "tags": [
+        "Artificial Intelligence",
+        "Data Science",
+        "Dataset",
+        "Editors Pick",
+        "Machine Learning",
+        "Staff",
+        "Technology",
+        "Tutorials"
+      ],
+      "summary": "A hands-on tutorial walks through streaming, filtering, deduplication, and tokenization workflows on the FineWeb web corpus without downloading the full multi-terabyte dataset. It reproduces simplified versions of FineWeb's quality pipeline and MinHash near-duplicate detection.",
+      "importance_score": 18,
+      "reasoning": "Educational how-to content on data processing with no new model, capability, or research finding. Useful for practitioners but minimal frontier significance.",
+      "themes": [
+        "Tutorials",
+        "Data processing",
+        "Datasets"
+      ],
+      "continuation": null,
+      "summary_html": "<p>A hands-on tutorial walks through streaming, filtering, deduplication, and tokenization workflows on the FineWeb web corpus without downloading the full multi-terabyte dataset. It reproduces simplified versions of FineWeb's quality pipeline and MinHash near-duplicate detection.</p>",
+      "content_html": "<p>In this tutorial, we explore the FineWeb dataset through an advanced hands-on workflow. We stream a manageable sample of the dataset without downloading the full multi-terabyte corpus, inspect its schema and metadata, and analyze key fields such as URL, language, language score, and token count. We also reproduce simplified versions of FineWeb’s quality-filtering pipeline, apply MinHash-based near-duplicate detection, verify token counts with the GPT-2 tokenizer, and generate useful analytics on domains, language scores, document lengths, and tokenizer efficiency.</p>\n<p>Copy CodeCopiedUse a different Browserimport subprocess, sys</p>\n<p>def pip(*pkgs):</p>\n<p>subprocess.run([sys.executable, \"-m\", \"pip\", \"install\", \"-q\", *pkgs], check=True)</p>\n<p>pip(\"datasets&gt;=2.19\", \"datasketch\", \"tiktoken\", \"pandas\", \"matplotlib\", \"tqdm\")</p>\n<p>import re, math, random, collections</p>\n<p>from urllib.parse import urlparse</p>\n<p>import pandas as pd</p>\n<p>import numpy as np</p>\n<p>import matplotlib.pyplot as plt</p>\n<p>from tqdm.auto import tqdm</p>\n<p>from datasets import load_dataset</p>\n<p>random.seed(0); np.random.seed(0)</p>\n<p>pd.set_option(\"display.max_colwidth\", 90)</p>\n<p>We begin by installing all required libraries for streaming, analysis, deduplication, tokenization, and visualization. We import the core Python packages needed to process FineWeb documents and work with tabular data. We also set random seeds and display options so that our results remain consistent and easier to inspect.</p>\n<p>Copy CodeCopiedUse a different BrowserN_DOCS = 3000</p>\n<p>print(f\"Streaming {N_DOCS} docs from FineWeb sample-10BT ...\")</p>\n<p>stream = load_dataset(</p>\n<p>\"HuggingFaceFW/fineweb\",</p>\n<p>name=\"sample-10BT\",</p>\n<p>split=\"train\",</p>\n<p>streaming=True,</p>\n<p>)</p>\n<p>docs = []</p>\n<p>for i, doc in enumerate(tqdm(stream, total=N_DOCS)):</p>\n<p>docs.append(doc)</p>\n<p>if i + 1 &gt;= N_DOCS:</p>\n<p>break</p>\n<p>df = pd.DataFrame(docs)</p>\n<p>print(\"\\nColumns:\", list(df.columns))</p>\n<p>print(df[[\"url\", \"language\", \"language_score\", \"token_count\"]].head(5))</p>\n<p>ex = docs[0]</p>\n<p>print(\"\\n--- Example record (fields) ---\")</p>\n<p>for k, v in ex.items():</p>\n<p>preview = (v[:120] + \"…\") if isinstance(v, str) and len(v) &gt; 120 else v</p>\n<p>print(f\"{k:&gt;16}: {preview}\")</p>\n<p>We stream a fixed number of documents from the FineWeb sample-10BT subset without downloading the full dataset. We convert the streamed records into a DataFrame and inspect key metadata fields, including URL, language, language score, and token count. We also print a complete example record to better understand the dataset’s structure.</p>\n<p>Copy CodeCopiedUse a different BrowserWORD = re.compile(r\"\\b\\w+\\b\")</p>\n<p>def gopher_quality(text):</p>\n<p>words = WORD.findall(text)</p>\n<p>n = len(words)</p>\n<p>if n &lt; 50 or n &gt; 100_000:</p>\n<p>return False, \"word_count_out_of_range\"</p>\n<p>mean_len = sum(len(w) for w in words) / n</p>\n<p>if mean_len &lt; 3 or mean_len &gt; 10:</p>\n<p>return False, \"bad_mean_word_length\"</p>\n<p>if (text.count(\"#\") + text.count(\"...\")) / n &gt; 0.1:</p>\n<p>return False, \"too_many_symbols\"</p>\n<p>lines = text.split(\"\\n\")</p>\n<p>if lines and sum(l.lstrip().startswith((\"•\", \"-\", \"*\")) for l in lines) / len(lines) &gt; 0.9:</p>\n<p>return False, \"mostly_bullets\"</p>\n<p>stops = {\"the\", \"be\", \"to\", \"of\", \"and\", \"that\", \"have\", \"with\"}</p>\n<p>if len(stops &amp; {w.lower() for w in words}) &lt; 2:</p>\n<p>return False, \"too_few_stopwords\"</p>\n<p>return True, \"ok\"</p>\n<p>def c4_quality(text):</p>\n<p>lines = [l for l in text.split(\"\\n\") if l.strip()]</p>\n<p>if not lines:</p>\n<p>return False, \"empty\"</p>\n<p>low = text.lower()</p>\n<p>for bad in (\"lorem ipsum\", \"javascript is disabled\"):</p>\n<p>if bad in low:</p>\n<p>return False, f\"boilerplate:{bad}\"</p>\n<p>if text.count(\"{\") &gt; 0 and text.count(\"{\") / max(len(lines), 1) &gt; 0.5:</p>\n<p>return False, \"too_many_braces\"</p>\n<p>return True, \"ok\"</p>\n<p>def fineweb_custom(text):</p>\n<p>lines = [l.strip() for l in text.split(\"\\n\") if l.strip()]</p>\n<p>if not lines:</p>\n<p>return False, \"empty\"</p>\n<p>dup_frac = 1 - len(set(lines)) / len(lines)</p>\n<p>if dup_frac &gt; 0.3:</p>\n<p>return False, \"duplicated_lines\"</p>\n<p>short_frac = sum(len(l) &lt; 30 for l in lines) / len(lines)</p>\n<p>if short_frac &gt; 0.67 and len(lines) &gt; 5:</p>\n<p>return False, \"list_like\"</p>\n<p>return True, \"ok\"</p>\n<p>results = []</p>\n<p>for d in docs:</p>\n<p>t = d[\"text\"]</p>\n<p>g_ok, g_r = gopher_quality(t)</p>\n<p>c_ok, c_r = c4_quality(t)</p>\n<p>f_ok, f_r = fineweb_custom(t)</p>\n<p>reason = \"kept\" if (g_ok and c_ok and f_ok) else (g_r if not g_ok else c_r if not c_ok else f_r)</p>\n<p>results.append(reason)</p>\n<p>filter_summary = pd.Series(results).value_counts()</p>\n<p>print(\"\\n--- Quality-filter outcomes on already-clean FineWeb data ---\")</p>\n<p>print(\"(Most pass: FineWeb is pre-filtered. Rejections show what the rules catch.)\")</p>\n<p>print(filter_summary)</p>\n<p>We recreate simplified versions of FineWeb’s quality filters using Gopher-style, C4-style, and custom text-cleaning heuristics. We check each document for issues such as abnormal word counts, poor word statistics, boilerplate text, repeated lines, and list-like structure. We summarize how many documents pass or fail these filters to understand the quality of the already-cleaned FineWeb sample.</p>\n<p>Copy CodeCopiedUse a different Browserfrom datasketch import MinHash, MinHashLSH</p>\n<p>def shingles(text, k=5):</p>\n<p>toks = WORD.findall(text.lower())</p>\n<p>return {\" \".join(toks[i:i+k]) for i in range(max(len(toks) - k + 1, 1))}</p>\n<p>NUM_PERM = 128</p>\n<p>THRESHOLD = 0.7</p>\n<p>lsh = MinHashLSH(threshold=THRESHOLD, num_perm=NUM_PERM)</p>\n<p>minhashes = {}</p>\n<p>for idx, d in enumerate(tqdm(docs, desc=\"MinHashing\")):</p>\n<p>m = MinHash(num_perm=NUM_PERM)</p>\n<p>for s in shingles(d[\"text\"]):</p>\n<p>m.update(s.encode(\"utf8\"))</p>\n<p>minhashes[idx] = m</p>\n<p>lsh.insert(str(idx), m)</p>\n<p>dup_pairs = set()</p>\n<p>for idx, m in minhashes.items():</p>\n<p>for cand in lsh.query(m):</p>\n<p>c = int(cand)</p>\n<p>if c != idx:</p>\n<p>dup_pairs.add(tuple(sorted((idx, c))))</p>\n<p>print(f\"\\nFound {len(dup_pairs)} near-duplicate pairs (Jaccard ≥ {THRESHOLD}).\")</p>\n<p>if dup_pairs:</p>\n<p>a, b = next(iter(dup_pairs))</p>\n<p>j = minhashes[a].jaccard(minhashes[b])</p>\n<p>print(f\"Example pair (estimated Jaccard ≈ {j:.2f}):\")</p>\n<p>print(\"  DOC A:\", docs[a][\"text\"][:160].replace(\"\\n\", \" \"), \"…\")</p>\n<p>print(\"  DOC B:\", docs[b][\"text\"][:160].replace(\"\\n\", \" \"), \"…\")</p>\n<p>else:</p>\n<p>print(\"No near-dupes in this slice — expected, since FineWeb is dedup'd per crawl.\")</p>\n<p>We implement MinHash-based near-duplicate detection to approximate how large web corpora identify repeated or highly similar documents. We convert each document into word shingles, generate MinHash signatures, and index them with Locality Sensitive Hashing. We then search for near-duplicate document pairs and inspect an example if any similar texts are found.</p>\n<p>Copy CodeCopiedUse a different Browserimport tiktoken</p>\n<p>enc = tiktoken.get_encoding(\"gpt2\")</p>\n<p>check = docs[:200]</p>\n<p>recomputed = [len(enc.encode(d[\"text\"])) for d in tqdm(check, desc=\"Tokenizing\")]</p>\n<p>stored = [d[\"token_count\"] for d in check]</p>\n<p>diffs = np.array(recomputed) - np.array(stored)</p>\n<p>print(f\"\\n--- Verifying token_count field (gpt2) on 200 docs ---\")</p>\n<p>print(f\"Mean abs diff vs stored token_count: {np.abs(diffs).mean():.2f} tokens\")</p>\n<p>print(f\"Exact matches: {(diffs == 0).mean()*100:.0f}%   (small drift = tokenizer version)\")</p>\n<p>df[\"chars_per_token\"] = df[\"text\"].str.len() / df[\"token_count\"].clip(lower=1)</p>\n<p>print(f\"Avg characters per token: {df['chars_per_token'].mean():.2f}\")</p>\n<p>We verify the dataset’s token_count field by recomputing GPT-2 token counts with the tiktoken tokenizer. We compare the recomputed token counts with the stored values and measure the average difference between them. We also calculate characters per token to understand tokenizer efficiency across the sampled documents.</p>\n<p>Copy CodeCopiedUse a different Browserdf[\"domain\"] = df[\"url\"].apply(lambda u: urlparse(u).netloc.replace(\"www.\", \"\") if isinstance(u, str) else \"?\")</p>\n<p>top_domains = df[\"domain\"].value_counts().head(15)</p>\n<p>print(\"\\n--- Top 15 domains in sample ---\")</p>\n<p>print(top_domains)</p>\n<p>fig, axes = plt.subplots(2, 2, figsize=(14, 10))</p>\n<p>axes[0, 0].hist(df[\"token_count\"].clip(upper=4000), bins=50, color=\"#7b2d26\")</p>\n<p>axes[0, 0].set_title(\"Token count per document (gpt2)\")</p>\n<p>axes[0, 0].set_xlabel(\"tokens\"); axes[0, 0].set_ylabel(\"docs\")</p>\n<p>axes[0, 1].hist(df[\"language_score\"], bins=40, color=\"#2d5d7b\")</p>\n<p>axes[0, 1].axvline(0.65, color=\"red\", ls=\"--\", label=\"FineWeb cutoff 0.65\")</p>\n<p>axes[0, 1].set_title(\"fastText English language score\")</p>\n<p>axes[0, 1].set_xlabel(\"score\"); axes[0, 1].legend()</p>\n<p>axes[1, 0].hist(df[\"chars_per_token\"].clip(upper=8), bins=40, color=\"#3f7b2d\")</p>\n<p>axes[1, 0].set_title(\"Characters per token (compression)\")</p>\n<p>axes[1, 0].set_xlabel(\"chars / token\")</p>\n<p>top_domains.iloc[::-1].plot(kind=\"barh\", ax=axes[1, 1], color=\"#7b5d2d\")</p>\n<p>axes[1, 1].set_title(\"Top domains\")</p>\n<p>plt.tight_layout()</p>\n<p>plt.show()</p>\n<p>print(\"\\n\" + \"=\" * 70)</p>\n<p>print(\"SUMMARY\")</p>\n<p>print(\"=\" * 70)</p>\n<p>print(f\"Docs streamed          : {len(df):,}\")</p>\n<p>print(f\"Total gpt2 tokens       : {df['token_count'].sum():,}\")</p>\n<p>print(f\"Median tokens/doc       : {int(df['token_count'].median())}\")</p>\n<p>print(f\"Unique domains          : {df['domain'].nunique():,}\")</p>\n<p>print(f\"Mean language_score     : {df['language_score'].mean():.3f}\")</p>\n<p>print(f\"Near-duplicate pairs    : {len(dup_pairs)}\")</p>\n<p>print(f\"Docs flagged by filters : {(pd.Series(results) != 'kept').sum()} / {len(results)}\")</p>\n<p>print(\"\\nNext steps:\")</p>\n<p>print(\"  • Swap name='sample-10BT' for a real crawl, e.g. name='CC-MAIN-2024-10'\")</p>\n<p>print(\"  • Raise N_DOCS for stronger statistics\")</p>\n<p>print(\"  • Use the full datatrove pipeline to reproduce FineWeb end-to-end\")</p>\n<p>We extract domain names from URLs and identify the most frequent domains present in the FineWeb sample. We create visualizations for token count distribution, language score distribution, characters per token, and top domains. We finish by printing a compact summary of streamed documents, total tokens, median length, unique domains, language quality, duplicate count, and filter results.</p>\n<p>In conclusion, we developed a practical understanding of how large-scale web datasets such as FineWeb are explored, filtered, deduplicated, and analyzed for language model training. We worked efficiently with streaming data, tested quality heuristics on real documents, identified near-duplicate text patterns, and validated token-level metadata using a production-style tokenizer. It can be used to scale the workflow to larger FineWeb crawls, perform deeper corpus analysis, and design high-quality preprocessing pipelines for LLM dataset preparation.</p>\n<p>Check out&nbsp;the&nbsp;Full Codes with Notebook.&nbsp;Also,&nbsp;feel free to follow us on&nbsp;Twitter&nbsp;and don’t forget to join our&nbsp;150k+ML SubReddit&nbsp;and Subscribe to&nbsp;our Newsletter. Wait! are you on telegram?&nbsp;now you can join us on telegram as well.</p>\n<p>Need to partner with us for promoting your GitHub Repo OR Hugging Face Page OR Product Release OR Webinar etc.?&nbsp;Connect with us</p>\n<p>The post A Coding Hands-On on FineWeb for Streaming, Filtering, Deduplication, Tokenization, and Large-Scale Web Corpus Analytics appeared first on MarkTechPost.</p>"
+    }
+  ]
+}
