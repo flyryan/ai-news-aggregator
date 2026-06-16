@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=research" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/research-100.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:100</id>
-  <updated>2026-06-15T09:52:19Z</updated>
+  <updated>2026-06-16T10:05:50Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,372 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-06-16:category-summary:research</id>
+    <title>Research Summary: June 16, 2026</title>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research" rel="canonical" type="text/html"/>
+    <link href="http://arxiv.org/abs/2606.15497" rel="alternate" type="text/html; charset=utf-8" title="Representative source"/>
+    <link href="http://arxiv.org/abs/2606.15497" rel="via" type="text/html" title="Representative source"/>
+    <published>2026-06-16T06:00:00Z</published>
+    <updated>2026-06-16T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p>Today's research spans frontier model releases, training-efficiency advances, and safety findings with societal weight. NVIDIA's <strong>Nemotron 3 Ultra</strong> is a <strong>550B-total/55B-active</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-406619e3fc4b" class="internal-link" rel="noopener noreferrer">Mixture-of-Experts hybrid Mamba-Attention model</a> (<strong>20T</strong> tokens, <strong>1M</strong> context) built for agentic reasoning. <strong>The AI Scientist</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-3e8ad56ae03b" class="internal-link" rel="noopener noreferrer">pushes toward end-to-end automation</a> of the full research lifecycle, while the <strong>Stanford AI Index Report 2026</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-e54772bea54d" class="internal-link" rel="noopener noreferrer">maps ecosystem-wide progress</a> and governance gaps.</p>
+<p>Optimization and training stability see practical, broadly applicable gains:</p>
+<ul>
+<li><strong>Hyperball</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-fe70e0a9b240" class="internal-link" rel="noopener noreferrer">fixes Frobenius norms</a> of weights and updates to restore matrix-aware scaling gains (Tengyu Ma et al.)</li>
+<li><strong>Taming Curvature</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-76044ab4abf7" class="internal-link" rel="noopener noreferrer">uses online preconditioned-Hessian estimation</a> for an architecture warm-up that stabilizes Transformer training</li>
+</ul>
+<p>Reasoning, RL, and representation learning advance:</p>
+<ul>
+<li>Diversity collapse in <strong>RLVR</strong> is <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-ee4a79059732" class="internal-link" rel="noopener noreferrer">formalized via overtraining</a>—<strong>Pass@1</strong> improves while <strong>Pass@k</strong> degrades once reward saturates</li>
+<li>A <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-64fa8bc31473" class="internal-link" rel="noopener noreferrer">temporal-difference method</a> (Yann LeCun, Heng Ji) removes augmentation/masking biases from visual representation learning</li>
+</ul>
+<p>Alignment and scientific applications round out the day:</p>
+<ul>
+<li><strong>Constitutional Value Potentials</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-0a0a7e7c0072" class="internal-link" rel="noopener noreferrer">read and steer internal margins</a> from hidden states</li>
+<li>A study of <strong>100+</strong> biological reasoning models <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-7639651d7358" class="internal-link" rel="noopener noreferrer">dissects how pre-training, SFT, and RL</a> shape in- vs out-of-domain generalization</li>
+<li>Four preregistered experiments (~<strong>19,000</strong> conversations) <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-9a13a48b03cd" class="internal-link" rel="noopener noreferrer">find AI systems out-persuade expert humans</a></li>
+</ul>]]></summary>
+    <content type="html"><![CDATA[<p>Today's research spans frontier model releases, training-efficiency advances, and safety findings with societal weight. NVIDIA's <strong>Nemotron 3 Ultra</strong> is a <strong>550B-total/55B-active</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-406619e3fc4b" class="internal-link" rel="noopener noreferrer">Mixture-of-Experts hybrid Mamba-Attention model</a> (<strong>20T</strong> tokens, <strong>1M</strong> context) built for agentic reasoning. <strong>The AI Scientist</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-3e8ad56ae03b" class="internal-link" rel="noopener noreferrer">pushes toward end-to-end automation</a> of the full research lifecycle, while the <strong>Stanford AI Index Report 2026</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-e54772bea54d" class="internal-link" rel="noopener noreferrer">maps ecosystem-wide progress</a> and governance gaps.</p>
+<p>Optimization and training stability see practical, broadly applicable gains:</p>
+<ul>
+<li><strong>Hyperball</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-fe70e0a9b240" class="internal-link" rel="noopener noreferrer">fixes Frobenius norms</a> of weights and updates to restore matrix-aware scaling gains (Tengyu Ma et al.)</li>
+<li><strong>Taming Curvature</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-76044ab4abf7" class="internal-link" rel="noopener noreferrer">uses online preconditioned-Hessian estimation</a> for an architecture warm-up that stabilizes Transformer training</li>
+</ul>
+<p>Reasoning, RL, and representation learning advance:</p>
+<ul>
+<li>Diversity collapse in <strong>RLVR</strong> is <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-ee4a79059732" class="internal-link" rel="noopener noreferrer">formalized via overtraining</a>—<strong>Pass@1</strong> improves while <strong>Pass@k</strong> degrades once reward saturates</li>
+<li>A <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-64fa8bc31473" class="internal-link" rel="noopener noreferrer">temporal-difference method</a> (Yann LeCun, Heng Ji) removes augmentation/masking biases from visual representation learning</li>
+</ul>
+<p>Alignment and scientific applications round out the day:</p>
+<ul>
+<li><strong>Constitutional Value Potentials</strong> <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-0a0a7e7c0072" class="internal-link" rel="noopener noreferrer">read and steer internal margins</a> from hidden states</li>
+<li>A study of <strong>100+</strong> biological reasoning models <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-7639651d7358" class="internal-link" rel="noopener noreferrer">dissects how pre-training, SFT, and RL</a> shape in- vs out-of-domain generalization</li>
+<li>Four preregistered experiments (~<strong>19,000</strong> conversations) <a href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-9a13a48b03cd" class="internal-link" rel="noopener noreferrer">find AI systems out-persuade expert humans</a></li>
+</ul>]]></content>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:3e8ad56ae03b</id>
+    <title>Towards End-to-End Automation of AI Research</title>
+    <link href="http://arxiv.org/abs/2606.15497" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-3e8ad56ae03b" rel="related" type="text/html"/>
+    <published>2026-06-16T03:16:00Z</published>
+    <updated>2026-06-16T03:16:00Z</updated>
+    <author><name>Yutaro Yamada, Robert Tjarko Lange, Cong Lu, Chris Lu, Shengran Hu, Jakob Foerster, David Ha, Jeff Clune</name></author>
+    <summary type="html"><![CDATA[<p>Presents The AI Scientist, an end-to-end system that autonomously generates research ideas, writes code, runs experiments, drafts manuscripts, and conducts peer review, claiming the strongest demonstration of full research automation to date. Authored by a prominent team including David Ha and Jeff Clune.</p>]]></summary>
+    <category term="AI for Science"/>
+    <category term="Autonomous Agents"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:406619e3fc4b</id>
+    <title>Nemotron 3 Ultra: Open, Efficient Mixture-of-Experts Hybrid Mamba-Transformer Model for Agentic Reasoning</title>
+    <link href="http://arxiv.org/abs/2606.15007" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-406619e3fc4b" rel="related" type="text/html"/>
+    <published>2026-06-16T03:16:00Z</published>
+    <updated>2026-06-16T03:16:00Z</updated>
+    <author><name>NVIDIA (Allan), : (Allan), Aaron Blakeman (Allan), Aaron Thomas (Allan), Aastha Jhunjhunwala (Allan), Abhibha Gupta (Allan), Abhinav Khattar (Allan), Adam Rajfer (Allan), Adi Renduchintala (Allan), Adil Asif (Allan), Aditya Vavre (Allan), Adriana Flores Miranda (Allan), Ahmad Bilal (Allan), Aileen Zaman (Allan), Ajay Hotchandani (Allan), Akanksha Shukla (Allan), Akhiad Bercovich (Allan), Aleksander Ficek (Allan), Alex Gronskiy (Allan), Alex Kondratenko (Allan), Alex Steiner (Allan), Alex Ye (Allan), Alexander Bukharin (Allan), Alexandre Milesi (Allan), Ali Taghibakhshi (Allan), Alice Gatti (Allan), Alisa Liu (Allan), Alok Kumar (Allan), Amar Phanishayee (Allan), Ameya Sunil Mahabaleshwarkar (Allan), Amir Klein (Allan), Amit Zuker (Allan), Amnon Geifman (Allan), Anahita Bhiwandiwalla (Allan), Ananth Subramaniam (Allan), Andrea Santilli (Allan), Andrew Fulks (Allan), Andrew McHarg (Allan), Andrew Tao (Allan), Andrii Skliar (Allan), Anjulie Agrusa (Allan), Ankur Srivastava (Allan), Ankur Verma (Allan), Anna Shors (Allan), Anna Warno (Allan), Antoni-Joan Solergibert I Llaquet (Allan), Arham Mehta (Allan), Arkadiusz Nowaczynski (Allan), Arti Jain (Allan), Ashwath Aithal (Allan), Ashwin Poojary (Allan), Asif Ahamed (Allan), Asit Mishra (Allan), Asma Kuriparambil Thekkumpate (Allan), Atefeh Sohrabizadeh (Allan), Avinash Kaur (Allan), Avinash Vem (Allan), Ayush Dattagupta (Allan), Barath Subramaniam Anandan (Allan), Bardiya Sadeghi (Allan), Ben Lanir (Allan), Benedikt Schifferer (Allan), Besmira Nushi (Allan), Bilal Kartal (Allan), Bill Thiede (Allan), Bita Darvish Rouhani (Allan), Bo Deng (Allan), Bob Schatz (Allan), Boris Ginsburg (Allan), Boxin Wang (Allan), Brad Nemire (Allan), Brandon Norick (Allan), Brian Dang (Allan), Brian Westphal (Allan), Brian Yu (Allan), Brucek Khailany (Allan), Bryan Catanzaro (Allan), Carlo del Mundo (Allan), Caryln Aarish (Allan), Chankyu Lee (Allan), Chantal Hwang (Allan), Charbel Sakr (Allan), Charles Wang (Allan), Charlie Truong (Allan), Chen Cui (Allan), Cheng Cheng (Allan), Cheng-Ping Hsieh (Allan), Chenghao Zhang (Allan), Chenhui Deng (Allan), Chintan Patel (Allan), Chris Alexiuk (Allan), Christian Cosgrove (Allan), Christian Munley (Allan), Christine Harvey (Allan), Christopher Parisien (Allan), Chunyang Shen (Allan), Coco Li (Allan), Collin Neale (Allan), Cynthia Gao (Allan), Cyril Meurillon (Allan), Dan Gil (Allan), Dan Su (Allan), Dan Zhao (Allan), Dane Corneil (Allan), Daniel Afrimi (Allan), Daniel Egert (Allan), Daniel Korzekwa (Allan), Daniel Lo (Allan), Daniel Machlab (Allan), Daniel Serebrenik (Allan), Daniil Sorokin (Allan), Daria Gitman (Allan), Daria Levy (Allan), Darko Stosic (Allan), David Mosallanezhad (Allan), David Yu (Allan), Davit Karamyan (Allan), Deena Donia (Allan), Deep Debroy (Allan), Deepak Narayanan (Allan), Devin O'Kelly (Allan), Dheeraj Peri (Allan), Dhruv Nathawani (Allan), Di (Allan), Wu, Dima Rekesh, Divyanshu Kakwani, Donald Plummer, Dong Anh, Dongfeng Yu, Dongfu Jiang, Donnie Kim, Dorrin Poorkay, Duncan Riach, Dusan Stosic, Dustin VanStee, Eavan Meng, Edgar Minasyan, Edward Lin, Eileen Margaret Peters Long, Elad Sarafin, Elad Segal, Elena Lantz, Ellie Evans, Elliott Ning, Eric Chung, Eric Harper, Eric Pham-Hung, Eric Tramel, Eric Yang, Erick Galinkin, Erik Pounds, Erika Goncalves Goncalves, Evan Briones, Evan Wu, Evelina Bakhturina, Evgeny Tsykunov, Ewa Dobrowolska, Faisal Ladhak, Farzan Memarian, Fay Wang, Fei Jia, Felipe Soares, Felipe Vieira Frujeri, Feng Chen, Fengguang Lin, Ferenc Galko, Frank Sun, Frankie Siino, Frida Hou, Gal Hubara Agam, Gal Kaplun, Gantavya Bhatt, Gargi Prasad, Garvit Kulshreshtha, George Armstrong, Gerald Shen, Giulio Borghesi, Gordana Neskovic, Gorkem Batmaz, Grace Lam, Greg Mason, Greg Pauloski, Grigor Nalbandyan, Grzegorz Chlebus, Grzegorz Karch, Guan-Ting Liu, Guoming Zhang, Guyue Huang, Haggai Maron, Haifeng Qian, Haim Elisha, Haoxing Ren, Haran Kumar Shiv Kumar, Haribhau Hud, Harris Nover, Harrison Saturley Hall, Hayate Iso, Helen Ngo, Herbert Hum, Herman Sahota, Hexin Wang, Himanshu Soni, Hovhannes Tamoyan, Hua Li, Huanhuan Chen, Hui Li, Hui Wang, Huy Nguyen, Ian Chiles, Ido Galil, Ido Shahaf, Igor Gitman, Igor Shovkun, Ilya Loshchilov, Ingo Guehring, Itamar Schen, Itay Levy, Itay Neeman, Ivan Moshkov, Izik Golan, Izzy Putterman, Jaemin Choi, Jakub Slowikowski, Jan Kautz, Jane Polak Scowcroft, Jared Casper, Jatin Mitra, Jeffrey Glick, Jenny Chen, Jesse Oliver, Jiacheng Xu, Jiafan Zhu, Jialin Song, Jian Zhang, Jiantao Jiao, Jiaqi Zeng, Jie Lou, Jim King, Jimmy Zhang, Jingquan Wang, Jinhang Choi, Jinju Chu, Joey Conway, Joey Guman, Johan Jatko, Johannes Rausch, John Kamalu, John Roberts, Johnny Greco, Johnny Mensel, Jonah Alben, Jonas Yang, Jonathan Cohen, Jonathan Raiman, Joseph Jennings, Joshua Mabry, Joshua Pierce, Joyjit Daw, Julien Veron Vialard, Junkeun Yi, Jupinder Parmar, Kajal Jain, Kan Zhu, Kari Briski, Katherine Cheung, Katherine Luna, Keith Willowhawk, Keith Wyss, Keshav Santhanam, Kevin Shih, Kezhi Kong, Khanh Nguyen, Khushi Bhardwaj, Kirthi Shankar Sivamani, Konstantinos Krommydas, Krishna C. Puvvada, Krzysztof Pawelec, Kumar Anik, Kyle Keprios, Kylie Day, Lawrence McAfee, Leo Du, Leon Derczynski, Li Ding, Linda Liu, Lingjie Wu, Lior Kadoch, Lizzie Wei, Luis Vega, Luke Robison, Lun Su, Maarten Van Segbroeck, Maciej Jakub Mikulski, Maer Rodrigues de Melo, Magda Sypula, Mahan Fathi, Makesh Narsimhan Sreedhar, Makesh Tarun Chandran, Manoj Kilaru, Maor Ashkenazi, Marc Cuevas, Marc Romeijn, Marcin Chochowski, Mark Cai, Mark Mozolewski, Markus Kliegl, Marta Stepniewska-Dziubinska, Martyna Patelka, Mattei Machczynski, Matvei Novikov, Mauricio Ferrato, Maximilian Golub, Mehrzad Samadi, Melissa Corpuz, Mengru Wang, Mengxi Wu, Meredith Price, Meriem Boubdir, Micah Schaffer, Michael Andersch, Michael Boone, Michael Gschwind, Michael Lightstone, Michael Loh, Michal Bien, Michal Zawalski, Michelle Gill, Miguel Martinez, Mikail Khona, Mike Chrzanowski, Mike Houston, Mingyuan Ma, Minseok Lee, Mohamed Fawzy, Mohammad Dabbah, Mohammad Shoeybi, Mostofa Patwary, Nabin Mulepati, Najeeb Nabwani, Namit Dhameja, Narimane Hennouni, Natalie Hereth, Nathaniel Pinckney, Nave Algarici, Nave Assaf, Netanel Haber, Nicholas Knight, Nick Reamaroon, Nickson Quak, Nidhi Bhatia, Nikhil Desai, Nikolai Ludwig, Nima Tajbakhsh, Ning Xu, Nir Ailon, Nirmal Juluru, Nitin Nitin, Ofri Masad, Oleg Rybakov, Oleksii Hrinchuk, Oleksii Kuchaiev, Olivia Viessmann, Olivier Delalleau, Oluwatobi Olabiyi, Omer Ullman Argov, Omri Puny, Oren Tropp, Pablo Ribalta, Pallab Bhattacharya, Panos Lampropoulos, Parth Mannan, Pasha Shamis, Patrick Legresley, Paul Gibbons, Pavlo Molchanov, Pawel Morkisz, Peter Dykas, Peter Jin, Pierre-Yves Aquilanti, Pinky Xu, Piotr Januszewski, Piotr Laskiewicz, Pooya Jannaty, Prakash Gurumurthy, Pranav Prashant Thombre, Prasoon Varshney, Pritam Gundecha, Przemek Tredak, Puhui Meng, Qiyu Wan, Rabeeh Karimi Mahabadi, Rachel Oberman, Rachit Garg, Radha Sri-Tharan, Rahul Kandu, Rakshit Sanadhya, Ran El-Yaniv, Ran Zilberstein, Rasoul Shafipour, Ray Macalisang, Rayen Tian, Reka Kovacs, Renjie Pi, Rick Izzo, Rima Shahbazyan, Rishabh Garg, Rishi Puri, Rita Fernandes Neves, Ritchie Zhao, Ritika Borkar, Ritu Gala, Riyad Islam, Robert Clark, Robert Hesse, Robert Kirby, Roger Waleffe, Rohit Watve, Roi Koren, Ron Banner, Ruoxi Zhang, Russell J. Hewett, Ryan Prenger, Ryan Stewart, Ryota Egashira, Sadegh Mahdavi, Saee Paliwal, Sagar Singh, Sahil Modi, Salika Dave, Samantha Shinagawa, Samuel Kriman, Sandip Bhaskar, Sangkug Lym, Sanjay Kariyappa, Sanjeev Satheesh, Saran Vikas Murari, Satish Pasumarthi, Saurabh Mishra, Saurav Muralidharan, Scott Hara, Sean Narentharen, Selvaraj Anandaraj, Seonjin Na, Seonmeyong Bak, Seonmyeong Bak, Sepehr Sameni, Seph Mard, Serge Panev, Seth Henneman, Seth Poulos, Shahar Mor, Shantanu Acharya, Shaona Ghosh, Sharath Turuvekere Sreenivas, Sharon Mendelson, Shaun Kotek, Shawn Wang, Shay Aharon, Shaya Gharghabi, Sheng-Chieh Lin, Shi Chen, Shiqing Fan, Shirish Baskaran, Shreya Gopa, Shrimai Prabhumoye, Shubham Pachori, Shubham Toshniwal, Shuoyang Ding, Shwetha Krishnamurthy, Siddharth Singh, Simeng Sun, Sirshak Das, Sivakumar Arayandi Thottakara, Smita Ithape, Somshubra Majumdar, Soumye Singhal, Sri Harsha Singudasu, Sridhar Bhuvanapalli, Srimukh Veccham, Stas Sergienko, Stefania Alborghetti, Stephen Ge, Su Rong, Sugam Dipak Devare, Sukrit Rao, Sumeet Kumar Barua, Sungsoo Ha, Sunny Gai, Suriya Gunasekar, Suseella Panguluri, Suyog Gupta, Sviataslau Hinzburh, Sweta Priyadarshi, Syeda Nahida Akter, Talor Abramovich, Tan Bui, Tanay Varshney, Tatevik Ter-Hovhannisyan, Teodor-Dumitru Ene, Terry Kong, Thanh Do, Tianhe Zhang, Tiffany Moore, Tijmen Blankevoort, Tim Moon, Tiyasa Mitra, Tom Balough, Tomasz Grzegorzek, Tomasz Hliwiak, Tomer Asida, Tomer Bar Natan, Tomer Keren, Tomer Ronen, Tony Salim, Tony Wang, Traian Rebedea, Tugrul Konuk, Twinkle Vashishth, Udi Karpas, Ushnish De, Vahid Noorozi, Venkat Srinivasan, Venmugil Elango, Vibhor Agrawal, Victor Cui, Vijay Korthikanti, Vikas Mehta, Vinay Rao, Virginia Wu, Vitaly Kurin, Vitaly Lavrukhin, Vladimir Anisimov, Vu Pham, Wanli Jiang, Wasi Uddin Ahmad, Wataru Ishihara, Wei Du, Wei Ping, Weiheng Chai, Wenliang Dai, Wesley Helmholz, Will Jennings, Will Zhu, Wojciech Prazuch, Xiaowei Ren, Xiwen Yu, Yan Breek, Yang Chen, Yang Yu, Yangyi Chen, Yaniv Galron, Yashaswi Karnati, Yejin Choi, Yev Meyer, Yi-Fu Wu, Yian Zhang, Ying Lin, Yonatan Geifman, Yonggan Fu, Youngeun Kwon, Yu Yao, Yugi Guvvla, Yuki Huang, Yunsheng Liu, Zach Moshe, Zachary Newell, Zhilin Wang, Zhiyu Li, Zhongbo Zhu, Zhuolin Yang, Zihan Liu, Zijie Yan, Zsolt-Alon Wertheimer</name></author>
+    <summary type="html"><![CDATA[<p>Nemotron 3 Ultra is NVIDIA's 550B-total/55B-active Mixture-of-Experts hybrid Mamba-Attention model pretrained on 20T tokens, extended to 1M context, and post-trained with SFT, RL, and multi-teacher on-policy distillation. It claims up to ~6x higher inference throughput than comparable public LLMs at on-par accuracy using techniques like LatentMoE, MTP, and NVFP4 pretraining.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Mixture-of-Experts"/>
+    <category term="Efficiency"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:e54772bea54d</id>
+    <title>Artificial Intelligence Index Report 2026</title>
+    <link href="http://arxiv.org/abs/2606.15708" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-e54772bea54d" rel="related" type="text/html"/>
+    <published>2026-06-16T03:12:00Z</published>
+    <updated>2026-06-16T03:12:00Z</updated>
+    <author><name>Sha Sajadieh, Loredana Fattorini, Raymond Perrault, Yolanda Gil, Vanessa Parli, Lapo Santarlasci, Juan Pava, Nestor Maslej, Russ Altman, Erik Brynjolfsson, Carla Brodley, Jack Clark, Virginia Dignum, Vipin Kumar, James Landay, Terah Lyons, James Manyika, Juan Carlos Niebles, Yoav Shoham, Elham Tabassi, Russell Wald, Toby Walsh, Dan Weld</name></author>
+    <summary type="html"><![CDATA[<p>The ninth edition of the Stanford AI Index Report tracks AI advances across reasoning, safety, real-world task execution, governance gaps, and new estimates of generative AI's economic value. A major authoritative reference for the state of AI.</p>]]></summary>
+    <category term="AI and Society"/>
+    <category term="AI Policy"/>
+    <category term="AI Trends"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:9a13a48b03cd</id>
+    <title>AI systems out-persuade expert humans</title>
+    <link href="http://arxiv.org/abs/2606.16475" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-9a13a48b03cd" rel="related" type="text/html"/>
+    <published>2026-06-16T03:12:00Z</published>
+    <updated>2026-06-16T03:12:00Z</updated>
+    <author><name>Kobi Hackenburg, Caroline Wagner, Luke Hewitt, Ben M. Tappin, Ed Saunders, Hannah Rose Kirk, Helen Margetts, Christopher Summerfield</name></author>
+    <summary type="html"><![CDATA[<p>Reports four large preregistered experiments (nearly 19,000 conversations) showing AI systems are reliably more persuasive than expert humans, including tournament winners, professional canvassers, and world-championship debaters even when humans prepared extensively. The finding has major implications for AI's role in societal contests of persuasion.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Persuasion"/>
+    <category term="AI and Society"/>
+    <category term="Human-AI Interaction"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:fe70e0a9b240</id>
+    <title>Fantastic Pretraining Optimizers and Where to Find Them II: Hyperball Optimization</title>
+    <link href="http://arxiv.org/abs/2606.16899" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-fe70e0a9b240" rel="related" type="text/html"/>
+    <published>2026-06-16T03:02:00Z</published>
+    <updated>2026-06-16T03:02:00Z</updated>
+    <author><name>Kaiyue Wen, Xingyu Dang, Kaifeng Lyu, Tengyu Ma, Percy Liang</name></author>
+    <summary type="html"><![CDATA[<p>Hyperball is an optimizer wrapper that fixes the Frobenius norms of weight matrices and their updates to constants, restoring the scaling gains of matrix optimizers like Muon over AdamW. It achieves 20 to 30 percent token-equivalent speedups and improves learning-rate transfer on Qwen3-style models up to 1.2B parameters.</p>]]></summary>
+    <category term="Optimization"/>
+    <category term="Language Model Pretraining"/>
+    <category term="Efficiency"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:7639651d7358</id>
+    <title>How Post-Training Shapes Biological Reasoning Models</title>
+    <link href="http://arxiv.org/abs/2606.16517" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-7639651d7358" rel="related" type="text/html"/>
+    <published>2026-06-16T02:57:00Z</published>
+    <updated>2026-06-16T02:57:00Z</updated>
+    <author><name>Lukas Fesser, Hanlin Zhang, Michelle M. Li, Eric Wang, Bryan Perozzi, Shekoofeh Azizi, Sham M. Kakade, Marinka Zitnik</name></author>
+    <summary type="html"><![CDATA[<p>A large empirical study of over 100 biological reasoning models examines how continued pre-training, SFT, and RL each shape in-domain versus out-of-domain generalization across genomics, transcriptomics, and proteins. It identifies when post-training improves performance versus inducing over-specialization.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Post-Training"/>
+    <category term="AI for Science"/>
+    <category term="Generalization"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:ee4a79059732</id>
+    <title>Understanding Diversity Collapse in RLVR via the Lens of Overtraining</title>
+    <link href="http://arxiv.org/abs/2606.15455" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-ee4a79059732" rel="related" type="text/html"/>
+    <published>2026-06-16T02:52:00Z</published>
+    <updated>2026-06-16T02:52:00Z</updated>
+    <author><name>Suqin Yuan, Jinkun Chen, Jiyang Zheng, Muyang Li, Lei Feng, Dadong Wang, Tao Xiang, Tongliang Liu, Bo An</name></author>
+    <summary type="html"><![CDATA[<p>Formalizes diversity collapse in RLVR (Pass@1 improves while Pass@k degrades) through the lens of overtraining, showing that once a problem's reward contribution saturates further updates just concentrate probability mass. Provides theoretical grounding for a known RLVR pathology.</p>]]></summary>
+    <category term="Reinforcement Learning"/>
+    <category term="Reasoning"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:0a0a7e7c0072</id>
+    <title>Constitutional Value Potentials: reading and steering internal priority margins in language models</title>
+    <link href="http://arxiv.org/abs/2606.15420" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-0a0a7e7c0072" rel="related" type="text/html"/>
+    <published>2026-06-16T02:47:00Z</published>
+    <updated>2026-06-16T02:47:00Z</updated>
+    <author><name>Tong Che, Rui Wu</name></author>
+    <summary type="html"><![CDATA[<p>Constitutional Value Potentials learn scalar potentials from hidden states representing internal pressure to preserve each value, with their signed difference forming a priority margin readable from activations. Aims to detect and steer how models arbitrate value conflicts internally.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Alignment"/>
+    <category term="Interpretability"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:64fa8bc31473</id>
+    <title>You Don't Need Strong Assumptions: Visual Representation Learning via Temporal Differences</title>
+    <link href="http://arxiv.org/abs/2606.15956" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-64fa8bc31473" rel="related" type="text/html"/>
+    <published>2026-06-16T02:47:00Z</published>
+    <updated>2026-06-16T02:47:00Z</updated>
+    <author><name>Ninad Daithankar, Alexi Gladstone, Yann LeCun, Heng Ji</name></author>
+    <summary type="html"><![CDATA[<p>Argues that visual representation learning should remove remaining inductive biases like augmentations and masking, proposing a temporal-difference approach that learns from video without strong assumptions. Experiments confirm that the optimal strength of inductive biases diminishes with scale.</p>]]></summary>
+    <category term="Self-Supervised Learning"/>
+    <category term="Representation Learning"/>
+    <category term="Computer Vision"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:76044ab4abf7</id>
+    <title>Taming Curvature: Architecture Warm-Up for Stable Transformer Training</title>
+    <link href="http://arxiv.org/abs/2606.16768" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-76044ab4abf7" rel="related" type="text/html"/>
+    <published>2026-06-16T02:47:00Z</published>
+    <updated>2026-06-16T02:47:00Z</updated>
+    <author><name>Sameera Ramasinghe, Ajanthan Thalaiyasingam, Hadi Mohaghegh Dolatabadi, Chamin Hewa Koneputugodage, Gil Avraham, Violetta Shevchenko, Yan Zuo, Karol Pajak, Alexander Long</name></author>
+    <summary type="html"><![CDATA[<p>This paper introduces a fast online estimator of preconditioned Hessian curvature using warm-started power iteration, then uses it for an architecture warm-up that stabilizes billion-parameter Transformer training. It connects Edge of Stability theory to practical large-scale training.</p>]]></summary>
+    <category term="Optimization"/>
+    <category term="Transformer Training"/>
+    <category term="Training Stability"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:137c75ead0fe</id>
+    <title>The Value Axis: Language Models Encode Whether They're on the Right Track</title>
+    <link href="http://arxiv.org/abs/2606.17056" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-137c75ead0fe" rel="related" type="text/html"/>
+    <published>2026-06-16T02:47:00Z</published>
+    <updated>2026-06-16T02:47:00Z</updated>
+    <author><name>Nick Jiang, Isaac Kauvar, Jack Lindsey</name></author>
+    <summary type="html"><![CDATA[<p>This paper finds that language models internally track the value of their current reasoning trajectory along a learnable value axis, distinguishing high vs low confidence, backtracking, and correct vs corrupted code. Steering along this axis causally controls self-correction and exploration behavior.</p>]]></summary>
+    <category term="Interpretability"/>
+    <category term="Reinforcement Learning"/>
+    <category term="Alignment"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:14e0bc85d306</id>
+    <title>Relational Structural Causal Models</title>
+    <link href="http://arxiv.org/abs/2606.14892" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-14e0bc85d306" rel="related" type="text/html"/>
+    <published>2026-06-16T02:43:00Z</published>
+    <updated>2026-06-16T02:43:00Z</updated>
+    <author><name>Adiba Ejaz, Elias Bareinboim</name></author>
+    <summary type="html"><![CDATA[<p>This work extends Pearl's structural causal models to relational settings where objects and relations vary, deriving identifiability conditions and relational causal graphs for generalizing to unseen object combinations. Co-authored by Elias Bareinboim, it offers rigorous theoretical foundations for combinatorial causal reasoning.</p>]]></summary>
+    <category term="Causal Inference"/>
+    <category term="Reasoning"/>
+    <category term="Machine Learning Theory"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:8b131c1c0f16</id>
+    <title>VibeThinker-3B: Exploring the Frontier of Verifiable Reasoning in Small Language Models</title>
+    <link href="http://arxiv.org/abs/2606.16140" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-8b131c1c0f16" rel="related" type="text/html"/>
+    <published>2026-06-16T02:43:00Z</published>
+    <updated>2026-06-16T02:43:00Z</updated>
+    <author><name>Sen Xu, Shixi Liu, Wei Wang, Jixin Min, Yingwei Dai, Zhibin Yin, Yirong Chen, Xin Zhou, Junlin Zhang</name></author>
+    <summary type="html"><![CDATA[<p>VibeThinker-3B is a compact 3B-parameter dense model that achieves frontier-level verifiable reasoning, scoring 94.3 on AIME26 and 80.2 Pass@1 on LiveCodeBench v6 via a Spectrum-to-Signal post-training pipeline of curriculum SFT, multi-domain RL, and self-distillation. Demonstrates strong small-model reasoning.</p>]]></summary>
+    <category term="Small Language Models"/>
+    <category term="Reasoning"/>
+    <category term="Reinforcement Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:0934eed3c5ad</id>
+    <title>Ling and Ring 2.6 Technical Report: Efficient and Instant Agentic Intelligence at Trillion-Parameter Scale</title>
+    <link href="http://arxiv.org/abs/2606.15079" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-0934eed3c5ad" rel="related" type="text/html"/>
+    <published>2026-06-16T02:43:00Z</published>
+    <updated>2026-06-16T02:43:00Z</updated>
+    <author><name>Ang Li, Ben Liu, Bin Han, Bin Hu, Bin Jing, Binbin Hu, Bing Li, Cai Chen, Caizhi Tang, Changxin Tian, Chao Huang, Chao Zhang, Chen Liang, Chen Qian, Chengfu Tang, Chengyao Wen, Chilin Fu, Chunwei Wu, Cong Zhang, Cunyin Peng, Daixin Wang, Dalong Zhang, Deng Zhao, Dingnan Jin, Dingyuan Zhu, Donghao Zhang, Fan Yuan, Fangzheng Zhao, Fanzhuang Meng, Feifan Wu, Feng Xu, Fengbin Fang, Gangshan Wang, Guodong Yang, Hailin Zhao, Haitao Wang, Haitao Zhang, Hanxiao Zhang, Hanzi Wang, Hao Dai, Hao Liu, Hao Qian, Hao Wu, Haoxiong Liu, Haoyu Xu, Heng Zhang, Hong Liu, Hongliang Zhang, Hongrui Liu, Hongxun Li, Hongzhi Ruan, Huaidong Xiong, Huihuang Zheng, Huikang Tang, Jia Guo, Jia Li, Jia Liu, Jiameng Wang, Jiaming Liu, Jiannan Shi, Jianping Wei, Jiaolong Yang, Jiapeng Wang, Jie Gao, Jie Wang, Jiewei Wu, Jin Yang, Jinjin Li, Jinjing Huang, Jinquan Sun, Jinyao Chen, Juanhui Tu, Jun Liu, Jun Mei, Jun Xu, Jun Zhou, Junjie Ou, Junnan Sipan, Junpeng Fang, Kaihong Zhang, Kaiqin Hu, Ke Shi, Kuan Xu, Kun Tang, Kunlong Chen, Lanyin Mei, Lei Chen, Lei Liang, Lei Xu, Li Tang, Liang Jiang, Liangcheng Fu, Lihui Zhang, Linfeng Shi, Lintao Ma, Liyuan Liu, Longfei Li, Longfei Zheng, Lu Liu, Lu Yu, Man Li, Meiqi Zhu, Meng Li, Mengjie Gao, Mengshu Sun, Mingming Yin, Mingyang Zhang, Mingyuan Fan, Nuo Xu, Pan Tang, Peijie Jiang, Peilong Zhao, Peng Lin, Pingping Liu, Qi Zuo, Qian Zhao, Qiang Cheng, Qianggang Cao, Qiaoben Bao, Qing Cui, Qingyuan Yang, Qitao Shi, Qiyin Huang, Qizheng Zhou, Quan Wan, Runyuan Zhao, Shaomian Zheng, Shaowei Wei, Shengnan Zhang, Shuaicheng Li, Shujie Li, Shuo Zhang, Sikang Bian, Tianchu Yao, Tiange Xu, Tianshu Wang, Ting Guo, Tinghao Wang, Tingwei Huang, Tong Zhao, Tongkai Yang, Wang Hong, Wanli Gu, Wei Lu, Weichang Wu, Weiguang Han, Weiquan Li, Wenbo Shen, Wenjing Fang, Wenzhi Tang, Xiang Shu, Xiao Shi, Xiaodong Yan, Xiaolu Zhang, Xiaopei Wan, Xiaqing Sun, Xin Zhao, Xingyu Lu, Xinxing Yang, Xinyao Tang, Xinyu Kong, Xinyu Liu, Xiong Xu, Xuan Sun, Xudong Han, Xudong Wang, Xujie Shen, Yalin Zhang, Yangyang Hou, Yankun Ren, Yao Zhao, Ye Chen, Yeyang Chen, Yibo Cao, Yifan Zuo, Yijie Chen, Ying Li, Yingjie Song, Yingxue Li, Yiqi Wang, Yixuan Sun, Yizhu Xiao, Yongfei Xu, Yu Liu, Yuchen Fang, Yue Gao, Yue Yu, Yue Zhang, Yuqi Zhang, Yuxiao He, Yuxiao Lu, Yuxin Tian, Yuxuan Li, Yuzhuo Fu, Zhankai Xu, Zhaoxin Huan, Zhenduo Zhang, Zhengke Gui, Zhengyu Huang, Zhenjun Ma, Zhenxuan Pan, Zheping Qu, Zhibo Zhu, Zhidong Fan, Zhigang Huangfu, Zhihao Wang, Zhiqiang Zhang, Zhizhen Liu, Zhuyan Zhou, Zibin Lin, Zihang Zeng, Zihao Wang, Zilong Wang, Ziqi Liu, Zitao Xuan, Zixuan Cheng, Zujie Wen, Zuoli Tang</name></author>
+    <summary type="html"><![CDATA[<p>This technical report presents Ling-2.6 and Ring-2.6, a family of trillion-parameter-scale models for agentic intelligence, with Ling optimized for instant response and Ring for deeper reasoning. They are built by upgrading the Ling-2.0 base via architectural migration pretraining and large-scale post-training under unified system co-design.</p>]]></summary>
+    <category term="Language Models"/>
+    <category term="Agents"/>
+    <category term="Efficiency"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:d963205d0dfb</id>
+    <title>Defending against Adaptive Prompt Injection Attacks via Reasoning-enabled Task Alignment</title>
+    <link href="http://arxiv.org/abs/2606.15441" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-d963205d0dfb" rel="related" type="text/html"/>
+    <published>2026-06-16T02:43:00Z</published>
+    <updated>2026-06-16T02:43:00Z</updated>
+    <author><name>Lipeng He, Yihan Wang, Jiawen Zhang, N. Asokan</name></author>
+    <summary type="html"><![CDATA[<p>Defends against adaptive indirect prompt-injection attacks by training models to assess whether each embedded instruction's intent aligns with the user task, rather than recognizing specific attack patterns. Traces why prior defenses collapse under adaptive attackers.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Prompt Injection"/>
+    <category term="AI Agents"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:569fc8d3e13a</id>
+    <title>Rapid Poison: Practical Poisoning Attacks Against the Rapid Response Framework</title>
+    <link href="http://arxiv.org/abs/2606.16242" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-569fc8d3e13a" rel="related" type="text/html"/>
+    <published>2026-06-16T02:43:00Z</published>
+    <updated>2026-06-16T02:43:00Z</updated>
+    <author><name>David Huang, Jaewon Chang, Avidan Shah, Prateek Mittal, Chawin Sitawarin</name></author>
+    <summary type="html"><![CDATA[<p>Demonstrates practical poisoning attacks against the Rapid Response jailbreak-defense framework deployed in Anthropic's ASL-3 safeguards, using prompt injection to infiltrate the classifier's training set. Enables targeted false-positive poisoning and concept-based backdoor attacks.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Adversarial Attacks"/>
+    <category term="Data Poisoning"/>
+    <category term="Jailbreak Defense"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:39e53591c0d1</id>
+    <title>MIRAGE: Auditing Anti-Muslim Bias in Frontier LLMs Across Reasoning, Agentic, and Time-Coupled Conditions</title>
+    <link href="http://arxiv.org/abs/2606.16562" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-39e53591c0d1" rel="related" type="text/html"/>
+    <published>2026-06-16T02:43:00Z</published>
+    <updated>2026-06-16T02:43:00Z</updated>
+    <author><name>Noor Islam S. Mohammad, Tamim Sheikh</name></author>
+    <summary type="html"><![CDATA[<p>MIRAGE is a 1,200-prompt benchmark auditing anti-Muslim bias in frontier LLMs across direct completion, chain-of-thought, and simulated agentic decision contexts. It finds that CoT reasoning amplifies Muslim-violence associations by 12 to 34 percent relative to direct completion.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Bias and Fairness"/>
+    <category term="LLM Evaluation"/>
+    <category term="Agentic AI"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:04c864fd769b</id>
+    <title>Exact Posterior Score Estimation for Solving Linear Inverse Problems</title>
+    <link href="http://arxiv.org/abs/2606.17048" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-04c864fd769b" rel="related" type="text/html"/>
+    <published>2026-06-16T02:43:00Z</published>
+    <updated>2026-06-16T02:43:00Z</updated>
+    <author><name>Abbas Mammadov, Ozgur Kara, Kaan Oktay, Iskander Azangulov, Adil Kaan Akan, Hyungjin Chung, James Matthew Rehg, Yee Whye Teh</name></author>
+    <summary type="html"><![CDATA[<p>This paper derives the exact posterior score in closed form for linear Gaussian inverse problems under general Gaussian interpolants, showing posterior sampling reduces to denoising at an operator-dependent shifted pivot. It improves on approximate measurement-matching corrections in diffusion-based inverse solvers.</p>]]></summary>
+    <category term="Diffusion Models"/>
+    <category term="Inverse Problems"/>
+    <category term="Generative Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:4b4133e55dad</id>
+    <title>MVEB: Massive Video Embedding Benchmark</title>
+    <link href="http://arxiv.org/abs/2606.14958" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-4b4133e55dad" rel="related" type="text/html"/>
+    <published>2026-06-16T02:43:00Z</published>
+    <updated>2026-06-16T02:43:00Z</updated>
+    <author><name>Adnan El Assadi, Roman Solomatin, Isaac Chung, Chenghao Xiao, Deep Shah, Manan Dey, Shriya Sudhakar, Zacharie Bugaud, Wissam Siblini, Ayush Sunil Munot, Yashwanth Devavarapu, Rakshitha Ireddi, Michelle Yang, M\'arton Kardos, Niklas Muennighoff, Kenneth Enevoldsen</name></author>
+    <summary type="html"><![CDATA[<p>MVEB is a 23-task massive video embedding benchmark spanning classification, retrieval, clustering, and video QA, evaluating 33 models. It finds no single model dominates and that audio's contribution depends on dataset annotation provenance.</p>]]></summary>
+    <category term="Multimodal Learning"/>
+    <category term="Video Understanding"/>
+    <category term="Benchmarks"/>
+    <category term="Representation Learning"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:abb28db86e36</id>
+    <title>How Much Can We Trust LLM Search Agents? Measuring Endorsement Vulnerability to Web Content Manipulation</title>
+    <link href="http://arxiv.org/abs/2606.16821" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-abb28db86e36" rel="related" type="text/html"/>
+    <published>2026-06-16T02:43:00Z</published>
+    <updated>2026-06-16T02:43:00Z</updated>
+    <author><name>Yimeng Chen, Zhe Ren, Firas Laakom, Yu Li, Dandan Guo, J\"urgen Schmidhuber</name></author>
+    <summary type="html"><![CDATA[<p>SearchGEO is a controlled evaluation framework measuring how LLM-based web search agents can be manipulated into endorsing attacker-published content. It benchmarks 13 LLM backends, finding attack success rates ranging from 0% (Claude-Sonnet-4.6) to 31.4% (Gemini-3-Flash).</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Adversarial Attacks"/>
+    <category term="LLM Agents"/>
+    <category term="Retrieval-Augmented Generation"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:63a8ec0ce1ff</id>
+    <title>Not All Skills Help: Measuring and Repairing Agent Knowledge</title>
+    <link href="http://arxiv.org/abs/2606.15390" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-63a8ec0ce1ff" rel="related" type="text/html"/>
+    <published>2026-06-16T02:40:00Z</published>
+    <updated>2026-06-16T02:40:00Z</updated>
+    <author><name>Yixuan Wang, Yiyang Zhou, Yiming Liang, Congyu Zhang, Fuxiao Liu, Jiawei Zhou, Huaxiu Yao</name></author>
+    <summary type="html"><![CDATA[<p>Argues that LLM agents accumulating natural-language skills suffer pervasive causal heterogeneity—skills help on some tasks but hurt on others, canceling in aggregate. Uses randomized masking to measure per-skill causal contributions and repair skill libraries.</p>]]></summary>
+    <category term="AI Agents"/>
+    <category term="Continual Learning"/>
+    <category term="Causal Analysis"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:0fa58c6b7e26</id>
+    <title>Is Code Better Than Language for Algorithmic Reasoning</title>
+    <link href="http://arxiv.org/abs/2606.15589" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-0fa58c6b7e26" rel="related" type="text/html"/>
+    <published>2026-06-16T02:40:00Z</published>
+    <updated>2026-06-16T02:40:00Z</updated>
+    <author><name>Terry Tong, Yu Feng, Surbhi Goel, Dan Roth</name></author>
+    <summary type="html"><![CDATA[<p>Separates representation from execution mechanism in tool-augmented reasoning by having the model express reasoning as code then either execute it deterministically or simulate it in-context. Finds deterministic code execution beats natural-language reasoning by 31.6pp while the representation change alone barely matters.</p>]]></summary>
+    <category term="Reasoning"/>
+    <category term="Code Execution"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:35b446ec6224</id>
+    <title>Learning Policy from a Single Trajectory in Average-Reward Markov Decision Process</title>
+    <link href="http://arxiv.org/abs/2606.16729" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-35b446ec6224" rel="related" type="text/html"/>
+    <published>2026-06-16T02:40:00Z</published>
+    <updated>2026-06-16T02:40:00Z</updated>
+    <author><name>Jongmin Lee, Ernest K. Ryu, Vaneet Aggarwal</name></author>
+    <summary type="html"><![CDATA[<p>This work establishes the first finite-sample complexity guarantees from a single trajectory for weakly communicating average-reward MDPs, without ergodicity or generative-model assumptions. It develops model-free value-based and policy-based methods with explicit sample bounds.</p>]]></summary>
+    <category term="Reinforcement Learning"/>
+    <category term="Learning Theory"/>
+    <category term="Markov Decision Processes"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-06-16:research:43e850d6ab7b</id>
+    <title>Rethinking the Role of Efficient Attention in Hybrid Architectures</title>
+    <link href="http://arxiv.org/abs/2606.15378" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-06-16&amp;category=research#item-43e850d6ab7b" rel="related" type="text/html"/>
+    <published>2026-06-16T02:40:00Z</published>
+    <updated>2026-06-16T02:40:00Z</updated>
+    <author><name>Ziqing Qiao, Yinuo Xu, Chaojun Xiao, Zhou Su, Zihan Zhou, Yingfa Chen, Xiaoyue Xu, Xu Han, Zhiyuan Liu</name></author>
+    <summary type="html"><![CDATA[<p>This paper systematically analyzes how efficient attention modules (sliding-window attention, recurrent mixers) shape hybrid Transformer architectures across scaling, mechanism, and design. It finds efficient-attention choice mainly affects how fast long-context capability emerges, with hybrids converging to comparable performance given enough training.</p>]]></summary>
+    <category term="Transformer Architectures"/>
+    <category term="Efficient Attention"/>
+    <category term="Long-Context Modeling"/>
+    <category term="Language Models"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-06-15:category-summary:research</id>
     <title>Research Summary: June 15, 2026</title>
@@ -1070,46 +1436,6 @@
     <category term="Agent Security"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-06-10:research:3aa63764fd1a</id>
-    <title>Duality for Optimal Multi-Item, Multi-Bidder Auction Design: Revenue Certificates through Deep Learning</title>
-    <link href="http://arxiv.org/abs/2606.10112" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-10&amp;category=research#item-3aa63764fd1a" rel="related" type="text/html"/>
-    <published>2026-06-10T02:40:00Z</published>
-    <updated>2026-06-10T02:40:00Z</updated>
-    <author><name>Yanchen Jiang, David C. Parkes, Tonghan Wang</name></author>
-    <summary type="html"><![CDATA[<p>Introduces the first computational framework that directly tackles the dual problem for revenue-optimal multi-item multi-bidder auctions, parametrizing Lagrange multipliers with neural networks to generate certified revenue upper bounds under dominant-strategy incentive compatibility. It addresses a fundamental open problem in mechanism design.</p>]]></summary>
-    <category term="Mechanism Design"/>
-    <category term="Auction Theory"/>
-    <category term="Deep Learning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-10:research:b4494febf6f9</id>
-    <title>Test-Time Gradient Guidance of Flow Policies in Reinforcement Learning</title>
-    <link href="http://arxiv.org/abs/2606.11087" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-10&amp;category=research#item-b4494febf6f9" rel="related" type="text/html"/>
-    <published>2026-06-10T02:40:00Z</published>
-    <updated>2026-06-10T02:40:00Z</updated>
-    <author><name>Zhiyuan Zhou, Andy Peng, Charles Xu, Qiyang Li, Tobias Springenberg, Kevin Frans, Sergey Levine</name></author>
-    <summary type="html"><![CDATA[<p>Studies whether simple test-time gradient guidance of flow/diffusion policies can improve RL performance while leaving stable supervised training intact, avoiding backpropagation through denoising. From a strong Berkeley robotics-RL group including Sergey Levine.</p>]]></summary>
-    <category term="Reinforcement Learning"/>
-    <category term="Robotics"/>
-    <category term="Flow Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-10:research:345f6097e524</id>
-    <title>It\^o maps for any-step SDEs</title>
-    <link href="http://arxiv.org/abs/2606.11156" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-10&amp;category=research#item-345f6097e524" rel="related" type="text/html"/>
-    <published>2026-06-10T02:40:00Z</published>
-    <updated>2026-06-10T02:40:00Z</updated>
-    <author><name>Zhengkai Pan, Peter Potaptchik, Wenxi Yao, Michael S. Albergo, Jakiw Pidstrigach</name></author>
-    <summary type="html"><![CDATA[<p>This paper introduces the Ito map, an any-step stochastic flow map that predicts future states from an intermediate state and Brownian path in a single pass, enabling exact distillation for stochastic dynamics. It provides differentiable access to posterior samples for inference-time control and steering.</p>]]></summary>
-    <category term="Generative Models"/>
-    <category term="Diffusion Models"/>
-    <category term="Stochastic Processes"/>
-    <category term="Distillation"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-06-09:category-summary:research</id>
     <title>Research Summary: June 09, 2026</title>
     <link href="https://news.aatf.ai/?date=2026-06-09&amp;category=research" rel="alternate" type="text/html"/>
@@ -1397,342 +1723,5 @@
     <category term="Language Models"/>
     <category term="AI Engineering"/>
     <category term="Code Generation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-09:research:1a7db306e5a3</id>
-    <title>VATS: Exploiting Implicit Authority in Error-Path Injection via Systematic Mutation</title>
-    <link href="http://arxiv.org/abs/2606.07992" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-09&amp;category=research#item-1a7db306e5a3" rel="related" type="text/html"/>
-    <published>2026-06-09T02:40:00Z</published>
-    <updated>2026-06-09T02:40:00Z</updated>
-    <author><name>Harshil Patel, Kunal Pai</name></author>
-    <summary type="html"><![CDATA[<p>VATS is a mutation-driven framework exploiting the implicit authority of tool error messages in the Model Context Protocol to triple indirect prompt injection success, reaching up to 100% compliance on frontier models. It exposes the error-handling loop as a critical unexamined attack surface for agents.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Adversarial Attacks"/>
-    <category term="Agents"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-09:research:b88d522f2b02</id>
-    <title>Ablation-Reversible Heads Don't Transfer: A Stress Test for Mechanistic Role Claims in Transformers</title>
-    <link href="http://arxiv.org/abs/2606.08292" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-09&amp;category=research#item-b88d522f2b02" rel="related" type="text/html"/>
-    <published>2026-06-09T02:40:00Z</published>
-    <updated>2026-06-09T02:40:00Z</updated>
-    <author><name>Philip Quirke</name></author>
-    <summary type="html"><![CDATA[<p>This stress-test paper shows that attention heads passing standard mechanistic-role checks (necessity, linear encoding, ablation-recovery) routinely fail to transfer their computation when patched into different prompts under matched controls. It introduces a KID lens and a pipeline questioning common mechanistic role claims.</p>]]></summary>
-    <category term="Interpretability"/>
-    <category term="Language Models"/>
-    <category term="Mechanistic Interpretability"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-09:research:4d57a09779fa</id>
-    <title>ResearchClawBench: A Benchmark for End-to-End Autonomous Scientific Research</title>
-    <link href="http://arxiv.org/abs/2606.07591" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-09&amp;category=research#item-4d57a09779fa" rel="related" type="text/html"/>
-    <published>2026-06-09T02:40:00Z</published>
-    <updated>2026-06-09T02:40:00Z</updated>
-    <author><name>Wanghan Xu, Shuo Li, Tianlin Ye, Qinglong Cao, Yixin Chen, Hengjian Gao, Yiheng Wang, Qi Li, Kun Li, Sheng Xu, Shengdu Chai, Fangchen Yu, Xiangyu Zhao, Zhangrui Zhao, Weijie Ma, Zijie Guo, Haoyu Zhou, Haoxiang Yin, Lixue Cheng, Chaofan Hu, Haoxuan Li, Lu Mi, Xuxuan Xie, Yifan Zhou, Ruizhe Chen, Zhiwang Zhou, Xingjian Guo, Yuhao Zhou, Xuming He, Shengyuan Xu, Xinyu Gu, Jiamin Wu, Mianxin Liu, Chunfeng Song, Fenghua Ling, Dongzhan Zhou, Shixiang Tang, Yuqiang Li, Mao Su, Peng Ye, Siqi Sun, Bin Wang, Xue Yang, Zhenfei Yin, Tianfan Fu, Guangtao Zhai, Wanli Ouyang, Bo Zhang, Lei Bai, Wenlong Zhang</name></author>
-    <summary type="html"><![CDATA[<p>Introduces ResearchClawBench, a benchmark for end-to-end autonomous scientific research across 40 tasks from 10 domains, each grounded in a real published paper with hidden targets and expert-curated multimodal rubrics. Evaluates seven auto-research agents and seventeen LLMs under a unified protocol.</p>]]></summary>
-    <category term="Autonomous Agents"/>
-    <category term="Benchmarks"/>
-    <category term="Scientific Discovery"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-09:research:ba2e310ed3cc</id>
-    <title>Pre-Intervention Prediction of Sparse Autoencoder Steering Side Effects</title>
-    <link href="http://arxiv.org/abs/2606.08365" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-09&amp;category=research#item-ba2e310ed3cc" rel="related" type="text/html"/>
-    <published>2026-06-09T02:40:00Z</published>
-    <updated>2026-06-09T02:40:00Z</updated>
-    <author><name>Evan Duan</name></author>
-    <summary type="html"><![CDATA[<p>This paper introduces a pre-intervention screening framework that forecasts sparse autoencoder steering side effects from feature statistics computed before steering. It operationalizes effect stability and collateral spread across multiple models and SAE dictionary types to predict steering modularity.</p>]]></summary>
-    <category term="Interpretability"/>
-    <category term="Sparse Autoencoders"/>
-    <category term="Model Steering"/>
-    <category term="AI Safety"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-09:research:b0e93926632a</id>
-    <title>PACT: Self-Evolving Physical Safety Alignment for Diffusion Policies in Embodied Manipulation</title>
-    <link href="http://arxiv.org/abs/2606.08414" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-09&amp;category=research#item-b0e93926632a" rel="related" type="text/html"/>
-    <published>2026-06-09T02:40:00Z</published>
-    <updated>2026-06-09T02:40:00Z</updated>
-    <author><name>Lingxuan Wu, Zijian Zhu, Lizhong Wang, Chengyang Ying, Huayu Chen, Xiao Yang, Fangming Liu, Jun Zhu</name></author>
-    <summary type="html"><![CDATA[<p>PACT is a self-evolving post-training framework that projects pretrained diffusion robot policies onto constraint-feasible regions without demonstration data or task rewards, distilling constraint gradients via a reverse-KL objective with dense supervision. It addresses physical safety constraints often violated by diffusion policies at deployment.</p>]]></summary>
-    <category term="Robotics"/>
-    <category term="AI Safety"/>
-    <category term="Diffusion Models"/>
-    <category term="Embodied AI"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-09:research:734575e10712</id>
-    <title>A retrieval conditioned rebinding circuit for dynamic entity tracking in large language models</title>
-    <link href="http://arxiv.org/abs/2606.08644" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-09&amp;category=research#item-734575e10712" rel="related" type="text/html"/>
-    <published>2026-06-09T02:40:00Z</published>
-    <updated>2026-06-09T02:40:00Z</updated>
-    <author><name>Soyoung Oh, Vera Demberg</name></author>
-    <summary type="html"><![CDATA[<p>This interpretability study identifies a retrieval-conditioned rebinding mechanism in LLMs, a compact attention head circuit that encodes swap-relevant binding information and reinstates it at readout for dynamic entity tracking. It uses causal interventions across Gemma and Llama, finding the representational signature differs across model families.</p>]]></summary>
-    <category term="Interpretability"/>
-    <category term="Mechanistic Interpretability"/>
-    <category term="Language Models"/>
-    <category term="Entity Tracking"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-09:research:06ba7a4e7ee5</id>
-    <title>Hardening Agent Benchmarks with Adversarial Hacker-Fixer Loops</title>
-    <link href="http://arxiv.org/abs/2606.08960" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-09&amp;category=research#item-06ba7a4e7ee5" rel="related" type="text/html"/>
-    <published>2026-06-09T02:40:00Z</published>
-    <updated>2026-06-09T02:40:00Z</updated>
-    <author><name>Ziqian Zhong, Ivgeni Segal, Ivan Bercovich, Shashwat Saxena, Kexun Zhang, Aditi Raghunathan</name></author>
-    <summary type="html"><![CDATA[<p>Audits 1,968 agent-benchmark tasks finding 16% hackable by frontier models, then introduces a hacker-fixer loop that uses three cooperating LLM agents to build exploit-resistant verifiers without per-task manual patching. Addresses reward hacking that corrupts leaderboards and RL training signal.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Reward Hacking"/>
-    <category term="Benchmarking"/>
-    <category term="LLM Agents"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-09:research:89fb5a11b7b6</id>
-    <title>End-to-End Context Compression at Scale</title>
-    <link href="http://arxiv.org/abs/2606.09659" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-09&amp;category=research#item-89fb5a11b7b6" rel="related" type="text/html"/>
-    <published>2026-06-09T02:40:00Z</published>
-    <updated>2026-06-09T02:40:00Z</updated>
-    <author><name>Ang Li, Sean McLeish, Haozhe Chen, Nimit Kalra, Zaiqian Chen, Artem Gazizov, Venkata Anoop Suhas Kumar Morisetty, Bhavya Kailkhura, Harshitha Menon, Zhuang Liu, Brian R. Bartoldson, Tom Goldstein, Sanae Lotfi, Micah Goldblum, Pavel Izmailov</name></author>
-    <summary type="html"><![CDATA[<p>Presents an encoder-decoder context compression method that maps long token sequences to shorter latent embeddings, aiming to beat KV-cache compression on the accuracy-efficiency frontier for long-context inference. It addresses memory bottlenecks while staying compatible with production inference engines.</p>]]></summary>
-    <category term="Language Models"/>
-    <category term="Efficiency"/>
-    <category term="Long Context"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-09:research:171f5010ab52</id>
-    <title>iOSWorld: A Benchmark for Personally Intelligent Phone Agents</title>
-    <link href="http://arxiv.org/abs/2606.09764" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-09&amp;category=research#item-171f5010ab52" rel="related" type="text/html"/>
-    <published>2026-06-09T02:40:00Z</published>
-    <updated>2026-06-09T02:40:00Z</updated>
-    <author><name>Lawrence Keunho Jang, Mareks Woodside, Geronimo Carom, Andrew Keunwoo Jang, Jing Yu Koh, Ruslan Salakhutdinov</name></author>
-    <summary type="html"><![CDATA[<p>iOSWorld is the first interactive native iOS simulator benchmark built around a persistent user identity across 26 custom apps with connected personal data, testing personally intelligent phone agents on 133 tasks including memory and personalization. Addresses a gap in mobile agent evaluation. Matters for personalized agent research.</p>]]></summary>
-    <category term="Agents"/>
-    <category term="Benchmarks"/>
-    <category term="Personalization"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:category-summary:research</id>
-    <title>Research Summary: June 08, 2026</title>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research" rel="canonical" type="text/html"/>
-    <link href="http://arxiv.org/abs/2606.06667" rel="alternate" type="text/html; charset=utf-8" title="Representative source"/>
-    <link href="http://arxiv.org/abs/2606.06667" rel="via" type="text/html" title="Representative source"/>
-    <published>2026-06-08T06:00:00Z</published>
-    <updated>2026-06-08T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research is dominated by <strong>safety, alignment, and agent monitoring</strong>, alongside provocative efficiency and theory contributions.</p>
-<p><strong>Safety &amp; Alignment</strong> leads with strong mechanistic and empirical work:</p>
-<ul>
-<li>The <strong>Piggyback Hypothesis</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-b53bf948a761" class="internal-link" rel="noopener noreferrer">gives a concrete causal mechanism</a> for emergent misalignment—chat-template tokens carry finetuned misbehavior onto unrelated tokens—plus an effective mitigation.</li>
-<li><strong>Think Fast</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-e4b697a36cd8" class="internal-link" rel="noopener noreferrer">measures no-CoT task-completion time horizons</a> across <strong>30,000+ questions</strong> in <strong>43 benchmarks</strong>, directly probing reasoning monitorability.</li>
-<li><strong>CapCode</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-72ce62de7588" class="internal-link" rel="noopener noreferrer">detects and prevents reward hacking</a> in coding agents via randomized tests with a deliberately capped non-cheating score.</li>
-<li>The <strong>Geography of Algorithmic Judgment</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-da444417a4b5" class="internal-link" rel="noopener noreferrer">audits 7 LLMs for racial steering</a> in housing search across 4 US cities using paired testing.</li>
-</ul>
-<p><strong>Efficiency &amp; Architecture</strong> features bold rethinks with industry stakes:</p>
-<ul>
-<li><strong>FP8 is All You Need</strong> (Matsuoka) <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-5e9f1130c57f" class="internal-link" rel="noopener noreferrer">argues hardware FP64 is unnecessary</a> for HPC, leveraging FP8 tensor throughput plus the <strong>Ozaki Scheme II</strong>.</li>
-<li><strong>Sparsely gated tiny linear experts</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-39879c2f329c" class="internal-link" rel="noopener noreferrer">pushes MoE sparsity to single-neuron experts</a> with the nonlinearity removed, yielding isoflop gains and interpretability benefits.</li>
-</ul>
-<p><strong>Theory, Benchmarks &amp; Meta-Science</strong> round out the list:</p>
-<ul>
-<li><strong>Flatland</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-1e1395108719" class="internal-link" rel="noopener noreferrer">unifies the definition of large step sizes</a> for gradient descent under only local Lipschitz/Hölder continuity.</li>
-<li><strong>MMBU</strong> is the <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-27e074eb0867" class="internal-link" rel="noopener noreferrer">largest biomedical vision-language benchmark</a>, spanning <strong>35 submodalities</strong> with grounded/ungrounded tasks.</li>
-<li><strong>"Don't Just Fix it in Post"</strong> (Biderman, Saphra, Barez, Mireshghallah) <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-d14361debc4b" class="internal-link" rel="noopener noreferrer">argues a science of AI must study training dynamics</a>, not post-hoc patches.</li>
-<li><strong>How Language Models Fail</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-9aabd92c9d93" class="internal-link" rel="noopener noreferrer">characterizes reasoning failures via token-level uncertainty</a>, distinguishing committed (early lock-in) from persistent failures.</li>
-</ul>]]></summary>
-    <content type="html"><![CDATA[<p>Today's research is dominated by <strong>safety, alignment, and agent monitoring</strong>, alongside provocative efficiency and theory contributions.</p>
-<p><strong>Safety &amp; Alignment</strong> leads with strong mechanistic and empirical work:</p>
-<ul>
-<li>The <strong>Piggyback Hypothesis</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-b53bf948a761" class="internal-link" rel="noopener noreferrer">gives a concrete causal mechanism</a> for emergent misalignment—chat-template tokens carry finetuned misbehavior onto unrelated tokens—plus an effective mitigation.</li>
-<li><strong>Think Fast</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-e4b697a36cd8" class="internal-link" rel="noopener noreferrer">measures no-CoT task-completion time horizons</a> across <strong>30,000+ questions</strong> in <strong>43 benchmarks</strong>, directly probing reasoning monitorability.</li>
-<li><strong>CapCode</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-72ce62de7588" class="internal-link" rel="noopener noreferrer">detects and prevents reward hacking</a> in coding agents via randomized tests with a deliberately capped non-cheating score.</li>
-<li>The <strong>Geography of Algorithmic Judgment</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-da444417a4b5" class="internal-link" rel="noopener noreferrer">audits 7 LLMs for racial steering</a> in housing search across 4 US cities using paired testing.</li>
-</ul>
-<p><strong>Efficiency &amp; Architecture</strong> features bold rethinks with industry stakes:</p>
-<ul>
-<li><strong>FP8 is All You Need</strong> (Matsuoka) <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-5e9f1130c57f" class="internal-link" rel="noopener noreferrer">argues hardware FP64 is unnecessary</a> for HPC, leveraging FP8 tensor throughput plus the <strong>Ozaki Scheme II</strong>.</li>
-<li><strong>Sparsely gated tiny linear experts</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-39879c2f329c" class="internal-link" rel="noopener noreferrer">pushes MoE sparsity to single-neuron experts</a> with the nonlinearity removed, yielding isoflop gains and interpretability benefits.</li>
-</ul>
-<p><strong>Theory, Benchmarks &amp; Meta-Science</strong> round out the list:</p>
-<ul>
-<li><strong>Flatland</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-1e1395108719" class="internal-link" rel="noopener noreferrer">unifies the definition of large step sizes</a> for gradient descent under only local Lipschitz/Hölder continuity.</li>
-<li><strong>MMBU</strong> is the <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-27e074eb0867" class="internal-link" rel="noopener noreferrer">largest biomedical vision-language benchmark</a>, spanning <strong>35 submodalities</strong> with grounded/ungrounded tasks.</li>
-<li><strong>"Don't Just Fix it in Post"</strong> (Biderman, Saphra, Barez, Mireshghallah) <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-d14361debc4b" class="internal-link" rel="noopener noreferrer">argues a science of AI must study training dynamics</a>, not post-hoc patches.</li>
-<li><strong>How Language Models Fail</strong> <a href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-9aabd92c9d93" class="internal-link" rel="noopener noreferrer">characterizes reasoning failures via token-level uncertainty</a>, distinguishing committed (early lock-in) from persistent failures.</li>
-</ul>]]></content>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:b53bf948a761</id>
-    <title>The Piggyback Hypothesis of Generalization: Explaining and Mitigating Emergent Misalignment</title>
-    <link href="http://arxiv.org/abs/2606.06667" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-b53bf948a761" rel="related" type="text/html"/>
-    <published>2026-06-08T03:02:00Z</published>
-    <updated>2026-06-08T03:02:00Z</updated>
-    <author><name>Jiachen Zhao, Zhengxuan Wu, Aryaman Arora, Yiyou Sun, David Bau, Weiyan Shi</name></author>
-    <summary type="html"><![CDATA[<p>This paper proposes the Piggyback Hypothesis to explain emergent misalignment, showing that chat-template tokens carry finetuned misbehavior onto unrelated queries. The authors validate it via prefix perturbations and introduce Token-Regularized Finetuning (TReFT) to mitigate misalignment.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Alignment"/>
-    <category term="Interpretability"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:e4b697a36cd8</id>
-    <title>Think Fast: Estimating No-CoT Task-Completion Time Horizons of Frontier AI Models</title>
-    <link href="http://arxiv.org/abs/2606.07157" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-e4b697a36cd8" rel="related" type="text/html"/>
-    <published>2026-06-08T02:57:00Z</published>
-    <updated>2026-06-08T02:57:00Z</updated>
-    <author><name>Dewi Gould, Francis Rhys Ward, Anders Cairns Woodruff, Rauno Arike, Josh Hills, Alex Serrano, Ida Caspary, Jason Ross Brown, Jo J. Jiao, Patrick Leask, Twm Stone, Ram Potham, Ionut Gabriel Stan, Harry Mayne, Simeon Hellsten, Shubhorup Biswas, Ariana Azarbal, William L. Anderson, Elle Najt, Ryan Greenblatt, Julian Stastny</name></author>
-    <summary type="html"><![CDATA[<p>This study measures how well frontier models reason without chain-of-thought across 30,000+ questions in 43 benchmarks, estimating human time-horizon equivalents for tasks solved without explicit thinking tokens. It matters because CoT-based oversight breaks down if models can reason complexly internally. The strong author roster and safety-relevant framing make this notable.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Chain-of-Thought"/>
-    <category term="Evaluation"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:da444417a4b5</id>
-    <title>The Geography of Algorithmic Judgment: LLM Intermediaries, Place Identity, and Racial Steering in Housing Search</title>
-    <link href="http://arxiv.org/abs/2606.06694" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-da444417a4b5" rel="related" type="text/html"/>
-    <published>2026-06-08T02:47:00Z</published>
-    <updated>2026-06-08T02:47:00Z</updated>
-    <author><name>Hana Samad, Trung Lam, Christoph M\"ugge-Durum and Michael Akinwumi</name></author>
-    <summary type="html"><![CDATA[<p>This behavioral audit of seven LLMs across four US cities tests racial steering in housing recommendations under progressively detailed prompting that mirrors fair-housing paired-testing. It finds steering is an emergent property of model interpretation interacting with user identity and preferences rather than a static property.</p>]]></summary>
-    <category term="AI Ethics"/>
-    <category term="Fairness"/>
-    <category term="Language Models"/>
-    <category term="Bias Auditing"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:1e1395108719</id>
-    <title>Flatland: The Adventures of Gradient Descent with Large Step Sizes</title>
-    <link href="http://arxiv.org/abs/2606.06722" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-1e1395108719" rel="related" type="text/html"/>
-    <published>2026-06-08T02:47:00Z</published>
-    <updated>2026-06-08T02:47:00Z</updated>
-    <author><name>Leonardo Galli, Curtis Fox, Wiebke Bartolomaeus, Mark Schmidt, Holger Rauhut</name></author>
-    <summary type="html"><![CDATA[<p>This theoretical paper provides a unifying definition of large step sizes for gradient descent requiring only local Lipschitz or Holder gradient continuity, addressing the longstanding question of maximum convergent step size for non-smooth objectives. It designs adaptive methods that provably operate at the edge of stability from training start.</p>]]></summary>
-    <category term="Optimization"/>
-    <category term="Deep Learning Theory"/>
-    <category term="Edge of Stability"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:72ce62de7588</id>
-    <title>Do Coding Agents Deceive Us? Detecting and Preventing Cheating via Capped Evaluation with Randomized Tests</title>
-    <link href="http://arxiv.org/abs/2606.07379" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-72ce62de7588" rel="related" type="text/html"/>
-    <published>2026-06-08T02:47:00Z</published>
-    <updated>2026-06-08T02:47:00Z</updated>
-    <author><name>Thanawat Lodkaew, Johannes Ackermann, Soichiro Nishimori, Nontawat Charoenphakdee, Masashi Sugiyama, Takashi Ishida</name></author>
-    <summary type="html"><![CDATA[<p>Introduces CapCode, which builds coding datasets with randomized tests whose maximum non-cheating score is deliberately capped, so scores above the cap reveal reward hacking, plus CapReward to discourage exploitation. Addresses deceptive performance in coding agent evaluation and training.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="LLM Agents"/>
-    <category term="Evaluation"/>
-    <category term="Reward Hacking"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:27e074eb0867</id>
-    <title>MMBU: A Massive Multi-modal Biomedical Understanding Benchmark to Probe the Perception Capabilities of Vision-Language Models</title>
-    <link href="http://arxiv.org/abs/2606.06696" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-27e074eb0867" rel="related" type="text/html"/>
-    <published>2026-06-08T02:45:00Z</published>
-    <updated>2026-06-08T02:45:00Z</updated>
-    <author><name>Ryan D'Cunha, Alejandro Lozano, Xiaoxiao Sun, Daniel Vela Jarquin, Min Woo Sun, Josiah Aklilu, James Burgess, Yuhui Zhang, Ryan Nayebi, Paola Avila, Robayo, Jin Ye, Ming Hu, Zhongying Deng, Junjun He, Xin Chen, Yue Yao, Robert Tibshirani, Jeffrey J. Nirschl, and Serena Yeung-Levy</name></author>
-    <summary type="html"><![CDATA[<p>MMBU is the largest biomedical vision-language benchmark to date, covering 35 submodalities with structured metadata and tasks spanning ungrounded/grounded classification and object detection. It probes fine-grained perception capabilities of VLMs across diverse biomedical imaging contexts.</p>]]></summary>
-    <category term="Computer Vision"/>
-    <category term="Healthcare AI"/>
-    <category term="Vision-Language Models"/>
-    <category term="Benchmarks"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:5e9f1130c57f</id>
-    <title>FP8 is All You Need (Part 1): Debunking Hardware FP64 as the HPC Holy Grail</title>
-    <link href="http://arxiv.org/abs/2606.06510" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-5e9f1130c57f" rel="related" type="text/html"/>
-    <published>2026-06-08T02:43:00Z</published>
-    <updated>2026-06-08T02:43:00Z</updated>
-    <author><name>Satoshi Matsuoka</name></author>
-    <summary type="html"><![CDATA[<p>Argues provocatively that native hardware FP64 is not essential for scientific computing, showing that FP8 tensor throughput plus the Ozaki Scheme II can recover full FP64 accuracy on AI-optimized GPUs like NVIDIA B300. Introduces a Tensor-Memory Equilibrium roofline model to support the claim.</p>]]></summary>
-    <category term="High-Performance Computing"/>
-    <category term="Hardware"/>
-    <category term="Numerical Precision"/>
-    <category term="AI Accelerators"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:9aabd92c9d93</id>
-    <title>How Language Models Fail: Token-Level Signatures of Committed and Persistent Reasoning Failures</title>
-    <link href="http://arxiv.org/abs/2606.06635" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-9aabd92c9d93" rel="related" type="text/html"/>
-    <published>2026-06-08T02:43:00Z</published>
-    <updated>2026-06-08T02:43:00Z</updated>
-    <author><name>Tanvi Thoria, Kiana Jafari, Marc R. Schlichting, Mykel J. Kochenderfer</name></author>
-    <summary type="html"><![CDATA[<p>The authors characterize LLM reasoning failures using token-level uncertainty signals, distinguishing committed failures (early lock-in) from persistent uncertainty (accumulating doubt). The framework offers falsifiable diagnostics reproducible across 23 model-dataset configurations, useful for failure detection in reasoning systems.</p>]]></summary>
-    <category term="Language Models"/>
-    <category term="Interpretability"/>
-    <category term="Reasoning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:d3b8378a1723</id>
-    <title>Optimal Rates for Generalization of Gradient Descent Methods with Deep Neural Networks</title>
-    <link href="http://arxiv.org/abs/2606.06764" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-d3b8378a1723" rel="related" type="text/html"/>
-    <published>2026-06-08T02:43:00Z</published>
-    <updated>2026-06-08T02:43:00Z</updated>
-    <author><name>Junyu Zhou, Puyu Wang, Yunwen Lei, Yiming Ying, Ding-Xuan Zhou</name></author>
-    <summary type="html"><![CDATA[<p>This theoretical paper establishes the first minimax-optimal generalization rates for deep ReLU networks trained with gradient descent and SGD in the NTK regime, extending prior work limited to shallow architectures. It assumes polynomial width scaling with depth and training samples.</p>]]></summary>
-    <category term="Deep Learning Theory"/>
-    <category term="Generalization"/>
-    <category term="Optimization"/>
-    <category term="NTK"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:2fc2fec206e2</id>
-    <title>The Effect of Training Task Diversity on In-Context Learning through the Lens of Low-Dimensional Subspaces</title>
-    <link href="http://arxiv.org/abs/2606.06814" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-2fc2fec206e2" rel="related" type="text/html"/>
-    <published>2026-06-08T02:43:00Z</published>
-    <updated>2026-06-08T02:43:00Z</updated>
-    <author><name>Soo Min Kwon, Alec S. Xu, Can Yaras, Dogyoon Song, Laura Balzano, Qing Qu</name></author>
-    <summary type="html"><![CDATA[<p>This paper develops an analytical model explaining how training task diversity shapes in-context learning in transformers by modeling task vectors as a mixture of low-rank Gaussians. It provides theoretical grounding for previously observed but unexplained ICL phenomena.</p>]]></summary>
-    <category term="In-Context Learning"/>
-    <category term="Learning Theory"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:d14361debc4b</id>
-    <title>Position: Don't Just "Fix it in Post": A Science of AI Must Study Training Dynamics</title>
-    <link href="http://arxiv.org/abs/2606.06533" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-d14361debc4b" rel="related" type="text/html"/>
-    <published>2026-06-08T02:40:00Z</published>
-    <updated>2026-06-08T02:40:00Z</updated>
-    <author><name>Stella Biderman and Mohammad Aflah Khan and Niloofar Mireshghallah and Catherine Arnett and Fazl Barez and Naomi Saphra</name></author>
-    <summary type="html"><![CDATA[<p>A position paper arguing that a genuine science of AI must study training dynamics rather than relying on post-hoc fixes, advocating for predicting outcomes from early signals, intervening on trajectories, and designing training to reliably produce desired properties. Frames scaling laws as just a start toward understanding emergence.</p>]]></summary>
-    <category term="Science of Deep Learning"/>
-    <category term="Training Dynamics"/>
-    <category term="Interpretability"/>
-    <category term="AI Research Methodology"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-06-08:research:14df6dcb7a55</id>
-    <title>Inside the Visual Mind: Neuroscience-Motivated Concept Circuits for Interpreting and Steering Vision Transformers</title>
-    <link href="http://arxiv.org/abs/2606.06664" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-06-08&amp;category=research#item-14df6dcb7a55" rel="related" type="text/html"/>
-    <published>2026-06-08T02:40:00Z</published>
-    <updated>2026-06-08T02:40:00Z</updated>
-    <author><name>Tang Li, Yanlin Chen, Mengmeng Ma, Xi Peng</name></author>
-    <summary type="html"><![CDATA[<p>ViSAE is a neuroscience-motivated mechanistic interpretability toolbox for Vision Transformers, using sparse autoencoders to extract human-interpretable concept circuits with a 64K-image probing suite and 16K concept vocabulary. It enables understanding and steering of ViT internals to mitigate spurious cues.</p>]]></summary>
-    <category term="Computer Vision"/>
-    <category term="Interpretability"/>
-    <category term="Mechanistic Interpretability"/>
   </entry>
 </feed>
