@@ -953,8 +953,15 @@ RELEASE-DATE GROUNDING (mandatory check for any topic that names or implies a mo
                 messages=[{"role": "user", "content": prompt}],
                 system=self.grounding_context,  # Inject ecosystem grounding
                 profile=ThinkingLevel.ULTRATHINK,
-                caller="orchestrator.topics"
+                caller="orchestrator.topics",
+                full_output_budget=True,
             )
+
+            if response.stop_reason == "max_tokens":
+                logger.error(
+                    "Topic detection response truncated at max_tokens after escalation; "
+                    "topic JSON may be incomplete."
+                )
 
             # Parse JSON response
             result = json.loads(
@@ -1114,8 +1121,15 @@ The summary should help a busy professional quickly scan and understand what's N
                 messages=[{"role": "user", "content": prompt}],
                 system=self.grounding_context,  # Inject ecosystem grounding
                 profile=ThinkingLevel.DEEP,
-                caller="orchestrator.summary"
+                caller="orchestrator.summary",
+                full_output_budget=True,
             )
+
+            if response.stop_reason == "max_tokens":
+                logger.error(
+                    "Executive summary truncated at max_tokens after escalation; "
+                    "output may be incomplete."
+                )
 
             return response.content, response.thinking or ""
 

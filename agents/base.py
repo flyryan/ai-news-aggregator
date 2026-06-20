@@ -949,10 +949,25 @@ class BaseAnalyzer(ABC):
                 messages=[{"role": "user", "content": ranking_prompt}],
                 system=self.grounding_context,  # Inject ecosystem grounding
                 profile=self.thinking_budget,  # DEEP
-                caller=f"{self.category}_analyzer.reduce_rank"
+                caller=f"{self.category}_analyzer.reduce_rank",
+                # Ranking + summary is a single max-effort call whose thinking
+                # and visible output share one token budget. Give it the full
+                # output ceiling so a deep ranking pass cannot truncate the
+                # category_summary mid-word (effort stays at max).
+                full_output_budget=True,
             )
 
+            if response.stop_reason == "max_tokens":
+                logger.error(
+                    f"  {self.category} REDUCE: ranking response still truncated at max_tokens "
+                    f"after escalation; sanitizing a possibly-incomplete category_summary."
+                )
+
             ranking_result = self._parse_json_response(response.content)
+            if response.stop_reason == "max_tokens" and ranking_result.get('category_summary'):
+                ranking_result['category_summary'] = self._sanitize_truncated_summary(
+                    ranking_result['category_summary']
+                )
             ranking_thinking = response.thinking
 
         except Exception as e:
@@ -998,6 +1013,36 @@ class BaseAnalyzer(ABC):
             total_collected=len(analyzed_items),
             thinking=f"Batch Analysis:\n{batch_thinking}\n\nRanking:\n{ranking_thinking}"
         )
+
+    def _sanitize_truncated_summary(self, summary: str) -> str:
+        """Best-effort cleanup of a category summary cut off mid-generation.
+
+        Only invoked when the reduce response stopped at ``max_tokens`` even
+        after the escalation retry (rare). Removes a dangling incomplete
+        markdown link, balances an unclosed ``**`` bold marker, and marks an
+        unterminated tail with an ellipsis so we never publish text ending
+        mid-word with broken markup.
+        """
+        if not summary:
+            return summary
+        text = summary.rstrip()
+
+        # Drop a dangling, incomplete markdown link like "... [label](/partial".
+        open_link = re.search(r'\[[^\]]*\]\([^)]*$', text)
+        if open_link:
+            text = text[:open_link.start()].rstrip()
+
+        # Balance bold markers: an odd count means one was left open.
+        if text.count('**') % 2 == 1:
+            idx = text.rfind('**')
+            if idx != -1:
+                text = (text[:idx] + text[idx + 2:]).rstrip()
+
+        # Signal an unterminated tail rather than leaving it reading as broken.
+        if text and text[-1] not in '.!?:)]"’”`' and not text.endswith('...'):
+            text = text + '...'
+
+        return text
 
     def _exclude_from_top(self, item: AnalyzedItem) -> bool:
         """Return True when an analyzed item must not be used for top-story ranking."""

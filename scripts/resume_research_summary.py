@@ -101,7 +101,8 @@ def _analyzed_from_published(rec: dict) -> AnalyzedItem:
     )
 
 
-async def resume(target_date: str, web_dir: str = './web', config_dir: str = './config') -> bool:
+async def resume(target_date: str, web_dir: str = './web', config_dir: str = './config',
+                 force: bool = False) -> bool:
     research_path = os.path.join(web_dir, 'data', target_date, 'research.json')
     summary_path = os.path.join(web_dir, 'data', target_date, 'summary.json')
     if not os.path.exists(research_path):
@@ -127,10 +128,13 @@ async def resume(target_date: str, web_dir: str = './web', config_dir: str = './
     PLACEHOLDER = "Analysis complete. Top items selected by score."
     current_summary = (research.get('category_summary') or '').strip()
 
-    if current_summary and current_summary != PLACEHOLDER:
+    if current_summary and current_summary != PLACEHOLDER and not force:
         # Summary is already real (e.g. we previously regenerated it). Skip the
         # ranking LLM call entirely and just (re)run link enrichment on it.
+        # NOTE: a truncated summary is also "non-placeholder" -- pass --force to
+        # regenerate one that was cut off mid-generation.
         print("Existing research summary is real (not placeholder); skipping regeneration, enriching only.")
+        print("       (pass --force to regenerate anyway, e.g. when the summary was truncated)")
         new_summary = current_summary
     else:
         grounding_context = _build_grounding_context(config_dir, target_date)
@@ -160,7 +164,12 @@ async def resume(target_date: str, web_dir: str = './web', config_dir: str = './
             system=analyzer.grounding_context,
             profile=analyzer.thinking_budget,
             caller="research_analyzer.resume_reduce_rank",
+            # Match the pipeline reduce path: full output ceiling at max effort
+            # so the regeneration itself cannot re-truncate.
+            full_output_budget=True,
         )
+        if response.stop_reason == "max_tokens":
+            print("WARNING: regeneration response truncated at max_tokens even after escalation")
 
         result = analyzer._parse_json_response(response.content)
         new_summary = (result.get('category_summary') or '').strip()
@@ -240,10 +249,12 @@ async def resume(target_date: str, web_dir: str = './web', config_dir: str = './
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Usage: python scripts/resume_research_summary.py YYYY-MM-DD")
+    args = [a for a in sys.argv[1:] if a != '--force']
+    force = '--force' in sys.argv[1:]
+    if not args:
+        print("Usage: python scripts/resume_research_summary.py YYYY-MM-DD [--force]")
         sys.exit(1)
-    date = sys.argv[1]
+    date = args[0]
     datetime.strptime(date, '%Y-%m-%d')
-    ok = asyncio.run(resume(date))
+    ok = asyncio.run(resume(date, force=force))
     sys.exit(0 if ok else 1)

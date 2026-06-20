@@ -352,7 +352,8 @@ class AnthropicClient:
         budget_tokens: int = ThinkingLevel.STANDARD,
         profile: Optional[int] = None,
         max_tokens: Optional[int] = None,
-        temperature: float = 1.0
+        temperature: float = 1.0,
+        full_output_budget: bool = False
     ) -> LLMResponse:
         """
         Make an API call with adaptive or manual thinking enabled.
@@ -368,6 +369,9 @@ class AnthropicClient:
                        defaults to LLM_ADAPTIVE_MAX_TOKENS; older manual
                        thinking models default to profile plus an output buffer.
             temperature: Must be 1.0 for thinking mode.
+            full_output_budget: Raise the default ceiling to the full model
+                       output limit so max-effort thinking cannot clip the
+                       output. Effort is never reduced.
 
         Returns:
             LLMResponse with content and thinking blocks.
@@ -379,7 +383,7 @@ class AnthropicClient:
         if use_adaptive:
             effort = BUDGET_TO_EFFORT.get(requested_profile, "high")
             if max_tokens is None:
-                max_tokens = self.adaptive_max_tokens
+                max_tokens = self.max_output_tokens if full_output_budget else self.adaptive_max_tokens
             manual_budget_tokens = None
         else:
             effort = None
@@ -972,9 +976,17 @@ class AsyncAnthropicClient:
         max_tokens: Optional[int] = None,
         temperature: float = 1.0,
         caller: Optional[str] = None,
-        routing_context: Optional[Dict[str, Any]] = None
+        routing_context: Optional[Dict[str, Any]] = None,
+        full_output_budget: bool = False
     ) -> LLMResponse:
-        """Async version of call_with_thinking."""
+        """Async version of call_with_thinking.
+
+        When ``full_output_budget`` is True (used by single-shot
+        ranking/summary/topic calls), the default response ceiling is raised to
+        the full model output limit so that max-effort thinking cannot starve
+        the visible output. Effort is never reduced. The map phase deliberately
+        leaves this False because it has its own split-and-retry recovery.
+        """
         requested_profile = profile if profile is not None else budget_tokens
         profile_name = THINKING_LEVEL_NAMES.get(requested_profile, str(requested_profile))
         use_adaptive = _uses_adaptive_thinking(self.model)
@@ -982,7 +994,9 @@ class AsyncAnthropicClient:
         if use_adaptive:
             effort = BUDGET_TO_EFFORT.get(requested_profile, "high")
             if max_tokens is None:
-                max_tokens = self.adaptive_max_tokens
+                # These callers get the full combined thinking+output budget up
+                # front so max-effort thinking cannot clip the output.
+                max_tokens = self.max_output_tokens if full_output_budget else self.adaptive_max_tokens
             manual_budget_tokens = None
         else:
             effort = None
@@ -1053,7 +1067,9 @@ class AsyncAnthropicClient:
         # Log stop_reason for diagnostics (helps debug proxy behavior)
         logger.debug(f"Response stop_reason: {response.stop_reason}, output_tokens: {response.usage.output_tokens}")
 
-        # Check for truncation
+        # Check for truncation. Callers that pass full_output_budget already run
+        # at the model's max output ceiling, so there is no larger budget to
+        # grant -- we surface it loudly rather than degrading thinking effort.
         if response.stop_reason == "max_tokens":
             logger.warning(f"Response truncated at max_tokens ({max_tokens}). Output may be incomplete.")
 
