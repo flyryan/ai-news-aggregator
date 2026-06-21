@@ -1,0 +1,34 @@
+name: Tests
+
+# Fast guard checks on every push/PR. Intentionally dependency-light: the
+# call_with_thinking signature guard is stdlib-only (ast), so it runs without
+# installing the project or any secrets/network. This is what turns a silent
+# prod break (like the 2026-06-21 call_with_thinking overload drift that took
+# the daily pipeline RED) into a red check before it can merge.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: Signature lockstep guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: call_with_thinking signature lockstep
+        run: python3 -m unittest tests.call_with_thinking_signature_test -v
