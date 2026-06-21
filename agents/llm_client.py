@@ -1399,7 +1399,8 @@ class AsyncLLMRouter:
         profile: Optional[int] = None,
         max_tokens: Optional[int] = None,
         temperature: float = 1.0,
-        caller: Optional[str] = None
+        caller: Optional[str] = None,
+        full_output_budget: bool = False
     ) -> LLMResponse:
         """Route an adaptive/manual thinking call across configured providers."""
         return await self._call_with_failover(
@@ -1412,6 +1413,7 @@ class AsyncLLMRouter:
                 "max_tokens": max_tokens,
                 "temperature": temperature,
                 "caller": caller,
+                "full_output_budget": full_output_budget,
             },
         )
 
