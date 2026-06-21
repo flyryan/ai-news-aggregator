@@ -422,3 +422,76 @@ jobs:
           set -euo pipefail
           git pull --rebase origin main
           git push origin HEAD:main
+
+      # ---------------------------------------------------------------------
+      # Detection gap fix (2026-06-21): a scheduled run can exit 0 without ever
+      # producing today's report. The 3 AM ET gate makes the OTHER scheduled
+      # entry exit as a 7-second "success" no-op, and a run that does real work
+      # but fails synthesis gets reverted by the publish gate (last good report
+      # stays live) WITHOUT failing loudly. Either way the site silently serves
+      # stale content. This step runs only on the nominal 3 AM ET pass (the one
+      # that is SUPPOSED to publish) and asserts a `data: Auto-update <today>`
+      # commit actually landed on origin/main. If not, it fails the job, which
+      # triggers the failure-alert step below.
+      - name: Assert today's report is published on origin/main
+        if: steps.schedule_gate.outputs.should_run == 'true' && env.COMMIT_OUTPUTS == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
+          git fetch origin main --quiet
+          # Verify the actual published artifact for report_date exists on the live
+          # branch. This is commit-timing independent (no false positives on same-day
+          # re-dispatches or backfills where nothing new was committed), and directly
+          # answers "is the site serving today's report?" If summary.json for the date
+          # is absent from origin/main, the run claimed success but the site is STALE.
+          artifact="web/data/${report_date}/summary.json"
+          if git cat-file -e "origin/main:${artifact}" 2>/dev/null; then
+            echo "Verified: ${artifact} is published on origin/main."
+          else
+            echo "::error::${artifact} is NOT on origin/main after a run that was \
+          supposed to publish. The site is serving STALE content for ${report_date}." >&2
+            echo "Recent origin/main subjects:" >&2
+            git log origin/main -8 --pretty='  %h %s' >&2
+            exit 1
+          fi
+
+      # Proactive failure alert (2026-06-21). Fires on ANY failure of a run that
+      # was supposed to publish (RED synthesis, publish-gate revert, or the
+      # commit-landed assertion above). POSTs to the graph-webhooks alert ingress
+      # (Cloudflare tunnel -> LaunchDaemon on Ryan's Mac mini), which wakes FlyBot
+      # with a system event in under a minute instead of the site sitting stale
+      # for hours. Bearer-authenticated; the endpoint fails closed without it.
+      # best-effort: never let the alert itself fail the job or leak the token.
+      - name: Alert on pipeline failure
+        if: failure() && steps.schedule_gate.outputs.should_run == 'true'
+        shell: bash
+        env:
+          PIPELINE_ALERT_TOKEN: ${{ secrets.PIPELINE_ALERT_TOKEN }}
+          PIPELINE_ALERT_URL: ${{ vars.PIPELINE_ALERT_URL || 'https://flybotwebhook.duffplex.com/alert/pipeline' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -uo pipefail
+          if [[ -z "${PIPELINE_ALERT_TOKEN:-}" ]]; then
+            echo "PIPELINE_ALERT_TOKEN not set; skipping alert POST (configure the repo secret)."
+            exit 0
+          fi
+          report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
+          payload="$(python3 - "$report_date" "$RUN_URL" <<'PY'
+          import json, sys
+          print(json.dumps({
+              "status": "failure",
+              "report_date": sys.argv[1],
+              "reason": "daily-pipeline.yml failed before today's report published",
+              "run_url": sys.argv[2],
+          }))
+          PY
+          )"
+          code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 \
+            -X POST "$PIPELINE_ALERT_URL" \
+            -H "Authorization: Bearer ${PIPELINE_ALERT_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -d "$payload" || true)"
+          echo "Alert POST -> HTTP ${code:-no-response}"
+          # Do not fail the job on alert delivery problems; the run is already red.
+          exit 0
