@@ -10,10 +10,17 @@ name: Pipeline Watchdog
 
 on:
   schedule:
-    # ~6 AM America/New_York (covers DST). The 3 AM pipeline normally finishes well
-    # before this; a slow/failed run (the outage run finished 06:29 ET) is caught here.
-    - cron: "0 10 * * *"  # 06:00 EDT
-    - cron: "0 11 * * *"  # 06:00 EST
+    # Hourly sweep across the 4 AM-9 AM ET window (covers DST). The 3 AM pipeline
+    # normally finishes by ~3:25 ET, so the first 4 AM ET pass catches a failed/stale
+    # report only ~30-60 min after the failure instead of waiting until 6 AM. Running
+    # the whole window (not a single hour) means GitHub cron jitter can't make the
+    # watchdog no-op entirely the way the old single 6-ET entry did on 2026-06-23
+    # (its only runs landed 7:09 + 8:04 ET and both skipped). The 6-hour retry cap in
+    # the guard step still prevents loop-burning ~$8.50/run during a sustained outage:
+    # only the first pass that sees a bad report dispatches; later passes are capped.
+    # UTC entries 08-14 cover 04-09 ET across both EDT (UTC-4) and EST (UTC-5); the
+    # ET gate below lets only passes whose ET hour is in 04..09 proceed.
+    - cron: "0 8-14 * * *"
   workflow_dispatch:
     inputs:
       target_date:
@@ -60,21 +67,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # GitHub cron is UTC-only; both cron entries fire, but only let the one
-          # that maps to 06:00 ET continue (mirrors the pipeline's ET gate). Manual
-          # dispatch always proceeds.
+          # GitHub cron is UTC-only; all entries fire, but only let passes whose
+          # ET hour falls in the 04..09 recovery window continue (mirrors the
+          # pipeline's ET gate). Manual dispatch always proceeds.
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "should_run=true" >> "$GITHUB_OUTPUT"
             echo "Manual dispatch: proceeding."
             exit 0
           fi
           actual_hour="$(TZ=America/New_York date +%H)"
-          if [[ "$actual_hour" == "06" ]]; then
+          # Strip any leading zero so 04..09 compare as integers.
+          h=$((10#$actual_hour))
+          if [[ "$h" -ge 4 && "$h" -le 9 ]]; then
             echo "should_run=true" >> "$GITHUB_OUTPUT"
-            echo "06:xx ET: proceeding."
+            echo "${actual_hour}:xx ET is in the 04-09 recovery window: proceeding."
           else
             echo "should_run=false" >> "$GITHUB_OUTPUT"
-            echo "Not 06:xx ET (got ${actual_hour}); skipping as no-op."
+            echo "Not in 04-09 ET window (got ${actual_hour}); skipping as no-op."
           fi
 
       - name: Validate published report
