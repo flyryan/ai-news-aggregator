@@ -163,7 +163,7 @@ class JSONGenerator:
             'coverage_end': result.get('coverage_end', ''),
             'executive_summary': executive_summary,
             'executive_summary_html': self._markdown_to_html(executive_summary),
-            'top_topics': result.get('top_topics', []),
+            'top_topics': self._sanitize_top_topics(result.get('top_topics', [])),
             'total_items_collected': result.get('total_items_collected', 0),
             'total_items_analyzed': result.get('total_items_analyzed', 0),
             'collection_status': self._format_collection_status(collection_status),
@@ -444,6 +444,21 @@ class JSONGenerator:
             link_rel="noopener noreferrer",
             url_schemes={'http', 'https', 'mailto'},
         )
+
+    def _sanitize_top_topics(self, topics: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Sanitize the HTML field of each top topic through nh3, matching other *_html fields.
+
+        description_html is built upstream by a bare regex (orchestrator._markdown_links_to_html)
+        with no scheme check or escaping; run it through _sanitize_html so the published
+        summary.json cannot carry unsanitized markup (CWE-79 defense layer).
+        """
+        sanitized = []
+        for topic in topics:
+            t = dict(topic)
+            if t.get('description_html'):
+                t['description_html'] = self._sanitize_html(t['description_html'])
+            sanitized.append(t)
+        return sanitized
 
     def _markdown_to_html(self, text: str) -> str:
         """
