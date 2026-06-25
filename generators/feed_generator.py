@@ -20,6 +20,13 @@ from xml.sax.saxutils import escape
 
 logger = logging.getLogger(__name__)
 
+_XML_ATTR_ENTITIES = {'"': '&quot;', "'": '&apos;'}
+
+
+def escape_xml_attr(value: str) -> str:
+    """Escape a value for use inside a double-quoted XML attribute (also escapes " and ')."""
+    return escape(value or '', _XML_ATTR_ENTITIES)
+
 
 def encode_url_for_xml(url: str) -> str:
     """
@@ -39,6 +46,7 @@ def encode_url_for_xml(url: str) -> str:
         encoded_path = quote(parsed.path, safe='/:@!$&\'()*+,;=')
         # Encode query string if present
         encoded_query = quote(parsed.query, safe='/:@!$&\'()*+,;=?') if parsed.query else ''
+        encoded_fragment = quote(parsed.fragment, safe="!$&'()*+,;=:@/?") if parsed.fragment else ''
         # Reconstruct URL
         encoded_url = urlunparse((
             parsed.scheme,
@@ -46,13 +54,13 @@ def encode_url_for_xml(url: str) -> str:
             encoded_path,
             parsed.params,
             encoded_query,
-            parsed.fragment
+            encoded_fragment
         ))
-        # Escape for XML (handles &, <, >, etc.)
-        return escape(encoded_url)
+        # Escape for XML (handles &, <, >, " and ')
+        return escape_xml_attr(encoded_url)
     except Exception:
         # Fallback: just escape for XML
-        return escape(url)
+        return escape_xml_attr(url)
 
 
 def strip_html_from_text(text: str) -> str:
@@ -724,7 +732,7 @@ class FeedGenerator:
 
         # Build category elements
         category_elements = ''.join(
-            f'\n    <category term="{escape(theme)}"/>'
+            f'\n    <category term="{escape_xml_attr(theme)}"/>'
             for theme in themes[:5]  # Limit to 5 themes
         )
 
