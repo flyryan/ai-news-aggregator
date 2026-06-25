@@ -7,6 +7,7 @@ extracts article content.
 
 import asyncio
 import logging
+import os
 import re
 from datetime import datetime
 from typing import List, Dict, Any, Optional, Set
@@ -198,7 +199,7 @@ Reply with just "YES" or "NO"."""
 
         except Exception as e:
             logger.error(f"Error in link evaluation: {e}")
-            return True  # Default to following on error
+            return False  # Fail closed: do not fetch when the relevance gate is unavailable
 
     async def fetch_article(self, url: str) -> Optional[Dict[str, Any]]:
         """
@@ -332,11 +333,26 @@ Reply with just "YES" or "NO"."""
         articles = []
         url_to_post = {}  # Track which post each URL came from
 
+        # Hard cap on the number of distinct URLs processed per run. Each URL
+        # costs one paid LLM relevance call plus a potential outbound fetch, so
+        # an unbounded set lets a flood of social posts amplify cost/egress.
+        max_links = int(os.environ.get('LINK_FOLLOWER_MAX_URLS', '50'))
+
         # Extract URLs from all posts
+        capped = False
         for post in posts:
             urls = self.extract_urls(post.content)
             for url in urls:
+                if len(url_to_post) >= max_links and url not in url_to_post:
+                    logger.warning(
+                        f"LINK_FOLLOWER_MAX_URLS cap ({max_links}) reached; "
+                        f"dropping further URLs this run"
+                    )
+                    capped = True
+                    break
                 url_to_post[url] = post
+            if capped:
+                break
 
         logger.info(f"Found {len(url_to_post)} unique URLs in {len(posts)} social posts")
 
