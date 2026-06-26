@@ -8,9 +8,11 @@ Provides mode-based image generation:
 Follows the same factory pattern as agents/llm_client.py for consistency.
 """
 
+import asyncio
 import io
 import base64
 import logging
+import random
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional, TYPE_CHECKING
@@ -25,6 +27,19 @@ if TYPE_CHECKING:
     from agents.config import ImageProviderConfig
 
 logger = logging.getLogger(__name__)
+
+# Retry policy for transient image-generation failures (connection drops,
+# timeouts, 429s, and 5xx). A single dropped connection used to lose the entire
+# daily hero image with no retry (e.g. "Server disconnected without sending a
+# response" on 2026-06-26). These bound the worst-case added latency while
+# letting one-off provider hiccups self-heal.
+DEFAULT_MAX_ATTEMPTS = 3
+DEFAULT_RETRY_BASE_DELAY = 2.0  # seconds; exponential: ~2s, ~4s between tries
+
+
+def _is_retryable_status(status_code: int) -> bool:
+    """True for transient HTTP statuses worth retrying (429 + any 5xx)."""
+    return status_code == 429 or status_code >= 500
 
 
 @dataclass
@@ -165,7 +180,9 @@ class OpenAICompatibleClient(BaseImageClient):
         api_key: str,
         endpoint: str,
         model: str,
-        timeout: float = 180.0
+        timeout: float = 180.0,
+        max_attempts: int = DEFAULT_MAX_ATTEMPTS,
+        retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY
     ):
         """
         Initialize OpenAI-compatible client.
@@ -175,10 +192,14 @@ class OpenAICompatibleClient(BaseImageClient):
             endpoint: API endpoint URL (auto-appends /chat/completions if ends with /v1)
             model: Model name for the proxy
             timeout: Request timeout in seconds
+            max_attempts: Total attempts (incl. first) on transient failures
+            retry_base_delay: Base seconds for exponential backoff between retries
         """
         self.api_key = api_key
         self.model = model
         self.timeout = timeout
+        self.max_attempts = max(1, max_attempts)
+        self.retry_base_delay = max(0.0, retry_base_delay)
 
         # Auto-append /chat/completions if endpoint ends with /v1
         if endpoint.rstrip('/').endswith('/v1'):
@@ -187,6 +208,11 @@ class OpenAICompatibleClient(BaseImageClient):
             self.endpoint = endpoint
 
         logger.info(f"OpenAICompatibleClient initialized with endpoint={self.endpoint}, model={self.model}")
+
+    def _backoff_delay(self, attempt: int) -> float:
+        """Exponential backoff with jitter for retry attempt N (1-indexed)."""
+        base = self.retry_base_delay * (2 ** (attempt - 1))
+        return base + random.uniform(0, self.retry_base_delay / 2)
 
     async def generate(
         self,
@@ -218,43 +244,76 @@ class OpenAICompatibleClient(BaseImageClient):
             }
         }
 
-        try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.post(
-                    self.endpoint,
-                    headers={
-                        "Authorization": f"Bearer {self.api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json=request_body
-                )
-                response.raise_for_status()
-                data = response.json()
+        # Retry transient failures (connection drops, timeouts, 429, 5xx) with
+        # exponential backoff. Non-transient errors (4xx auth/validation) fail
+        # fast on the first attempt.
+        data = None
+        for attempt in range(1, self.max_attempts + 1):
+            try:
+                async with httpx.AsyncClient(timeout=self.timeout) as client:
+                    response = await client.post(
+                        self.endpoint,
+                        headers={
+                            "Authorization": f"Bearer {self.api_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json=request_body
+                    )
+                    response.raise_for_status()
+                    data = response.json()
+                break  # success
 
-        except httpx.TimeoutException:
-            error_msg = f"Image generation timed out after {self.timeout}s"
-            logger.error(error_msg)
-            raise RuntimeError(error_msg)
-        except httpx.HTTPStatusError as e:
-            error_msg = (
-                f"Image generation API error (status={e.response.status_code}): "
-                f"{e.response.text[:500]}\n\n"
-                f"Troubleshooting (openai-compatible mode):\n"
-                f"- Verify your proxy endpoint supports image generation\n"
-                f"- Check that the model name '{self.model}' is correct for your proxy\n"
-                f"- Ensure the API key has proper permissions"
-            )
-            logger.error(error_msg)
-            raise RuntimeError(error_msg) from e
-        except httpx.RequestError as e:
-            error_msg = (
-                f"Image generation request failed: {e}\n\n"
-                f"Troubleshooting (openai-compatible mode):\n"
-                f"- Verify the endpoint URL is correct: {self.endpoint}\n"
-                f"- Check network connectivity to your proxy"
-            )
-            logger.error(error_msg)
-            raise RuntimeError(error_msg) from e
+            except httpx.TimeoutException as e:
+                if attempt < self.max_attempts:
+                    delay = self._backoff_delay(attempt)
+                    logger.warning(
+                        f"Image generation timed out after {self.timeout}s "
+                        f"(attempt {attempt}/{self.max_attempts}); retrying in {delay:.1f}s"
+                    )
+                    await asyncio.sleep(delay)
+                    continue
+                error_msg = f"Image generation timed out after {self.timeout}s ({self.max_attempts} attempts)"
+                logger.error(error_msg)
+                raise RuntimeError(error_msg) from e
+            except httpx.HTTPStatusError as e:
+                status = e.response.status_code
+                if _is_retryable_status(status) and attempt < self.max_attempts:
+                    delay = self._backoff_delay(attempt)
+                    logger.warning(
+                        f"Image generation API returned status {status} "
+                        f"(attempt {attempt}/{self.max_attempts}); retrying in {delay:.1f}s"
+                    )
+                    await asyncio.sleep(delay)
+                    continue
+                error_msg = (
+                    f"Image generation API error (status={status}): "
+                    f"{e.response.text[:500]}\n\n"
+                    f"Troubleshooting (openai-compatible mode):\n"
+                    f"- Verify your proxy endpoint supports image generation\n"
+                    f"- Check that the model name '{self.model}' is correct for your proxy\n"
+                    f"- Ensure the API key has proper permissions"
+                )
+                logger.error(error_msg)
+                raise RuntimeError(error_msg) from e
+            except httpx.RequestError as e:
+                # Connection drops / DNS / read errors (e.g. "Server disconnected
+                # without sending a response") -- treat as transient.
+                if attempt < self.max_attempts:
+                    delay = self._backoff_delay(attempt)
+                    logger.warning(
+                        f"Image generation request failed: {e} "
+                        f"(attempt {attempt}/{self.max_attempts}); retrying in {delay:.1f}s"
+                    )
+                    await asyncio.sleep(delay)
+                    continue
+                error_msg = (
+                    f"Image generation request failed: {e}\n\n"
+                    f"Troubleshooting (openai-compatible mode):\n"
+                    f"- Verify the endpoint URL is correct: {self.endpoint}\n"
+                    f"- Check network connectivity to your proxy"
+                )
+                logger.error(error_msg)
+                raise RuntimeError(error_msg) from e
 
         # Extract image from response
         message = data.get("choices", [{}])[0].get("message", {})
