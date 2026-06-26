@@ -15,6 +15,12 @@
 #   REMOTE_REPO           Repo path on the host. Defaults to /home/ubuntu/ai-news-aggregator.
 #   COMPOSE_FILE          Compose file for rebuilds. Defaults to docker-compose.web.yml.
 #   REBUILD_WEB           Set true to rebuild/restart the web-only container after sync.
+#   SSH_STRICT_HOST_KEY   ssh StrictHostKeyChecking mode for the deploy SSH.
+#                         Defaults to accept-new (trust on first use, refuse a
+#                         changed key). Set to yes (with SSH_KNOWN_HOSTS) to fully
+#                         pin, or no to disable checking (insecure, not advised).
+#   SSH_KNOWN_HOSTS       Path to a known_hosts file for host-key pinning. When
+#                         set, passed as ssh UserKnownHostsFile.
 
 set -e
 
@@ -32,6 +38,13 @@ REMOTE_REPO="${REMOTE_REPO:-/home/ubuntu/ai-news-aggregator}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.web.yml}"
 REBUILD_WEB="${REBUILD_WEB:-false}"
 SITE_URL="${SITE_URL:-https://news.aatf.ai}"
+# Host-key verification mode for the deploy SSH. Default 'accept-new' trusts a
+# host on first contact but REFUSES a changed key (blocks active MITM of a
+# known host) — unlike the old 'no', which silently accepted any key every time.
+# Set SSH_STRICT_HOST_KEY=yes with SSH_KNOWN_HOSTS=/path/to/known_hosts to fully
+# pin (recommended for production).
+SSH_STRICT_HOST_KEY="${SSH_STRICT_HOST_KEY:-accept-new}"
+SSH_KNOWN_HOSTS="${SSH_KNOWN_HOSTS:-}"
 
 # Today's date (what should be on the site after pipeline runs)
 TODAY=$(date +%Y-%m-%d)
@@ -93,12 +106,17 @@ force_sync_aws() {
     local host
     host="$(resolve_aws_host)"
 
+    local -a ssh_opts=(-i "$SSH_KEY" -o "StrictHostKeyChecking=$SSH_STRICT_HOST_KEY" -o ConnectTimeout=30)
+    if [ -n "$SSH_KNOWN_HOSTS" ]; then
+        ssh_opts+=(-o "UserKnownHostsFile=$SSH_KNOWN_HOSTS")
+    fi
+
     echo "[FIX] Forcing git sync on AWS host..."
     if [ "$REBUILD_WEB" = "true" ]; then
-        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$host" \
+        ssh "${ssh_opts[@]}" "$host" \
             "cd '$REMOTE_REPO' && git fetch origin && git reset --hard origin/main && docker compose -f '$COMPOSE_FILE' up -d --build" 2>&1
     else
-        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=30 "$host" \
+        ssh "${ssh_opts[@]}" "$host" \
             "cd '$REMOTE_REPO' && git fetch origin && git reset --hard origin/main" 2>&1
     fi
 }
