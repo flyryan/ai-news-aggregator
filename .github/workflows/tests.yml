@@ -32,3 +32,23 @@ jobs:
           python-version: "3.11"
       - name: call_with_thinking signature lockstep
         run: python3 -m unittest tests.call_with_thinking_signature_test -v
+
+  hero-retry:
+    name: Hero image retry-window guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Guards the daily hero image retry window. On 2026-06-26 a single provider
+    # disconnect dropped the hero (no retry); on 2026-06-27 the 3-attempt/~25s
+    # window was too shallow and the hero dropped AGAIN even though a manual
+    # regen minutes later succeeded. This test locks in the multi-minute retry
+    # window + transient-failure handling so neither regression can silently
+    # return. Needs the three deps image_client imports at module load.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install minimal deps for image_client import
+        run: python3 -m pip install --no-input "httpx>=0.27.0" "google-genai>=1.0.0" "Pillow>=10.0.0"
+      - name: Hero image retry behavior
+        run: python3 -m unittest tests.image_client_retry_test -v

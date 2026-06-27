@@ -31,10 +31,21 @@ logger = logging.getLogger(__name__)
 # Retry policy for transient image-generation failures (connection drops,
 # timeouts, 429s, and 5xx). A single dropped connection used to lose the entire
 # daily hero image with no retry (e.g. "Server disconnected without sending a
-# response" on 2026-06-26). These bound the worst-case added latency while
-# letting one-off provider hiccups self-heal.
-DEFAULT_MAX_ATTEMPTS = 3
-DEFAULT_RETRY_BASE_DELAY = 2.0  # seconds; exponential: ~2s, ~4s between tries
+# response" on 2026-06-26). A short 3-attempt/~25s window then proved too
+# shallow: on 2026-06-27 the RDSec proxy fast-failed (~3s each) on all 3 tries
+# inside ~25s, dropping the hero, yet a manual regen later succeeded first try --
+# the provider blip simply outlasted the tiny retry window. So we widen the
+# window to span several minutes: more attempts with capped exponential backoff,
+# so a multi-minute transient outage self-heals. The per-request timeout (180s)
+# is unchanged -- it was never the issue (today's failures were instant
+# disconnects, not timeouts).
+#
+# Backoff schedule (base 3.0, cap 60): ~3, 6, 12, 24, 48, 60 s between the 7
+# attempts => ~153s of pure backoff + jitter + request time, i.e. the retry
+# window now spans roughly 3 minutes instead of 25 seconds.
+DEFAULT_MAX_ATTEMPTS = 7
+DEFAULT_RETRY_BASE_DELAY = 3.0  # seconds; exponential: ~3s, 6s, 12s, 24s ...
+DEFAULT_RETRY_MAX_DELAY = 60.0  # seconds; cap per-retry backoff so it stays bounded
 
 
 def _is_retryable_status(status_code: int) -> bool:
@@ -182,7 +193,8 @@ class OpenAICompatibleClient(BaseImageClient):
         model: str,
         timeout: float = 180.0,
         max_attempts: int = DEFAULT_MAX_ATTEMPTS,
-        retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY
+        retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
+        retry_max_delay: float = DEFAULT_RETRY_MAX_DELAY
     ):
         """
         Initialize OpenAI-compatible client.
@@ -194,12 +206,15 @@ class OpenAICompatibleClient(BaseImageClient):
             timeout: Request timeout in seconds
             max_attempts: Total attempts (incl. first) on transient failures
             retry_base_delay: Base seconds for exponential backoff between retries
+            retry_max_delay: Cap (seconds) on any single backoff sleep so a long
+                retry window stays bounded per-step
         """
         self.api_key = api_key
         self.model = model
         self.timeout = timeout
         self.max_attempts = max(1, max_attempts)
         self.retry_base_delay = max(0.0, retry_base_delay)
+        self.retry_max_delay = max(0.0, retry_max_delay)
 
         # Auto-append /chat/completions if endpoint ends with /v1
         if endpoint.rstrip('/').endswith('/v1'):
@@ -210,8 +225,9 @@ class OpenAICompatibleClient(BaseImageClient):
         logger.info(f"OpenAICompatibleClient initialized with endpoint={self.endpoint}, model={self.model}")
 
     def _backoff_delay(self, attempt: int) -> float:
-        """Exponential backoff with jitter for retry attempt N (1-indexed)."""
+        """Exponential backoff with jitter for retry attempt N (1-indexed), capped."""
         base = self.retry_base_delay * (2 ** (attempt - 1))
+        base = min(base, self.retry_max_delay)
         return base + random.uniform(0, self.retry_base_delay / 2)
 
     async def generate(
