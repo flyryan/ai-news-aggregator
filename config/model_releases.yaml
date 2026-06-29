@@ -463,10 +463,32 @@ mistralai:
     ga_date: "2025-12-02"   # Inferred
     api_date: "2025-12-02"  # OpenRouter
 
-moonshot:
+# NOTE: provider key MUST equal the OpenRouter id prefix (moonshotai, not
+# moonshot) or _load_releases() filters it out and curated/discovered entries
+# land in separate buckets. Same rule applies to z-ai below.
+moonshotai:
+  Kimi-K2.6:
+    ga_date: "2026-04-20"   # OpenRouter created date
+    api_date: "2026-04-20"  # OpenRouter
   Kimi-K2.5:
     ga_date: "2026-01-27"   # TechCrunch, SiliconANGLE
     api_date: "2026-01-27"  # Same day (API + open source)
+
+# Zhipu / Z.ai (GLM family) — OpenRouter prefix is "z-ai"
+# Seeded 2026-06-29 from HuggingFace org zai-org (weights upload = GA) +
+# OpenRouter created date (API). Chinese frontier labs were previously
+# untracked, so GLM releases had zero date-grounding (GLM-5.2 mis-framed
+# as a "yesterday" release on 2026-06-29 — it was 13 days old).
+z-ai:
+  GLM-5.2:
+    ga_date: "2026-06-16"   # HF zai-org/GLM-5.2 weights upload
+    api_date: "2026-06-16"  # OpenRouter
+  GLM-5.1:
+    ga_date: "2026-04-03"   # HF zai-org/GLM-5.1 weights upload
+    api_date: "2026-04-07"  # OpenRouter
+  GLM-5:
+    ga_date: "2026-02-11"   # HF zai-org/GLM-5 weights upload
+    api_date: "2026-02-11"  # OpenRouter
 
 # Agent enrichment notes:
 # - Models marked "needs verification" should be confirmed by agent

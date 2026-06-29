@@ -51,6 +51,8 @@ class EcosystemContextManager:
         'qwen': 'Alibaba/Qwen',
         'mistralai': 'Mistral',
         'cohere': 'Cohere',
+        'z-ai': 'Zhipu/Z.ai',
+        'moonshotai': 'Moonshot',
     }
 
     # Max models per provider to keep prompt size reasonable
