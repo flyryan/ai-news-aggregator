@@ -1,7 +1,7 @@
 """
 Social Gatherer - Collects posts from Twitter, Bluesky, and Mastodon.
 
-Twitter uses TwitterAPI.io (paid).
+Twitter uses TwitterAPI.io by default, with optional Xquik support.
 Bluesky and Mastodon use their free public APIs.
 """
 
@@ -21,9 +21,28 @@ from ..base import BaseGatherer, CollectedItem
 
 logger = logging.getLogger(__name__)
 
-# TwitterAPI.io configuration
+# Twitter/X provider configuration
+TWITTER_PROVIDER = os.getenv('TWITTER_PROVIDER', 'twitterapi_io').strip().lower().replace('-', '_')
 TWITTERAPI_IO_KEY = os.getenv('TWITTERAPI_IO_KEY', '')
 TWITTERAPI_IO_BASE = "https://api.twitterapi.io"
+XQUIK_API_KEY = os.getenv('XQUIK_API_KEY', '')
+XQUIK_API_BASE = os.getenv('XQUIK_API_BASE', 'https://xquik.com/api/v1').rstrip('/')
+
+if TWITTER_PROVIDER not in {'twitterapi_io', 'xquik'}:
+    logger.warning(f"Unknown TWITTER_PROVIDER={TWITTER_PROVIDER!r}; using twitterapi_io")
+    TWITTER_PROVIDER = 'twitterapi_io'
+
+
+def _twitter_provider_label() -> str:
+    return 'Xquik' if TWITTER_PROVIDER == 'xquik' else 'TwitterAPI.io'
+
+
+def _twitter_api_key() -> str:
+    return XQUIK_API_KEY if TWITTER_PROVIDER == 'xquik' else TWITTERAPI_IO_KEY
+
+
+def _twitter_iso(dt: datetime) -> str:
+    return dt.isoformat(timespec='seconds') + 'Z'
 
 
 class SocialGatherer(BaseGatherer):
@@ -50,9 +69,9 @@ class SocialGatherer(BaseGatherer):
             'mastodon': {'status': 'pending', 'count': 0, 'error': None},
         }
 
-        # TwitterAPI.io usage accounting (surfaced in the end-of-run cost summary)
-        self._twitter_calls = 0          # billable API requests issued
-        self._twitter_tweets_billed = 0  # raw tweets returned (TwitterAPI.io bills per tweet)
+        # Twitter provider usage accounting (surfaced in the end-of-run cost summary)
+        self._twitter_calls = 0
+        self._twitter_tweets_returned = 0
 
         logger.info(f"Loaded {len(self.twitter_users)} Twitter, {len(self.bluesky_handles)} Bluesky, {len(self.mastodon_accounts)} Mastodon accounts")
 
@@ -68,9 +87,10 @@ class SocialGatherer(BaseGatherer):
         loop = asyncio.get_event_loop()
 
         # Mark skipped platforms
-        if not self.twitter_users or not TWITTERAPI_IO_KEY:
+        twitter_key = _twitter_api_key()
+        if not self.twitter_users or not twitter_key:
             self.collection_status['twitter']['status'] = 'skipped'
-            self.collection_status['twitter']['error'] = 'No API key' if not TWITTERAPI_IO_KEY else 'No accounts configured'
+            self.collection_status['twitter']['error'] = 'No API key' if not twitter_key else 'No accounts configured'
         if not self.bluesky_handles:
             self.collection_status['bluesky']['status'] = 'skipped'
             self.collection_status['bluesky']['error'] = 'No accounts configured'
@@ -83,7 +103,7 @@ class SocialGatherer(BaseGatherer):
             tasks = []
 
             # Twitter collection
-            if self.twitter_users and TWITTERAPI_IO_KEY:
+            if self.twitter_users and twitter_key:
                 tasks.append(loop.run_in_executor(executor, self._collect_twitter))
 
             # Bluesky collection
@@ -131,9 +151,11 @@ class SocialGatherer(BaseGatherer):
     # ========== TWITTER COLLECTION ==========
 
     def _collect_twitter(self) -> List[CollectedItem]:
-        """Collect tweets from configured users via TwitterAPI.io."""
-        if not TWITTERAPI_IO_KEY:
-            logger.warning("TwitterAPI.io key not configured - skipping Twitter")
+        """Collect tweets from configured users via the selected Twitter provider."""
+        twitter_key = _twitter_api_key()
+        provider_label = _twitter_provider_label()
+        if not twitter_key:
+            logger.warning(f"{provider_label} key not configured - skipping Twitter")
             self.collection_status['twitter']['status'] = 'skipped'
             self.collection_status['twitter']['error'] = 'No API key'
             return []
@@ -159,31 +181,42 @@ class SocialGatherer(BaseGatherer):
             self.collection_status['twitter']['error'] = str(e)
             logger.error(f"Twitter collection failed: {e}")
 
-        # Surface TwitterAPI.io usage + balance in the end-of-run cost summary.
+        # Surface provider usage in the end-of-run cost summary.
         try:
             from ..cost_tracker import get_tracker
-            balance = self._fetch_twitter_balance()
-            # TwitterAPI.io bills ~$0.15 / 1000 tweets; credits are $1 / 100,000 units.
-            logger.info(
-                f"TwitterAPI.io usage: {self._twitter_calls} calls, "
-                f"{self._twitter_tweets_billed} tweets billed; recharge_credits={balance}"
-            )
-            get_tracker().record_external_api(
-                "TwitterAPI.io (Twitter)",
-                calls=self._twitter_calls,
-                items=self._twitter_tweets_billed,
-                balance=balance,
-                balance_usd=(balance / 100000) if balance is not None else None,
-                est_cost_usd=round(self._twitter_tweets_billed * 0.15 / 1000, 4),
-            )
+            if TWITTER_PROVIDER == 'twitterapi_io':
+                balance = self._fetch_twitter_balance()
+                # TwitterAPI.io bills ~$0.15 / 1000 tweets; credits are $1 / 100,000 units.
+                logger.info(
+                    f"TwitterAPI.io usage: {self._twitter_calls} calls, "
+                    f"{self._twitter_tweets_returned} tweets billed; recharge_credits={balance}"
+                )
+                get_tracker().record_external_api(
+                    "TwitterAPI.io (Twitter)",
+                    calls=self._twitter_calls,
+                    items=self._twitter_tweets_returned,
+                    balance=balance,
+                    balance_usd=(balance / 100000) if balance is not None else None,
+                    est_cost_usd=round(self._twitter_tweets_returned * 0.15 / 1000, 4),
+                )
+            else:
+                logger.info(
+                    f"Xquik usage: {self._twitter_calls} calls, "
+                    f"{self._twitter_tweets_returned} tweets returned"
+                )
+                get_tracker().record_external_api(
+                    "Xquik (Twitter)",
+                    calls=self._twitter_calls,
+                    items=self._twitter_tweets_returned,
+                )
         except Exception as e:  # never let reporting break collection
-            logger.debug(f"Could not record TwitterAPI.io usage: {e}")
+            logger.debug(f"Could not record Twitter provider usage: {e}")
 
         return all_tweets
 
     def _fetch_twitter_balance(self) -> Optional[int]:
         """Best-effort TwitterAPI.io recharge-credit balance (free /oapi/my/info endpoint)."""
-        if not TWITTERAPI_IO_KEY:
+        if TWITTER_PROVIDER != 'twitterapi_io' or not TWITTERAPI_IO_KEY:
             return None
         try:
             resp = requests.get(
@@ -214,14 +247,17 @@ class SocialGatherer(BaseGatherer):
         since_date = self.start_time.strftime('%Y-%m-%d')
         until_date = (self.end_time + timedelta(days=1)).strftime('%Y-%m-%d')
 
-        headers = {
-            "X-API-Key": TWITTERAPI_IO_KEY,
-            "Content-Type": "application/json"
-        }
+        headers = self._twitter_headers()
+        endpoint = self._twitter_search_endpoint()
 
         for chunk_idx, chunk in enumerate(chunks):
             from_clauses = [f"from:{u}" for u in chunk]
-            query = f"({' OR '.join(from_clauses)}) since:{since_date} until:{until_date}"
+            base_query = f"({' OR '.join(from_clauses)})"
+            query = (
+                base_query
+                if TWITTER_PROVIDER == 'xquik'
+                else f"{base_query} since:{since_date} until:{until_date}"
+            )
             logger.info(f"Twitter search query (chunk {chunk_idx + 1}/{len(chunks)})")
             chunk_error = None
 
@@ -231,12 +267,10 @@ class SocialGatherer(BaseGatherer):
 
             while page < max_pages:
                 try:
-                    params = {"query": query, "queryType": "Latest"}
-                    if cursor:
-                        params["cursor"] = cursor
+                    params = self._twitter_search_params(query, cursor)
 
                     response = requests.get(
-                        f"{TWITTERAPI_IO_BASE}/twitter/tweet/advanced_search",
+                        endpoint,
                         params=params,
                         headers=headers,
                         timeout=30
@@ -252,8 +286,7 @@ class SocialGatherer(BaseGatherer):
                     if not tweets_data:
                         break
 
-                    # TwitterAPI.io bills per tweet returned.
-                    self._twitter_tweets_billed += len(tweets_data)
+                    self._twitter_tweets_returned += len(tweets_data)
 
                     for tweet_data in tweets_data:
                         try:
@@ -291,6 +324,37 @@ class SocialGatherer(BaseGatherer):
 
         return all_tweets
 
+    def _twitter_headers(self) -> Dict[str, str]:
+        """Return request headers for the selected Twitter provider."""
+        if TWITTER_PROVIDER == 'xquik':
+            return {"x-api-key": XQUIK_API_KEY}
+        return {
+            "X-API-Key": TWITTERAPI_IO_KEY,
+            "Content-Type": "application/json"
+        }
+
+    def _twitter_search_endpoint(self) -> str:
+        """Return the search endpoint for the selected Twitter provider."""
+        if TWITTER_PROVIDER == 'xquik':
+            return f"{XQUIK_API_BASE}/x/tweets/search"
+        return f"{TWITTERAPI_IO_BASE}/twitter/tweet/advanced_search"
+
+    def _twitter_search_params(self, query: str, cursor: str) -> Dict[str, Any]:
+        """Build search parameters for the selected Twitter provider."""
+        if TWITTER_PROVIDER == 'xquik':
+            params: Dict[str, Any] = {
+                "q": query,
+                "queryType": "Latest",
+                "limit": 100,
+                "sinceTime": _twitter_iso(self.start_time),
+                "untilTime": _twitter_iso(self.end_time),
+            }
+        else:
+            params = {"query": query, "queryType": "Latest"}
+        if cursor:
+            params["cursor"] = cursor
+        return params
+
     def _parse_twitter_tweet(self, tweet_data: Dict[str, Any]) -> Optional[CollectedItem]:
         """Parse a tweet into CollectedItem."""
         tweet_id = tweet_data.get('id', '')
@@ -305,9 +369,14 @@ class SocialGatherer(BaseGatherer):
             if pub_date.tzinfo:
                 pub_date = pub_date.replace(tzinfo=None)
         except:
-            try:
-                pub_date = datetime.strptime(created_at, '%Y-%m-%dT%H:%M:%S.%fZ')
-            except:
+            pub_date = None
+            for date_format in ('%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ'):
+                try:
+                    pub_date = datetime.strptime(created_at, date_format)
+                    break
+                except:
+                    continue
+            if pub_date is None:
                 pub_date = datetime.now()
 
         return CollectedItem(
