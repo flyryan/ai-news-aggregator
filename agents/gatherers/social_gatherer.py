@@ -45,6 +45,10 @@ def _twitter_iso(dt: datetime) -> str:
     return dt.isoformat(timespec='seconds') + 'Z'
 
 
+def _twitter_date(dt: datetime) -> str:
+    return dt.strftime('%Y-%m-%d')
+
+
 class SocialGatherer(BaseGatherer):
     """Gathers posts from Twitter, Bluesky, and Mastodon."""
 
@@ -346,8 +350,8 @@ class SocialGatherer(BaseGatherer):
                 "q": query,
                 "queryType": "Latest",
                 "limit": 100,
-                "sinceTime": _twitter_iso(self.start_time),
-                "untilTime": _twitter_iso(self.end_time),
+                "sinceTime": _twitter_date(self.start_time),
+                "untilTime": _twitter_date(self.end_time + timedelta(days=1)),
             }
         else:
             params = {"query": query, "queryType": "Latest"}
