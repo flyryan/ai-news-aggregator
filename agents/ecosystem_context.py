@@ -53,6 +53,22 @@ class EcosystemContextManager:
         'cohere': 'Cohere',
         'z-ai': 'Zhipu/Z.ai',
         'moonshotai': 'Moonshot',
+        # Tier 1 (added 2026-06-29 grounding audit): labs that appear in the
+        # daily aggregator output but previously had ZERO release-date grounding.
+        # All have an OpenRouter id prefix, so discovery + enrichment date them
+        # automatically. The yaml key MUST equal the OpenRouter prefix.
+        'nvidia': 'NVIDIA',
+        'minimax': 'MiniMax',
+        'microsoft': 'Microsoft',
+        'amazon': 'Amazon',
+        'perplexity': 'Perplexity',
+        'nousresearch': 'Nous Research',
+        'allenai': 'Allen AI',
+        'liquid': 'Liquid AI',
+        'baidu': 'Baidu',
+        'ai21': 'AI21',
+        'bytedance': 'ByteDance',
+        'inception': 'Inception',
     }
 
     # Max models per provider to keep prompt size reasonable
