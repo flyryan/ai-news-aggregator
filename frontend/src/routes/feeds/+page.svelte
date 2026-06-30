@@ -238,7 +238,7 @@
 							<a
 								href={variant.url}
 								class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border transition-colors
-									{variant.default
+									{'default' in variant && variant.default
 										? 'bg-trend-gray-100 dark:bg-trend-gray-700 border-trend-gray-300 dark:border-trend-gray-600 text-trend-gray-800 dark:text-trend-gray-100 hover:border-trend-red'
 										: 'border-trend-gray-200 dark:border-trend-gray-700 text-trend-gray-600 dark:text-trend-gray-400 hover:border-trend-gray-400 dark:hover:border-trend-gray-500'
 									}"
@@ -248,7 +248,7 @@
 									<path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
 								</svg>
 								{variant.name}
-								{#if variant.default}
+								{#if 'default' in variant && variant.default}
 									<span class="text-xs text-trend-gray-500">(default)</span>
 								{/if}
 							</a>

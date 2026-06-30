@@ -40,7 +40,7 @@
 						class="w-2 h-2 rounded-full"
 						style="background-color: {config.color}"
 					></span>
-					{count} {config.title.toLowerCase()}
+					{count} {(count === 1 ? config.singularTitle : config.title).toLowerCase()}
 				</span>
 			{/each}
 		</div>

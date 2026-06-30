@@ -37,7 +37,7 @@
 	$: routeKey = `${dateParam ?? 'latest'}|${rawCategoryParam ?? ''}`;
 
 	// Validate params
-	$: isValidDate = !hasExplicitDate || parseDate(dateParam) !== null;
+	$: isValidDate = !hasExplicitDate || parseDate(dateParam ?? '') !== null;
 	$: effectiveDate = hasExplicitDate ? (isValidDate ? dateParam : null) : ($currentDate || null);
 	$: overviewHref = hasExplicitDate && effectiveDate ? `/?date=${effectiveDate}` : '/';
 	$: categoryHref = (category: Category) =>

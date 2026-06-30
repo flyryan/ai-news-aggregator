@@ -139,6 +139,7 @@ export const CATEGORY_CONFIG: Record<
 	Category,
 	{
 		title: string;
+		singularTitle: string;
 		shortTitle: string;
 		color: string;
 		bgClass: string;
@@ -149,6 +150,7 @@ export const CATEGORY_CONFIG: Record<
 > = {
 	news: {
 		title: 'AI News',
+		singularTitle: 'AI News',
 		shortTitle: 'News',
 		color: '#667eea',
 		bgClass: 'bg-category-news',
@@ -158,6 +160,7 @@ export const CATEGORY_CONFIG: Record<
 	},
 	research: {
 		title: 'Research',
+		singularTitle: 'Research',
 		shortTitle: 'Research',
 		color: '#10b981',
 		bgClass: 'bg-category-research',
@@ -167,6 +170,7 @@ export const CATEGORY_CONFIG: Record<
 	},
 	social: {
 		title: 'Social Media',
+		singularTitle: 'Social Media',
 		shortTitle: 'Social',
 		color: '#f59e0b',
 		bgClass: 'bg-category-social',
@@ -176,6 +180,7 @@ export const CATEGORY_CONFIG: Record<
 	},
 	reddit: {
 		title: 'Reddit Discussions',
+		singularTitle: 'Reddit Discussion',
 		shortTitle: 'Reddit',
 		color: '#ef4444',
 		bgClass: 'bg-category-reddit',
