@@ -2,6 +2,30 @@
   {
     "id": "deploy",
     "execute-command": "/home/ubuntu/ai-news-aggregator/scripts/deploy.sh",
-    "command-working-directory": "/home/ubuntu/ai-news-aggregator"
+    "command-working-directory": "/home/ubuntu/ai-news-aggregator",
+    "trigger-rule": {
+      "and": [
+        {
+          "match": {
+            "type": "payload-hmac-sha256",
+            "secret": "CHANGE_ME_SET_A_STRONG_SHARED_SECRET_MATCHING_GITHUB",
+            "parameter": {
+              "source": "header",
+              "name": "X-Hub-Signature-256"
+            }
+          }
+        },
+        {
+          "match": {
+            "type": "value",
+            "value": "refs/heads/main",
+            "parameter": {
+              "source": "payload",
+              "name": "ref"
+            }
+          }
+        }
+      ]
+    }
   }
 ]

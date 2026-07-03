@@ -32,6 +32,8 @@ jobs:
           python-version: "3.11"
       - name: call_with_thinking signature lockstep
         run: python3 -m unittest tests.call_with_thinking_signature_test -v
+      - name: Deploy webhook requires authenticated caller (CWE-306 #1247)
+        run: python3 -m unittest tests.webhook_hook_auth_test -v
 
   hero-retry:
     name: Hero image retry-window guard
