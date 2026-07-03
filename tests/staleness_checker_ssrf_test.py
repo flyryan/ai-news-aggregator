@@ -150,6 +150,23 @@ class SafeGetBlockingTest(unittest.TestCase):
         self.assertEqual(self.session.calls[0][0], "http://redirector.example.com/go")
 
     @patch("agents.staleness_checker.socket.getaddrinfo", side_effect=fake_getaddrinfo)
+    def test_redirect_cap_enforced_exactly(self, _dns):
+        # max_redirects=2 -> 1 original GET + at most 2 redirect follows = 3
+        # outbound requests total. When the 3rd response is still a redirect,
+        # SSRFBlockedError is raised WITHOUT issuing a 4th request.
+        self.session = RecordingSession([
+            make_response(302, {"Location": "http://news.example.com/a"}),
+            make_response(302, {"Location": "http://news.example.com/b"}),
+            make_response(302, {"Location": "http://news.example.com/c"}),
+            make_response(302, {"Location": "http://news.example.com/d"}),
+        ])
+        self.checker._session = self.session
+        with self.assertRaises(SSRFBlockedError):
+            self.checker._safe_get("http://news.example.com/start", max_redirects=2)
+        self.assertEqual(len(self.session.calls), 3,
+                         "cap is 1 original + max_redirects follows, no extra request")
+
+    @patch("agents.staleness_checker.socket.getaddrinfo", side_effect=fake_getaddrinfo)
     def test_allows_public_host(self, _dns):
         self.session = RecordingSession([
             make_response(200, {"Content-Type": "text/html"}, b"<html>ok</html>"),
