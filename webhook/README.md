@@ -25,7 +25,8 @@ Do **not** remove the `trigger-rule` block, and do **not** run a hook with a bla
    openssl rand -hex 32
    ```
    - Replace `CHANGE_ME_SET_A_STRONG_SHARED_SECRET_MATCHING_GITHUB` in `hooks.json` with the generated value.
-   - Set the **same** value as the webhook *Secret* in the GitHub repo settings (Settings → Webhooks → Secret), and set the webhook *Content type* to `application/json` so GitHub signs the payload with `X-Hub-Signature-256`.
+   - Set the **same** value as the webhook *Secret* in the GitHub repo settings (Settings → Webhooks → Secret). Once a secret is set, GitHub includes the `X-Hub-Signature-256` HMAC header on every delivery.
+   - Also set the webhook *Content type* to `application/json`. The content type controls the exact body bytes GitHub signs; a raw JSON body is what this hook's `trigger-rule` expects — both for the HMAC check and for the `payload.ref` branch match.
 
    Never commit the real secret — `hooks.json` is git-ignored.
 
