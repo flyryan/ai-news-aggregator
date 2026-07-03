@@ -21,6 +21,7 @@ python-dateutil, httpx, anthropic):
   python3 -m unittest tests.staleness_checker_ssrf_test -v
 """
 
+import io
 import ipaddress
 import socket
 import sys
@@ -62,6 +63,11 @@ def make_response(status_code=200, headers=None, body=b"", url="http://news.exam
     if headers:
         resp.headers.update(headers)
     resp._content = body
+    # Mirror a real non-streamed response: body already drained and a raw
+    # object present, so Response.close() (called by _safe_get on redirect
+    # hops) behaves exactly as it does in production.
+    resp._content_consumed = True
+    resp.raw = io.BytesIO(body)
     resp.url = url
     return resp
 
