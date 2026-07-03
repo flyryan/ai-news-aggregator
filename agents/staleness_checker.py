@@ -589,6 +589,12 @@ class StalenessChecker:
                 location = response.headers.get("Location")
                 if not location:
                     return response
+                # Explicitly release the intermediate hop's connection back to the
+                # session pool before following the redirect. (With the default
+                # stream=False requests drains the body eagerly, so this is
+                # defensive — it keeps the manual redirect loop safe even if the
+                # fetch is ever switched to streaming.)
+                response.close()
                 current = urljoin(current, location)
                 continue
             return response
