@@ -9,10 +9,12 @@ Applied before reduce-phase ranking/summaries, then run again after continuity
 as a defensive backstop.
 """
 
+import ipaddress
 import logging
 import json
 import os
 import re
+import socket
 from html import unescape
 import yaml
 from datetime import date, datetime, timedelta
@@ -159,6 +161,41 @@ OLD_ANCHOR_FACT_TERMS = {
 }
 
 OLD_ANCHOR_CATEGORIES = {"news", "social", "reddit"}
+
+# --- SSRF guard for outbound freshness fetches (finding #1248, CWE-918) --------
+# StalenessChecker fetches fully untrusted URLs (RSS <link>, second-order
+# <a href>, redirect targets). Route every outbound GET through _safe_get() so a
+# malicious URL cannot reach loopback / RFC1918 / link-local (cloud-metadata)
+# targets, and cannot use a non-http(s) scheme.
+ALLOWED_URL_SCHEMES = frozenset({"http", "https"})
+MAX_SAFE_REDIRECTS = 5
+
+
+class SSRFBlockedError(requests.exceptions.RequestException):
+    """Raised when an outbound fetch targets a disallowed scheme or private address.
+
+    Subclasses requests.RequestException so existing ``except Exception`` handlers
+    around the fetch sinks treat it as an ordinary (logged, non-fatal) fetch failure.
+    """
+
+
+def _ip_is_blocked(ip_str: str) -> bool:
+    """True when ip_str is a non-public address (loopback/private/link-local/etc.)."""
+    try:
+        ip = ipaddress.ip_address(ip_str)
+    except ValueError:
+        return True  # unparseable address -> refuse
+    # Unwrap IPv4-mapped IPv6 (e.g. ::ffff:169.254.169.254) so the v4 rules apply.
+    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped is not None:
+        ip = ip.ipv4_mapped
+    return (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or ip.is_unspecified
+    )
 
 
 class StalenessChecker:
@@ -512,6 +549,51 @@ class StalenessChecker:
             return left == right
         return ".".join(left_parts[-2:]) == ".".join(right_parts[-2:])
 
+    def _hostname_is_safe(self, hostname: str) -> bool:
+        """Resolve hostname and require every resolved address to be public/routable."""
+        if not hostname:
+            return False
+        try:
+            infos = socket.getaddrinfo(hostname, None)
+        except (socket.gaierror, socket.herror, UnicodeError, OSError):
+            return False
+        if not infos:
+            return False
+        for info in infos:
+            sockaddr = info[4]
+            if not sockaddr or _ip_is_blocked(sockaddr[0]):
+                return False
+        return True
+
+    def _safe_get(self, url: str, timeout: int = 12, max_redirects: int = MAX_SAFE_REDIRECTS):
+        """SSRF-guarded GET: http(s) only, no private targets, redirects re-validated.
+
+        Redirects are followed manually (allow_redirects=False) so every hop's scheme
+        and resolved IP are validated before the request is issued — a 302 from an
+        allowlisted domain cannot bounce the fetch into an internal host. Raises
+        SSRFBlockedError when a hop is disallowed.
+        """
+        current = url
+        for _ in range(max_redirects + 1):
+            parsed = urlparse(current)
+            scheme = (parsed.scheme or "").lower()
+            if scheme not in ALLOWED_URL_SCHEMES:
+                raise SSRFBlockedError(f"blocked non-http(s) URL scheme: {scheme!r}")
+            host = (parsed.hostname or "").lower()
+            if not self._hostname_is_safe(host):
+                raise SSRFBlockedError(
+                    f"blocked outbound request to disallowed host: {host!r}"
+                )
+            response = self._session.get(current, timeout=timeout, allow_redirects=False)
+            if response.is_redirect:
+                location = response.headers.get("Location")
+                if not location:
+                    return response
+                current = urljoin(current, location)
+                continue
+            return response
+        raise SSRFBlockedError(f"too many redirects while fetching {url!r}")
+
     def _find_primary_source_url(self, item: AnalyzedItem) -> Optional[str]:
         """Fetch a secondary article and look for an official primary-source link."""
         item_url = item.item.url
@@ -521,7 +603,7 @@ class StalenessChecker:
 
         if item_url not in self._article_page_cache:
             try:
-                response = self._session.get(item_url, timeout=12)
+                response = self._safe_get(item_url, timeout=12)
                 response.raise_for_status()
                 if self._is_html_response(response):
                     self._article_page_cache[item_url] = response.text
@@ -585,7 +667,7 @@ class StalenessChecker:
             return self._primary_date_cache[primary_url]
 
         try:
-            response = self._session.get(primary_url, timeout=12)
+            response = self._safe_get(primary_url, timeout=12)
             response.raise_for_status()
         except Exception as exc:
             logger.debug(f"Freshness check could not fetch primary page {primary_url}: {exc}")
