@@ -23,6 +23,7 @@ python-dateutil, httpx, anthropic):
 
 import io
 import ipaddress
+import logging
 import socket
 import sys
 import unittest
@@ -73,7 +74,10 @@ def make_response(status_code=200, headers=None, body=b"", url="http://news.exam
 
 
 def make_checker():
-    # config_dir missing -> _load_releases logs a warning and returns {} (fine here).
+    # config_dir missing -> _load_releases logs a warning and returns {} (fine
+    # here). Silence that expected warning so it doesn't leak into test/CI
+    # output via logging's lastResort handler.
+    logging.getLogger("agents.staleness_checker").setLevel(logging.ERROR)
     return StalenessChecker(config_dir="/nonexistent", target_date="2026-07-03")
 
 
