@@ -109,6 +109,21 @@ class SafeGetBlockingTest(unittest.TestCase):
             self.checker._safe_get("http://10.1.2.3/")
         self.assertEqual(self.session.calls, [])
 
+    @patch("agents.staleness_checker.socket.getaddrinfo", side_effect=fake_getaddrinfo)
+    def test_blocks_ipv4_mapped_ipv6_metadata_ip(self, _dns):
+        # ::ffff:169.254.169.254 is the IPv4-mapped IPv6 spelling of the cloud
+        # metadata IP. _ip_is_blocked() must unwrap the mapping and apply the
+        # IPv4 rules, so this literal cannot bypass the link-local block.
+        with self.assertRaises(SSRFBlockedError):
+            self.checker._safe_get("http://[::ffff:169.254.169.254]/latest/meta-data/")
+        self.assertEqual(self.session.calls, [], "mapped-IPv6 metadata IP must be blocked")
+
+    @patch("agents.staleness_checker.socket.getaddrinfo", side_effect=fake_getaddrinfo)
+    def test_blocks_ipv6_loopback(self, _dns):
+        with self.assertRaises(SSRFBlockedError):
+            self.checker._safe_get("http://[::1]:8080/admin")
+        self.assertEqual(self.session.calls, [])
+
     def test_blocks_non_http_scheme(self):
         for url in ("file:///etc/passwd", "gopher://127.0.0.1:70/", "ftp://10.0.0.1/"):
             with self.assertRaises(SSRFBlockedError):
