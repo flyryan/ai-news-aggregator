@@ -96,13 +96,52 @@ reach it through Cloudflare. Therefore `:9000` is **not** directly reachable at
 the public IP; the deploy hook's only public path is the Cloudflare hostname,
 now HMAC-gated.
 
+## Wave 4 (2026-07-07): #11 CWE-693 weak CSP, #12 CWE-1427 prompt injection
+
+| Issue | CWE | Fix | Commits |
+|-------|-----|-----|---------|
+| #11 | CWE-693 | Hash-based CSP split + URL scheme allowlist | `e69c1a5` (main, deployed) |
+| #12 | CWE-1427 | Stage 1: input normalization + bounded output schema | `9149e4a` (main) |
+| #12 | CWE-1427 | Stage 2: system/user channel separation + nonce fencing | `a6b3f6a` (`security/wave-4`, pending A/B quality gate) |
+
+**#11 (fixed + deployed):** SvelteKit `kit.csp` (mode `hash`) now owns script
+policy via a per-page `<meta>` CSP whose `script-src` carries the sha256 hash
+of the inline hydration script; the nginx header carries **no**
+`script-src`/`default-src` (a second script policy would be enforced in
+addition to the meta and blank the site), drops `https:` from `img-src`
+(beacon-exfil vector), and adds `worker-src`/`object-src`/`base-uri` plus
+header-only `frame-ancestors`. `NewsCard` hrefs and `json_generator` output
+both pass an http/https/mailto scheme allowlist, closing the `javascript:`-URI
+sink for the SPA, feeds, and search corpus alike. Regression check:
+`scripts/check_csp.sh`. Verified 2026-07-07 on localhost and
+`https://news.aatf.ai` (header + meta hash + hydration + search worker, zero
+console CSP violations).
+
+**#12 stage 1 (on main):** all analyzer context builders normalize untrusted
+text at the `_clip_context_text` chokepoint (NFKC fold, zero-width/bidi/control
+stripping — `agents/prompt_security.py`), `item.url` is capped at 512 chars,
+and `agents/analysis_schema.py` clamps every republished response field
+(scores into 0–100, strings truncated, unknown keys dropped; clamp/repair,
+never reject).
+
+**#12 stage 2 (branch, gated):** operator instructions move verbatim to the
+`system` prompt behind a SECURITY BOUNDARY preamble; untrusted data moves to
+the `user` message inside a per-prompt `secrets.token_hex` nonce fence, across
+the analyzer map/ranking path and the second-order sinks (news filter/combined,
+topic detection, executive summary, link enricher, ecosystem enrichment; the
+hero prompt gets normalization only since an image model has no channel
+split). Gate before merging to main: rerun a checkpointed date with
+`--resume-from 2` and pass `scripts/compare_outputs.py <date>` (top-10
+overlap, score deltas, entity coverage, summary equivalence vs. the committed
+baseline).
+
 ## Remaining / open items
 
 | Item | Status | Notes |
 |------|--------|-------|
 | #10 CWE-345 — `deploy.sh` blind `reset --hard`/force-push without integrity verification | **Open** | Flow-affecting; left for maintainer decision (harden vs. network lockdown). |
-| #11 CWE-693 — Weak CSP (`script-src 'unsafe-inline'`) | **Open** | Wave 4. Undermines XSS defense-in-depth. |
-| #12 CWE-1427 — Indirect prompt injection in analyzer pipeline | **Open** | Wave 4. |
+| #11 CWE-693 — Weak CSP (`script-src 'unsafe-inline'`) | **Fixed** | Wave 4 (`e69c1a5`), deployed to news.aatf.ai 2026-07-07. |
+| #12 CWE-1427 — Indirect prompt injection in analyzer pipeline | **Stage 1 fixed / stage 2 gated** | Wave 4: `9149e4a` on main; `a6b3f6a` on `security/wave-4` pending the output-quality A/B gate. |
 | SSH `:22` open to `0.0.0.0/0` | **Open (infra)** | Only broad SG exposure; key-only auth mitigates. Restrict to admin IPs or move to SSM. |
 | Cloudflare allowlist on `webhook.aatf.ai` | **Optional** | Defense-in-depth: scope to GitHub webhook IP ranges at the CF edge. |
 

@@ -89,6 +89,20 @@ EC2 security group only allows `:22` inbound, so `:443`/`:9000` are reachable
 only via `news.aatf.ai` / `webhook.aatf.ai` through Cloudflare, never at the raw
 IP. See `docs/security/remediation-2026-07.md` for the full remediation record.
 
+### Content Security Policy (split contract — CWE-693 fix, 2026-07-07)
+
+Script policy lives ONLY in the SvelteKit build-time `<meta>` CSP
+(`frontend/svelte.config.js` `kit.csp`, mode `hash`): each prerendered page
+carries a per-page `sha256-` hash for its inline hydration script. The nginx
+header (`nginx.conf`) intentionally has **no `script-src` and no
+`default-src`** — header and meta CSPs are enforced simultaneously, so adding
+either directive to nginx re-blocks the hashed inline script and blanks the
+site. Keep `img-src 'self' data:` (no `https:` — beacon-exfil vector).
+`scripts/check_csp.sh [BASE_URL]` verifies the contract; run it after any
+nginx or svelte.config.js change. Item URLs are scheme-allowlisted
+(http/https/mailto) both server-side (`generators/json_generator.py
+_safe_url`) and in the frontend (`sanitize.ts isSafeUrl`).
+
 ## Architecture
 
 ### Multi-Agent Pipeline (run_pipeline.py)
