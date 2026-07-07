@@ -2,34 +2,45 @@
 
 **Date landed:** 2026-07-07
 **Branch:** `main` (flyryan/ai-news-aggregator) at `917800b`
-**Source:** Project Glasswing (ZDI) AESIR/FENRIR scan (org issues #1–#12; board findings #1247, #1248)
+**Source:** Trend ZDI AESIR/FENRIR scan, using Claude Mythos accessed via Anthropic's Project Glasswing (org issues #1–#12; board findings #1247, #1248)
 
 This document records the security findings remediated on 2026-07-07, how they
 were verified, and what hardening remains open.
 
-## Finding provenance: Project Glasswing (ZDI, Claude Mythos)
+## Finding provenance: Trend ZDI via Anthropic's Project Glasswing (Claude Mythos)
 
-All twelve findings originate from **Project Glasswing**, the Trend Micro
-**Zero Day Initiative (ZDI)** threat-hunting team's AI-driven vulnerability
-discovery program. Under Glasswing, the ZDI team operates **Claude Mythos**
-(Anthropic's Mythos-class model, available to approved organizations — the same
-underlying model as Claude Fable 5, but without the general-availability
-dual-use guardrails) as the analysis engine of the **AESIR**
-vulnerability-discovery pipeline; candidate findings are then run through the
-**FENRIR** adversarial validator (`fenrir-validator`, skills
-`vulnerability-triage` / `reviewing-security` / `fenrir-adversarial-validate`),
-which packages a reproducible `docker-compose` exploit harness, evidence
-artifacts (PCAPs, execution/access logs), and a `confidence-assessment.md`, and
-emits a ZDI-format report (with a "Root Cause Analysis (ZDI Section 4)"
-section) — filtering out false positives before a finding reaches the AATF
-maintainer.
+**Project Glasswing** is **Anthropic's** defensive-security initiative
+(announced 2026-04-07, ~$100M in model-usage credits) that gives partner
+organizations access to **Claude Mythos** — the approved-org, reduced-guardrail
+tier of Anthropic's Mythos-class frontier model, capable of finding and
+exploiting software vulnerabilities at a level beyond most human experts — so
+they can find and fix flaws in their own critical systems before adversaries
+weaponize comparable AI. Access is delivered through the usual model channels
+(Claude API, Amazon Bedrock, Google Vertex AI, Microsoft Foundry), and
+qualifying security teams also receive Anthropic-provided tooling: agent
+**skills**, a **scanning harness**, and **threat-model builders**. (Mythos and
+the generally-available **Claude Fable 5** share the same underlying model;
+Mythos omits the GA dual-use guardrails.)
 
-So these are **Claude-Mythos-discovered, FENRIR-validated ZDI findings**, filed
-here as org issues #1–#12 (the two HIGH findings also went to the ZDI board as
-#1247 / #1248) and remediated by Claude (Fable 5) working with the AATF
-maintainer. Per-finding harnesses and evidence bundles live in each finding's
-`fenrir_package/`, in the `trend-zdi-threat-hunting/zth-aesir-vulnerability-discovery`
-repo under `bugs/Internal/trend-ai-acceleration-task-force/ai-news-aggregator/`.
+**Trend Micro's Zero Day Initiative (ZDI)** team is a Glasswing participant —
+that participation is how we have Claude Mythos access. On top of it the ZDI
+team runs its own discovery-and-validation pipeline (the
+`trend-zdi-threat-hunting` org): **AESIR** is the Mythos-driven discovery stage
+that scanned this repo and filed the raw findings, and **FENRIR** is the
+adversarial validator (`fenrir-validator`, skills `vulnerability-triage` /
+`reviewing-security` / `fenrir-adversarial-validate`) that reproduces each
+candidate in a contained `docker-compose` harness, gathers evidence (PCAPs,
+execution/access logs) and a `confidence-assessment.md`, and emits a ZDI-format
+report (with a "Root Cause Analysis (ZDI Section 4)" section), filtering false
+positives before a finding reaches the AATF maintainer.
+
+So these twelve findings are **Claude-Mythos-discovered (via Glasswing),
+FENRIR-validated ZDI findings**, filed here as org issues #1–#12 (the two HIGH
+findings also went to the ZDI board as #1247 / #1248) and remediated by Claude
+(Fable 5) working with the AATF maintainer. Per-finding harnesses and evidence
+bundles live in each finding's `fenrir_package/`, in the
+`trend-zdi-threat-hunting/zth-aesir-vulnerability-discovery` repo under
+`bugs/Internal/trend-ai-acceleration-task-force/ai-news-aggregator/`.
 
 ## How the fixes were landed: cherry-pick, never merge
 
