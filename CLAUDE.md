@@ -89,6 +89,27 @@ EC2 security group only allows `:22` inbound, so `:443`/`:9000` are reachable
 only via `news.aatf.ai` / `webhook.aatf.ai` through Cloudflare, never at the raw
 IP. See `docs/security/remediation-2026-07.md` for the full remediation record.
 
+### Commit signing (CWE-345 deploy gate, 2026-07-07)
+
+Commits that reach `main` MUST be SSH-signed by a trusted key, or
+`scripts/deploy.sh` aborts the production deploy (it runs `git verify-commit` on
+the `origin/main` tip against `deploy/allowed_signers.example`). This is not a
+per-commit step — it is driven by git config, so once configured every
+`git commit` signs automatically. On a **fresh clone or new machine**, configure
+it before committing:
+
+```bash
+git config --global gpg.format ssh
+git config --global commit.gpgsign true
+git config --global user.signingkey ~/.ssh/id_flyryan.pub   # or your trusted key
+```
+
+CI signs via the `PIPELINE_SIGNING_KEY` secret in `daily-pipeline.yml`. Trusted
+keys live in `deploy/allowed_signers.example`; add a new signer there and in the
+host copy (`/home/ubuntu/deploy_allowed_signers`). If a deploy must ship an
+unsigned tip, set `ALLOW_UNSIGNED_DEPLOY=1` (logged loudly). Full details:
+`deploy/README.md`.
+
 ### Content Security Policy (split contract — CWE-693 fix, 2026-07-07)
 
 Script policy lives ONLY in the SvelteKit build-time `<meta>` CSP

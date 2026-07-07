@@ -376,6 +376,8 @@ jobs:
         if: steps.schedule_gate.outputs.should_run == 'true' && env.COMMIT_OUTPUTS == 'true'
         id: commit
         shell: bash
+        env:
+          PIPELINE_SIGNING_KEY: ${{ secrets.PIPELINE_SIGNING_KEY }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -390,8 +392,24 @@ jobs:
             exit 0
           fi
 
+          # Sign the commit so the deploy gate (scripts/deploy.sh) accepts it.
+          # An unsigned tip on origin/main would abort the production deploy
+          # (CWE-345 fix), so fail loudly here rather than stall publishing.
+          if [ -z "${PIPELINE_SIGNING_KEY:-}" ]; then
+            echo "ERROR: PIPELINE_SIGNING_KEY secret is empty; refusing to create an unsigned commit." >&2
+            echo "  Set the PIPELINE_SIGNING_KEY secret (see deploy/README.md) so deploy.sh will accept the tip." >&2
+            exit 1
+          fi
+          signing_key="${RUNNER_TEMP}/pipeline_signing_key"
+          printf '%s\n' "$PIPELINE_SIGNING_KEY" > "$signing_key"
+          chmod 600 "$signing_key"
+          git config gpg.format ssh
+          git config user.signingkey "$signing_key"
+          git config commit.gpgsign true
+
           report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
-          git commit -m "data: Auto-update ${report_date}"
+          git commit -S -m "data: Auto-update ${report_date}"
+          rm -f "$signing_key"
           echo "committed=true" >> "$GITHUB_OUTPUT"
 
       - name: Upload generated outputs without committing

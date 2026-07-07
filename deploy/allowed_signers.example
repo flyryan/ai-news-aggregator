@@ -1,0 +1,26 @@
+# Trusted SSH signing keys for commits deployed to production.
+#
+# scripts/deploy.sh verifies that the tip of origin/main is signed by one of
+# these keys (git verify-commit against gpg.ssh.allowedSignersFile) before it
+# resets the host to that commit. An unsigned or untrusted tip aborts the deploy.
+#
+# This is the TRACKED TEMPLATE. On the host, copy it to the real file (which is
+# git-ignored) and point deploy.sh at it — see deploy/README.md. Keep the real
+# file OUTSIDE the working tree (e.g. /home/ubuntu/deploy_allowed_signers) so it
+# survives `git reset --hard` / `git clean -fd`.
+#
+# Format (ssh allowed_signers): <principals> [options] <keytype> <key> [comment]
+# The principal is `*` on purpose: git verify-commit passes the committer email
+# as the principal and matches it as a GLOB, and the CI committer email contains
+# `[bot]` which glob would treat as a character class. `*` sidesteps that; the
+# security property (signed by a private key we trust) is unchanged since every
+# key below is ours. namespaces="git" restricts each key to git commit signing.
+
+# Ryan Duff — flyryan identity (~/.ssh/id_flyryan)
+* namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILbbbiyFuYmIOU57MZey5pJc0Cjxnb3EFSp9XRZK3LLN flyryan
+
+# Ryan Duff — EMU identity (~/.ssh/id_ed25519_github_emu)
+* namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOeR7KsiJp5qXm//Pt/9NCDNaRw2+4ZntGmfBi4tbxCh ryan-emu
+
+# AATF daily pipeline CI bot (PIPELINE_SIGNING_KEY secret in flyryan/ai-news-aggregator)
+* namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFoL5hkMSs62pc+L6ilSpKMD/MLvPOsq+tnWy3I5+Ni3 aatf-pipeline-ci
