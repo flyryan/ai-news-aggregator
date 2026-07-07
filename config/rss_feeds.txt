@@ -7,7 +7,10 @@ https://feeds.arstechnica.com/arstechnica/index
 https://www.wired.com/feed/tag/ai/latest/rss
 https://venturebeat.com/category/ai/feed/
 https://www.theguardian.com/technology/artificialintelligenceai/rss
-https://www.artificialintelligence-news.com/feed/rss/
+# artificialintelligence-news.com moved its feed from /feed/rss/ to /feed/
+# (old path 301s/403s), and the site drops connections from Mullvad exit IPs,
+# so this feed bypasses the pipeline proxy (verified 2026-07-07).
+https://www.artificialintelligence-news.com/feed/  proxy=off
 https://techcrunch.com/category/artificial-intelligence/feed/
 https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
 https://www.technologyreview.com/topic/artificial-intelligence/feed/
@@ -22,7 +25,9 @@ https://aibusiness.com/rss.xml
 https://www.marktechpost.com/feed
 https://openai.com/news/rss.xml
 https://blog.google/technology/ai/rss/
-https://blogs.microsoft.com/ai/feed/
+# Microsoft retired blogs.microsoft.com/ai (410 Gone) and folded it into the
+# Microsoft Cloud Blog; this URL serves that feed (verified 2026-07-07).
+https://www.microsoft.com/en-us/ai/blog/feed/
 https://aws.amazon.com/blogs/machine-learning/feed/
 https://blogs.nvidia.com/blog/tag/generative-ai/feed/
 https://github.blog/tag/github-copilot/feed/
@@ -32,7 +37,7 @@ https://huggingface.co/blog/feed.xml
 # Webflow marketing HTML, and /feed, /rss.xml, www.langchain.com/blog/feed
 # all 404 (verified 2026-04-17). Removed to silence warnings.
 # https://blog.langchain.dev/rss/
-https://every.to/chain-of-thought/feed.xml
+https://every.to/chain-of-thought/feed
 https://lastweekin.ai/feed
 https://www.latent.space/feed
 https://semianalysis.com/feed/
