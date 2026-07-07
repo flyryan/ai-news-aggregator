@@ -15,12 +15,10 @@
 # `[bot]` which glob would treat as a character class. `*` sidesteps that; the
 # security property (signed by a private key we trust) is unchanged since every
 # key below is ours. namespaces="git" restricts each key to git commit signing.
-
+# NOTE: no blank lines between entries — some ssh-keygen builds warn on them.
 # Ryan Duff — flyryan identity (~/.ssh/id_flyryan)
 * namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILbbbiyFuYmIOU57MZey5pJc0Cjxnb3EFSp9XRZK3LLN flyryan
-
 # Ryan Duff — EMU identity (~/.ssh/id_ed25519_github_emu)
 * namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOeR7KsiJp5qXm//Pt/9NCDNaRw2+4ZntGmfBi4tbxCh ryan-emu
-
 # AATF daily pipeline CI bot (PIPELINE_SIGNING_KEY secret in flyryan/ai-news-aggregator)
 * namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFoL5hkMSs62pc+L6ilSpKMD/MLvPOsq+tnWy3I5+Ni3 aatf-pipeline-ci
