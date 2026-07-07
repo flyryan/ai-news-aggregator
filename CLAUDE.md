@@ -72,6 +72,23 @@ Hosted runner egress can be proxied with `PIPELINE_PROXY_URL` for all sources or
 
 Use `scripts/post_pipeline_verify.sh` for hosted-site verification. It is configured with environment variables: set `AWS_HOST` directly, or set `AWS_PROFILE` plus `AWS_INSTANCE_ID`/`AWS_INSTANCE_NAME` for EC2 lookup. Set `REBUILD_WEB=true` when the deployment includes frontend source or web-image changes.
 
+### Deploy Webhook Security
+
+Pushing to the publishing repo's `main` triggers a deploy on the origin host via
+an [`adnanh/webhook`](https://github.com/adnanh/webhook) listener (`webhook/hooks.json`,
+git-ignored on the host; `webhook/hooks.example.json` is the tracked template).
+The `deploy` hook runs `scripts/deploy.sh` and is **HMAC-gated** (CWE-306 fix,
+2026-07-07): its `trigger-rule` requires a valid `X-Hub-Signature-256` (shared
+secret set on both the GitHub repo webhook and the host `hooks.json`) **and**
+`payload.ref == refs/heads/main`. When editing the hook, keep both conditions —
+a missing `trigger-rule` means match-all/unauthenticated. Rotate the secret
+GitHub-first, then the host, to avoid failed deliveries.
+
+The origin is fronted by a Cloudflare tunnel (`cloudflared`, outbound-only); its
+EC2 security group only allows `:22` inbound, so `:443`/`:9000` are reachable
+only via `news.aatf.ai` / `webhook.aatf.ai` through Cloudflare, never at the raw
+IP. See `docs/security/remediation-2026-07.md` for the full remediation record.
+
 ## Architecture
 
 ### Multi-Agent Pipeline (run_pipeline.py)
