@@ -236,7 +236,7 @@ The summary should capture the pulse of AI community discussions."""
                 "author": self._clip_context_text(item.author),
                 "content": self._clip_context_text(item.content, 1000),
                 "engagement": item.metadata.get('engagement', {}),
-                "url": item.url,
+                "url": self._clip_context_text(item.url, 512),
             })
         return self._json_items_context(records)
 

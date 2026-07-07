@@ -241,7 +241,7 @@ The summary should capture what the AI community on Reddit is debating and build
                     "score": engagement.get('score', 0),
                     "num_comments": engagement.get('num_comments', 0),
                 },
-                "url": item.url,
+                "url": self._clip_context_text(item.url, 512),
             })
         return self._json_items_context(records)
 

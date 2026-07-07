@@ -18,6 +18,8 @@ from urllib.parse import urlparse
 import re
 
 from .llm_client import AnthropicClient, AsyncAnthropicClient, ThinkingLevel, LLMResponse
+from .analysis_schema import sanitize_batch_result, sanitize_ranking_result
+from .prompt_security import normalize_untrusted_text
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -588,6 +590,7 @@ class BaseAnalyzer(ABC):
                     batch_items, batch_index, total_batches, sub_label, str(parse_error)
                 )
 
+            result = sanitize_batch_result(result, where=f"{self.category} map {label}")
             batch_themes = result.get('themes', result.get('category_themes', []))
             parsed_items = result.get('items', [])
             logger.info(f"  {self.category} map {label}: {len(parsed_items)} items, {len(batch_themes)} themes")
@@ -622,6 +625,7 @@ class BaseAnalyzer(ABC):
                     return await self._handle_truncated_batch(
                         batch_items, batch_index, total_batches, sub_label, str(parse_error)
                     )
+                result = sanitize_batch_result(result, where=f"{self.category} map {label} retry")
                 batch_themes = result.get('themes', result.get('category_themes', []))
                 parsed_items = result.get('items', [])
                 logger.info(f"  {self.category} map {label}: {len(parsed_items)} items, {len(batch_themes)} themes (retry)")
@@ -963,7 +967,10 @@ class BaseAnalyzer(ABC):
                     f"after escalation; sanitizing a possibly-incomplete category_summary."
                 )
 
-            ranking_result = self._parse_json_response(response.content)
+            ranking_result = sanitize_ranking_result(
+                self._parse_json_response(response.content),
+                where=f"{self.category} reduce",
+            )
             if response.stop_reason == "max_tokens" and ranking_result.get('category_summary'):
                 ranking_result['category_summary'] = self._sanitize_truncated_summary(
                     ranking_result['category_summary']
@@ -1108,17 +1115,17 @@ class BaseAnalyzer(ABC):
                 "source": item.source,
                 "published": item.published,
                 "content": self._clip_context_text(item.content, 500),
-                "url": item.url,
+                "url": self._clip_context_text(item.url, 512),
             },
             ensure_ascii=False,
             indent=2,
         )
 
     def _clip_context_text(self, value: Any, max_chars: int = 800) -> str:
-        """Trim source text before placing it in LLM context."""
+        """Normalize and trim untrusted source text before placing it in LLM context."""
         if value is None:
             return ""
-        text = str(value).replace("\x00", "")
+        text = normalize_untrusted_text(str(value))
         return text[:max_chars] + "..." if len(text) > max_chars else text
 
     def _json_items_context(self, records: List[Dict[str, Any]]) -> str:
@@ -1137,7 +1144,7 @@ class BaseAnalyzer(ABC):
                 "source": item.source,
                 "published": item.published,
                 "content": self._clip_context_text(item.content, 500),
-                "url": item.url,
+                "url": self._clip_context_text(item.url, 512),
             })
         return self._json_items_context(records)
 

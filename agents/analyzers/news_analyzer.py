@@ -15,6 +15,7 @@ import os
 from datetime import datetime
 from typing import List, Optional, Set
 
+from ..analysis_schema import sanitize_batch_result
 from ..base import (
     BaseAnalyzer, CollectedItem, AnalyzedItem,
     CategoryReport, CategoryTheme
@@ -439,7 +440,10 @@ Snippet: {item.content[:300]}...
                 caller="news_analyzer.small_batch"
             )
 
-            result = self._parse_json_response(response.content)
+            result = sanitize_batch_result(
+                self._parse_json_response(response.content),
+                where="news small_batch",
+            )
             thinking = response.thinking
 
             logger.info(self._thinking_log_message("Small batch thinking", response))
@@ -569,7 +573,7 @@ Snippet: {item.content[:300]}...
                 "source": item.source,
                 "published": item.published,
                 "source_type": item.source_type,
-                "url": item.url,
+                "url": self._clip_context_text(item.url, 512),
                 "content": self._clip_context_text(item.content, 800),
                 "tags": item.tags,
                 "freshness": item.metadata.get("freshness") if isinstance(item.metadata, dict) else None,

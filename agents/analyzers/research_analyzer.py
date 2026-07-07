@@ -233,7 +233,7 @@ The summary should read like a technical briefing for researchers and practition
                 "source_type": item.source_type,
                 "category": item.metadata.get('category_name', ''),
                 "content": self._clip_context_text(item.content, content_limit),
-                "url": item.url,
+                "url": self._clip_context_text(item.url, 512),
             })
         return self._json_items_context(records)
 
