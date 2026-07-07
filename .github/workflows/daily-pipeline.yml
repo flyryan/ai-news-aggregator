@@ -406,10 +406,15 @@ jobs:
           git config gpg.format ssh
           git config user.signingkey "$signing_key"
           git config commit.gpgsign true
+          # rebase.gpgSign so the `git pull --rebase` in the Push step re-signs
+          # the recreated commit (a plain rebase drops the signature). These
+          # git config values persist in .git/config for that later step; the
+          # key file stays in the ephemeral RUNNER_TEMP for the same reason and
+          # is discarded with the runner.
+          git config rebase.gpgSign true
 
           report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
           git commit -S -m "data: Auto-update ${report_date}"
-          rm -f "$signing_key"
           echo "committed=true" >> "$GITHUB_OUTPUT"
 
       - name: Upload generated outputs without committing
