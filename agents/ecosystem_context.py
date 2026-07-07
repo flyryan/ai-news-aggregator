@@ -776,7 +776,7 @@ IMPORTANT:
             ga_date = release.get('ga_date', coverage_date.isoformat())
 
             # Validate LLM-supplied scalars before they are spliced into YAML (CWE-116).
-            if not re.match(r'^[A-Za-z0-9][A-Za-z0-9._\- ]{0,63}$', model_name):
+            if not re.match(r'^[A-Za-z0-9][A-Za-z0-9._+/() \-]{0,63}$', model_name):
                 logger.warning(f"Skipping release with invalid model_name: {model_name!r}")
                 continue
             if not re.match(r'^\d{4}-\d{2}-\d{2}$', ga_date):

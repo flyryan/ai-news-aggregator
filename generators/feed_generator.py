@@ -46,7 +46,7 @@ def encode_url_for_xml(url: str) -> str:
         encoded_path = quote(parsed.path, safe='/:@!$&\'()*+,;=')
         # Encode query string if present
         encoded_query = quote(parsed.query, safe='/:@!$&\'()*+,;=?') if parsed.query else ''
-        encoded_fragment = quote(parsed.fragment, safe="!$&'()*+,;=:@/?") if parsed.fragment else ''
+        encoded_fragment = quote(parsed.fragment, safe="!$&'()*+,;=:@/?%") if parsed.fragment else ''
         # Reconstruct URL
         encoded_url = urlunparse((
             parsed.scheme,
