@@ -181,8 +181,6 @@ stories, scores 32–42 — far below the top-10 cutoff).
 | #10 CWE-345 — `deploy.sh` blind `reset --hard`/force-push without integrity verification | **Open** | Flow-affecting; left for maintainer decision (harden vs. network lockdown). |
 | #11 CWE-693 — Weak CSP (`script-src 'unsafe-inline'`) | **Fixed** | Wave 4 (`e69c1a5`), deployed to news.aatf.ai 2026-07-07. |
 | #12 CWE-1427 — Indirect prompt injection in analyzer pipeline | **Fixed** | Wave 4: `9149e4a` + `bf969d7` on main; A/B output-quality gate passed 2026-07-07. |
-| SSH `:22` open to `0.0.0.0/0` | **Open (infra)** | Only broad SG exposure; key-only auth mitigates. Restrict to admin IPs or move to SSM. |
-| Cloudflare allowlist on `webhook.aatf.ai` | **Optional** | Defense-in-depth: scope to GitHub webhook IP ranges at the CF edge. |
 
 ### Non-blocking hardening noted during review (SSRF)
 
