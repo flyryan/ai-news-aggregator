@@ -4,6 +4,7 @@
 	import { formatRelativeTime } from '$lib/services/dateUtils';
 	import { markdownToHtml } from '$lib/services/markdown';
 	import { safeHtml } from '$lib/services/safeHtml';
+	import { isSafeUrl } from '$lib/services/sanitize';
 	import CategoryBadge from './CategoryBadge.svelte';
 
 	export let item: NewsItem;
@@ -22,6 +23,7 @@
 	}
 
 	$: config = CATEGORY_CONFIG[category];
+	$: safeUrl = isSafeUrl(item.url) ? item.url : undefined;
 	$: hasContent = item.content && item.content.length > 0;
 	$: truncatedContent = item.content?.slice(0, 300);
 	$: needsTruncation = item.content?.length > 300;
@@ -51,7 +53,7 @@
 
 			<h3 class="font-semibold text-trend-gray-800 dark:text-trend-gray-100 leading-snug">
 				<a
-					href={item.url}
+					href={safeUrl}
 					target="_blank"
 					rel="noopener noreferrer"
 					class="hover:text-trend-red transition-colors"
@@ -146,7 +148,7 @@
 	<!-- Actions -->
 	<div class="flex items-center justify-between pt-3 border-t border-trend-gray-100 dark:border-trend-gray-700">
 		<a
-			href={item.url}
+			href={safeUrl}
 			target="_blank"
 			rel="noopener noreferrer"
 			class="text-sm font-medium text-trend-red hover:text-guardian-red transition-colors"

@@ -25,6 +25,24 @@ const config = {
 				// Throw for all other errors
 				throw new Error(message);
 			}
+		},
+		// script-src gets per-page 'sha256-…' hashes for SvelteKit's inline hydration
+		// script at build time; frame-ancestors is auto-omitted from the <meta> tag by
+		// SvelteKit and enforced by the nginx header instead.
+		csp: {
+			mode: 'hash',
+			directives: {
+				'default-src': ['self'],
+				'script-src': ['self'],
+				'style-src': ['self', 'unsafe-inline'],
+				'img-src': ['self', 'data:'],
+				'font-src': ['self'],
+				'connect-src': ['self'],
+				'worker-src': ['self'],
+				'object-src': ['none'],
+				'base-uri': ['self'],
+				'frame-ancestors': ['self']
+			}
 		}
 	}
 };

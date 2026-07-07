@@ -19,6 +19,11 @@ const ALLOWED_ATTR = ['href', 'class', 'target', 'rel'];
 // Also allows relative URLs starting with /, #, or ?
 const ALLOWED_URI_REGEXP = /^(?:https?:|mailto:|\/|#|\?)/i;
 
+// External item links must be absolute http(s)/mailto; anything else (javascript:, data:, relative) is dropped.
+export function isSafeUrl(url: string | undefined | null): boolean {
+	return !!url && /^(?:https?:|mailto:)/i.test(url.trim());
+}
+
 /**
  * Sanitize HTML string to prevent XSS attacks.
  *

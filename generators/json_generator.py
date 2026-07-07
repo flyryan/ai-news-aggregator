@@ -27,6 +27,18 @@ ALLOWED_ATTRIBUTES = {
     'a': {'href', 'class', 'target'},  # 'rel' handled by nh3's link_rel parameter
 }
 
+# URL scheme allowlist for published item links
+_SAFE_URL_SCHEMES = ("http://", "https://", "mailto:")
+
+
+def _safe_url(url):
+    """Return url only if it uses an allowlisted scheme; else '' (blocks javascript:/data: etc.)."""
+    if not url or not isinstance(url, str):
+        return ""
+    if url.strip().lower().startswith(_SAFE_URL_SCHEMES):
+        return url.strip()
+    return ""
+
 
 def get_arxiv_notice(report_date: str) -> Optional[Dict[str, str]]:
     """
@@ -284,7 +296,7 @@ class JSONGenerator:
                     'id': base.get('id', ''),
                     'title': base.get('title', ''),
                     'content': base.get('content', ''),
-                    'url': base.get('url', ''),
+                    'url': _safe_url(base.get('url', '')),
                     'author': base.get('author', ''),
                     'published': base.get('published', ''),
                     'source': base.get('source', ''),
@@ -303,7 +315,7 @@ class JSONGenerator:
                     'id': item.get('id', ''),
                     'title': item.get('title', ''),
                     'content': item.get('content', ''),
-                    'url': item.get('url', ''),
+                    'url': _safe_url(item.get('url', '')),
                     'author': item.get('author', ''),
                     'published': item.get('published', ''),
                     'source': item.get('source', ''),
