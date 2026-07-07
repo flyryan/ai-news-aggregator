@@ -2,17 +2,34 @@
 
 **Date landed:** 2026-07-07
 **Branch:** `main` (flyryan/ai-news-aggregator) at `917800b`
-**Source:** AESIR/FENRIR repo scan (org issues #1–#12; board findings #1247, #1248)
+**Source:** Project Glasswing (ZDI) AESIR/FENRIR scan (org issues #1–#12; board findings #1247, #1248)
 
 This document records the security findings remediated on 2026-07-07, how they
 were verified, and what hardening remains open.
 
-## Summary
+## Finding provenance: Project Glasswing (ZDI, Claude Mythos)
 
-Eight findings were fixed and landed on `main`. Two HIGH-severity findings
-(the deploy-webhook auth bypass and the StalenessChecker SSRF) were additionally
-closed on the live production host. Three findings (deploy integrity, CSP,
-prompt injection) remain open and are tracked below.
+All twelve findings originate from **Project Glasswing**, the Trend Micro
+**Zero Day Initiative (ZDI)** threat-hunting team's AI-driven vulnerability
+discovery program. Under Glasswing, the ZDI team operates **Claude Mythos**
+(Anthropic's Mythos-class model, available to approved organizations — the same
+underlying model as Claude Fable 5, but without the general-availability
+dual-use guardrails) as the analysis engine of the **AESIR**
+vulnerability-discovery pipeline; candidate findings are then run through the
+**FENRIR** adversarial validator (`fenrir-validator`, skills
+`vulnerability-triage` / `reviewing-security` / `fenrir-adversarial-validate`),
+which packages a reproducible `docker-compose` exploit harness, evidence
+artifacts (PCAPs, execution/access logs), and a `confidence-assessment.md`, and
+emits a ZDI-format report (with a "Root Cause Analysis (ZDI Section 4)"
+section) — filtering out false positives before a finding reaches the AATF
+maintainer.
+
+So these are **Claude-Mythos-discovered, FENRIR-validated ZDI findings**, filed
+here as org issues #1–#12 (the two HIGH findings also went to the ZDI board as
+#1247 / #1248) and remediated by Claude (Fable 5) working with the AATF
+maintainer. Per-finding harnesses and evidence bundles live in each finding's
+`fenrir_package/`, in the `trend-zdi-threat-hunting/zth-aesir-vulnerability-discovery`
+repo under `bugs/Internal/trend-ai-acceleration-task-force/ai-news-aggregator/`.
 
 ## How the fixes were landed: cherry-pick, never merge
 
