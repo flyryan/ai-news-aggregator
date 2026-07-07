@@ -102,7 +102,7 @@ now HMAC-gated.
 |-------|-----|-----|---------|
 | #11 | CWE-693 | Hash-based CSP split + URL scheme allowlist | `e69c1a5` (main, deployed) |
 | #12 | CWE-1427 | Stage 1: input normalization + bounded output schema | `9149e4a` (main) |
-| #12 | CWE-1427 | Stage 2: system/user channel separation + nonce fencing | `a6b3f6a` (`security/wave-4`, pending A/B quality gate) |
+| #12 | CWE-1427 | Stage 2: system/user channel separation + nonce fencing | `bf969d7` (merged to main 2026-07-07 after passing the A/B quality gate) |
 
 **#11 (fixed + deployed):** SvelteKit `kit.csp` (mode `hash`) now owns script
 policy via a per-page `<meta>` CSP whose `script-src` carries the sha256 hash
@@ -124,16 +124,27 @@ and `agents/analysis_schema.py` clamps every republished response field
 (scores into 0–100, strings truncated, unknown keys dropped; clamp/repair,
 never reject).
 
-**#12 stage 2 (branch, gated):** operator instructions move verbatim to the
+**#12 stage 2 (merged after gate):** operator instructions move verbatim to the
 `system` prompt behind a SECURITY BOUNDARY preamble; untrusted data moves to
 the `user` message inside a per-prompt `secrets.token_hex` nonce fence, across
 the analyzer map/ranking path and the second-order sinks (news filter/combined,
 topic detection, executive summary, link enricher, ecosystem enrichment; the
 hero prompt gets normalization only since an image model has no channel
-split). Gate before merging to main: rerun a checkpointed date with
-`--resume-from 2` and pass `scripts/compare_outputs.py <date>` (top-10
-overlap, score deltas, entity coverage, summary equivalence vs. the committed
-baseline).
+split).
+
+**A/B quality gate (run 2026-07-07, PASS):** the 2026-07-07 report was
+regenerated from the gathering checkpoint (`--resume-from 2`, identical
+analysis inputs) and compared to the committed baseline with
+`scripts/compare_outputs.py`. Research/social/reddit: 0% item loss, top-10
+overlap 5–7/10, mean |score Δ| 4–6 (temperature-1.0 rank jitter). The script's
+one flagged failure (news "lost" 4 items) was traced to input provenance, not
+prompts: those 4 articles were never in the local gathering checkpoint (the
+baseline CI run's link-follower had captured them); input-corrected news loss
+was 0/33 with top-10 overlap 5/6. Executive summaries were qualitatively
+equivalent (same top story and section structure). A 3×-vs-3× controlled
+probe of the news filter showed the new structure is stable run-to-run and
+marginally more inclusive on 3–4 gray-zone items (AI-attributed layoff
+stories, scores 32–42 — far below the top-10 cutoff).
 
 ## Remaining / open items
 
@@ -141,7 +152,7 @@ baseline).
 |------|--------|-------|
 | #10 CWE-345 — `deploy.sh` blind `reset --hard`/force-push without integrity verification | **Open** | Flow-affecting; left for maintainer decision (harden vs. network lockdown). |
 | #11 CWE-693 — Weak CSP (`script-src 'unsafe-inline'`) | **Fixed** | Wave 4 (`e69c1a5`), deployed to news.aatf.ai 2026-07-07. |
-| #12 CWE-1427 — Indirect prompt injection in analyzer pipeline | **Stage 1 fixed / stage 2 gated** | Wave 4: `9149e4a` on main; `a6b3f6a` on `security/wave-4` pending the output-quality A/B gate. |
+| #12 CWE-1427 — Indirect prompt injection in analyzer pipeline | **Fixed** | Wave 4: `9149e4a` + `bf969d7` on main; A/B output-quality gate passed 2026-07-07. |
 | SSH `:22` open to `0.0.0.0/0` | **Open (infra)** | Only broad SG exposure; key-only auth mitigates. Restrict to admin IPs or move to SSM. |
 | Cloudflare allowlist on `webhook.aatf.ai` | **Optional** | Defense-in-depth: scope to GitHub webhook IP ranges at the CF edge. |
 

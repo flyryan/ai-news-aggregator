@@ -20,6 +20,14 @@ runs of the SAME code do not produce identical rankings. The gate exists to
 catch structural regressions (empty summaries, collapsed rankings, mass score
 shifts), while summary equivalence is judged by reading the printed
 side-by-side text.
+
+CAVEAT (learned 2026-07-07): the item-loss metric assumes the local gathering
+checkpoint matches the gathering that produced the baseline outputs. If the
+baseline came from a different run (e.g. CI at 3 AM), its link-follower may
+have captured articles the local checkpoint lacks — a "lost items" failure
+must be input-verified (is the lost id present in
+data/checkpoints/<date>/gathering.json at all?) before being attributed to a
+prompt change.
 """
 
 import argparse
