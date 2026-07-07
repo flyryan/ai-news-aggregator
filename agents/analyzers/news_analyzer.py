@@ -21,6 +21,12 @@ from ..base import (
     CategoryReport, CategoryTheme
 )
 from ..llm_client import AnthropicClient, AsyncAnthropicClient, ThinkingLevel
+from ..prompt_security import (
+    DATA_POINTER,
+    build_fenced_user_message,
+    build_hardened_system,
+    new_fence_nonce,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -349,28 +355,34 @@ The summary should read like a professional briefing, focusing on what matters f
             id_map[truncated_id] = item.id
             context_parts.append(f"""
 ID: {truncated_id}
-Title: {item.title}
+Title: {self._clip_context_text(item.title, 300)}
 Source: {item.source}
-Snippet: {item.content[:300]}...
+Snippet: {self._clip_context_text(item.content, 300)}...
 """)
 
         items_context = '\n---'.join(context_parts)
         example_id = self._truncate_id(items[0].id)
+        # CWE-1427: filter instructions travel in the system prompt; the
+        # untrusted article text travels in the user message inside a fence.
+        nonce = new_fence_nonce()
         if self.prompt_accessor:
-            prompt = self.prompt_accessor.get_analyzer_prompt(
+            instructions = self.prompt_accessor.get_analyzer_prompt(
                 self.category, 'filter',
-                {'items_context': items_context, 'example_id': example_id}
+                {'items_context': DATA_POINTER, 'example_id': example_id}
             )
         else:
             # Fallback to class constant for backwards compatibility
-            prompt = self.FILTER_PROMPT.format(
-                items_context=items_context,
+            instructions = self.FILTER_PROMPT.format(
+                items_context=DATA_POINTER,
                 example_id=example_id
             )
+        system_prompt = build_hardened_system(instructions, nonce)
+        user_message = build_fenced_user_message(items_context, nonce)
 
         try:
             response = await self.async_client.call_with_thinking(
-                messages=[{"role": "user", "content": prompt}],
+                messages=[{"role": "user", "content": user_message}],
+                system=system_prompt,
                 profile=ThinkingLevel.QUICK,  # Fast filter
                 caller="news_analyzer.filter"
             )
@@ -421,21 +433,29 @@ Snippet: {item.content[:300]}...
         # Build items context
         items_context = self._build_items_context(items, max_items=len(items))
 
+        # CWE-1427: instructions in system, untrusted item data nonce-fenced
+        # in the user message.
+        nonce = new_fence_nonce()
         if self.prompt_accessor:
-            prompt = self.prompt_accessor.get_analyzer_prompt(
+            instructions = self.prompt_accessor.get_analyzer_prompt(
                 self.category, 'combined_analysis',
-                {'count': len(items), 'items_context': items_context}
+                {'count': len(items), 'items_context': DATA_POINTER}
             )
         else:
             # Fallback to class constant for backwards compatibility
-            prompt = self.COMBINED_ANALYSIS_PROMPT.format(
+            instructions = self.COMBINED_ANALYSIS_PROMPT.format(
                 count=len(items),
-                items_context=items_context
+                items_context=DATA_POINTER
             )
+        system_prompt = build_hardened_system(
+            instructions, nonce, grounding=self.grounding_context
+        )
+        user_message = build_fenced_user_message(items_context, nonce)
 
         try:
             response = await self.async_client.call_with_thinking(
-                messages=[{"role": "user", "content": prompt}],
+                messages=[{"role": "user", "content": user_message}],
+                system=system_prompt,
                 profile=ThinkingLevel.DEEP,  # Higher profile for combined task
                 caller="news_analyzer.small_batch"
             )

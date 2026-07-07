@@ -19,7 +19,13 @@ import re
 
 from .llm_client import AnthropicClient, AsyncAnthropicClient, ThinkingLevel, LLMResponse
 from .analysis_schema import sanitize_batch_result, sanitize_ranking_result
-from .prompt_security import normalize_untrusted_text
+from .prompt_security import (
+    DATA_POINTER,
+    build_fenced_user_message,
+    build_hardened_system,
+    new_fence_nonce,
+    normalize_untrusted_text,
+)
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -559,19 +565,25 @@ class BaseAnalyzer(ABC):
                 (e.g. "a", "b", "ab"); purely cosmetic for logging.
         """
         items_context = self._build_items_context(batch_items, max_items=len(batch_items))
-        prompt = self._get_batch_analysis_prompt(items_context, batch_index, total_batches)
+        # CWE-1427: operator instructions travel in the system prompt (with
+        # ecosystem grounding and the anti-injection preamble); the untrusted
+        # item data travels in the user message inside a nonce fence.
+        nonce = new_fence_nonce()
+        instructions = self._get_batch_analysis_prompt(DATA_POINTER, batch_index, total_batches)
+        system_prompt = build_hardened_system(instructions, nonce, grounding=self.grounding_context)
+        user_message = build_fenced_user_message(items_context, nonce)
 
         label = f"{batch_index + 1}{sub_label}/{total_batches}"
         caller_suffix = f"{batch_index}{sub_label}"
         logger.info(
             f"  {self.category} map {label}: sending {len(batch_items)} items "
-            f"(prompt_chars={len(prompt)}, system_chars={len(self.grounding_context or '')})"
+            f"(user_chars={len(user_message)}, system_chars={len(system_prompt)})"
         )
 
         try:
             response = await self.async_client.call_with_thinking(
-                messages=[{"role": "user", "content": prompt}],
-                system=self.grounding_context,  # Inject ecosystem grounding
+                messages=[{"role": "user", "content": user_message}],
+                system=system_prompt,
                 profile=ThinkingLevel.STANDARD,  # Quality batch processing
                 caller=f"{self.category}_analyzer.batch_{caller_suffix}"
             )
@@ -608,8 +620,8 @@ class BaseAnalyzer(ABC):
             try:
                 await asyncio.sleep(5)
                 response = await self.async_client.call_with_thinking(
-                    messages=[{"role": "user", "content": prompt}],
-                    system=self.grounding_context,  # Inject ecosystem grounding
+                    messages=[{"role": "user", "content": user_message}],
+                    system=system_prompt,
                     profile=ThinkingLevel.STANDARD,
                     caller=f"{self.category}_analyzer.batch_{caller_suffix}_retry"
                 )
@@ -857,7 +869,7 @@ class BaseAnalyzer(ABC):
         # Add top candidates
         parts.append("TOP CANDIDATES (by initial score):\n")
         for i, item in enumerate(top_candidates[:30], 1):
-            parts.append(f"{i}. [{item.item.id}] {item.item.title}")
+            parts.append(f"{i}. [{item.item.id}] {self._clip_context_text(item.item.title, 300)}")
             parts.append(f"   Score: {item.importance_score} | {item.reasoning[:100] if item.reasoning else 'N/A'}")
             parts.append(f"   Summary: {item.summary[:150] if item.summary else 'N/A'}")
             parts.append("")
@@ -945,13 +957,25 @@ class BaseAnalyzer(ABC):
                 metadata = item.item.metadata if isinstance(item.item.metadata, dict) else {}
                 freshness = metadata.get('freshness') if isinstance(metadata.get('freshness'), dict) else {}
                 reason = freshness.get('reason', 'freshness policy')
-                ranking_context += f"- [{item.item.id}] {item.item.title} ({reason})\n"
-        ranking_prompt = self._get_ranking_prompt(ranking_context)
+                ranking_context += f"- [{item.item.id}] {self._clip_context_text(item.item.title, 300)} ({reason})\n"
+
+        # CWE-1427: ranking instructions travel in the system prompt; the
+        # candidate context (which quotes untrusted titles) travels in the
+        # user message inside a nonce fence.
+        nonce = new_fence_nonce()
+        ranking_instructions = self._get_ranking_prompt(DATA_POINTER)
+        system_prompt = build_hardened_system(
+            ranking_instructions, nonce, grounding=self.grounding_context
+        )
+        ranking_user = build_fenced_user_message(
+            ranking_context, nonce,
+            task_line="Rank the fenced analysis results below according to your system instructions.",
+        )
 
         try:
             response = await self.async_client.call_with_thinking(
-                messages=[{"role": "user", "content": ranking_prompt}],
-                system=self.grounding_context,  # Inject ecosystem grounding
+                messages=[{"role": "user", "content": ranking_user}],
+                system=system_prompt,
                 profile=self.thinking_budget,  # DEEP
                 caller=f"{self.category}_analyzer.reduce_rank",
                 # Ranking + summary is a single max-effort call whose thinking

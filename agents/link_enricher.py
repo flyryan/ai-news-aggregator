@@ -15,6 +15,12 @@ from typing import Dict, List, Tuple, Any, Optional
 from dataclasses import dataclass
 
 from .llm_client import AsyncAnthropicClient, ThinkingLevel
+from .prompt_security import (
+    build_fenced_user_message,
+    build_hardened_system,
+    new_fence_nonce,
+    normalize_untrusted_text,
+)
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -221,7 +227,7 @@ class LinkEnricher:
                 if item_id and title:
                     items.append({
                         'id': item_id,
-                        'title': title,
+                        'title': normalize_untrusted_text(title)[:300],
                         'category': category,
                         'summary': summary[:200] if summary else ''
                     })
@@ -254,14 +260,20 @@ class LinkEnricher:
         # every story mentioned by the executive summary.
         items_json = json.dumps(items[:140], indent=2, ensure_ascii=False)
 
+        # CWE-1427: enrichment instructions travel in the system prompt; the
+        # item list and text to enrich travel in the user message inside a
+        # nonce fence, as labeled sections the instruction pointers name.
+        nonce = new_fence_nonce()
+        items_pointer = "[Provided in the user message inside the <source_data> fence, under AVAILABLE ITEMS.]"
+        text_pointer = "[Provided in the user message inside the <source_data> fence, under TEXT TO ENRICH.]"
         if self.prompt_accessor:
-            prompt = self.prompt_accessor.get_post_processing_prompt(
+            instructions = self.prompt_accessor.get_post_processing_prompt(
                 'link_enrichment',
-                {'date': self.date, 'items_json': items_json, 'text': text}
+                {'date': self.date, 'items_json': items_pointer, 'text': text_pointer}
             )
         else:
             # Fallback to inline prompt for backwards compatibility
-            prompt = f"""You are a link enrichment agent. Add contextual "read more" links to summary text so readers can dive deeper into stories.
+            instructions = f"""You are a link enrichment agent. Add contextual "read more" links to summary text so readers can dive deeper into stories.
 
 LINKING STRATEGY (CRITICAL):
 1. Keep links SHORT (3-7 words max) - just the key action phrase
@@ -287,10 +299,10 @@ CRITICAL: The hash MUST start with "item-" followed by the item's id. Example:
 DATE: {self.date}
 
 AVAILABLE ITEMS (ordered by importance - use id and category exactly as shown):
-{items_json}
+{items_pointer}
 
 TEXT TO ENRICH:
-{text}
+{text_pointer}
 
 OUTPUT (JSON only, no markdown code blocks):
 {{
@@ -306,9 +318,20 @@ CRITICAL JSON FORMATTING:
 
 Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not entities. Avoid bold markers inside links."""
 
+        system_prompt = build_hardened_system(instructions, nonce)
+        fenced_payload = (
+            f"AVAILABLE ITEMS (ordered by importance):\n{items_json}\n\n"
+            f"TEXT TO ENRICH:\n{text}"
+        )
+        user_message = build_fenced_user_message(
+            fenced_payload, nonce,
+            task_line="Enrich the fenced text below according to your system instructions.",
+        )
+
         try:
             response = await self.async_client.call_with_thinking(
-                messages=[{"role": "user", "content": prompt}],
+                messages=[{"role": "user", "content": user_message}],
+                system=system_prompt,
                 profile=ThinkingLevel.STANDARD,
                 caller=f"link_enricher.{context_name}"
             )

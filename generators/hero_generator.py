@@ -178,7 +178,16 @@ class HeroGenerator:
         return re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
 
     def _get_topic_summaries(self, topics: List[Any]) -> List[Dict[str, str]]:
-        """Extract topic names and clean descriptions for prompt context."""
+        """Extract topic names and clean descriptions for prompt context.
+
+        Topic text descends from untrusted feed content, and this prompt is
+        published verbatim as hero_image_prompt, so it gets the shared
+        normalization (invisible/bidi characters stripped) plus length caps.
+        The image model has no instruction/data channel split, so unlike the
+        analyzer prompts there is no nonce fence here.
+        """
+        from agents.prompt_security import normalize_untrusted_text
+
         summaries = []
         for topic in topics:
             name = ""
@@ -196,7 +205,10 @@ class HeroGenerator:
             elif isinstance(topic, dict) and 'description' in topic:
                 description = self._strip_markdown_links(topic['description'])
 
-            summaries.append({"name": name, "description": description})
+            summaries.append({
+                "name": normalize_untrusted_text(name)[:160],
+                "description": normalize_untrusted_text(description)[:600],
+            })
 
         return summaries
 

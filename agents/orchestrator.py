@@ -23,6 +23,13 @@ from .analyzers import NewsAnalyzer, ResearchAnalyzer, SocialAnalyzer, RedditAna
 from .cost_tracker import get_tracker, reset_tracker
 from .link_enricher import LinkEnricher
 from .ecosystem_context import EcosystemContextManager
+from .prompt_security import (
+    DATA_POINTER,
+    build_fenced_user_message,
+    build_hardened_system,
+    new_fence_nonce,
+    normalize_untrusted_text,
+)
 from .staleness_checker import StalenessChecker
 from .phase_tracker import PhaseTracker
 from .config import ProviderConfig
@@ -893,8 +900,8 @@ class MainOrchestrator:
             context_parts.append(f"Top items ({len(summary_items)}):")
             for i, item in enumerate(summary_items[:10], 1):
                 # Include URL so LLM can create inline links
-                context_parts.append(f"  {i}. {item.item.title}")
-                context_parts.append(f"     URL: {item.item.url}")
+                context_parts.append(f"  {i}. {normalize_untrusted_text(item.item.title)[:300]}")
+                context_parts.append(f"     URL: {normalize_untrusted_text(item.item.url)[:512]}")
                 context_parts.append(f"     Source: {item.item.source}")
                 if item.summary:
                     context_parts.append(f"     Summary: {item.summary[:150]}...")
@@ -902,15 +909,19 @@ class MainOrchestrator:
 
         context = "\n".join(context_parts)
 
+        # CWE-1427: topic-detection instructions travel in the system prompt;
+        # the category-report context (which quotes untrusted titles/URLs)
+        # travels in the user message inside a nonce fence.
+        nonce = new_fence_nonce()
         if self.prompt_accessor:
-            prompt = self.prompt_accessor.get_orchestration_prompt(
-                'topic_detection', {'context': context}
+            instructions = self.prompt_accessor.get_orchestration_prompt(
+                'topic_detection', {'context': DATA_POINTER}
             )
         else:
             # Fallback to inline prompt for backwards compatibility
-            prompt = f"""Analyze the following category reports from today's AI news collection and identify the TOP 6 cross-category topics that appear across multiple categories. If there are fewer than 6 distinct topics worth covering, return exactly 3 instead.
+            instructions = f"""Analyze the following category reports from today's AI news collection and identify the TOP 6 cross-category topics that appear across multiple categories. If there are fewer than 6 distinct topics worth covering, return exactly 3 instead.
 
-{context}
+{DATA_POINTER}
 
 For each cross-category topic, provide:
 1. A concise name (2-5 words)
@@ -948,10 +959,18 @@ RELEASE-DATE GROUNDING (mandatory check for any topic that names or implies a mo
 - A "release" topic must center on a model whose GA date is on or within ~7 days of the coverage date.
 - Continuation/follow-up topics about a model that was already covered as a release in the prior 1-3 days should be downweighted (importance ≤ 65) unless there is a genuinely new development beyond initial coverage."""
 
+        system_prompt = build_hardened_system(
+            instructions, nonce, grounding=self.grounding_context
+        )
+        user_message = build_fenced_user_message(
+            context, nonce,
+            task_line="Analyze the fenced category reports below according to your system instructions.",
+        )
+
         try:
             response = await self.async_client.call_with_thinking(
-                messages=[{"role": "user", "content": prompt}],
-                system=self.grounding_context,  # Inject ecosystem grounding
+                messages=[{"role": "user", "content": user_message}],
+                system=system_prompt,
                 profile=ThinkingLevel.ULTRATHINK,
                 caller="orchestrator.topics",
                 full_output_budget=True,
@@ -1064,20 +1083,23 @@ RELEASE-DATE GROUNDING (mandatory check for any topic that names or implies a mo
                 if not self._exclude_from_summaries(item)
             ]
             if summary_items:
-                context_parts.append("Top story: " + summary_items[0].item.title)
+                context_parts.append("Top story: " + normalize_untrusted_text(summary_items[0].item.title)[:300])
             context_parts.append("")
 
         context = "\n".join(context_parts)
 
+        # CWE-1427: summary instructions travel in the system prompt; the
+        # aggregated context travels in the user message inside a nonce fence.
+        nonce = new_fence_nonce()
         if self.prompt_accessor:
-            prompt = self.prompt_accessor.get_orchestration_prompt(
-                'executive_summary', {'context': context}
+            instructions = self.prompt_accessor.get_orchestration_prompt(
+                'executive_summary', {'context': DATA_POINTER}
             )
         else:
             # Fallback to inline prompt for backwards compatibility
-            prompt = f"""Write a structured executive summary of today's AI news using markdown formatting.
+            instructions = f"""Write a structured executive summary of today's AI news using markdown formatting.
 
-{context}
+{DATA_POINTER}
 
 FORMAT YOUR SUMMARY LIKE THIS:
 
@@ -1116,10 +1138,18 @@ CRITICAL - AVOID REPETITION:
 
 The summary should help a busy professional quickly scan and understand what's NEW in AI today."""
 
+        system_prompt = build_hardened_system(
+            instructions, nonce, grounding=self.grounding_context
+        )
+        user_message = build_fenced_user_message(
+            context, nonce,
+            task_line="Write the executive summary from the fenced context below according to your system instructions.",
+        )
+
         try:
             response = await self.async_client.call_with_thinking(
-                messages=[{"role": "user", "content": prompt}],
-                system=self.grounding_context,  # Inject ecosystem grounding
+                messages=[{"role": "user", "content": user_message}],
+                system=system_prompt,
                 profile=ThinkingLevel.DEEP,
                 caller="orchestrator.summary",
                 full_output_budget=True,

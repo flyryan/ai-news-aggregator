@@ -20,6 +20,14 @@ from datetime import datetime, date, timedelta
 from pathlib import Path
 from typing import Dict, Any, Optional, List, TYPE_CHECKING
 
+from .prompt_security import (
+    DATA_POINTER,
+    build_fenced_user_message,
+    build_hardened_system,
+    new_fence_nonce,
+    normalize_untrusted_text,
+)
+
 if TYPE_CHECKING:
     from .llm_client import AsyncAnthropicClient
     from .base import AnalyzedItem
@@ -659,30 +667,41 @@ IMPORTANT:
             if self.report_date else date.today() - timedelta(days=1)
         )
 
+        # CWE-1427: enrichment instructions (with the trusted tracked-model
+        # list) travel in the system prompt; the untrusted news items travel
+        # in the user message inside a nonce fence.
+        nonce = new_fence_nonce()
         if self.prompt_accessor:
-            prompt = self.prompt_accessor.get_post_processing_prompt(
+            instructions = self.prompt_accessor.get_post_processing_prompt(
                 'ecosystem_enrichment',
                 {
                     'report_date': self.report_date.isoformat() if self.report_date else date.today().isoformat(),
                     'coverage_date': coverage_date.isoformat(),
                     'existing_models': existing_models,
-                    'news_items': news_context
+                    'news_items': DATA_POINTER
                 }
             )
         else:
             # Fallback to class constant for backwards compatibility
-            prompt = self.ENRICHMENT_PROMPT.format(
+            instructions = self.ENRICHMENT_PROMPT.format(
                 report_date=self.report_date.isoformat() if self.report_date else date.today().isoformat(),
                 coverage_date=coverage_date.isoformat(),
                 existing_models=existing_models,
-                news_items=news_context
+                news_items=DATA_POINTER
             )
+
+        system_prompt = build_hardened_system(instructions, nonce)
+        user_message = build_fenced_user_message(
+            news_context, nonce,
+            task_line="Review the fenced news items below according to your system instructions.",
+        )
 
         try:
             # Use LLM to analyze news for releases
             from .llm_client import ThinkingLevel
             response = await llm_client.call_with_thinking(
-                messages=[{"role": "user", "content": prompt}],
+                messages=[{"role": "user", "content": user_message}],
+                system=system_prompt,
                 profile=ThinkingLevel.STANDARD,
                 caller="ecosystem_context.enrichment"
             )
@@ -720,7 +739,7 @@ IMPORTANT:
         lines = []
         for i, item in enumerate(items[:30], 1):  # Limit to top 30
             lines.append(f"\n--- Item {i} ---")
-            lines.append(f"Title: {item.item.title}")
+            lines.append(f"Title: {normalize_untrusted_text(item.item.title)[:300]}")
             lines.append(f"Summary: {item.summary}")
             if item.themes:
                 lines.append(f"Themes: {', '.join(item.themes)}")
