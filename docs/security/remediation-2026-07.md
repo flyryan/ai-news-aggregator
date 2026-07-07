@@ -4,8 +4,8 @@
 **Branch:** `main` (flyryan/ai-news-aggregator) at `917800b`
 **Source:** Trend ZDI AESIR/FENRIR scan, using Claude Mythos accessed via Anthropic's Project Glasswing (org issues #1–#12; board findings #1247, #1248)
 
-This document records the security findings remediated on 2026-07-07, how they
-were verified, and what hardening remains open.
+This document records the security findings remediated on 2026-07-07 and how
+each fix was verified.
 
 ## Finding provenance: Trend ZDI via Anthropic's Project Glasswing (Claude Mythos)
 
@@ -133,13 +133,36 @@ reach it through Cloudflare. Therefore `:9000` is **not** directly reachable at
 the public IP; the deploy hook's only public path is the Cloudflare hostname,
 now HMAC-gated.
 
-## Wave 4 (2026-07-07): #11 CWE-693 weak CSP, #12 CWE-1427 prompt injection
+## Wave 4 (2026-07-07): #10 CWE-345 deploy integrity, #11 CWE-693 weak CSP, #12 CWE-1427 prompt injection
 
 | Issue | CWE | Fix | Commits |
 |-------|-----|-----|---------|
+| #10 | CWE-345 | Signed-commit verification gate in `deploy.sh` + SSH signing for all commit sources | `49d6edd` `cdb19be` `2eddeb9` (main) |
 | #11 | CWE-693 | Hash-based CSP split + URL scheme allowlist | `e69c1a5` (main, deployed) |
 | #12 | CWE-1427 | Stage 1: input normalization + bounded output schema | `9149e4a` (main) |
 | #12 | CWE-1427 | Stage 2: system/user channel separation + nonce fencing | `bf969d7` (merged to main 2026-07-07 after passing the A/B quality gate) |
+
+**#10 (fixed + deployed):** `scripts/deploy.sh` previously did a blind
+`git reset --hard origin/main` and executed whatever the tip pointed at, so
+anyone able to move `flyryan/main` (a compromised token, a malicious
+force-push) gained code execution on the host — the deploy verified *who*
+triggered it (the webhook HMAC fix, #9) but not *what* it was about to run. The
+deploy now requires the tip of `origin/main` to be SSH-signed by a trusted key:
+`deploy.sh` runs `git verify-commit` against a host-only allow-list
+(`/home/ubuntu/deploy_allowed_signers`, template `deploy/allowed_signers.example`)
+before resetting, captures that one verified hash and operates on it for both
+resets (dropping the second fetch so nothing arriving mid-deploy slips in
+unverified), and aborts the deploy on failure (`ALLOW_UNSIGNED_DEPLOY=1` is a
+loudly-logged emergency override). All three commit sources sign: Ryan's local
+flyryan and EMU identities (SSH signing config) and the daily-pipeline CI bot
+(`PIPELINE_SIGNING_KEY` secret; the workflow signs the auto-update commit and
+re-signs across the push-step rebase). Allow-list principals are wildcards
+because the CI committer email contains `[bot]`, which the ssh matcher treats as
+a glob character class. Verified 2026-07-07 end-to-end via the live webhook: a
+signed tip logs `Signature OK … signed by a trusted signer` and deploys; an
+unsigned tip is refused. Signing is config-driven (no per-commit step) and
+documented in `CLAUDE.md` + `deploy/README.md` so a fresh clone configures it
+and the gate fails safe (visible stall, never a silent bad deploy) if missed.
 
 **#11 (fixed + deployed):** SvelteKit `kit.csp` (mode `hash`) now owns script
 policy via a per-page `<meta>` CSP whose `script-src` carries the sha256 hash
@@ -182,14 +205,6 @@ equivalent (same top story and section structure). A 3×-vs-3× controlled
 probe of the news filter showed the new structure is stable run-to-run and
 marginally more inclusive on 3–4 gray-zone items (AI-attributed layoff
 stories, scores 32–42 — far below the top-10 cutoff).
-
-## Remaining / open items
-
-| Item | Status | Notes |
-|------|--------|-------|
-| #10 CWE-345 — `deploy.sh` blind `reset --hard`/force-push without integrity verification | **Open** | Flow-affecting; left for maintainer decision (harden vs. network lockdown). |
-| #11 CWE-693 — Weak CSP (`script-src 'unsafe-inline'`) | **Fixed** | Wave 4 (`e69c1a5`), deployed to news.aatf.ai 2026-07-07. |
-| #12 CWE-1427 — Indirect prompt injection in analyzer pipeline | **Fixed** | Wave 4: `9149e4a` + `bf969d7` on main; A/B output-quality gate passed 2026-07-07. |
 
 ## Verification commands
 
