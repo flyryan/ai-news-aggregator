@@ -169,6 +169,10 @@ OLD_ANCHOR_CATEGORIES = {"news", "social", "reddit"}
 # targets, and cannot use a non-http(s) scheme.
 ALLOWED_URL_SCHEMES = frozenset({"http", "https"})
 MAX_SAFE_REDIRECTS = 5
+# Cap the body we buffer from an untrusted fetch. Freshness only needs the
+# article <head>/date metadata, so 5 MiB is far more than enough while
+# preventing a malicious host from exhausting memory with a multi-GB body.
+MAX_RESPONSE_BYTES = 5 * 1024 * 1024
 
 
 class SSRFBlockedError(requests.exceptions.RequestException):
@@ -180,7 +184,14 @@ class SSRFBlockedError(requests.exceptions.RequestException):
 
 
 def _ip_is_blocked(ip_str: str) -> bool:
-    """True when ip_str is a non-public address (loopback/private/link-local/etc.)."""
+    """True when ip_str is not a publicly routable address.
+
+    Rejects loopback / RFC1918 private / link-local (cloud-metadata) /
+    reserved / multicast / unspecified ranges, and additionally requires the
+    address to be globally routable (``is_global``). The ``is_global`` check
+    closes carrier-grade NAT (``100.64.0.0/10``) and other shared/special
+    ranges that are not flagged as private on older Python versions.
+    """
     try:
         ip = ipaddress.ip_address(ip_str)
     except ValueError:
@@ -195,6 +206,7 @@ def _ip_is_blocked(ip_str: str) -> bool:
         or ip.is_reserved
         or ip.is_multicast
         or ip.is_unspecified
+        or not ip.is_global
     )
 
 
@@ -584,21 +596,52 @@ class StalenessChecker:
                 raise SSRFBlockedError(
                     f"blocked outbound request to disallowed host: {host!r}"
                 )
-            response = self._session.get(current, timeout=timeout, allow_redirects=False)
+            response = self._session.get(
+                current, timeout=timeout, allow_redirects=False, stream=True
+            )
             if response.is_redirect:
                 location = response.headers.get("Location")
                 if not location:
                     return response
-                # Explicitly release the intermediate hop's connection back to the
-                # session pool before following the redirect. (With the default
-                # stream=False requests drains the body eagerly, so this is
-                # defensive — it keeps the manual redirect loop safe even if the
-                # fetch is ever switched to streaming.)
+                # Release the intermediate hop's connection back to the pool
+                # before following the redirect (nothing in the body is needed).
                 response.close()
                 current = urljoin(current, location)
                 continue
+            # Final hop: buffer the body under a hard size cap before returning,
+            # so callers keep using response.text/.content unchanged.
+            self._buffer_capped_body(response)
             return response
         raise SSRFBlockedError(f"too many redirects while fetching {url!r}")
+
+    def _buffer_capped_body(self, response) -> None:
+        """Read an untrusted response body into memory under MAX_RESPONSE_BYTES.
+
+        Streams the body and refuses (SSRFBlockedError, treated upstream as an
+        ordinary non-fatal fetch failure) once it exceeds the cap, so a hostile
+        or misconfigured host cannot exhaust memory. The buffered bytes are
+        stored back on the response so ``.text``/``.content`` work as before.
+        """
+        declared = response.headers.get("Content-Length")
+        if declared and declared.strip().isdigit() and int(declared) > MAX_RESPONSE_BYTES:
+            response.close()
+            raise SSRFBlockedError(
+                f"response body exceeds {MAX_RESPONSE_BYTES}-byte cap "
+                f"(declared Content-Length {declared})"
+            )
+        body = bytearray()
+        for chunk in response.iter_content(chunk_size=65536):
+            if not chunk:
+                continue
+            body.extend(chunk)
+            if len(body) > MAX_RESPONSE_BYTES:
+                response.close()
+                raise SSRFBlockedError(
+                    f"response body exceeds {MAX_RESPONSE_BYTES}-byte cap"
+                )
+        response._content = bytes(body)
+        response._content_consumed = True
+        response.close()
 
     def _find_primary_source_url(self, item: AnalyzedItem) -> Optional[str]:
         """Fetch a secondary article and look for an official primary-source link."""

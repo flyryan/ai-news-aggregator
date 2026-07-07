@@ -183,6 +183,52 @@ class SafeGetBlockingTest(unittest.TestCase):
         # redirects must be disabled on the underlying session call
         self.assertFalse(self.session.calls[0][1].get("allow_redirects", True))
 
+    @patch("agents.staleness_checker.socket.getaddrinfo", side_effect=fake_getaddrinfo)
+    def test_blocks_cgnat_shared_address(self, _dns):
+        # 100.64.0.0/10 (carrier-grade NAT / shared address space) is not
+        # flagged is_private on older Python, so the is_global check is what
+        # blocks it. No request must be issued.
+        with self.assertRaises(SSRFBlockedError):
+            self.checker._safe_get("http://100.64.0.1/")
+        self.assertEqual(self.session.calls, [])
+
+    @patch("agents.staleness_checker.socket.getaddrinfo", side_effect=fake_getaddrinfo)
+    def test_caps_oversized_response_body(self, _dns):
+        # A body larger than the cap is refused (treated upstream as a normal
+        # non-fatal fetch failure) rather than buffered into memory.
+        from agents.staleness_checker import MAX_RESPONSE_BYTES
+        big = b"x" * (MAX_RESPONSE_BYTES + 1)
+        self.session = RecordingSession([
+            make_response(200, {"Content-Type": "text/html"}, big),
+        ])
+        self.checker._session = self.session
+        with self.assertRaises(SSRFBlockedError):
+            self.checker._safe_get("http://news.example.com/huge")
+
+    @patch("agents.staleness_checker.socket.getaddrinfo", side_effect=fake_getaddrinfo)
+    def test_rejects_declared_oversized_content_length(self, _dns):
+        from agents.staleness_checker import MAX_RESPONSE_BYTES
+        self.session = RecordingSession([
+            make_response(
+                200,
+                {"Content-Type": "text/html", "Content-Length": str(MAX_RESPONSE_BYTES + 1)},
+                b"<html>small actual body</html>",
+            ),
+        ])
+        self.checker._session = self.session
+        with self.assertRaises(SSRFBlockedError):
+            self.checker._safe_get("http://news.example.com/liar")
+
+    @patch("agents.staleness_checker.socket.getaddrinfo", side_effect=fake_getaddrinfo)
+    def test_body_under_cap_is_returned_intact(self, _dns):
+        self.session = RecordingSession([
+            make_response(200, {"Content-Type": "text/html"}, b"<html>fresh</html>"),
+        ])
+        self.checker._session = self.session
+        resp = self.checker._safe_get("http://news.example.com/ok")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("fresh", resp.text)
+
 
 class SinkDoesNotReachInternalTest(unittest.TestCase):
     """End-to-end guard on the two real sinks: no request escapes to an internal host.

@@ -80,12 +80,21 @@ blocked), and documented `LINK_FOLLOWER_MAX_URLS` in `CLAUDE.md`.
 ### Notes on the SSRF fix (#8 / #1248)
 
 Two competing implementations existed (PR #15 wave-3 and PR #17). **PR #17 was
-taken** (typed exception, IPv4-mapped-IPv6 unwrap, 223-line hermetic test
-suite); wave-3's SSRF commit (`7e2552d`) was **dropped as superseded**. The guard
-routes both fetch sinks through `_safe_get()`: http/https allowlist, resolves
-every address and rejects private/loopback/link-local/reserved/multicast/
-unspecified IPs, follows redirects manually with per-hop revalidation (5-hop
-cap), and closes intermediate responses.
+taken** (typed exception, IPv4-mapped-IPv6 unwrap, hermetic test suite);
+wave-3's SSRF commit (`7e2552d`) was **dropped as superseded**. The guard
+routes both fetch sinks through `_safe_get()`, which:
+
+- allows only `http`/`https` schemes;
+- resolves every address and rejects private / loopback / link-local
+  (cloud-metadata) / reserved / multicast / unspecified IPs, unwrapping
+  IPv4-mapped IPv6 first, and additionally requires the target to be globally
+  routable (`is_global`) — this blocks carrier-grade NAT (`100.64.0.0/10`) and
+  other shared/special ranges that older Python does not flag as private;
+- follows redirects manually with per-hop scheme+IP revalidation (5-hop cap),
+  so a 302 from an allowlisted host cannot bounce the fetch to an internal
+  address, and closes intermediate responses; and
+- buffers each response body under a hard 5 MiB cap (rejecting an oversized or
+  falsely-declared `Content-Length`), so a hostile host cannot exhaust memory.
 
 ## Deploy webhook (CWE-306) — code + production host
 
@@ -181,15 +190,6 @@ stories, scores 32–42 — far below the top-10 cutoff).
 | #10 CWE-345 — `deploy.sh` blind `reset --hard`/force-push without integrity verification | **Open** | Flow-affecting; left for maintainer decision (harden vs. network lockdown). |
 | #11 CWE-693 — Weak CSP (`script-src 'unsafe-inline'`) | **Fixed** | Wave 4 (`e69c1a5`), deployed to news.aatf.ai 2026-07-07. |
 | #12 CWE-1427 — Indirect prompt injection in analyzer pipeline | **Fixed** | Wave 4: `9149e4a` + `bf969d7` on main; A/B output-quality gate passed 2026-07-07. |
-
-### Non-blocking hardening noted during review (SSRF)
-
-- DNS-rebinding TOCTOU: guard validates via `getaddrinfo`, then `requests`
-  re-resolves at connect time. Impact tempered — fetched content is date-parsed,
-  never echoed to users (blind-GET only). Full fix: pin the validated IP.
-- No response body size cap (OOM on a multi-GB body). Port wave-3's 5 MB
-  streamed cap.
-- CGNAT `100.64.0.0/10` not blocked on Python < 3.13; add `or not ip.is_global`.
 
 ## Verification commands
 
