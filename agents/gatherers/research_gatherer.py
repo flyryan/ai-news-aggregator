@@ -419,6 +419,15 @@ class ResearchGatherer(BaseGatherer):
                         entry.get('published_parsed') or entry.get('updated_parsed')
                     )
 
+                    # An undated/unparseable entry can't be placed in a specific
+                    # day's coverage window; skip it visibly rather than silently.
+                    if pub_date is None:
+                        logger.warning(
+                            f"Skipping entry with missing/unparseable date from "
+                            f"{feed_url}: {entry.get('title', 'No Title')!r}"
+                        )
+                        continue
+
                     # Skip if outside date range
                     if not self.is_in_date_range(pub_date):
                         continue
@@ -655,14 +664,19 @@ class ResearchGatherer(BaseGatherer):
         response.raise_for_status()
         return response.json()
 
-    def _parse_feed_date(self, date_struct) -> datetime:
+    def _parse_feed_date(self, date_struct) -> Optional[datetime]:
         """Parse date from feedparser date structure.
 
         feedparser returns time.struct_time in UTC. We convert to local time
         for comparison with our local-time coverage window.
+
+        Returns None when the date is missing or unparseable, so the caller can
+        log and skip the entry explicitly. (A fallback to datetime.now() would
+        land on the report day, outside the coverage window — the day before —
+        and silently drop the entry with no signal.)
         """
         if not date_struct:
-            return datetime.now()
+            return None
 
         try:
             # feedparser returns time.struct_time in UTC
@@ -676,7 +690,7 @@ class ResearchGatherer(BaseGatherer):
         except Exception as e:
             logger.warning(f"Failed to parse feed date: {e}")
 
-        return datetime.now()
+        return None
 
     def _fetch_category_rss(self, category: str) -> List[CollectedItem]:
         """Fetch papers from arXiv RSS feed (primary method - no rate limits)."""
