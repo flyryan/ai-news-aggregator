@@ -32,7 +32,14 @@ permissions:
 
 concurrency:
   group: daily-pipeline-${{ github.ref }}
-  cancel-in-progress: false
+  # Only a manual dispatch cancels an in-flight run, so a manual re-run
+  # supersedes an overlapping scheduled run instead of double-publishing the
+  # same day (see the 2026-07-08 double run). Scheduled runs must NOT cancel
+  # each other: the two DST-backstop crons (0 7 / 0 8) intentionally overlap and
+  # rely on the ET gate below to pick the nominal 3 AM run. A plain
+  # `cancel-in-progress: true` would let the 8 AM UTC cron kill the still-running
+  # 3 AM run, then gate itself out — publishing nothing.
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
 
 jobs:
   daily-pipeline:
