@@ -34,6 +34,8 @@ jobs:
         run: python3 -m unittest tests.call_with_thinking_signature_test -v
       - name: Deploy webhook requires authenticated caller (CWE-306 #1247)
         run: python3 -m unittest tests.webhook_hook_auth_test -v
+      - name: Topic-detection JSON extraction survives fences/preambles (2026-07-09)
+        run: python3 -m unittest tests.extract_json_str_test -v
 
   hero-retry:
     name: Hero image retry-window guard

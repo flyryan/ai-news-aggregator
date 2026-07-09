@@ -16,7 +16,7 @@ from typing import List, Dict, Any, Optional
 from .llm_client import AnthropicClient, AsyncAnthropicClient, AsyncLLMRouter, ThinkingLevel, LLMResponse
 from .base import (
     BaseGatherer, BaseAnalyzer, CollectedItem, AnalyzedItem,
-    CategoryReport, CategoryTheme, deduplicate_items
+    CategoryReport, CategoryTheme, deduplicate_items, extract_json_str
 )
 from .gatherers import NewsGatherer, ResearchGatherer, SocialGatherer, RedditGatherer, LinkFollower
 from .analyzers import NewsAnalyzer, ResearchAnalyzer, SocialAnalyzer, RedditAnalyzer
@@ -982,10 +982,12 @@ RELEASE-DATE GROUNDING (mandatory check for any topic that names or implies a mo
                     "topic JSON may be incomplete."
                 )
 
-            # Parse JSON response
-            result = json.loads(
-                response.content.strip().strip('```json').strip('```').strip()
-            )
+            # Parse JSON response. Models occasionally wrap the object in a
+            # ```json fence or emit a short prose preamble; extract_json_str
+            # recovers the JSON substring (the fragile .strip('```json')
+            # char-set stripping used to drop the whole day's topics with
+            # "Expecting value: line 1 column 1").
+            result = json.loads(extract_json_str(response.content))
 
             topics = []
             for topic_data in result.get('topics', []):

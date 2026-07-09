@@ -82,6 +82,56 @@ def _env_int(name: str, default: int, minimum: int = 1) -> int:
     return value
 
 
+def extract_json_str(content: str) -> str:
+    """Extract a JSON object/array substring from an LLM response.
+
+    Mirrors the robust extraction used by BaseAnalyzer._parse_json_response so
+    callers outside that class hierarchy (e.g. the orchestrator's topic
+    detection) can survive models that wrap JSON in ```json fences or emit a
+    prose preamble before the object. Returns the best-effort JSON substring;
+    json.loads is left to the caller.
+    """
+    content = (content or "").strip()
+
+    # Prefer JSON inside a markdown code block when present.
+    code_block_match = re.search(r'```(?:json)?\s*\n?([\s\S]*?)\n?```', content)
+    if code_block_match:
+        content = code_block_match.group(1).strip()
+
+    # Skip any leading prose before the first { or [.
+    if not content.startswith(('{', '[')):
+        obj_start = content.find('{')
+        arr_start = content.find('[')
+        if obj_start == -1 and arr_start == -1:
+            return content
+        start = min(s for s in [obj_start, arr_start] if s != -1)
+        content = content[start:]
+
+    # Walk braces/brackets to find the matching close, ignoring string bodies.
+    open_char = content[0]
+    close_char = '}' if open_char == '{' else ']'
+    depth = 0
+    in_string = False
+    escape_next = False
+    for i, char in enumerate(content):
+        if escape_next:
+            escape_next = False
+            continue
+        if char == '\\':
+            escape_next = True
+            continue
+        if char == '"':
+            in_string = not in_string
+        if not in_string:
+            if char == open_char:
+                depth += 1
+            elif char == close_char:
+                depth -= 1
+                if depth == 0:
+                    return content[:i + 1]
+    return content
+
+
 @dataclass
 class CollectedItem:
     """Standardized item from any gatherer."""
