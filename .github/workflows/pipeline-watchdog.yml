@@ -127,9 +127,20 @@ jobs:
         run: |
           set -euo pipefail
           # Do not stack pipelines: skip if one is already queued/running.
-          active="$(gh run list --workflow "$PIPELINE_WORKFLOW" \
-            --status in_progress --status queued --limit 5 --json databaseId \
+          # NOTE: `gh run list --status` is a single-value string flag, NOT
+          # repeatable/OR'd — passing it twice silently keeps only the LAST
+          # value (queued), so an in_progress run was invisible to this check
+          # (root cause of the 2026-07-08 04:53 ET false-positive recovery
+          # dispatch: the 3:49 AM nominal run was still in_progress, running
+          # long that morning, and this guard reported active=0). Query each
+          # status separately and sum, so both queued AND in_progress count.
+          active_queued="$(gh run list --workflow "$PIPELINE_WORKFLOW" \
+            --status queued --limit 5 --json databaseId \
             --jq 'length' 2>/dev/null || echo 0)"
+          active_running="$(gh run list --workflow "$PIPELINE_WORKFLOW" \
+            --status in_progress --limit 5 --json databaseId \
+            --jq 'length' 2>/dev/null || echo 0)"
+          active="$(( ${active_queued:-0} + ${active_running:-0} ))"
           if [[ "${active:-0}" -gt 0 ]]; then
             echo "should_dispatch=false" >> "$GITHUB_OUTPUT"
             echo "A pipeline run is already in progress/queued ($active); not dispatching."
