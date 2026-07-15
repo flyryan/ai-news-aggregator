@@ -299,7 +299,8 @@ jobs:
             --settings-file "$settings_file" \
             --output-dir "$tmp_dir/wg"
 
-          wg_conf="$(find "$tmp_dir/wg" -name '*.conf' | sort | head -1)"
+          mapfile -t wg_confs < <(find "$tmp_dir/wg" -name '*.conf' | sort)
+          wg_conf="${wg_confs[0]:-}"
           if [[ -z "$wg_conf" ]]; then
             echo "No Mullvad WireGuard config generated." >&2
             exit 1
