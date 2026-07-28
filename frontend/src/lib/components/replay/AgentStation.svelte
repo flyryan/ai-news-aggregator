@@ -9,6 +9,8 @@
 		formatDuration,
 		isImageCall
 	} from '$lib/services/replayViz';
+	import { agentDoc } from '$lib/services/agentDocs';
+	import AgentInfo from './AgentInfo.svelte';
 
 	export let agent: ReplayAgent;
 	export let state: AgentFrameState | undefined = undefined;
@@ -17,6 +19,13 @@
 	export let onSelectCall: (callId: string) => void = () => {};
 
 	$: color = agentColor(agent);
+	// Null for an agent we have no documentation for — an info button that opens
+	// onto nothing is worse than no button.
+	$: doc = agentDoc(agent.id);
+	let infoOpen = false;
+	// A new day's replay reuses this component instance; don't leave a panel open
+	// describing the agent that used to be in this slot.
+	$: if (agent.id) infoOpen = false;
 	$: status = state?.status ?? 'idle';
 	$: activeCalls = state?.active ?? [];
 	$: flash = reduced ? 0 : (state?.flash ?? 0);
@@ -64,6 +73,7 @@
 	class:is-idle={status === 'idle'}
 	class:is-live={isLive}
 	class:is-done={status === 'done'}
+	class:info-open={infoOpen}
 	style="--accent: {color}; --flash: {flash};"
 >
 	<!-- Completion flash: fires the instant a call ends, decays over ~2.2s of run time -->
@@ -76,7 +86,19 @@
 			{/if}
 		</span>
 		<div class="min-w-0 flex-1">
-			<div class="label">{agent.label}</div>
+			<div class="label">
+				{agent.label}
+				{#if doc}
+					<button
+						type="button"
+						class="info-btn"
+						on:click|stopPropagation={() => (infoOpen = !infoOpen)}
+						aria-expanded={infoOpen}
+						aria-label="What does the {agent.label} do?"
+						title="What does the {agent.label} do?">ⓘ</button
+					>
+				{/if}
+			</div>
 			<div class="kind">{agent.kind}</div>
 		</div>
 		{#if total > 0}
@@ -85,6 +107,10 @@
 			</div>
 		{/if}
 	</div>
+
+	{#if doc && infoOpen}
+		<AgentInfo label={agent.label} {doc} accent={color} onClose={() => (infoOpen = false)} />
+	{/if}
 
 	{#if total > 0}
 		<div class="progress" role="presentation">
@@ -286,6 +312,8 @@
 		padding: 0.7rem 0.75rem 0.6rem;
 		background: rgb(255 255 255 / 0.72);
 		border: 1px solid rgb(0 0 0 / 0.08);
+		/* Clips the flash layer to the rounded corners — but it would also clip the
+		   info popover, which hangs below the card. Lifted while one is open. */
 		overflow: hidden;
 		transition:
 			border-color 220ms ease,
@@ -305,6 +333,17 @@
 		opacity: 0.92;
 		border-color: color-mix(in srgb, var(--accent) 34%, transparent);
 	}
+	/* The popover hangs below the card, so the clip has to come off — and the card
+	   has to sit above its neighbours or they cover the panel.
+	   `opacity` matters too: an idle station is dimmed to 0.44, and opacity applies
+	   to the whole subtree, so the panel rendered see-through no matter what
+	   background it set. A station being read is not idle. */
+	.station.info-open {
+		overflow: visible;
+		z-index: 42;
+		opacity: 1;
+	}
+
 	.station.is-live {
 		opacity: 1;
 		border-color: color-mix(in srgb, var(--accent) 72%, transparent);
@@ -363,6 +402,9 @@
 	}
 
 	.label {
+		display: flex;
+		align-items: baseline;
+		gap: 0.25rem;
 		font-size: 0.8rem;
 		font-weight: 650;
 		line-height: 1.15;
@@ -370,6 +412,34 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	/* Quiet until wanted: the stations are already dense, and this is a secondary
+	   affordance. It brightens on hover and is always reachable by keyboard. */
+	.info-btn {
+		flex: none;
+		font-size: 0.68rem;
+		line-height: 1;
+		color: #c4c4c4;
+		background: none;
+		border: none;
+		padding: 0 1px;
+		cursor: pointer;
+		transition: color 140ms ease;
+	}
+	.info-btn[aria-expanded='true'] {
+		color: var(--accent);
+	}
+	.info-btn:focus-visible {
+		color: var(--accent);
+		outline: 1px solid var(--accent);
+		outline-offset: 1px;
+		border-radius: 2px;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.info-btn:hover {
+			color: var(--accent);
+		}
 	}
 	:global(.dark) .label {
 		color: #f5f5f5;
