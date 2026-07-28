@@ -35,6 +35,10 @@ interface CallSeed {
 	retry_reason?: string | null;
 	attempt?: number;
 	has_stream?: boolean;
+	/** Image-generation calls: no LLM route, so tokens/cost are zeroed, not derived. */
+	model?: string;
+	image_url?: string;
+	image_prompt?: string;
 }
 
 const MODEL_BY_PROVIDER: Record<string, string> = {
@@ -48,6 +52,10 @@ function buildCall(seed: CallSeed): ReplayCall {
 	const end_ms = start_ms + seed.dur_ms;
 	const first_token_ms = seed.ttft_ms > 0 ? start_ms + seed.ttft_ms : null;
 	const thinking = seed.thinking_chars ?? Math.round(seed.output_tokens * 1.4);
+	// Image calls bypass the LLM cost/token derivation entirely: the real generator
+	// writes literal zeros there, and the fixture must match or the demo would show
+	// invented spend for a call that was never billed per token.
+	const isImage = seed.role === 'image';
 	return {
 		id: seed.id,
 		agent_id: seed.agent_id,
@@ -62,22 +70,26 @@ function buildCall(seed: CallSeed): ReplayCall {
 		end_ms,
 		wait_ms: seed.wait_ms,
 		provider_id: seed.provider_id,
-		model: MODEL_BY_PROVIDER[seed.provider_id] ?? `claude-5-opus-${seed.provider_id}`,
+		model: seed.model ?? MODEL_BY_PROVIDER[seed.provider_id] ?? `claude-5-opus-${seed.provider_id}`,
 		profile: seed.profile,
 		effort: seed.effort,
-		input_tokens: seed.input_tokens,
-		output_tokens: seed.output_tokens,
-		cache_read_tokens: Math.round(seed.input_tokens * 0.35),
-		cost_usd: +(seed.input_tokens * 0.000005 + seed.output_tokens * 0.000075).toFixed(4),
-		thinking_chars: thinking,
-		text_chars: Math.round(seed.output_tokens * 3.6),
-		stream_events: Math.round(seed.output_tokens * 0.7),
+		input_tokens: isImage ? 0 : seed.input_tokens,
+		output_tokens: isImage ? 0 : seed.output_tokens,
+		cache_read_tokens: isImage ? 0 : Math.round(seed.input_tokens * 0.35),
+		cost_usd: isImage
+			? 0
+			: +(seed.input_tokens * 0.000005 + seed.output_tokens * 0.000075).toFixed(4),
+		thinking_chars: isImage ? 0 : thinking,
+		text_chars: isImage ? (seed.image_prompt?.length ?? 0) : Math.round(seed.output_tokens * 3.6),
+		stream_events: isImage ? 0 : Math.round(seed.output_tokens * 0.7),
 		stop_reason: seed.stop_reason ?? 'end_turn',
 		outcome: seed.outcome ?? 'ok',
 		attempt: seed.attempt ?? 1,
 		fallback_from: seed.fallback_from ?? null,
 		retry_reason: seed.retry_reason ?? null,
-		has_stream: seed.has_stream ?? true
+		has_stream: seed.has_stream ?? !isImage,
+		image_url: seed.image_url ?? null,
+		image_prompt: seed.image_prompt ?? null
 	};
 }
 
@@ -399,6 +411,73 @@ seeds.push({
 	output_tokens: 2900
 });
 
+// --- Phase 4.7: the Illustrator ---------------------------------------------
+//
+// Not an LLM call. It goes through a separate image client, so it has no tokens,
+// no cost, and no token stream — only a duration and a picture. It is in the
+// fixture so the demo exercises the image branch of the transcript, which is the
+// only call in a run whose output you can actually look at.
+//
+// The demo points at a real committed hero from the same date as the fixture; if
+// that file is ever pruned the UI degrades to prompt-only, which is also worth
+// seeing in the demo.
+const DEMO_HERO_PROMPT = `You are generating a daily hero image for an AI news aggregator website.
+
+## Your Goal
+Create a playful, colorful editorial illustration that visually represents today's top AI news stories. The scene should immediately convey the themes of the day's news to readers.
+
+## The Mascot (CRITICAL)
+The attached image shows our skunk mascot. You MUST:
+- Keep the EXACT circuit board pattern on the skunk's body and tail - this is a core part of the brand identity
+- Maintain the skunk's white and black coloring with the tech circuit pattern visible
+- The skunk must be ACTIVELY DOING SOMETHING related to the topics - typing on a keyboard, reading papers, adjusting equipment, pointing at a screen, holding tools, etc. NOT just standing and smiling at the camera!
+- Position the skunk in the lower-left or lower-right portion, engaged with the scene
+
+## Today's Stories
+
+**Topic 1: Inference Economics Squeeze**
+Three separate announcements converged on serving cost rather than training scale: a hardware partnership aimed squarely at throughput, a serving-stack release claiming a 2.4x gain on identical silicon, and a pricing change that only makes sense if the first two hold up. The throughline is that frontier capability is no longer the scarce resource.
+
+**Topic 2: Speculative Decoding Convergence**
+arXiv carried a cluster of papers on speculative decoding and KV-cache compression, which reads less like coincidence and more like a field converging on the same bottleneck. Two are follow-ups to a paper from last week.
+
+**Topic 3: Split Community Reaction**
+Practitioners treated the pricing move as straightforwardly good news; community threads were more sceptical, focusing on rate limits rather than headline cost.
+
+## Visual Direction
+Create a scene that represents these stories. You must include Topic 1 (the top story), then pick 2-3 others that would make the best scene together. Consider:
+- What visual metaphors could represent these themes?
+- How can the skunk mascot interact with or observe these elements?
+- Suggested scene elements: throughput gauges, stacked server racks, cost curves bending downward, comparison charts
+
+## Style Requirements
+- Playful cartoon illustration, tech editorial art style
+- Vibrant colors with Trend Red (#E63946) accents
+- Energetic, forward-looking, tech-optimistic mood
+- No company logos or watermarks - but topic-relevant company logos are encouraged when relevant to the stories
+- 21:9 ultra-wide banner composition`;
+
+seeds.push({
+	id: 'hero',
+	agent_id: 'hero',
+	phase_id: 'phase-4.7',
+	caller: 'hero_generator.compose',
+	task: "Paint the day's scene",
+	role: 'image',
+	queued_ms: 37.6 * MIN,
+	wait_ms: 0,
+	ttft_ms: 0,
+	dur_ms: 1.8 * MIN,
+	provider_id: 'image',
+	model: 'gemini-3-pro-image',
+	profile: 'STANDARD',
+	effort: 'high',
+	input_tokens: 0,
+	output_tokens: 0,
+	image_url: '/data/2026-07-27/hero.webp',
+	image_prompt: DEMO_HERO_PROMPT
+});
+
 const calls = seeds.map(buildCall).sort((a, b) => a.queued_ms - b.queued_ms);
 const lastEnd = calls.reduce((m, c) => Math.max(m, c.end_ms), 0);
 const DURATION = Math.round(lastEnd + 3.2 * MIN);
@@ -544,7 +623,12 @@ export const REPLAY_SAMPLE: ReplayIndex = {
 		total_input_tokens: calls.reduce((s, c) => s + c.input_tokens, 0),
 		total_output_tokens: calls.reduce((s, c) => s + c.output_tokens, 0),
 		llm_calls: calls.length,
-		models: ['claude-5-opus-aws', 'claude-5-opus-gcp', 'claude-5-opus-anthropic'],
+		models: [
+			'claude-5-opus-aws',
+			'claude-5-opus-gcp',
+			'claude-5-opus-anthropic',
+			'gemini-3-pro-image'
+		],
 		peak_concurrency: peak,
 		stream_available: true
 	},

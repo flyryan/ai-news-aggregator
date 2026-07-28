@@ -16,7 +16,10 @@ const PROVIDER_PALETTE: Record<string, string> = {
 	anthropic: '#d97757',
 	azure: '#0ea5e9',
 	vertex: '#8b5cf6',
-	bedrock: '#f59e0b'
+	bedrock: '#f59e0b',
+	// Not an LLM route: the hero image client. Matched to the `imagegen` kind tint so
+	// the Illustrator reads as one thing across the stage and the transcript.
+	image: '#ec4899'
 };
 
 const PROVIDER_FALLBACKS = ['#14b8a6', '#a855f7', '#ec4899', '#84cc16', '#6366f1'];
@@ -160,6 +163,18 @@ export function formatCost(usd: number): string {
 	if (usd >= 100) return `$${usd.toFixed(0)}`;
 	if (usd >= 1) return `$${usd.toFixed(2)}`;
 	return `$${usd.toFixed(3)}`;
+}
+
+/**
+ * True for the image-generation call (the hero).
+ *
+ * These go through a separate image client rather than an LLM route, so every
+ * token/cost field on them is a structural zero, not a measurement. Anywhere the
+ * UI would otherwise print "0 tok" or "$0.000" it must branch on this instead —
+ * the page's whole contract is that a number on screen was measured.
+ */
+export function isImageCall(call: Pick<ReplayCall, 'role'>): boolean {
+	return call.role === 'image';
 }
 
 export function callDuration(call: ReplayCall): number {

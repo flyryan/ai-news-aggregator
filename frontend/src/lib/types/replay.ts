@@ -120,6 +120,16 @@ export interface ReplayCall {
 	retry_reason: string | null;
 
 	has_stream: boolean;
+
+	/**
+	 * Image-generation calls only (`role: "image"`). The hero image runs through a
+	 * separate image client, not an LLM route, so it has no tokens, no cost and no
+	 * stream — but it does have the one output in the whole run you can look at.
+	 * Site-relative and already cache-busted by the generator; use verbatim.
+	 */
+	image_url?: string | null;
+	/** The prompt that produced `image_url`. Markdown-ish, ~5–6k chars. */
+	image_prompt?: string | null;
 }
 
 export interface ReplayConcurrency {

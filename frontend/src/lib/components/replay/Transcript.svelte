@@ -10,7 +10,8 @@
 		formatCost,
 		ROLE_LABELS,
 		OUTCOME_COLORS,
-		ttftOf
+		ttftOf,
+		isImageCall
 	} from '$lib/services/replayViz';
 	import { createStreamRenderer, withCaret } from '$lib/services/replayMarkdown';
 
@@ -18,6 +19,9 @@
 	// would be invalidated by the other caller every time.
 	const renderThinking = createStreamRenderer();
 	const renderAnswer = createStreamRenderer();
+	// The hero prompt is static, but it goes through the same renderer so the two
+	// panes share one markdown dialect.
+	const renderPrompt = createStreamRenderer();
 
 	export let call: ReplayCall;
 	export let stream: ReplayCallStream | null = null;
@@ -164,6 +168,46 @@
 	$: thinkingHtml = withCaret(renderThinking(thinkingText), answerText ? '' : caretHtml);
 	$: answerHtml = withCaret(renderAnswer(answerText), caretHtml);
 	$: showEmptyStream = streamState === 'unavailable' || (streamState === 'ready' && !prefixes);
+
+	// ------------------------------------------------------------ image calls
+	//
+	// The hero call is the one request in the run whose output you can look at. It
+	// ran on an image client rather than an LLM route, so it has no stream, no
+	// thinking, and no token accounting — every one of those fields is a structural
+	// zero. This branch renders the picture and the prompt instead, and the header
+	// above drops the token/cost stats rather than printing zeros as if measured.
+	$: isImage = isImageCall(call);
+	$: imageUrl = call.image_url ?? null;
+	$: imagePrompt = call.image_prompt ?? null;
+
+	// A missing hero (pruned, 404, never generated) degrades to prompt-only rather
+	// than a broken-image glyph. Reset when the selected call changes.
+	let imageFailed = false;
+	$: if (call.id) imageFailed = false;
+
+	// The prompt is ~5.6k chars — the image is the headline, so it starts folded.
+	let promptOpen = false;
+	$: if (call.id) promptOpen = false;
+	$: promptHtml = isImage && imagePrompt ? renderPrompt(imagePrompt) : '';
+
+	/**
+	 * Unfolding the prompt reveals it *below* a full-width 21:9 image, i.e. below the
+	 * body's scroll fold — the click would otherwise appear to do nothing. Bring the
+	 * heading to the top of the pane so the text the user asked for is what they see.
+	 */
+	function togglePrompt() {
+		promptOpen = !promptOpen;
+		if (!promptOpen) return;
+		autoScroll = false;
+		void svelteTick().then(() => {
+			const el = bodyEl?.querySelector('.prompt');
+			el?.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+		});
+	}
+
+	// The image lands at the end of the call, not progressively: before then, show
+	// the same "still working" state the station does rather than a finished picture.
+	$: imageArrived = t >= call.end_ms;
 </script>
 
 <div class="transcript card !p-0 overflow-hidden" style="--accent: {accent}">
@@ -171,7 +215,11 @@
 		<div class="min-w-0">
 			<div class="ts-eyebrow">
 				<span class="route" style="background: {accent}">{call.provider_id}</span>
-				<span class="profile" style="--p: {profileColor(call.profile)}">{call.profile}</span>
+				{#if !isImage}
+					<!-- Analysis profiles map to LLM effort levels; they mean nothing for an
+					     image client, so the badge would be decorative rather than true. -->
+					<span class="profile" style="--p: {profileColor(call.profile)}">{call.profile}</span>
+				{/if}
 				<span class="role">{ROLE_LABELS[call.role] ?? call.role}</span>
 				{#if call.worker != null}<span class="worker">worker {call.worker}</span>{/if}
 				{#if call.outcome !== 'ok'}
@@ -194,7 +242,18 @@
 
 	<dl class="ts-stats">
 		<div><dt>Duration</dt><dd>{formatDuration(call.end_ms - call.start_ms)}</dd></div>
-		{#if timingsMeasured}
+		{#if isImage}
+			<!-- No tokens, no cost, no queue: an image client, not an LLM route. Showing
+			     zeros here would present a structural absence as a measurement. -->
+			<div><dt>Model</dt><dd class="ts-model">{call.model}</dd></div>
+			<div><dt>Output</dt><dd>1 image</dd></div>
+			<div>
+				<dt>Tokens / cost</dt>
+				<dd class="ts-unrecorded" title="Image generation is not billed or metered per token">
+					n/a
+				</dd>
+			</div>
+		{:else if timingsMeasured}
 			<div><dt>Queue wait</dt><dd>{formatDuration(call.wait_ms)}</dd></div>
 			<div><dt>First token</dt><dd>{ttft != null ? formatDuration(ttft) : '—'}</dd></div>
 		{:else}
@@ -205,14 +264,16 @@
 				</dd>
 			</div>
 		{/if}
-		<div><dt>Effort</dt><dd>{call.effort}</dd></div>
-		<div><dt>Input</dt><dd>{formatTokens(call.input_tokens)}</dd></div>
-		<div><dt>Output</dt><dd>{formatTokens(call.output_tokens)}</dd></div>
-		{#if call.cache_read_tokens > 0}
-			<div><dt>Cache read</dt><dd>{formatTokens(call.cache_read_tokens)}</dd></div>
+		{#if !isImage}
+			<div><dt>Effort</dt><dd>{call.effort}</dd></div>
+			<div><dt>Input</dt><dd>{formatTokens(call.input_tokens)}</dd></div>
+			<div><dt>Output</dt><dd>{formatTokens(call.output_tokens)}</dd></div>
+			{#if call.cache_read_tokens > 0}
+				<div><dt>Cache read</dt><dd>{formatTokens(call.cache_read_tokens)}</dd></div>
+			{/if}
+			<div><dt>Cost</dt><dd>{formatCost(call.cost_usd)}</dd></div>
+			<div><dt>Stop</dt><dd>{call.stop_reason ?? '—'}</dd></div>
 		{/if}
-		<div><dt>Cost</dt><dd>{formatCost(call.cost_usd)}</dd></div>
-		<div><dt>Stop</dt><dd>{call.stop_reason ?? '—'}</dd></div>
 	</dl>
 
 	<!-- Scrub within this one call -->
@@ -242,8 +303,73 @@
 		>
 	</div>
 
-	<div class="ts-body" bind:this={bodyEl} on:scroll={onBodyScroll}>
-		{#if streamState === 'loading'}
+	<div class="ts-body" class:ts-body-art={isImage} bind:this={bodyEl} on:scroll={onBodyScroll}>
+		{#if isImage}
+			<!-- The picture first: it is the whole point of this one call. -->
+			<section class="art">
+				{#if imageUrl && !imageFailed}
+					<figure class="art-frame" class:pending={!imageArrived}>
+						<img
+							src={imageUrl}
+							alt="Hero image generated for {call.task}"
+							decoding="async"
+							on:error={() => (imageFailed = true)}
+						/>
+						{#if !imageArrived}
+							<figcaption class="art-working">
+								<span class="art-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+								painting — lands at {formatClock(call.end_ms)}
+							</figcaption>
+						{/if}
+					</figure>
+					{#if imageArrived}
+						<p class="art-note">
+							Published as the day's hero image.
+							<a href={imageUrl} target="_blank" rel="noopener noreferrer">Open full size ↗</a>
+						</p>
+					{/if}
+				{:else}
+					<p class="ts-note ts-note-block">
+						{#if imageUrl}
+							The generated image is no longer on disk for this date, so only the prompt survives.
+						{:else}
+							This run recorded the image step but not a path to its output.
+						{/if}
+					</p>
+				{/if}
+			</section>
+
+			<section class="prompt">
+				<h4>
+					<button
+						type="button"
+						class="prompt-toggle"
+						on:click={togglePrompt}
+						aria-expanded={promptOpen}
+					>
+						<span class="prompt-caret" class:open={promptOpen} aria-hidden="true">▸</span>
+						The prompt
+					</button>
+					<span class="answer-meta">
+						{#if imagePrompt}{imagePrompt.length.toLocaleString()} chars{:else}not recorded{/if}
+					</span>
+				</h4>
+				{#if promptOpen}
+					{#if promptHtml}
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="prompt-text md">{@html promptHtml}</div>
+					{:else}
+						<p class="answer-text pending">No prompt was captured for this call.</p>
+					{/if}
+				{:else if imagePrompt}
+					<p class="prompt-peek">
+						Assembled from the day's detected topics, the mascot reference, and a fixed style
+						brief — the only prompt in this replay that is safe to publish, because it contains
+						no source content.
+					</p>
+				{/if}
+			</section>
+		{:else if streamState === 'loading'}
 			<p class="ts-note">Loading stream…</p>
 		{:else if showEmptyStream}
 			<div class="ts-note ts-note-block">
@@ -511,6 +637,13 @@
 		max-height: 22rem;
 		overflow-y: auto;
 	}
+	/* The transcript body is capped so a long stream scrolls inside the card. A 21:9
+	   image at full card width is taller than that cap, so the one call whose output
+	   is a picture would open showing a horizontal slice of it. Give the image pane
+	   more room — the folded prompt keeps the whole thing bounded. */
+	.ts-body-art {
+		max-height: 40rem;
+	}
 
 	.ts-note {
 		font-size: 0.75rem;
@@ -558,6 +691,148 @@
 		color: #E63946;
 		text-decoration: underline;
 		font-variant-numeric: tabular-nums;
+	}
+
+	/* --- image-generation result ------------------------------------------- */
+	.art {
+		margin-bottom: 0.9rem;
+	}
+	.art-frame {
+		position: relative;
+		border-radius: 0.6rem;
+		overflow: hidden;
+		border: 1px solid rgb(0 0 0 / 0.1);
+		background: rgb(0 0 0 / 0.04);
+		line-height: 0;
+	}
+	:global(.dark) .art-frame {
+		border-color: rgb(255 255 255 / 0.1);
+		background: rgb(255 255 255 / 0.04);
+	}
+	.art-frame img {
+		width: 100%;
+		height: auto;
+		display: block;
+	}
+	/* Before the clock reaches the end of the call the image has not been produced
+	   yet, so it is shown dimmed and unresolved rather than as a finished result. */
+	.art-frame.pending img {
+		filter: blur(9px) saturate(0.6);
+		opacity: 0.5;
+	}
+	.art-working {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.4rem;
+		font-size: 0.72rem;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		line-height: 1.4;
+		color: #fff;
+		/* The blurred artwork underneath can be light or dark depending on the image,
+		   so the caption carries its own scrim rather than relying on the art. */
+		background: radial-gradient(60% 100% at 50% 50%, rgb(0 0 0 / 0.6), transparent 75%);
+		text-shadow: 0 1px 6px rgb(0 0 0 / 0.9);
+	}
+	.art-dots {
+		display: inline-flex;
+		gap: 2.5px;
+	}
+	.art-dots i {
+		width: 4px;
+		height: 4px;
+		border-radius: 999px;
+		background: currentColor;
+		animation: paintpulse 1.2s ease-in-out infinite;
+	}
+	.art-dots i:nth-child(2) {
+		animation-delay: 0.2s;
+	}
+	.art-dots i:nth-child(3) {
+		animation-delay: 0.4s;
+	}
+	@keyframes paintpulse {
+		0%,
+		100% {
+			opacity: 0.25;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+	.art-note {
+		margin-top: 0.35rem;
+		font-size: 0.68rem;
+		color: #737373;
+	}
+	.art-note a {
+		color: #E63946;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+
+	.prompt h4 {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		font-size: 0.55rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: #737373;
+		margin-bottom: 0.3rem;
+	}
+	.prompt-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		font: inherit;
+		letter-spacing: inherit;
+		text-transform: inherit;
+		color: inherit;
+		cursor: pointer;
+	}
+	.prompt-toggle:hover,
+	.prompt-toggle:focus-visible {
+		color: #E63946;
+		outline: none;
+	}
+	.prompt-caret {
+		display: inline-block;
+		font-size: 0.7rem;
+		line-height: 1;
+		transition: transform 150ms ease;
+	}
+	.prompt-caret.open {
+		transform: rotate(90deg);
+	}
+	.prompt-peek {
+		font-size: 0.72rem;
+		line-height: 1.5;
+		color: #737373;
+		font-style: italic;
+	}
+	.prompt-text {
+		font-size: 0.76rem;
+		line-height: 1.6;
+		color: #404040;
+		word-break: break-word;
+		padding: 0.55rem 0.7rem;
+		border-radius: 0.5rem;
+		border-left: 2px solid #ec4899;
+		background: rgb(236 72 153 / 0.06);
+	}
+	:global(.dark) .prompt-text {
+		color: #d4d4d4;
+		background: rgb(236 72 153 / 0.1);
+	}
+
+	.ts-model {
+		font-size: 0.68rem !important;
+		word-break: break-word;
 	}
 
 	.reasoning {
@@ -716,6 +991,13 @@
 		.md :global(.caret) {
 			animation: none;
 			opacity: 0.6;
+		}
+		.art-dots i {
+			animation: none;
+			opacity: 0.75;
+		}
+		.prompt-caret {
+			transition: none;
 		}
 	}
 </style>

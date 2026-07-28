@@ -6,7 +6,8 @@
 		profileColor,
 		formatClock,
 		formatDuration,
-		formatTokens
+		formatTokens,
+		isImageCall
 	} from '$lib/services/replayViz';
 
 	export let index: ReplayIndex;
@@ -237,11 +238,15 @@
 									class:selected={call.id === selectedCallId}
 									style="left: {left}%; width: {width}%; --c: {barColor(call)}"
 									on:click|stopPropagation={() => onSelectCall(call.id)}
-									title="{call.task} · {call.provider_id} · {call.profile} · {formatDuration(
-										call.end_ms - call.start_ms
-									)} · {formatTokens(call.output_tokens)} tok{call.outcome !== 'ok'
-										? ` · ${call.outcome}`
-										: ''}"
+									title={isImageCall(call)
+										? `${call.task} · ${call.model} · ${formatDuration(
+												call.end_ms - call.start_ms
+											)} · 1 image (no token metering)`
+										: `${call.task} · ${call.provider_id} · ${call.profile} · ${formatDuration(
+												call.end_ms - call.start_ms
+											)} · ${formatTokens(call.output_tokens)} tok${
+												call.outcome !== 'ok' ? ` · ${call.outcome}` : ''
+											}`}
 								>
 									{#if waitW > 0.05}
 										<span class="seg-wait" style="width: {(waitW / width) * 100}%"></span>
