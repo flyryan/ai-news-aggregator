@@ -23,7 +23,7 @@ Daily AI/ML news briefings curated by specialized agents using adaptive thinking
 | [Quick Start](#quick-start) | Docker and local setup |
 | [Configuration](#configuration) | Provider modes, prompts, data sources |
 | [Daily Automation](#daily-automation) | GitHub Actions publication workflow |
-| [Features](#features) | Multi-agent, continuity detection, frontend |
+| [Features](#features) | Multi-agent, LLM replay, continuity detection, frontend |
 | [Architecture](#architecture) | Directory structure, agent pairs, data output |
 | [Frontend Development](#frontend-development) | Dev server, build, URL routes |
 | [Operational Notes](#operational-notes) | arXiv schedule, date semantics |
@@ -62,7 +62,7 @@ A Python-based pipeline that collects AI/ML news from multiple sources, analyzes
 | **4.5. Link Enrichment** | Inject internal links to referenced items | STANDARD |
 | **4.6. Ecosystem Enrichment** | Auto-detect new model releases from news | STANDARD |
 | **4.7. Hero Image** | Generate branded banner with Gemini 3 Pro | - |
-| **5-7. Output** | JSON data generation + RSS feeds + MiniSearch corpus (client-built index) | - |
+| **5-7. Output** | JSON data generation + LLM replay artifacts + RSS feeds + MiniSearch corpus (client-built index) | - |
 
 ### Adaptive Thinking Profiles
 
@@ -244,6 +244,11 @@ Set these on the publishing repository:
 | `LLM_LOG_REQUESTS` | `true` | Log queue/start/done metadata without raw prompt content |
 | `LLM_HEARTBEAT_SECONDS` | `60` | Emit progress logs for in-flight LLM requests; set `0` to disable |
 | `LLM_STREAM_STALL_SECONDS` | `120` | Max gap between SSE chunks before a stream is treated as dead. On the streaming path this is the httpx `read` timeout; `LLM_TIMEOUT_SECONDS` still bounds total call duration |
+| `LLM_REPLAY_CAPTURE` | `true` | Capture LLM stream events for the replay artifact; set `false` to disable |
+| `LLM_REPLAY_COALESCE_MS` | `80` | Merge same-kind output deltas within this window |
+| `LLM_REPLAY_MAX_DELTAS` | `20000` | Per-call delta cap before the call is marked truncated |
+| `LLM_REPLAY_MAX_TOTAL_DELTAS` | `400000` | Whole-run delta cap |
+| `LLM_REPLAY_MAX_BYTES` | `600000` | Hard gzipped ceiling for `replay-stream.json.gz` |
 | `LLM_METRICS_PATH` | `data/llm_metrics.jsonl` | JSONL diagnostics file uploaded as a workflow artifact |
 
 ### Manual Dry Runs
@@ -393,6 +398,11 @@ export SCRAPECREATORS_API_KEY="your-key-here"  # For Reddit collection
 | `LLM_LOG_REQUESTS` | Log LLM queue/start/done metadata without raw prompt content. Default: `true` | No |
 | `LLM_HEARTBEAT_SECONDS` | Seconds between in-flight LLM progress logs. Default: `60`; set `0` to disable | No |
 | `LLM_STREAM_STALL_SECONDS` | Max gap between SSE chunks before a stream is treated as dead. Default: `120` | No |
+| `LLM_REPLAY_CAPTURE` | Capture LLM stream events for the replay artifact. Default: `true` | No |
+| `LLM_REPLAY_COALESCE_MS` | Merge same-kind output deltas within this window. Default: `80` | No |
+| `LLM_REPLAY_MAX_DELTAS` | Per-call delta cap before truncation. Default: `20000` | No |
+| `LLM_REPLAY_MAX_TOTAL_DELTAS` | Whole-run delta cap. Default: `400000` | No |
+| `LLM_REPLAY_MAX_BYTES` | Hard gzipped ceiling for `replay-stream.json.gz`. Default: `600000` | No |
 | `LLM_METRICS_PATH` | Optional JSONL path for per-request LLM metrics. GitHub Actions default: `data/llm_metrics.jsonl` | No |
 | `ANALYZER_BATCH_SIZE` | Items per analyzer map batch. Default: `75` | No |
 | `ANALYZER_MAX_CONCURRENT_BATCHES` | Per-category analyzer map concurrency. Default: `3` | No |
@@ -462,6 +472,23 @@ Phase 4.6 auto-detects new releases from daily news and updates this file.
 - **4 Gatherer agents** collecting from different source types in parallel
 - **4 Analyzer agents** with MAP-REDUCE batching for scalability
 - **Continuity detection** tracks developing stories across days
+
+### LLM Replay
+Every run publishes itself as a replayable artifact, viewable at `/replay?date=YYYY-MM-DD`:
+- **Newsroom view**: agents as stations that wake on their first call, show in-flight work
+  with per-call provider badges, and report in downstream as calls land
+- **Timeline view**: every LLM call as a bar (queue wait / time to first token / streaming)
+  over a concurrency series
+- **Transcript view**: the model's actual output replayed as a typewriter — thinking
+  summary first, then the answer
+- Every animation is driven by a real timestamp from a real request; nothing is simulated
+- Only model *output* is captured, never prompts, which is what makes the artifact safe to
+  publish. Set `LLM_REPLAY_CAPTURE=false` to disable capture entirely
+- Regenerate a past day offline:
+  `python3 generators/replay_generator.py YYYY-MM-DD --web-dir web --data-dir data`
+  (such runs set `timings_measured: false` — queue wait and first-token are unrecoverable
+  after the fact)
+- Schema contract: `docs/replay-schema.md`
 
 ### Continuity Detection
 Automatically identifies when today's stories continue from previous coverage:

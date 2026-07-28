@@ -149,6 +149,8 @@ Phase 5: Assembly & Output
     ↓
 Phase 6: JSON Data Generation (for SPA frontend)
     ↓
+Phase 6.2: LLM Replay Generation (replay-index.json + optional stream)
+    ↓
 Phase 6.5: RSS Feed Generation (Atom 1.0 with Media RSS)
     ↓
 Phase 7: Search Corpus Update (client-built MiniSearch index)
@@ -174,6 +176,8 @@ agents/
 ├── link_enricher.py           # Adds internal links to summaries
 ├── cost_tracker.py            # LLM API cost tracking
 ├── phase_tracker.py           # Phase status tracking and end-of-run summary
+├── replay_recorder.py         # In-memory capture of LLM stream events for replay
+├── replay_taxonomy.py         # Maps caller tags to the replay's cast of agents
 ├── ecosystem_context.py       # AI model release tracking for grounding
 ├── gatherers/
 │   ├── news_gatherer.py       # RSS + Twitter-linked articles
@@ -189,6 +193,7 @@ agents/
 
 generators/
 ├── json_generator.py          # Generates JSON data for SPA frontend
+├── replay_generator.py        # LLM replay artifacts (index + gzipped stream)
 ├── search_indexer.py          # Builds the MiniSearch corpus
 ├── hero_generator.py          # Daily hero image with skunk mascot
 └── feed_generator.py          # Atom RSS feeds with Media RSS support
@@ -221,7 +226,10 @@ frontend/                       # Svelte SPA frontend
 - `agents/cost_tracker.py` - Tracks LLM API usage and costs
 - `agents/ecosystem_context.py` - Model release tracking for LLM grounding
 - `agents/phase_tracker.py` - Phase status tracking, timing, and end-of-run summary
+- `agents/replay_recorder.py` - Captures LLM stream events in memory for the replay
+- `agents/replay_taxonomy.py` - Maps `caller` tags to agent identity/role/task
 - `generators/json_generator.py` - JSON data for SPA frontend
+- `generators/replay_generator.py` - Replay artifacts; offline-regenerable per date
 - `generators/search_indexer.py` - Builds the MiniSearch corpus (single search-corpus.json)
 - `generators/hero_generator.py` - Daily hero image generation via Gemini
 - `generators/feed_generator.py` - Atom RSS feeds with Media RSS namespace
@@ -271,6 +279,11 @@ LLM_MAX_RETRIES       # Anthropic SDK retry count for transient request failures
 LLM_LOG_REQUESTS      # Log LLM queue/start/done metadata without raw prompt content (default: true)
 LLM_HEARTBEAT_SECONDS # Seconds between in-flight LLM progress logs; 0 disables it (default: 60)
 LLM_STREAM_STALL_SECONDS # Max gap between SSE chunks before a stream is considered dead (default: 120)
+LLM_REPLAY_CAPTURE    # Capture LLM stream events for the replay artifact (default: true)
+LLM_REPLAY_COALESCE_MS # Merge same-kind output deltas within this window (default: 80)
+LLM_REPLAY_MAX_DELTAS # Per-call delta cap before the call is marked truncated (default: 20000)
+LLM_REPLAY_MAX_TOTAL_DELTAS # Whole-run delta cap (default: 400000)
+LLM_REPLAY_MAX_BYTES  # Hard gzipped ceiling for replay-stream.json.gz (default: 600000)
 LLM_METRICS_PATH      # Optional JSONL path for per-request LLM metrics (Actions default: data/llm_metrics.jsonl)
 ANALYZER_BATCH_SIZE   # Items per analyzer map batch (default: 75)
 ANALYZER_MAX_CONCURRENT_BATCHES # Per-category analyzer map concurrency (default: 3)
@@ -405,6 +418,41 @@ python3 generators/feed_generator.py web/ 30
 ### Feed Location
 Feeds are output to `web/data/feeds/` and accessible at `/data/feeds/*.xml` on the frontend.
 
+## LLM Replay
+
+Each run publishes itself as a replayable artifact, rendered at `/replay?date=YYYY-MM-DD`
+as a newsroom of agents working over a shared playback clock. `docs/replay-schema.md`
+is the binding contract for all three layers below — change it there first.
+
+### Layers
+| Layer | File | Role |
+|-------|------|------|
+| Capture | `agents/replay_recorder.py` | Observer on the existing SSE loop in `llm_client` |
+| Attribution | `agents/replay_taxonomy.py` | `caller` tag → agent identity, role, task |
+| Generation | `generators/replay_generator.py` | Merges recorder + cost + phase data into artifacts |
+
+### Non-obvious constraints
+- **Capture must never fail a run.** Every recorder entry point is guarded; the first
+  exception disables it for the rest of the run. `generate_replay()` likewise swallows
+  everything. A missing replay is acceptable; a failed pipeline is not.
+- **Hot path is memory-only** — no I/O, no locks, no `await` in `record_delta`, which
+  runs per token. Buffers flush once at end of run.
+- **Only model output is captured, never prompts.** This is what makes the artifact
+  safe to publish. The generator asserts no secret-shaped content before writing.
+- **The index is self-sufficient.** If `replay-stream.json.gz` is pruned or absent, the
+  replay still works minus the typewriter. Retention is by size, not age.
+- **Thinking prose is real but variable.** With `display: "summarized"` Opus 5 emits
+  genuine `thinking_delta` text (a DEEP call produced ~4.2k chars), but a QUICK call may
+  produce none. The UI must degrade when `thinking_chars` is 0.
+
+### Offline regeneration
+```bash
+python3 generators/replay_generator.py 2026-07-27 --web-dir web --data-dir data
+```
+Rebuilds a past day from committed `data/processed/` files. Such runs set
+`run.timings_measured: false`: `wait_ms` and `first_token_ms` are unrecoverable after
+the fact, and phase boundaries are reconstructed. Live runs measure all of it.
+
 ## Important Notes
 
 - **arXiv**: Uses arXiv RSS feeds for today's collection (no rate limits, more reliable) with automatic API fallback. For historical dates, uses API directly since RSS only contains current announcements. Only collects papers with `announce_type` of "new" or "cross" (skips replacements). arXiv only publishes papers on weekdays (Mon-Fri). Weekend dates will return 0 papers.
@@ -514,7 +562,9 @@ web/data/
     ├── news.json           # Full news items
     ├── research.json       # Full research items (arXiv + blogs)
     ├── social.json         # Full social items
-    └── reddit.json         # Full reddit items
+    ├── reddit.json         # Full reddit items
+    ├── replay-index.json   # LLM replay: phases, agents, calls, concurrency
+    └── replay-stream.json.gz  # LLM replay: output deltas (optional, prunable)
 
 ### summary.json includes:
 - `date`: Report date (YYYY-MM-DD)
@@ -536,6 +586,7 @@ Uses query parameters for bookmarkable/shareable URLs:
 | `/?date=2026-01-05&category=research` | Category page for date |
 | `/archive` | Calendar browser with all available dates |
 | `/feeds` | RSS feed directory with subscribe links |
+| `/replay?date=2026-07-27` | LLM replay for that date (`?demo=1` for the sample fixture) |
 
 Legacy path-based URLs (`/{date}` and `/{date}/{category}`) are automatically redirected to query param format.
 

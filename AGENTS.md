@@ -97,6 +97,8 @@ Phase 5: Assembly & Output
     ↓
 Phase 6: JSON Data Generation (for SPA frontend)
     ↓
+Phase 6.2: LLM Replay Generation (replay-index.json + optional stream)
+    ↓
 Phase 6.5: RSS Feed Generation (Atom 1.0 with Media RSS)
     ↓
 Phase 7: Search Corpus Update (client-built MiniSearch index)
@@ -122,6 +124,8 @@ agents/
 ├── link_enricher.py           # Adds internal links to summaries
 ├── cost_tracker.py            # LLM API cost tracking
 ├── phase_tracker.py           # Phase status tracking and end-of-run summary
+├── replay_recorder.py         # In-memory capture of LLM stream events for replay
+├── replay_taxonomy.py         # Maps caller tags to the replay's cast of agents
 ├── ecosystem_context.py       # AI model release tracking for grounding
 ├── gatherers/
 │   ├── news_gatherer.py       # RSS + Twitter-linked articles
@@ -137,6 +141,7 @@ agents/
 
 generators/
 ├── json_generator.py          # Generates JSON data for SPA frontend
+├── replay_generator.py        # LLM replay artifacts (index + gzipped stream)
 ├── search_indexer.py          # Builds the MiniSearch corpus
 ├── hero_generator.py          # Daily hero image with skunk mascot
 └── feed_generator.py          # Atom RSS feeds with Media RSS support
@@ -173,6 +178,9 @@ frontend/                       # Svelte SPA frontend
 - `generators/search_indexer.py` - Builds the MiniSearch corpus (single search-corpus.json)
 - `generators/hero_generator.py` - Daily hero image generation via Gemini
 - `generators/feed_generator.py` - Atom RSS feeds with Media RSS namespace
+- `generators/replay_generator.py` - Replay artifacts; offline-regenerable per date
+- `agents/replay_recorder.py` - Captures LLM stream events in memory for the replay
+- `agents/replay_taxonomy.py` - Maps `caller` tags to agent identity/role/task
 - `scripts/regenerate_hero.py` - Manual hero image regeneration script
 - `config/` - Feed lists (rss_feeds.txt, twitter_accounts.txt, etc.)
 - `config/model_releases.yaml` - Curated AI model release dates (source of truth)
@@ -218,6 +226,11 @@ LLM_MAX_RETRIES       # Anthropic SDK retry count for transient request failures
 LLM_LOG_REQUESTS      # Log LLM queue/start/done metadata without raw prompt content (default: true)
 LLM_HEARTBEAT_SECONDS # Seconds between in-flight LLM progress logs; 0 disables it (default: 60)
 LLM_STREAM_STALL_SECONDS # Max gap between SSE chunks before a stream is considered dead (default: 120)
+LLM_REPLAY_CAPTURE    # Capture LLM stream events for the replay artifact (default: true)
+LLM_REPLAY_COALESCE_MS # Merge same-kind output deltas within this window (default: 80)
+LLM_REPLAY_MAX_DELTAS # Per-call delta cap before the call is marked truncated (default: 20000)
+LLM_REPLAY_MAX_TOTAL_DELTAS # Whole-run delta cap (default: 400000)
+LLM_REPLAY_MAX_BYTES  # Hard gzipped ceiling for replay-stream.json.gz (default: 600000)
 LLM_METRICS_PATH      # Optional JSONL path for per-request LLM metrics (Actions default: data/llm_metrics.jsonl)
 ANALYZER_BATCH_SIZE   # Items per analyzer map batch (default: 75)
 ANALYZER_MAX_CONCURRENT_BATCHES # Per-category analyzer map concurrency (default: 3)
@@ -461,7 +474,9 @@ web/data/
     ├── news.json           # Full news items
     ├── research.json       # Full research items (arXiv + blogs)
     ├── social.json         # Full social items
-    └── reddit.json         # Full reddit items
+    ├── reddit.json         # Full reddit items
+    ├── replay-index.json   # LLM replay: phases, agents, calls, concurrency
+    └── replay-stream.json.gz  # LLM replay: output deltas (optional, prunable)
 
 ### summary.json includes:
 - `date`: Report date (YYYY-MM-DD)
