@@ -95,8 +95,13 @@
 						on:click|stopPropagation={() => (infoOpen = !infoOpen)}
 						aria-expanded={infoOpen}
 						aria-label="What does the {agent.label} do?"
-						title="What does the {agent.label} do?">ⓘ</button
+						title="What does the {agent.label} do?"
 					>
+						<!-- A plain letter: the circle is drawn in CSS, so it can carry the
+						     agent's colour and sit on a proper touch target. The ⓘ glyph
+						     renders at a different size and baseline in every font. -->
+						<span aria-hidden="true">i</span>
+					</button>
 				{/if}
 			</div>
 			<div class="kind">{agent.kind}</div>
@@ -326,8 +331,13 @@
 		border-color: rgb(255 255 255 / 0.09);
 	}
 
+	/* 0.44 was too aggressive once the stations carried a control. Opacity applies
+	   to the whole subtree and a child cannot opt out, so at 0.44 the info button
+	   sat at an effective 0.44 no matter what it set for itself — which is why it
+	   was hard to find. 0.62 still reads clearly as "hasn't started" while leaving
+	   the affordance visible. */
 	.station.is-idle {
-		opacity: 0.44;
+		opacity: 0.62;
 	}
 	.station.is-done {
 		opacity: 0.92;
@@ -414,31 +424,51 @@
 		text-overflow: ellipsis;
 	}
 
-	/* Quiet until wanted: the stations are already dense, and this is a secondary
-	   affordance. It brightens on hover and is always reachable by keyboard. */
+	/* A circled "i" set in the agent's own colour, on a tinted disc.
+	   The first version was a bare grey glyph at #c4c4c4 — against a white card
+	   that is barely above the background, and at 0.68rem it was smaller than the
+	   label it sat beside, so it read as punctuation rather than a control.
+	   14px is also a sane touch target relative to the 0.8rem label. */
 	.info-btn {
 		flex: none;
-		font-size: 0.68rem;
+		display: inline-grid;
+		place-items: center;
+		width: 14px;
+		height: 14px;
+		font-family: ui-serif, Georgia, serif;
+		font-size: 0.62rem;
+		font-weight: 700;
+		font-style: italic;
 		line-height: 1;
-		color: #c4c4c4;
-		background: none;
-		border: none;
-		padding: 0 1px;
+		color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 14%, transparent);
+		border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+		border-radius: 50%;
+		padding: 0;
 		cursor: pointer;
-		transition: color 140ms ease;
+		opacity: 0.75;
+		transition: opacity 140ms ease, background 140ms ease;
+	}
+	/* Full strength on a station that hasn't started: the dimming already conveys
+	   "idle", and this is the one thing on the card worth reading before it does. */
+	.station.is-idle .info-btn {
+		opacity: 1;
 	}
 	.info-btn[aria-expanded='true'] {
-		color: var(--accent);
+		opacity: 1;
+		background: var(--accent);
+		border-color: var(--accent);
+		color: #fff;
 	}
 	.info-btn:focus-visible {
-		color: var(--accent);
-		outline: 1px solid var(--accent);
-		outline-offset: 1px;
-		border-radius: 2px;
+		opacity: 1;
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
 	}
 	@media (hover: hover) and (pointer: fine) {
 		.info-btn:hover {
-			color: var(--accent);
+			opacity: 1;
+			background: color-mix(in srgb, var(--accent) 26%, transparent);
 		}
 	}
 	:global(.dark) .label {
