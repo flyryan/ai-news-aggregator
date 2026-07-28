@@ -270,6 +270,7 @@ LLM_ADAPTIVE_MAX_TOKENS # Response output ceiling for adaptive calls; not a thin
 LLM_MAX_RETRIES       # Anthropic SDK retry count for transient request failures (default: 2)
 LLM_LOG_REQUESTS      # Log LLM queue/start/done metadata without raw prompt content (default: true)
 LLM_HEARTBEAT_SECONDS # Seconds between in-flight LLM progress logs; 0 disables it (default: 60)
+LLM_STREAM_STALL_SECONDS # Max gap between SSE chunks before a stream is considered dead (default: 120)
 LLM_METRICS_PATH      # Optional JSONL path for per-request LLM metrics (Actions default: data/llm_metrics.jsonl)
 ANALYZER_BATCH_SIZE   # Items per analyzer map batch (default: 75)
 ANALYZER_MAX_CONCURRENT_BATCHES # Per-category analyzer map concurrency (default: 3)

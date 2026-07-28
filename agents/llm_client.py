@@ -80,6 +80,24 @@ def _env_bool(name: str, default: bool = False) -> bool:
     return default
 
 
+def _stream_timeout(total_timeout: float) -> httpx.Timeout:
+    """Build an httpx timeout tuned for SSE streaming.
+
+    On a streaming response httpx's `read` timeout measures the gap between
+    chunks, not the whole request, so it should be small enough to notice a
+    dead connection quickly while still tolerating the quiet stretch before
+    the first token on a max-effort request. `pool` keeps the total request
+    budget, so `LLM_TIMEOUT_SECONDS` still bounds the call end to end.
+
+    This is the fix for the deterministic long-request failures on rdsec: with
+    a single flat read timeout, a non-streaming call sat silent and was killed
+    at ~600s (our own read clock) or ~290s (a shorter upstream cutoff on the
+    gcp path).
+    """
+    stall = _env_float("LLM_STREAM_STALL_SECONDS", 120.0, minimum=5.0)
+    return httpx.Timeout(total_timeout, connect=10.0, read=stall, write=30.0, pool=total_timeout)
+
+
 class ThinkingLevel(IntEnum):
     """Internal analysis profiles.
 
@@ -264,10 +282,14 @@ class AnthropicClient:
         else:
             raise ValueError(f"Unknown mode: {self.mode}. Expected 'anthropic' or 'openai-compatible'.")
 
-        # Create httpx client with mode-appropriate auth
+        # Create httpx client with mode-appropriate auth.
+        # On the streaming path `read` is the max gap BETWEEN chunks, not the
+        # total request duration, so it can be far tighter than the overall
+        # budget -- a healthy long generation emits events continuously. See
+        # _stream_message() on the async client.
         self._http_client = httpx.Client(
             auth=auth,
-            timeout=httpx.Timeout(self.timeout),
+            timeout=_stream_timeout(self.timeout),
             trust_env=self.trust_env_proxy
         )
 
@@ -343,7 +365,11 @@ class AnthropicClient:
         if system:
             kwargs["system"] = system
 
-        response = self._client.messages.create(**kwargs)
+        # Stream for the same reason as the async path: a silent socket gets
+        # cut by intermediaries on long generations. get_final_message()
+        # returns the same Message a create() call would have.
+        with self._client.messages.stream(**kwargs) as stream:
+            response = stream.get_final_message()
 
         # Extract text content
         content = ""
@@ -466,7 +492,10 @@ class AnthropicClient:
         if system:
             kwargs["system"] = system
 
-        response = self._client.messages.create(**kwargs)
+        # Stream: see _stream_message() on the async client for why a
+        # non-streaming call dies on long generations.
+        with self._client.messages.stream(**kwargs) as stream:
+            response = stream.get_final_message()
 
         # Log stop_reason for diagnostics (helps debug proxy behavior)
         logger.debug(f"Response stop_reason: {response.stop_reason}, output_tokens: {response.usage.output_tokens}")
@@ -667,10 +696,12 @@ class AsyncAnthropicClient:
         else:
             raise ValueError(f"Unknown mode: {self.mode}. Expected 'anthropic' or 'openai-compatible'.")
 
-        # Create async httpx client with mode-appropriate auth
+        # Create async httpx client with mode-appropriate auth.
+        # `read` is the inter-chunk gap on the streaming path, not the total
+        # request duration -- see _stream_message().
         self._http_client = httpx.AsyncClient(
             auth=auth,
-            timeout=httpx.Timeout(self.timeout),
+            timeout=_stream_timeout(self.timeout),
             trust_env=self.trust_env_proxy
         )
 
@@ -853,11 +884,12 @@ class AsyncAnthropicClient:
         request_id: int,
         request_context: Optional[Dict[str, Any]],
         started_at: float,
+        progress: Optional[Dict[str, Any]] = None,
     ) -> Optional[asyncio.Task]:
         if self.heartbeat_seconds <= 0:
             return None
         return asyncio.create_task(
-            self._log_request_heartbeat(request_id, request_context, started_at)
+            self._log_request_heartbeat(request_id, request_context, started_at, progress)
         )
 
     async def _log_request_heartbeat(
@@ -865,6 +897,7 @@ class AsyncAnthropicClient:
         request_id: int,
         request_context: Optional[Dict[str, Any]],
         started_at: float,
+        progress: Optional[Dict[str, Any]] = None,
     ) -> None:
         while True:
             await asyncio.sleep(self.heartbeat_seconds)
@@ -872,9 +905,35 @@ class AsyncAnthropicClient:
                 active = self._active_requests
                 queued = self._queued_requests
             duration = time.time() - started_at
+
+            # On the streaming path, report what the model is actually doing
+            # rather than only how long we have been waiting. `stall` is the
+            # gap since the last chunk -- the number that matters, because a
+            # healthy long request has a small stall and a large duration,
+            # while a dying connection has both growing together.
+            detail = ""
+            metric_extra: Dict[str, Any] = {}
+            if progress is not None:
+                phase = progress.get("phase") or "connecting"
+                thinking_chars = progress.get("thinking_chars", 0)
+                text_chars = progress.get("text_chars", 0)
+                last_chunk_at = progress.get("last_chunk_at")
+                stall = (time.time() - last_chunk_at) if last_chunk_at else duration
+                detail = (
+                    f" phase={phase} thinking={thinking_chars}c text={text_chars}c"
+                    f" stall={stall:.1f}s"
+                )
+                metric_extra = {
+                    "phase": phase,
+                    "thinking_chars": thinking_chars,
+                    "text_chars": text_chars,
+                    "stream_events": progress.get("events", 0),
+                    "stall_seconds": round(stall, 3),
+                }
+
             logger.info(
                 f"LLM running #{request_id} {self._format_request_context(request_context)} "
-                f"active={active} queued={queued} duration={duration:.1f}s"
+                f"active={active} queued={queued} duration={duration:.1f}s{detail}"
             )
             await self._write_metric({
                 "event": "heartbeat",
@@ -883,6 +942,7 @@ class AsyncAnthropicClient:
                 "duration_seconds": round(duration, 3),
                 "active": active,
                 "queued": queued,
+                **metric_extra,
             })
 
     async def _write_metric(self, record: Dict[str, Any]) -> None:
@@ -911,19 +971,67 @@ class AsyncAnthropicClient:
         with metrics_file.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
 
+    async def _stream_message(self, progress: Optional[Dict[str, Any]] = None, **kwargs):
+        """Run one request over SSE and return the assembled Message.
+
+        Streaming is the transport, not a feature: a non-streaming request
+        leaves the socket completely silent from send until the first response
+        byte, so any intermediary with an idle-read timeout kills long
+        generations mid-flight. Observed on rdsec as deterministic failures at
+        ~600s (our own httpx read timeout, which never resets on a silent
+        socket) and ~290s (a shorter cutoff on the gcp path). SSE keeps events
+        -- including provider pings -- flowing throughout, so the read timeout
+        becomes "max gap between chunks" rather than "max total duration".
+        The SDK enforces the same rule: >10-minute non-streaming requests raise
+        ValueError("Streaming is required for operations that may take longer
+        than 10 minutes").
+
+        `progress`, when supplied, is updated in place as blocks arrive so the
+        heartbeat can report what the model is actually doing.
+        """
+        async with self._client.messages.stream(**kwargs) as stream:
+            if progress is None:
+                return await stream.get_final_message()
+
+            async for event in stream:
+                etype = getattr(event, "type", None)
+                if etype == "content_block_start":
+                    block_type = getattr(getattr(event, "content_block", None), "type", None)
+                    progress["phase"] = block_type or "unknown"
+                    progress["blocks"] = progress.get("blocks", 0) + 1
+                elif etype == "content_block_delta":
+                    delta = getattr(event, "delta", None)
+                    dtype = getattr(delta, "type", None)
+                    # Count characters rather than tokens: usage totals are only
+                    # final at message_delta, but text/thinking deltas give a
+                    # live signal that generation is progressing.
+                    if dtype == "text_delta":
+                        progress["text_chars"] = progress.get("text_chars", 0) + len(getattr(delta, "text", "") or "")
+                    elif dtype == "thinking_delta":
+                        progress["thinking_chars"] = progress.get("thinking_chars", 0) + len(getattr(delta, "thinking", "") or "")
+                    progress["last_chunk_at"] = time.time()
+                elif etype == "message_delta":
+                    usage = getattr(event, "usage", None)
+                    if usage is not None and getattr(usage, "output_tokens", None):
+                        progress["output_tokens"] = usage.output_tokens
+                progress["events"] = progress.get("events", 0) + 1
+
+            return await stream.get_final_message()
+
     async def _create_message(self, request_context: Optional[Dict[str, Any]] = None, **kwargs):
         """Create a message under the optional global async LLM concurrency cap."""
         if not self.log_requests:
             if self._request_semaphore is None:
-                return await self._client.messages.create(**kwargs)
+                return await self._stream_message(**kwargs)
             async with self._request_semaphore:
-                return await self._client.messages.create(**kwargs)
+                return await self._stream_message(**kwargs)
 
         queued_at = time.time()
         request_id, _, _ = await self._register_queued_request(request_context)
         acquired = False
         started_at = queued_at
         heartbeat_task = None
+        progress: Dict[str, Any] = {}
 
         try:
             if self._request_semaphore is not None:
@@ -931,8 +1039,8 @@ class AsyncAnthropicClient:
             acquired = True
             started_at = time.time()
             wait_seconds = await self._mark_request_started(request_id, request_context, queued_at)
-            heartbeat_task = self._start_heartbeat(request_id, request_context, started_at)
-            response = await self._client.messages.create(**kwargs)
+            heartbeat_task = self._start_heartbeat(request_id, request_context, started_at, progress)
+            response = await self._stream_message(progress=progress, **kwargs)
             await self._mark_request_finished(
                 request_id,
                 request_context,

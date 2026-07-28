@@ -243,6 +243,7 @@ Set these on the publishing repository:
 | `LLM_MAX_RETRIES` | `2` | Anthropic SDK retry count for transient request failures |
 | `LLM_LOG_REQUESTS` | `true` | Log queue/start/done metadata without raw prompt content |
 | `LLM_HEARTBEAT_SECONDS` | `60` | Emit progress logs for in-flight LLM requests; set `0` to disable |
+| `LLM_STREAM_STALL_SECONDS` | `120` | Max gap between SSE chunks before a stream is treated as dead. On the streaming path this is the httpx `read` timeout; `LLM_TIMEOUT_SECONDS` still bounds total call duration |
 | `LLM_METRICS_PATH` | `data/llm_metrics.jsonl` | JSONL diagnostics file uploaded as a workflow artifact |
 
 ### Manual Dry Runs
@@ -391,6 +392,7 @@ export SCRAPECREATORS_API_KEY="your-key-here"  # For Reddit collection
 | `LLM_MAX_RETRIES` | Anthropic SDK retry count for transient request failures. Default: `2` | No |
 | `LLM_LOG_REQUESTS` | Log LLM queue/start/done metadata without raw prompt content. Default: `true` | No |
 | `LLM_HEARTBEAT_SECONDS` | Seconds between in-flight LLM progress logs. Default: `60`; set `0` to disable | No |
+| `LLM_STREAM_STALL_SECONDS` | Max gap between SSE chunks before a stream is treated as dead. Default: `120` | No |
 | `LLM_METRICS_PATH` | Optional JSONL path for per-request LLM metrics. GitHub Actions default: `data/llm_metrics.jsonl` | No |
 | `ANALYZER_BATCH_SIZE` | Items per analyzer map batch. Default: `75` | No |
 | `ANALYZER_MAX_CONCURRENT_BATCHES` | Per-category analyzer map concurrency. Default: `3` | No |
