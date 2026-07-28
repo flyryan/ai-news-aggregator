@@ -4,7 +4,7 @@ Context / why this exists
 -------------------------
 - 2026-07-09: the daily pipeline went RED at the publish gate with
   `top_topics is empty (topic detection failed)`. Root cause: the
-  topic-detection LLM call SUCCEEDED (claude-4.8-opus-aws, stop_reason=end_turn,
+  topic-detection LLM call SUCCEEDED (claude-5-opus-aws, stop_reason=end_turn,
   10086 output tokens) but the orchestrator parsed the response with a fragile
   hand-rolled chain:
 

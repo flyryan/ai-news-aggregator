@@ -23,7 +23,7 @@
 				news outlets, and social media.
 			</p>
 			<p>
-				The aggregator uses a multi-agent pipeline powered by Claude Opus 4.8 with adaptive thinking
+				The aggregator uses a multi-agent pipeline powered by Claude Opus 5 with adaptive thinking
 				to gather, analyze, and synthesize content from diverse sources into coherent daily reports.
 			</p>
 			<p>
@@ -91,12 +91,12 @@
 				<div class="prose dark:prose-invert max-w-none text-trend-gray-600 dark:text-trend-gray-400">
 					<p>
 						<strong>All summaries and analysis on this site are AI-generated</strong> using
-						Claude Opus 4.8 from Anthropic. The content is produced entirely by automated processes
+						Claude Opus 5 from Anthropic. The content is produced entirely by automated processes
 						without human editorial review.
 					</p>
 					<p>
-						The pipeline uses Claude Opus 4.8 <strong>adaptive thinking</strong> for complex
-						analysis tasks like cross-category topic detection and executive summaries. On Opus 4.8,
+						The pipeline uses Claude Opus 5 <strong>adaptive thinking</strong> for complex
+						analysis tasks like cross-category topic detection and executive summaries. On Opus 5,
 						this is guided by effort settings rather than fixed manual token budgets.
 					</p>
 					<p>

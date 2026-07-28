@@ -101,7 +101,7 @@ class FeedGenerator:
     SIZE_VARIANTS = [25, 50, 100, None]  # None = full/all items
 
     FEED_TITLE = "AATF AI News Aggregator"
-    FEED_SUBTITLE = "Daily AI/ML news powered by Claude Opus 4.8"
+    FEED_SUBTITLE = "Daily AI/ML news powered by Claude Opus 5"
 
     def _extract_first_external_link(self, html: str) -> Optional[str]:
         """

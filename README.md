@@ -2,7 +2,7 @@
 
 ![Pipeline Banner](assets/pipeline-banner.webp)
 
-> Multi-agent AI news pipeline powered by Claude Opus 4.8 with adaptive thinking
+> Multi-agent AI news pipeline powered by Claude Opus 5 with adaptive thinking
 
 > **Live Site:** [https://news.aatf.ai](https://news.aatf.ai)
 
@@ -66,9 +66,9 @@ A Python-based pipeline that collects AI/ML news from multiple sources, analyzes
 
 ### Adaptive Thinking Profiles
 
-For Claude Opus 4.8, these are profiles rather than fixed token budgets. The client sends `thinking: { type: "adaptive", display: "summarized" }` and maps each profile to `output_config.effort`. Manual `budget_tokens` is only used for older Claude models that still support it.
+For Claude Opus 5, these are profiles rather than fixed token budgets. The client sends `thinking: { type: "adaptive", display: "summarized" }` and maps each profile to `output_config.effort`. Manual `budget_tokens` is only used for older Claude models that still support it.
 
-| Profile | Opus 4.8 Effort | Legacy Manual Budget | Use Case |
+| Profile | Opus 5 Effort | Legacy Manual Budget | Use Case |
 |---------|-----------------|----------------------|----------|
 | QUICK | `high` | 4,096 tokens | Link relevance decisions, item summarization |
 | STANDARD | `xhigh` | 8,192 tokens | Batch analysis, link enrichment |
@@ -230,7 +230,7 @@ Set these on the publishing repository:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `ANTHROPIC_MODEL` | `claude-4.8-opus-aws` | Legacy single-provider model ID; ignored when `llm.routes` is configured |
+| `ANTHROPIC_MODEL` | `claude-5-opus-aws` | Legacy single-provider model ID; ignored when `llm.routes` is configured |
 | `PIPELINE_BASE_URL` | `https://news.aatf.ai` | Base URL used in feeds |
 | `PIPELINE_IMAGE_MODEL` | `gemini-3-pro-image-preview` | Native Gemini image model used by fallback config |
 | `PIPELINE_COMMIT_PATHS` | `web/data config/model_releases.yaml config/ecosystem_context.yaml` | Space-separated generated outputs to commit |
@@ -253,22 +253,22 @@ Every hosted run also uploads a `pipeline-diagnostics` artifact when available. 
 
 ### Multi-Provider LLM Routing
 
-Production can route async LLM calls across multiple Opus 4.8 provider aliases by adding `llm.routes` to the ignored `config/providers.yaml` stored in `PIPELINE_PROVIDERS_YAML`. Routes inherit root `llm` settings unless overridden:
+Production can route async LLM calls across multiple Opus 5 provider aliases by adding `llm.routes` to the ignored `config/providers.yaml` stored in `PIPELINE_PROVIDERS_YAML`. Routes inherit root `llm` settings unless overridden:
 
 ```yaml
 llm:
   mode: "openai-compatible"
   api_key: "${ANTHROPIC_API_KEY}"
   base_url: "${ANTHROPIC_API_BASE}"
-  model: "claude-4.8-opus-aws"
+  model: "claude-5-opus-aws"
   timeout: 600
   routes:
     - id: "aws"
-      model: "claude-4.8-opus-aws"
+      model: "claude-5-opus-aws"
     - id: "gcp"
-      model: "claude-4.8-opus-gcp"
+      model: "claude-5-opus-gcp"
     - id: "anthropic"
-      model: "claude-4.8-opus-anthropic"
+      model: "claude-5-opus-anthropic"
 ```
 
 With routes configured, new async LLM calls rotate across providers. Each route gets its own semaphore using `LLM_MAX_CONCURRENT_REQUESTS`, so analyzer/category concurrency is unchanged but LLM capacity scales with the number of configured routes. Retryable transport failures, timeouts, 429s, and 5xx responses retry on a different provider. Prompt/schema/client errors and JSON parse failures do not cross-provider retry.
@@ -311,7 +311,7 @@ Supports two modes:
 
 | Mode | Description | Auth | Thinking Support |
 |------|-------------|------|------------------|
-| `anthropic` (default) | Direct Anthropic API | x-api-key header | Adaptive thinking on Opus 4.8 |
+| `anthropic` (default) | Direct Anthropic API | x-api-key header | Adaptive thinking on Opus 5 |
 | `openai-compatible` | LiteLLM, vLLM, or other proxies | Bearer token | Depends on proxy passthrough support |
 
 **Direct Anthropic API:**
@@ -321,7 +321,7 @@ llm:
   mode: "anthropic"
   api_key: "${ANTHROPIC_API_KEY}"  # Use env var reference
   # base_url: "https://api.anthropic.com"  # Default, uncomment to override
-  model: "claude-4.8-opus-anthropic"  # Or your endpoint's Opus 4.8 alias
+  model: "claude-5-opus-anthropic"  # Or your endpoint's Opus 5 alias
   timeout: 600
 ```
 
@@ -332,7 +332,7 @@ llm:
   mode: "openai-compatible"
   api_key: "${PROXY_API_KEY}"
   base_url: "https://your-litellm-proxy.example.com"
-  model: "claude-4.8-opus-aws"  # Your proxy's model alias
+  model: "claude-5-opus-aws"  # Your proxy's model alias
   timeout: 600
 ```
 
@@ -469,8 +469,8 @@ Automatically identifies when today's stories continue from previous coverage:
 
 ### Analysis Profiles And Adaptive Thinking
 - QUICK/STANDARD/DEEP/ULTRATHINK are internal AATF analysis profiles, not Anthropic API thinking levels
-- Claude Opus 4.8 uses adaptive thinking plus effort settings, not fixed manual `budget_tokens`
-- Opus 4.8 requests send top-level `thinking: {"type": "adaptive", "display": "summarized"}` plus `output_config.effort`
+- Claude Opus 5 uses adaptive thinking plus effort settings, not fixed manual `budget_tokens`
+- Opus 5 requests send top-level `thinking: {"type": "adaptive", "display": "summarized"}` plus `output_config.effort`
 - `LLM_ADAPTIVE_MAX_TOKENS` sets the response output ceiling and is separate from thinking depth
 - Request logs use `analysis_profile`, `adaptive_effort`, and `response_max_tokens` so the internal profile names are not confused with provider thinking levels or manual token budgets
 - QUICK/STANDARD/DEEP/ULTRATHINK remain as internal profile names for callers and older Claude models
@@ -727,7 +727,7 @@ python3 scripts/regenerate_hero.py 2026-01-06 -e "Add a coffee cup to the scene"
 - **Python 3.10+**
 - **Node.js 18+** (for frontend development)
 - **Docker & Docker Compose** (for containerized deployment)
-- **Claude Opus 4.8** (recommended for best analysis quality)
+- **Claude Opus 5** (recommended for best analysis quality)
 - **Gemini 3 Pro** (optional, for hero image generation)
 
 ### API Keys

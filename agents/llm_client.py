@@ -3,7 +3,7 @@ Anthropic Client with Adaptive/Manual Thinking Support
 
 This module provides a wrapper around the Anthropic SDK that:
 1. Uses Bearer token authentication (custom httpx transport)
-2. Supports Opus 4.8 adaptive thinking and legacy manual thinking budgets
+2. Supports Opus 4.7+ adaptive thinking and legacy manual thinking budgets
 3. Returns structured responses including thinking blocks
 4. Automatically tracks token usage and costs
 """
@@ -83,7 +83,7 @@ def _env_bool(name: str, default: bool = False) -> bool:
 class ThinkingLevel(IntEnum):
     """Internal analysis profiles.
 
-    On Opus 4.8+, these legacy budget values are mapped to adaptive effort
+    On Opus 4.7+, these legacy budget values are mapped to adaptive effort
     levels. On older Claude models, they remain manual thinking budgets.
     """
     QUICK = 4096       # Simple tasks (summarization)
@@ -92,7 +92,7 @@ class ThinkingLevel(IntEnum):
     ULTRATHINK = 32000 # Cross-category synthesis
 
 
-# Map internal pipeline analysis profiles to Opus 4.8+ effort levels. Effort is
+# Map internal pipeline analysis profiles to Opus 4.7+ effort levels. Effort is
 # the provider-facing reasoning knob; the enum values only remain for older
 # manual-thinking models and backwards-compatible call sites.
 BUDGET_TO_EFFORT = {
@@ -102,7 +102,7 @@ BUDGET_TO_EFFORT = {
     ThinkingLevel.ULTRATHINK: "max",
 }
 
-# Opus 4.8 adaptive thinking does not use fixed thinking budgets. Keep the
+# Opus 4.7+ adaptive thinking does not use fixed thinking budgets. Keep the
 # response ceiling separate from internal profiles so logs do not imply that
 # QUICK/STANDARD/DEEP/ULTRATHINK are Anthropic token-budget settings.
 DEFAULT_ADAPTIVE_MAX_TOKENS = 65536
@@ -129,19 +129,42 @@ def _messages_char_count(messages: List[Dict[str, Any]]) -> int:
 
 
 def _uses_adaptive_thinking(model: str) -> bool:
-    """True if model requires adaptive thinking (Opus 4.8 and later).
+    """True if model requires adaptive thinking (Opus 4.7 and later).
 
-    Opus 4.8 removed manual thinking (`type: enabled` + budget_tokens)
-    and sampling parameters. Opus 4.6 and earlier still accept manual thinking,
-    so we keep the legacy path for them. Regex is permissive to handle the
-    alias space: claude-opus-4-8, claude-4.8-opus, claude-opus-4-8-20260416,
-    claude-4.6-opus-aws, etc.
+    Opus 4.7 removed manual thinking (`type: enabled` + budget_tokens) and
+    sampling parameters; every model since (4.8, Opus 5, Sonnet 5, Fable 5)
+    keeps that contract. Only Opus 4.6 and earlier still accept manual
+    thinking, so the legacy path is opt-in by explicit match rather than the
+    default.
+
+    Detection is deliberately fail-open: an unrecognized name is treated as
+    adaptive. Getting this wrong in the adaptive direction produces a loud
+    400 ("thinking.type.enabled is not supported"); getting it wrong in the
+    manual direction is silent -- the proxy accepts the request and returns
+    no thinking blocks, so the pipeline runs a whole report at degraded
+    quality with no error. Prefer the loud failure.
+
+    Handles the full alias space: claude-opus-4-8, claude-4.8-opus-aws,
+    claude-5-opus-gcp, claude-opus-5, claude-fable-5, and the "[1m]"
+    long-context suffix. Names with no version pair at all (claude-fable-5
+    parses as major-only; mock-llm has none) fall through to adaptive.
     """
-    match = re.search(r'(\d+)[-.](\d+)', model.lower())
-    if not match:
-        return False
-    major, minor = int(match.group(1)), int(match.group(2))
-    return major > 4 or (major == 4 and minor >= 7)
+    normalized = model.lower()
+    # Strip context-window suffixes like "[1m]" -- the "1m" would otherwise
+    # be misread as a version pair on names such as claude-5-opus-gcp[1m].
+    normalized = re.sub(r'\[[^\]]*\]', '', normalized)
+
+    # Legacy manual-thinking models are a closed, known set. Match major.minor
+    # only where both digits are adjacent in the alias (4-6 / 4.6), and bound
+    # the minor to one digit so a dated snapshot (claude-opus-4-6-20251101)
+    # still parses as 4.6 rather than 6-20251101.
+    match = re.search(r'(?<!\d)(\d)[-.](\d)(?!\d)', normalized)
+    if match:
+        major, minor = int(match.group(1)), int(match.group(2))
+        if major < 4 or (major == 4 and minor <= 6):
+            return False
+
+    return True
 
 
 # Default model max token limit (can be overridden via config or constructor)
@@ -217,7 +240,7 @@ class AnthropicClient:
         """
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
-        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.8-opus-aws')
+        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-5-opus-aws')
         self.timeout = _env_float("LLM_TIMEOUT_SECONDS", timeout, minimum=1.0)
         self.mode = mode
         self.max_output_tokens = max_output_tokens or DEFAULT_MODEL_MAX_TOKENS
@@ -292,14 +315,14 @@ class AnthropicClient:
         """
         Make a plain API call.
 
-        Opus 4.8+ still receives adaptive thinking request metadata here; this
+        Opus 4.7+ still receives adaptive thinking request metadata here; this
         method only means the caller does not need returned thinking text.
 
         Args:
             messages: List of message dicts with 'role' and 'content'.
             system: Optional system prompt.
             max_tokens: Maximum tokens in response.
-            temperature: Sampling temperature (ignored on Opus 4.8+).
+            temperature: Sampling temperature (ignored on Opus 4.7+).
 
         Returns:
             LLMResponse with content and no returned thinking text.
@@ -362,7 +385,7 @@ class AnthropicClient:
             messages: List of message dicts with 'role' and 'content'.
             system: Optional system prompt.
             budget_tokens: Backward-compatible manual thinking budget/profile.
-            profile: Analysis profile (use ThinkingLevel enum). Opus 4.8+
+            profile: Analysis profile (use ThinkingLevel enum). Opus 4.7+
                      maps this to adaptive effort; older models use it as a
                      manual thinking budget.
             max_tokens: Maximum response output tokens. On adaptive models this
@@ -416,10 +439,10 @@ class AnthropicClient:
         }
 
         if use_adaptive:
-            # Opus 4.8+ path: adaptive thinking with effort. Manual thinking
+            # Opus 4.7+ path: adaptive thinking with effort. Manual thinking
             # and non-default sampling parameters return 400 on these models.
             # `thinking` is a typed SDK param in anthropic>=0.75.0; keep it
-            # top-level so Opus 4.8 cannot silently run with thinking disabled.
+            # top-level so adaptive models cannot silently run with thinking disabled.
             # `output_config` is not typed in this SDK yet, so effort goes
             # through extra_body as a passthrough.
             kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
@@ -451,6 +474,16 @@ class AnthropicClient:
         # Check for truncation
         if response.stop_reason == "max_tokens":
             logger.warning(f"Response truncated at max_tokens ({max_tokens}). Output may be incomplete.")
+
+        # See the async path for why refusals are logged loudly here rather
+        # than left to surface as an empty-content JSON parse failure.
+        if response.stop_reason == "refusal":
+            stop_details = getattr(response, "stop_details", None)
+            category = getattr(stop_details, "category", None) if stop_details else None
+            logger.error(
+                f"LLM REFUSAL: model={self.model} category={category} "
+                f"analysis_profile={profile_name} -- batch will yield no items"
+            )
 
         # Extract thinking and text content
         thinking_blocks = []
@@ -587,7 +620,7 @@ class AsyncAnthropicClient:
     ):
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
-        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-4.8-opus-aws')
+        self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-5-opus-aws')
         self.provider_id = provider_id or self.model
         self.timeout = _env_float("LLM_TIMEOUT_SECONDS", timeout, minimum=1.0)
         self.mode = mode
@@ -1029,7 +1062,7 @@ class AsyncAnthropicClient:
         }
 
         if use_adaptive:
-            # Opus 4.8+ path: adaptive thinking with effort. See the sync
+            # Opus 4.7+ path: adaptive thinking with effort. See the sync
             # method for the thinking/output_config rationale.
             kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
             kwargs["extra_body"] = {"output_config": {"effort": effort}}
@@ -1072,6 +1105,19 @@ class AsyncAnthropicClient:
         # grant -- we surface it loudly rather than degrading thinking effort.
         if response.stop_reason == "max_tokens":
             logger.warning(f"Response truncated at max_tokens ({max_tokens}). Output may be incomplete.")
+
+        # Safety classifiers can decline a request: HTTP 200, stop_reason
+        # "refusal", empty/partial content. Without this log the empty content
+        # falls through to the analyzer's "No JSON found" path and the whole
+        # batch is silently dropped -- which is how the 2026-06-10 Fable 5
+        # refusal problem stayed invisible until item counts came up short.
+        if response.stop_reason == "refusal":
+            stop_details = getattr(response, "stop_details", None)
+            category = getattr(stop_details, "category", None) if stop_details else None
+            logger.error(
+                f"LLM REFUSAL: model={self.model} category={category} "
+                f"analysis_profile={profile_name} -- batch will yield no items"
+            )
 
         thinking_blocks = []
         text_blocks = []
@@ -1148,7 +1194,7 @@ class AsyncAnthropicClient:
         caller: Optional[str] = None,
         routing_context: Optional[Dict[str, Any]] = None
     ) -> LLMResponse:
-        """Async plain call; Opus 4.8+ still uses adaptive thinking metadata."""
+        """Async plain call; Opus 4.7+ still uses adaptive thinking metadata."""
         kwargs = {
             "model": self.model,
             "max_tokens": max_tokens,

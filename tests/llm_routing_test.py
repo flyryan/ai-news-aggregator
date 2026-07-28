@@ -1,4 +1,4 @@
-"""Focused tests for Opus 4.8 adaptive thinking and async LLM routing."""
+"""Focused tests for Opus 5 adaptive thinking and async LLM routing."""
 
 import asyncio
 import os
@@ -32,14 +32,14 @@ class FakeTextBlock:
 class FakeAnthropicResponse:
     content = [FakeTextBlock()]
     usage = FakeUsage()
-    model = "claude-4.8-opus-aws"
+    model = "claude-5-opus-aws"
     stop_reason = "end_turn"
 
 
 class FakeRouteClient:
     def __init__(self, provider_id, model=None, failures=None):
         self.provider_id = provider_id
-        self.model = model or f"claude-4.8-opus-{provider_id}"
+        self.model = model or f"claude-5-opus-{provider_id}"
         self.max_concurrent_requests = 8
         self.failures = list(failures or [])
         self.calls = []
@@ -72,14 +72,14 @@ class LLMRouteConfigTests(unittest.TestCase):
             mode="openai-compatible",
             api_key="test-key",
             base_url="https://proxy.example.com/",
-            model="claude-4.8-opus-aws",
+            model="claude-5-opus-aws",
         )
 
         routes = config.get_route_configs()
 
         self.assertEqual(len(routes), 1)
-        self.assertEqual(routes[0].id, "claude-4.8-opus-aws")
-        self.assertEqual(routes[0].model, "claude-4.8-opus-aws")
+        self.assertEqual(routes[0].id, "claude-5-opus-aws")
+        self.assertEqual(routes[0].model, "claude-5-opus-aws")
         self.assertEqual(routes[0].mode, "openai-compatible")
         self.assertEqual(routes[0].api_key, "test-key")
         self.assertEqual(routes[0].base_url, "https://proxy.example.com")
@@ -89,11 +89,11 @@ class LLMRouteConfigTests(unittest.TestCase):
             mode="openai-compatible",
             api_key="root-key",
             base_url="https://proxy.example.com",
-            model="claude-4.8-opus-aws",
+            model="claude-5-opus-aws",
             routes=[
-                LLMRouteConfig(id="aws", model="claude-4.8-opus-aws"),
-                LLMRouteConfig(id="gcp", model="claude-4.8-opus-gcp"),
-                LLMRouteConfig(id="anthropic", model="claude-4.8-opus-anthropic"),
+                LLMRouteConfig(id="aws", model="claude-5-opus-aws"),
+                LLMRouteConfig(id="gcp", model="claude-5-opus-gcp"),
+                LLMRouteConfig(id="anthropic", model="claude-5-opus-anthropic"),
             ],
         )
 
@@ -105,9 +105,9 @@ class LLMRouteConfigTests(unittest.TestCase):
         self.assertEqual(
             [route.model for route in routes],
             [
-                "claude-4.8-opus-aws",
-                "claude-4.8-opus-gcp",
-                "claude-4.8-opus-anthropic",
+                "claude-5-opus-aws",
+                "claude-5-opus-gcp",
+                "claude-5-opus-anthropic",
             ],
         )
 
@@ -117,12 +117,67 @@ class LLMRouteConfigTests(unittest.TestCase):
 
         self.assertIn("llm.routes must not be empty", str(error.exception))
 
-    def test_all_hosted_opus_47_aliases_use_adaptive_thinking(self):
+    def test_prior_generation_opus_aliases_still_use_adaptive_thinking(self):
+        """Opus 4.7/4.8 keep the adaptive contract after the Opus 5 switch.
+
+        These aliases are no longer the configured routes, but the pipeline
+        must still drive them correctly on rollback.
+        """
         for model in (
             "claude-4.8-opus-aws",
             "claude-4.8-opus-gcp",
             "claude-4.8-opus-anthropic",
+            "claude-opus-4-8",
+            "claude-4.7-opus-gcp",
         ):
+            with self.subTest(model=model):
+                self.assertTrue(_uses_adaptive_thinking(model))
+
+    def test_opus_5_aliases_use_adaptive_thinking(self):
+        """Opus 5 names carry no adjacent major.minor digit pair.
+
+        The original regex (r'(\\d+)[-.](\\d+)') found no match in
+        "claude-5-opus-gcp" and fell through to the manual-thinking path,
+        which the rdsec proxy accepts while silently returning no thinking
+        blocks -- a whole report at degraded quality with no error raised.
+        """
+        for model in (
+            "claude-5-opus-aws",
+            "claude-5-opus-gcp",
+            "claude-5-opus-anthropic",
+            "claude-opus-5",
+            "claude-5-sonnet-gcp",
+            "claude-fable-5",
+            "claude-mythos-5",
+        ):
+            with self.subTest(model=model):
+                self.assertTrue(_uses_adaptive_thinking(model))
+
+    def test_context_window_suffix_does_not_break_detection(self):
+        """"[1m]" must not be parsed as a "1.m"-style version pair."""
+        for model in ("claude-5-opus-gcp[1m]", "claude-5-sonnet-gcp[1m]", "claude-fable-5[1m]"):
+            with self.subTest(model=model):
+                self.assertTrue(_uses_adaptive_thinking(model))
+
+    def test_legacy_manual_thinking_models_still_detected(self):
+        """Opus 4.6 and earlier keep the manual path, incl. dated snapshots."""
+        for model in (
+            "claude-4.6-opus-aws",
+            "claude-opus-4-6",
+            "claude-opus-4-6-20251101",
+            "claude-4.5-opus",
+            "claude-sonnet-4-5",
+            "claude-haiku-4-5",
+        ):
+            with self.subTest(model=model):
+                self.assertFalse(_uses_adaptive_thinking(model))
+
+    def test_unknown_model_names_fail_open_to_adaptive(self):
+        """Unrecognized names must fail toward adaptive.
+
+        Wrong-adaptive is a loud 400; wrong-manual is silent quality loss.
+        """
+        for model in ("some-future-model", "mock-llm", "claude-opus-6"):
             with self.subTest(model=model):
                 self.assertTrue(_uses_adaptive_thinking(model))
 
@@ -158,11 +213,11 @@ class AsyncLLMRouterTests(unittest.TestCase):
                     mode="openai-compatible",
                     api_key="test-key",
                     base_url="https://proxy.example.com",
-                    model="claude-4.8-opus-aws",
+                    model="claude-5-opus-aws",
                     routes=[
-                        LLMRouteConfig(id="aws", model="claude-4.8-opus-aws"),
-                        LLMRouteConfig(id="gcp", model="claude-4.8-opus-gcp"),
-                        LLMRouteConfig(id="anthropic", model="claude-4.8-opus-anthropic"),
+                        LLMRouteConfig(id="aws", model="claude-5-opus-aws"),
+                        LLMRouteConfig(id="gcp", model="claude-5-opus-gcp"),
+                        LLMRouteConfig(id="anthropic", model="claude-5-opus-anthropic"),
                     ],
                 )
                 router = AsyncLLMRouter.from_config(config)
@@ -189,21 +244,21 @@ class AsyncLLMRouterTests(unittest.TestCase):
                 mode="openai-compatible",
                 api_key="test-key",
                 base_url="https://proxy.example.com",
-                model="claude-4.8-opus-aws",
+                model="claude-5-opus-aws",
                 routes=[
                     LLMRouteConfig(
                         id="aws",
-                        model="claude-4.8-opus-aws",
+                        model="claude-5-opus-aws",
                         max_concurrent_requests=8,
                     ),
                     LLMRouteConfig(
                         id="gcp",
-                        model="claude-4.8-opus-gcp",
+                        model="claude-5-opus-gcp",
                         max_concurrent_requests=8,
                     ),
                     LLMRouteConfig(
                         id="anthropic",
-                        model="claude-4.8-opus-anthropic",
+                        model="claude-5-opus-anthropic",
                         max_concurrent_requests=8,
                     ),
                 ],
@@ -260,7 +315,7 @@ class AsyncLLMRouterTests(unittest.TestCase):
             client = AsyncAnthropicClient(
                 api_key="test-key",
                 base_url="https://proxy.example.com",
-                model="claude-4.8-opus-aws",
+                model="claude-5-opus-aws",
                 mode="openai-compatible",
                 max_retries=0,
             )
@@ -305,7 +360,7 @@ class AsyncLLMRouterTests(unittest.TestCase):
             client = AsyncAnthropicClient(
                 api_key="test-key",
                 base_url="https://proxy.example.com",
-                model="claude-4.8-opus-gcp",
+                model="claude-5-opus-gcp",
                 mode="openai-compatible",
                 max_retries=0,
             )

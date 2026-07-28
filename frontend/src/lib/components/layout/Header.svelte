@@ -22,7 +22,7 @@
 					<div>
 						<h1 class="text-2xl font-bold tracking-tight">AATF AI News Aggregator</h1>
 						<p class="text-sm text-white/80">
-							Powered by Claude Opus 4.8
+							Powered by Claude Opus 5
 							<span class="new-badge">NEW</span>
 						</p>
 					</div>

@@ -84,7 +84,7 @@ class LLMProviderConfig(BaseModel):
         default="https://api.anthropic.com",
         description="API base URL (no /v1 suffix)"
     )
-    model: str = Field(default="claude-4.8-opus-aws", description="Model identifier")
+    model: str = Field(default="claude-5-opus-aws", description="Model identifier")
     max_output_tokens: int = Field(
         default=128000,
         ge=1024,
