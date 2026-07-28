@@ -93,9 +93,11 @@
 		       outline-none transition-all duration-200;
 	}
 
-	/* Navigation link */
+	/* Navigation link.
+	   Three padding tiers, not two: the tablet band (sm–lg) carries text labels for
+	   all seven items and needs tighter gutters than the desktop layout to fit. */
 	.nav-link {
-		@apply px-1.5 sm:px-4 py-2 rounded-lg
+		@apply px-1.5 sm:px-2.5 lg:px-4 py-2 rounded-lg
 		       text-trend-gray-600 dark:text-trend-gray-400
 		       hover:bg-trend-gray-200 dark:hover:bg-trend-gray-700
 		       transition-colors duration-200;

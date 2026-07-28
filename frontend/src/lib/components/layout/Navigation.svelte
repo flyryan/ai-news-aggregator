@@ -63,8 +63,18 @@
 								class="w-2 h-2 rounded-full inline-block mr-1"
 								style="background-color: {CATEGORY_CONFIG[category].color}"
 							></span>
-							<span class="sm:hidden">{CATEGORY_CONFIG[category].shortTitle}</span>
-							<span class="hidden sm:inline">{CATEGORY_CONFIG[category].title}</span>
+							<!--
+								Long labels are held back to `lg:`, not `sm:`.
+
+								Measured at 640px: the seven items need 786px of content against
+								592px of track, so the full-label set ("AI News" / "Social Media" /
+								"Reddit Discussions" …) overflowed the viewport by 194px from the
+								moment `sm:` fired. They do not actually fit until ~836px. Short
+								labels plus the tightened `lg:px-4` padding fit comfortably in the
+								tablet band, and 1024px up is byte-identical to before.
+							-->
+							<span class="lg:hidden">{CATEGORY_CONFIG[category].shortTitle}</span>
+							<span class="hidden lg:inline">{CATEGORY_CONFIG[category].title}</span>
 						</a>
 					</li>
 				{/each}
