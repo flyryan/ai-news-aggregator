@@ -375,7 +375,19 @@
 			{#if call.cache_read_tokens > 0}
 				<div><dt>Cache read</dt><dd>{formatTokens(call.cache_read_tokens)}</dd></div>
 			{/if}
-			<div><dt>Cost</dt><dd>{formatCost(call.cost_usd)}</dd></div>
+			{#if call.billed_exact === false}
+				<!-- Tokens came off the SSE stream, not a final response, so this is a
+				     floor. Real spend, counted in the run total — just not exact. -->
+				<div>
+					<dt>Cost</dt>
+					<dd
+						title="Measured up to the point of failure: tokens emitted after the last stream event are unaccounted for."
+						>≥ {formatCost(call.cost_usd)}</dd
+					>
+				</div>
+			{:else}
+				<div><dt>Cost</dt><dd>{formatCost(call.cost_usd)}</dd></div>
+			{/if}
 			<div><dt>Stop</dt><dd>{call.stop_reason ?? '—'}</dd></div>
 		{/if}
 	</dl>

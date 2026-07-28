@@ -146,6 +146,13 @@ export interface ReplayCall {
 	 * UI must not render $0.00 for it.
 	 */
 	billed?: boolean;
+	/**
+	 * False when the call failed mid-stream: its tokens were read off the SSE
+	 * events rather than a final response, so the figure is a floor — anything
+	 * emitted after the last `message_delta` is unaccounted for. The spend is real
+	 * and is included in the run total either way.
+	 */
+	billed_exact?: boolean;
 	error_type?: string | null;
 	/** Set on a failed attempt: the id of the retry that succeeded in its place. */
 	recovered_by?: string;

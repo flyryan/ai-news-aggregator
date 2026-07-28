@@ -44,7 +44,7 @@ def _span(call_id, caller, queued_ms, end_ms, outcome, text_chars=0, **ctx):
     }
 
 
-def _cost_row(caller, output_tokens, duration_s, timestamp_offset_s):
+def _cost_row(caller, output_tokens, duration_s, timestamp_offset_s, partial=False):
     from datetime import datetime, timezone
 
     return {
@@ -59,6 +59,7 @@ def _cost_row(caller, output_tokens, duration_s, timestamp_offset_s):
         "provider_id": "gcp",
         "analysis_profile": "STANDARD",
         "adaptive_effort": "xhigh",
+        "partial": partial,
     }
 
 
@@ -146,6 +147,41 @@ def test_clean_run_is_unchanged():
     assert all(c["outcome"] == "ok" for c in calls)
     assert all(c["cost_usd"] > 0 for c in calls)
     assert all("recovered_by" not in c for c in calls)
+
+
+def test_partial_row_pairs_with_the_failed_span_not_the_success():
+    """A mid-stream failure now bills what it streamed; the money must land right.
+
+    Both attempts have a cost row: the failure's is flagged `partial` (tokens read
+    off the SSE events). Pairing must route each row to a span of matching
+    disposition, or the failure's spend gets attached to the successful call.
+    """
+    caller = "research_analyzer.batch_3"
+    spans = [
+        _span("c050", caller, 10_000, 205_000, "failed", text_chars=35_656),
+        _span("c051", caller, 210_000, 546_000, "ok", text_chars=40_000),
+    ]
+    rows = [
+        _cost_row(caller, output_tokens=18_000, duration_s=195.0,
+                  timestamp_offset_s=205, partial=True),
+        _cost_row(caller, output_tokens=27_407, duration_s=336.9, timestamp_offset_s=546),
+    ]
+
+    calls = _build(spans, rows)
+    assert len(calls) == 2
+
+    failed = next(c for c in calls if c["outcome"] == "failed")
+    ok = next(c for c in calls if c["outcome"] == "ok")
+
+    # The failure keeps the partial figures...
+    assert failed["output_tokens"] == 18_000
+    assert failed["cost_usd"] > 0, "a mid-stream failure was still billed"
+    assert failed["billed_exact"] is False
+    # ...and the success keeps its own, exactly.
+    assert ok["output_tokens"] == 27_407
+    assert ok["billed_exact"] is True
+    # The link between them survives.
+    assert failed["recovered_by"] == ok["id"]
 
 
 def test_concurrent_callers_do_not_swap_spans():

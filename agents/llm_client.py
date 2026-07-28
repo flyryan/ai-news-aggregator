@@ -1030,10 +1030,35 @@ class AsyncAnthropicClient:
                     # signature_delta is deliberately not recorded: it is an
                     # opaque cryptographic blob with nothing to render.
                     progress["last_chunk_at"] = time.time()
+                elif etype == "message_start":
+                    # `input_tokens` is settled the moment the request is accepted,
+                    # so it is available even for a call that later dies. Keeping it
+                    # here is what lets a failed attempt still be priced.
+                    msg_usage = getattr(getattr(event, "message", None), "usage", None)
+                    if msg_usage is not None:
+                        for field in (
+                            "input_tokens",
+                            "cache_creation_input_tokens",
+                            "cache_read_input_tokens",
+                        ):
+                            value = getattr(msg_usage, field, None)
+                            if value:
+                                progress[field] = value
                 elif etype == "message_delta":
+                    # Running totals, re-sent on every delta. A call that fails
+                    # mid-stream leaves the last figures here -- the provider billed
+                    # for them, so they are the only record of that spend.
                     usage = getattr(event, "usage", None)
-                    if usage is not None and getattr(usage, "output_tokens", None):
-                        progress["output_tokens"] = usage.output_tokens
+                    if usage is not None:
+                        for field in (
+                            "output_tokens",
+                            "input_tokens",
+                            "cache_creation_input_tokens",
+                            "cache_read_input_tokens",
+                        ):
+                            value = getattr(usage, field, None)
+                            if value:
+                                progress[field] = value
                 progress["events"] = progress.get("events", 0) + 1
 
             return await stream.get_final_message()
@@ -1046,6 +1071,49 @@ class AsyncAnthropicClient:
         # replay. Both branches below therefore open and close a replay span.
         recorder = get_recorder()
         replay_call_id = recorder.start_call(None, request_context)
+
+        def _record_partial_spend(progress_state: Optional[Dict[str, Any]]) -> None:
+            """Bill a call that streamed tokens and then died.
+
+            `record_call` normally runs off the final response, so a failed attempt
+            used to contribute nothing to the run total -- even though the provider
+            charged for every token it had already emitted. The SSE stream carries
+            running usage (`input_tokens` at message_start, `output_tokens` on each
+            message_delta), so the figures are known right up to the failure.
+
+            Recorded with `partial=True` so the cost report can distinguish spend we
+            measured exactly from spend measured up to the point of failure. Never
+            raises: a bookkeeping problem must not replace the real exception.
+            """
+            if not progress_state:
+                return
+            try:
+                usage = {
+                    key: progress_state[key]
+                    for key in (
+                        "input_tokens",
+                        "output_tokens",
+                        "cache_creation_input_tokens",
+                        "cache_read_input_tokens",
+                    )
+                    if progress_state.get(key)
+                }
+                if not usage:
+                    return
+                ctx = request_context or {}
+                get_tracker().record_call(
+                    caller=ctx.get("caller") or "unknown",
+                    usage=usage,
+                    thinking_level=ctx.get("analysis_profile"),
+                    duration_seconds=0.0,
+                    model=ctx.get("provider_model") or self.model,
+                    provider_id=self.provider_id,
+                    analysis_profile=ctx.get("analysis_profile"),
+                    adaptive_effort=ctx.get("adaptive_effort"),
+                    partial=True,
+                )
+            except Exception:
+                logger.debug("Could not record partial spend for failed call", exc_info=True)
 
         if not self.log_requests:
             # Without logging there is no heartbeat, so `progress` exists purely
@@ -1064,6 +1132,7 @@ class AsyncAnthropicClient:
                         response = await self._stream_message(progress=progress, **kwargs)
             except BaseException as error:
                 recorder.finish_call(replay_call_id, error=error)
+                _record_partial_spend(progress)
                 raise
             recorder.finish_call(replay_call_id, response=response)
             return response
@@ -1095,6 +1164,7 @@ class AsyncAnthropicClient:
             return response
         except BaseException as error:
             recorder.finish_call(replay_call_id, error=error)
+            _record_partial_spend(progress)
             if acquired:
                 await self._mark_request_finished(
                     request_id,

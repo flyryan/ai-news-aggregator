@@ -68,6 +68,11 @@ class APICallRecord:
     analysis_profile: Optional[str] = None
     adaptive_effort: Optional[str] = None
     duration_seconds: float = 0.0
+    # True when the call failed mid-stream and these counts were read off the SSE
+    # events rather than a final response. The provider still billed for them, so
+    # they belong in the total -- but they are a floor, not an exact figure: any
+    # tokens emitted after the last message_delta are unaccounted for.
+    partial: bool = False
 
     @property
     def total_input_tokens(self) -> int:
@@ -230,7 +235,8 @@ class CostTracker:
         model: Optional[str] = None,
         provider_id: Optional[str] = None,
         analysis_profile: Optional[str] = None,
-        adaptive_effort: Optional[str] = None
+        adaptive_effort: Optional[str] = None,
+        partial: bool = False
     ):
         """
         Record an API call.
@@ -241,6 +247,9 @@ class CostTracker:
             thinking_level: ThinkingLevel used (QUICK, STANDARD, DEEP, ULTRATHINK)
             duration_seconds: How long the call took
             model: Model used (if different from default)
+            partial: True when the call failed mid-stream and these counts came
+                from SSE events rather than a final response. Still billed, so
+                still counted -- but a floor rather than an exact figure.
         """
         record = APICallRecord(
             timestamp=datetime.now().isoformat(),
@@ -254,7 +263,8 @@ class CostTracker:
             provider_id=provider_id,
             analysis_profile=analysis_profile,
             adaptive_effort=adaptive_effort,
-            duration_seconds=duration_seconds
+            duration_seconds=duration_seconds,
+            partial=partial
         )
         self.calls.append(record)
 
@@ -479,7 +489,8 @@ class CostTracker:
                     "provider_id": call.provider_id,
                     "analysis_profile": call.analysis_profile,
                     "adaptive_effort": call.adaptive_effort,
-                    "duration_seconds": call.duration_seconds
+                    "duration_seconds": call.duration_seconds,
+                    "partial": call.partial
                 }
                 for call in self.calls
             ]

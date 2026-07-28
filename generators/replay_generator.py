@@ -301,19 +301,25 @@ class ReplayGenerator:
             caller = row.get("caller") or "unknown"
             identity = resolve_call(caller)
 
-            # Take the first span for this caller that actually *succeeded*.
+            # Pair the row with a span of matching disposition.
             #
-            # A failed attempt produces a span but no cost row, so naive positional
-            # pairing hands the failed span to the retry's cost row: the call then
-            # renders "failed" while carrying the successful attempt's tokens and
-            # cost. On 2026-07-28 that mislabelled five batches the pipeline had
-            # logged as 5/5 and 7/7 successful. Skipped spans are not discarded --
-            # they are emitted below as attempts in their own right.
+            # A row marked `partial` came from a call that failed mid-stream (its
+            # tokens were read off the SSE events), so it belongs to a *failed*
+            # span. Every other row belongs to a span that succeeded.
+            #
+            # Getting this wrong is what produced the 2026-07-28 bug: with naive
+            # positional pairing the failed span was handed to the retry's cost row,
+            # so the call rendered "failed" while carrying the successful attempt's
+            # tokens, duration and cost -- five batches the pipeline had logged as
+            # 5/5 and 7/7 successful. Spans passed over here are not discarded; any
+            # left unmatched are emitted below as attempts in their own right.
+            row_is_partial = bool(row.get("partial"))
             span: Optional[Dict[str, Any]] = None
             queue = recorded_by_caller.get(caller)
             if queue:
                 for i, candidate in enumerate(queue):
-                    if (candidate.get("outcome") or "ok") not in ("failed", "refused"):
+                    failed = (candidate.get("outcome") or "ok") in ("failed", "refused")
+                    if failed == row_is_partial:
                         span = queue.pop(i)
                         break
 
@@ -377,6 +383,10 @@ class ReplayGenerator:
                     "stream_events": int((span or {}).get("delta_events") or 0),
                     "stop_reason": (span or {}).get("stop_reason"),
                     "outcome": (span or {}).get("outcome") or "ok",
+                    # False only for a call that failed mid-stream: its tokens are
+                    # real and billed, but read off the SSE events, so they are a
+                    # floor rather than an exact figure.
+                    "billed_exact": not row_is_partial,
                     "attempt": int(context.get("attempt") or 1),
                     "fallback_from": context.get("fallback_from"),
                     "retry_reason": context.get("retry_reason"),
@@ -384,20 +394,18 @@ class ReplayGenerator:
                 }
             )
 
-        # Attempts that produced no cost row.
+        # Attempts with no cost row at all.
         #
-        # `record_call` only runs on a successful response (llm_client.py:1318,
-        # :1406), so a failed attempt is absent from the cost report entirely --
-        # even though it streamed real tokens and was really billed. On 2026-07-28
-        # the five failed batches emitted ~140k characters between them; that spend
-        # is missing from run.total_cost_usd and this generator cannot recover it,
-        # because the token counts only arrive on the response that never came.
+        # Since partial-spend recording landed, a call that streams anything before
+        # dying does produce a row (`partial: true`), so this path now only catches
+        # attempts that failed before the first `message_delta` -- a connection
+        # refused, an immediate 4xx -- plus any run generated before that change.
+        # Those genuinely have no token counts to recover.
         #
-        # So these rows carry zero tokens and `billed: false` -- meaning "we know
-        # this cost something and we do not know how much", not "it was free". The
-        # UI must not render them as $0.00. Dropping them entirely (the old
-        # behaviour) was worse: a retried batch looked like one clean call, hiding
-        # both the failure and the recovery.
+        # They carry zero tokens and `billed: false`, meaning "cost unknown", not
+        # "free". The UI must not render them as $0.00. Dropping them entirely (the
+        # original behaviour) was worse: a retried batch looked like one clean call,
+        # hiding both the failure and the recovery.
         for caller, leftovers in recorded_by_caller.items():
             identity = resolve_call(caller)
             for span in leftovers:
