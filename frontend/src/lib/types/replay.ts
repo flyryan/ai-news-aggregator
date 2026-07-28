@@ -10,7 +10,13 @@ export type ReplayRunStatus = 'success' | 'partial' | 'failed';
 export type ReplayPhaseStatus = 'success' | 'partial' | 'failed' | 'skipped' | 'running';
 export type ReplaySourceStatus = 'success' | 'partial' | 'failed';
 
-export type ReplayAgentKind = 'gatherer' | 'analyzer' | 'synthesizer' | 'enricher' | 'imagegen';
+export type ReplayAgentKind =
+	| 'gatherer'
+	| 'analyzer'
+	| 'ranker'
+	| 'synthesizer'
+	| 'enricher'
+	| 'imagegen';
 
 export type ReplayRole =
 	| 'map'
@@ -73,6 +79,14 @@ export interface ReplayAgent {
 	status: string;
 	/** Optional flavour text from the taxonomy; rendered in the agent detail popover. */
 	blurb?: string | null;
+	/**
+	 * The single role this agent performs, and the reasoning effort that role always
+	 * runs at. One role per agent is a deliberate property of the cast: an agent that
+	 * mixed `map` and `reduce` had no single effort to report. Absent on gatherers,
+	 * which make no LLM calls, and on days generated before the split.
+	 */
+	role?: ReplayRole | null;
+	effort?: ReplayEffort | null;
 }
 
 export interface ReplaySource {

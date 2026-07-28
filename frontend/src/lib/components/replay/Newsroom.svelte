@@ -38,10 +38,12 @@
 		.filter((x): x is NonNullable<typeof x> => x !== null)
 		.slice(0, 14);
 
-	$: laneCounts = {
-		scouts: packets.filter((p) => p.target === 'analysts').length,
-		analysts: packets.filter((p) => p.target === 'desk').length
-	};
+	// Packets in flight per conveyor, keyed by the column they are heading toward, so
+	// adding a column does not need this to be rewritten.
+	$: laneCounts = packets.reduce(
+		(acc, p) => acc.set(p.target, (acc.get(p.target) ?? 0) + 1),
+		new Map<string, number>()
+	);
 
 	$: inFlight = frame.active.filter((a) => a.state !== 'queued').length;
 	$: queuedNow = frame.active.filter((a) => a.state === 'queued').length;
@@ -91,7 +93,7 @@
 		{/each}
 	</div>
 
-	<div class="floor">
+	<div class="floor" style="--floor-cols: {columns.map(() => '1fr').join(' auto ')}">
 		{#each columns as col, ci (col.id)}
 			<section class="column" aria-label={col.title}>
 				<header class="col-head">
@@ -113,11 +115,12 @@
 			</section>
 
 			{#if ci < columns.length - 1}
+				{@const nextId = columns[ci + 1].id}
 				<!-- The conveyor between columns. Each packet is one real completed call. -->
 				<div class="lane" aria-hidden="true">
 					<span class="lane-rail"></span>
 					{#if !reduced}
-						{#each packets.filter((p) => (ci === 0 ? p.target === 'analysts' : p.target === 'desk')) as p (p.pulse.call.id)}
+						{#each packets.filter((p) => p.target === nextId) as p (p.pulse.call.id)}
 							<span
 								class="packet"
 								style="
@@ -129,10 +132,8 @@
 							></span>
 						{/each}
 					{/if}
-					{#if (ci === 0 ? laneCounts.scouts : laneCounts.analysts) > 0}
-						<span class="lane-badge">
-							+{ci === 0 ? laneCounts.scouts : laneCounts.analysts}
-						</span>
+					{#if (laneCounts.get(nextId) ?? 0) > 0}
+						<span class="lane-badge">+{laneCounts.get(nextId)}</span>
 					{/if}
 				</div>
 			{/if}
@@ -273,10 +274,13 @@
 		opacity: 0.85;
 	}
 
+	/* Columns and conveyors alternate, so the template is generated from the column
+	   count rather than hardcoded — the cast gained a column and this should not
+	   have to change again. */
 	.floor {
 		position: relative;
 		display: grid;
-		grid-template-columns: 1fr auto 1fr auto 1fr;
+		grid-template-columns: var(--floor-cols);
 		gap: 0.3rem;
 		align-items: stretch;
 	}

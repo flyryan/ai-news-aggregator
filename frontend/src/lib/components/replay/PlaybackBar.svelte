@@ -6,7 +6,7 @@
 	export let index: ReplayIndex;
 	export let t: number;
 	export let playing = false;
-	export let speed: Speed = 16;
+	export let speed: Speed = 8;
 	export let activeCount = 0;
 	export let onToggle: () => void = () => {};
 	export let onSeek: (ms: number) => void = () => {};

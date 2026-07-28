@@ -63,6 +63,15 @@ export interface AgentFrameState {
 	flash: number;
 	/** Most recent finished call, for the "reported in" caption. */
 	last_done: ReplayCall | null;
+	/**
+	 * Every call this agent has finished by `t`, oldest first.
+	 *
+	 * A station's work should not vanish the moment it lands: once the Research
+	 * Analyst has run thirteen batches, all thirteen stay open to inspection for the
+	 * rest of the replay. This is a slice of the agent's pre-sorted call list, so it
+	 * costs nothing per frame beyond the slice itself.
+	 */
+	done: ReplayCall[];
 }
 
 export interface SourceFrameState {
@@ -249,7 +258,8 @@ function deriveFrame(p: Prepared, t: number): ReplayFrame {
 			output_tokens: entry ? entry.cumOutput[completed] : 0,
 			cost_usd: entry ? entry.cumCost[completed] : 0,
 			flash,
-			last_done: lastDone
+			last_done: lastDone,
+			done: entry && completed > 0 ? entry.calls.slice(0, completed) : []
 		});
 	}
 
@@ -318,7 +328,7 @@ export interface ReplayEngine {
 	destroy(): void;
 }
 
-export function createReplayEngine(index: ReplayIndex, initialSpeed: Speed = 16): ReplayEngine {
+export function createReplayEngine(index: ReplayIndex, initialSpeed: Speed = 8): ReplayEngine {
 	const prepared = prepare(index);
 	const duration = Math.max(1, index.duration_ms || 1);
 

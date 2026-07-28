@@ -3,11 +3,11 @@
 	import {
 		agentColor,
 		providerColor,
-		profileColor,
 		formatClock,
 		formatDuration,
 		formatTokens,
-		isImageCall
+		isImageCall,
+		ROLE_LABELS
 	} from '$lib/services/replayViz';
 
 	export let index: ReplayIndex;
@@ -16,8 +16,16 @@
 	export let onSelectCall: (callId: string) => void = () => {};
 	export let onSeek: (ms: number) => void = () => {};
 
-	type ColorMode = 'provider' | 'profile';
-	let colorMode: ColorMode = 'provider';
+	// Two colour systems live here, separated by *region* rather than by a toggle:
+	//   · label gutter — agent identity, matching the Newsroom's cast colours
+	//   · plot area    — the provider that served each request
+	// They never touch, so neither needs a caption to stay unambiguous. An earlier
+	// version let the reader switch the bars between provider and effort, which meant
+	// the same swatches silently changed meaning.
+	//
+	// Effort needs no encoding of its own: it is a property of the role, and the
+	// taxonomy gives each role its own lane, so a lane's effort is constant and can
+	// simply be written next to its name.
 
 	// Offline-reconstructed runs carry start/end only: `wait_ms` is 0 and
 	// `first_token_ms` is null on every call. Segmenting a bar into wait / TTFT /
@@ -25,7 +33,14 @@
 	// as a bug. Fall back to undivided bars and say so instead of faking the split.
 	$: measured = index.run.timings_measured !== false;
 
-	const LANE_H = 20;
+	// The key must only name segments that are actually on screen. Queue wait is
+	// drawn from `queued_ms → start_ms`; when the concurrency cap is never reached
+	// that span is 0 on every call and no hatched segment is ever rendered, so
+	// listing it would describe a stripe the user cannot find.
+	$: hasQueueWait = measured && (index.calls ?? []).some((c) => c.start_ms - c.queued_ms > 0);
+
+	// Row height also has to clear the two-line gutter label (name + effort tier).
+	const LANE_H = 22;
 	const LANE_GAP = 2;
 
 	$: duration = Math.max(1, index.duration_ms || 1);
@@ -88,7 +103,7 @@
 	}
 
 	function barColor(call: ReplayCall): string {
-		return colorMode === 'provider' ? providerColor(call.provider_id) : profileColor(call.profile);
+		return providerColor(call.provider_id);
 	}
 
 	// Concurrency sparkline, drawn as an SVG polygon over the same x scale.
@@ -124,15 +139,36 @@
 		return out;
 	})();
 
-	$: legendEntries =
-		colorMode === 'provider'
-			? [...new Set((index.calls ?? []).map((c) => c.provider_id))].sort().map((id) => ({
-					label: id,
-					color: providerColor(id)
-				}))
-			: (['QUICK', 'STANDARD', 'DEEP', 'ULTRATHINK'] as const)
-					.filter((p) => (index.calls ?? []).some((c) => c.profile === p))
-					.map((p) => ({ label: p, color: profileColor(p) }));
+	// Every provider that served a request, with its share of the run. The count is
+	// what makes this a load-balancing readout rather than decoration.
+	$: routeLegend = (() => {
+		const counts = new Map<string, number>();
+		for (const c of index.calls ?? []) counts.set(c.provider_id, (counts.get(c.provider_id) ?? 0) + 1);
+		return [...counts.entries()]
+			.sort((a, b) => b[1] - a[1])
+			.map(([id, n]) => ({
+				id,
+				count: n,
+				color: providerColor(id),
+				note: id === 'image' ? 'image model, not an LLM route' : 'LLM route'
+			}));
+	})();
+
+	/**
+	 * The effort every call in a lane runs at.
+	 *
+	 * Each agent performs exactly one role and each role has one effort tier, so this
+	 * is a property of the lane, not of the individual bars — it belongs beside the
+	 * agent's name rather than encoded into the chart. Read from the agent when the
+	 * generator supplied it, else from the lane's own calls, so days generated before
+	 * the cast was split still label correctly.
+	 */
+	function laneEffort(agentId: string): string | null {
+		const declared = agentById.get(agentId)?.effort;
+		if (declared) return declared;
+		const efforts = new Set((index.calls ?? []).filter((c) => c.agent_id === agentId).map((c) => c.effort));
+		return efforts.size === 1 ? [...efforts][0] : null;
+	}
 
 	function handleTrackClick(event: MouseEvent) {
 		const el = event.currentTarget as HTMLElement;
@@ -151,35 +187,32 @@
 			</p>
 		</div>
 
-		<div class="flex items-center gap-3 flex-wrap">
-			<div class="seg" role="group" aria-label="Colour bars by">
-				<button
-					type="button"
-					class:on={colorMode === 'provider'}
-					on:click={() => (colorMode = 'provider')}>Route</button
-				>
-				<button
-					type="button"
-					class:on={colorMode === 'profile'}
-					on:click={() => (colorMode = 'profile')}>Profile</button
-				>
-			</div>
-			<ul class="legend">
-				{#each legendEntries as e (e.label)}
-					<li><span class="swatch" style="background: {e.color}"></span>{e.label}</li>
-				{/each}
-			</ul>
-		</div>
+		<!-- No toggle, no caption: a swatch beside a provider name and a count reads
+		     as "this color is this provider, and it took N calls" on its own. -->
+		<ul class="legend">
+			{#each routeLegend as r (r.id)}
+				<li title="{r.count} of {index.calls.length} requests · {r.note}">
+					<span class="swatch" style="background: {r.color}"></span>{r.id}
+					<span class="legend-n">{r.count}</span>
+				</li>
+			{/each}
+		</ul>
 	</div>
 
-	<!-- Segment key: the three parts of every bar -->
+	<!-- What the shading inside a bar means. Swatches use the same base-plus-overlay
+	     recipe as the bars, so a shade in the key is findable in the chart. -->
 	<div class="key">
 		{#if measured}
-			<span><span class="key-swatch seg-wait"></span>queue wait</span>
-			<span><span class="key-swatch seg-ttft"></span>time to first token</span>
-			<span><span class="key-swatch seg-stream"></span>streaming</span>
+			{#if hasQueueWait}
+				<span><span class="key-swatch key-wait"></span>queue wait</span>
+			{/if}
+			<span><span class="key-swatch key-ttft"></span>waiting for first token</span>
+			<span><span class="key-swatch key-stream"></span>writing</span>
+			{#if !hasQueueWait}
+				<span class="key-note">nothing queued this run — every request started immediately</span>
+			{/if}
 		{:else}
-			<span><span class="key-swatch seg-stream"></span>request start → end</span>
+			<span><span class="key-swatch key-stream"></span>request start → end</span>
 			<span class="key-note"
 				>timings reconstructed from run logs — no queue wait or first-token split recorded</span
 			>
@@ -187,17 +220,23 @@
 	</div>
 
 	<div class="tl-body">
-		<div class="gutter" style="height: {chartHeight}px">
-			{#each lanes as lane (lane.agent_id)}
-				<div
-					class="gutter-label"
-					style="height: {lane.rows.length * (LANE_H + LANE_GAP)}px; --accent: {lane.color}"
-					title={lane.label}
-				>
-					<span class="gutter-tick"></span>
-					<span class="gutter-text">{lane.label}</span>
-				</div>
-			{/each}
+		<div class="gutter">
+			<div class="gutter-rows" style="height: {chartHeight}px">
+				{#each lanes as lane (lane.agent_id)}
+					{@const eff = laneEffort(lane.agent_id)}
+					<div
+						class="gutter-label"
+						style="height: {lane.rows.length * (LANE_H + LANE_GAP)}px; --accent: {lane.color}"
+						title={eff ? `${lane.label} — every call at ${eff} effort` : lane.label}
+					>
+						<span class="gutter-tick"></span>
+						<span class="gutter-text">
+							{lane.label}
+							{#if eff}<span class="gutter-effort" data-effort={eff}>{eff}</span>{/if}
+						</span>
+					</div>
+				{/each}
+			</div>
 		</div>
 
 		<div class="track-wrap">
@@ -242,7 +281,7 @@
 										? `${call.task} · ${call.model} · ${formatDuration(
 												call.end_ms - call.start_ms
 											)} · 1 image (no token metering)`
-										: `${call.task} · ${call.provider_id} · ${call.profile} · ${formatDuration(
+										: `${call.task} · ${call.provider_id} · ${call.effort} effort · ${formatDuration(
 												call.end_ms - call.start_ms
 											)} · ${formatTokens(call.output_tokens)} tok${
 												call.outcome !== 'ok' ? ` · ${call.outcome}` : ''
@@ -329,28 +368,11 @@
 		color: #737373;
 	}
 
-	.seg {
-		display: inline-flex;
-		border-radius: 6px;
-		overflow: hidden;
-		border: 1px solid rgb(0 0 0 / 0.12);
-	}
-	:global(.dark) .seg {
-		border-color: rgb(255 255 255 / 0.14);
-	}
-	.seg button {
-		font-size: 0.65rem;
-		font-weight: 600;
-		padding: 2px 9px;
-		color: #525252;
-		background: transparent;
-	}
-	:global(.dark) .seg button {
-		color: #a3a3a3;
-	}
-	.seg button.on {
-		background: #E63946;
-		color: #fff;
+	.legend-n {
+		font-variant-numeric: tabular-nums;
+		font-weight: 700;
+		opacity: 0.55;
+		margin-left: 0.1rem;
 	}
 
 	.legend {
@@ -391,23 +413,25 @@
 		font-style: italic;
 		opacity: 0.85;
 	}
+	/* Neutral stand-in for the per-call route color. The overlays below are
+	   the exact ones the bars use, so the key reads as a slice of a real bar. */
 	.key-swatch {
 		width: 14px;
-		height: 6px;
+		height: 8px;
 		border-radius: 2px;
 		display: inline-block;
 		position: static;
-		background: #737373;
+		background: #8ba3c7;
 	}
-	.key .seg-wait {
-		background: repeating-linear-gradient(45deg, #a3a3a3 0 2px, transparent 2px 4px);
+	.key-wait {
+		background-image: repeating-linear-gradient(
+			45deg,
+			rgb(255 255 255 / 0.55) 0 2px,
+			transparent 2px 4px
+		);
 	}
-	.key .seg-ttft {
-		background: #a3a3a3;
-		opacity: 0.55;
-	}
-	.key .seg-stream {
-		background: #525252;
+	.key-ttft {
+		background-image: linear-gradient(rgb(0 0 0 / 0.28), rgb(0 0 0 / 0.28));
 	}
 
 	.tl-body {
@@ -420,6 +444,33 @@
 		flex: none;
 		display: flex;
 		flex-direction: column;
+	}
+	.gutter-rows {
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* One tier per lane, stated rather than encoded. Matches the badge on the
+	   Newsroom's stations so the same agent reads the same in both views. */
+	.gutter-effort {
+		display: block;
+		font-size: 0.48rem;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		color: #a3a3a3;
+		line-height: 1.2;
+	}
+	.gutter-effort[data-effort='xhigh'] {
+		color: #7c3aed;
+	}
+	.gutter-effort[data-effort='max'] {
+		color: #dc2626;
+	}
+	:global(.dark) .gutter-effort[data-effort='xhigh'] {
+		color: #c4b5fd;
+	}
+	:global(.dark) .gutter-effort[data-effort='max'] {
+		color: #fca5a5;
 	}
 	.gutter-label {
 		display: flex;
@@ -434,6 +485,9 @@
 		color: #a3a3a3;
 		border-color: rgb(255 255 255 / 0.07);
 	}
+	/* Agent identity, matching the Newsroom's cast colours so the same agent reads
+	   the same in both views. It sits in the label gutter, not in the plot area, so
+	   it never competes with the provider colour on the bars. */
 	.gutter-tick {
 		width: 3px;
 		align-self: stretch;
@@ -443,8 +497,10 @@
 		margin: 2px 0;
 	}
 	.gutter-text {
-		white-space: nowrap;
+		min-width: 0;
 		overflow: hidden;
+		font-size: 0.6rem;
+		line-height: 1.25;
 		text-overflow: ellipsis;
 	}
 

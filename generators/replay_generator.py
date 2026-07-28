@@ -558,6 +558,10 @@ class ReplayGenerator:
                     "label": identity.label,
                     "kind": identity.kind,
                     "category": identity.category,
+                    # One role per agent, so one effort tier per agent -- the UI states
+                    # it beside the name rather than encoding it per bar.
+                    "role": identity.role,
+                    "effort": identity.effort,
                     "phase_ids": entry.get("phase_ids", []),
                     "call_count": entry.get("call_count", 0),
                     "cost_usd": round(entry.get("cost_usd", 0.0), 6),

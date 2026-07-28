@@ -14,6 +14,8 @@
 		isImageCall
 	} from '$lib/services/replayViz';
 	import { createStreamRenderer, withCaret } from '$lib/services/replayMarkdown';
+	import { parsePrefix, highlightJson, splitFence } from '$lib/services/replayJson';
+	import JsonStream from './JsonStream.svelte';
 
 	// One renderer per pane: they re-render on the same frames, so a shared cache
 	// would be invalidated by the other caller every time.
@@ -22,6 +24,10 @@
 	// The hero prompt is static, but it goes through the same renderer so the two
 	// panes share one markdown dialect.
 	const renderPrompt = createStreamRenderer();
+	// Prose the model wrote around its JSON payload. Both are markdown in practice —
+	// one call opened with a 3k-char `## Analysis` write-up before its fence.
+	const renderPreamble = createStreamRenderer();
+	const renderEpilogue = createStreamRenderer();
 
 	export let call: ReplayCall;
 	export let stream: ReplayCallStream | null = null;
@@ -113,6 +119,10 @@
 	$: isAfter = t >= call.end_ms;
 
 	// Where the clock sits inside this call, as a caption + a mini progress bar.
+	//
+	// This scrubber spans one call, so its readout must be call-local. Showing the
+	// global run clock made a 3m55s call read "07:25" and kept counting after the
+	// bar was full — the number and the bar were measuring different things.
 	$: localT = Math.min(Math.max(0, t - call.queued_ms), call.end_ms - call.queued_ms);
 	$: localSpan = Math.max(1, call.end_ms - call.queued_ms);
 
@@ -168,6 +178,50 @@
 	$: thinkingHtml = withCaret(renderThinking(thinkingText), answerText ? '' : caretHtml);
 	$: answerHtml = withCaret(renderAnswer(answerText), caretHtml);
 	$: showEmptyStream = streamState === 'unavailable' || (streamState === 'ready' && !prefixes);
+
+	// ------------------------------------------------------- structured output
+	//
+	// Nearly every call in this pipeline answers with JSON — a wrapper object around
+	// one big array of records. As wrapped text that is a wall of braces; parsed, it
+	// is the work itself. `parsePrefix` returns null for genuine prose (the executive
+	// summary, the release-detection write-up), which falls through to markdown.
+	//
+	// Parsing runs per frame on a growing string, so it is memoised on the exact
+	// input: a paused transcript re-renders for free.
+	let jsonCacheKey = '';
+	let jsonCacheVal: ReturnType<typeof parsePrefix> = null;
+	function parseCached(text: string) {
+		if (text === jsonCacheKey) return jsonCacheVal;
+		jsonCacheKey = text;
+		jsonCacheVal = parsePrefix(text);
+		return jsonCacheVal;
+	}
+	$: parsedJson = answerText ? parseCached(answerText) : null;
+	/** Whether *this* call is one the structured view can render at all. */
+	$: isJsonCall = parsedJson !== null;
+
+	// Structured is the default when it applies; the raw stream stays one click away
+	// because it is the literal thing the model emitted and the replay's whole claim
+	// is that nothing here is embellished.
+	type OutputView = 'structured' | 'raw';
+	let outputView: OutputView = 'structured';
+	$: if (call.id) outputView = 'structured';
+	$: showStructured = isJsonCall && outputView === 'structured';
+
+	// The raw view's whole job is to show the literal bytes, so it must not go
+	// through the markdown renderer — that strips the fence and reflows the payload
+	// into paragraphs, which is the opposite of "raw". Highlighted, monospaced, with
+	// the model's own line breaks intact.
+	let rawCacheKey = '';
+	let rawCacheVal: { lang: string | null; html: string } = { lang: null, html: '' };
+	function highlightCached(text: string) {
+		if (text === rawCacheKey) return rawCacheVal;
+		rawCacheKey = text;
+		const { lang, body } = splitFence(text);
+		rawCacheVal = { lang, html: highlightJson(body) };
+		return rawCacheVal;
+	}
+	$: rawJson = isJsonCall && outputView === 'raw' && answerText ? highlightCached(answerText) : null;
 
 	// ------------------------------------------------------------ image calls
 	//
@@ -294,7 +348,13 @@
 				></span>
 			{/if}
 		</div>
-		<span class="mini-clock">{formatClock(t)}</span>
+		<span class="mini-clock" class:settled={isAfter} title={isAfter
+			? `Finished at ${formatClock(call.end_ms)} of the run`
+			: `Run clock ${formatClock(t)}`}
+			>{isBefore ? '—' : formatDuration(localT)}{#if isAfter}<span class="mini-done"
+					>done</span
+				>{/if}</span
+		>
 		<button
 			type="button"
 			class="jump"
@@ -449,11 +509,52 @@
 			<section class="answer">
 				<h4>
 					Output
+					{#if isJsonCall}
+						<!-- Only offered when there is something to switch between. -->
+						<span class="out-switch" role="group" aria-label="Output rendering">
+							<button
+								type="button"
+								class:on={outputView === 'structured'}
+								on:click={() => (outputView = 'structured')}>Structured</button
+							>
+							<button
+								type="button"
+								class:on={outputView === 'raw'}
+								on:click={() => (outputView = 'raw')}>Raw</button
+							>
+						</span>
+					{/if}
 					<span class="answer-meta">
 						{answerText.length.toLocaleString()} / {call.text_chars.toLocaleString()} chars
 					</span>
 				</h4>
-				{#if answerText}
+				{#if answerText && showStructured && parsedJson?.root}
+					{#if parsedJson.preamble}
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="json-aside md">{@html renderPreamble(parsedJson.preamble)}</div>
+					{/if}
+					<JsonStream
+						root={parsedJson.root}
+						complete={parsedJson.complete}
+						live={isLive}
+						{reduced}
+					/>
+					{#if parsedJson.epilogue}
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="json-aside json-aside-after md">
+							{@html renderEpilogue(parsedJson.epilogue)}
+						</div>
+					{/if}
+				{:else if answerText && rawJson}
+					<div class="rawblock">
+						{#if rawJson.lang}<span class="rawblock-lang">{rawJson.lang}</span>{/if}
+						<!-- Only <span class="j-*"> is emitted, over escaped text. -->
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<pre class="rawblock-pre"><code>{@html rawJson.html}{#if showCaret}<span
+									class="caret"
+								></span>{/if}</code></pre>
+					</div>
+				{:else if answerText}
 					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					<div class="answer-text md">{@html answerHtml}</div>
 				{:else if isLive}
@@ -630,6 +731,19 @@
 		font-size: 0.62rem;
 		font-variant-numeric: tabular-nums;
 		color: #737373;
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.3rem;
+		white-space: nowrap;
+	}
+	.mini-clock.settled {
+		color: #a3a3a3;
+	}
+	.mini-done {
+		font-size: 0.52rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		opacity: 0.75;
 	}
 
 	.ts-body {
@@ -871,6 +985,132 @@
 		text-transform: none;
 		font-variant-numeric: tabular-nums;
 		opacity: 0.75;
+	}
+
+	.out-switch {
+		display: inline-flex;
+		border-radius: 5px;
+		overflow: hidden;
+		border: 1px solid rgb(0 0 0 / 0.12);
+		margin-left: 0.15rem;
+	}
+	:global(.dark) .out-switch {
+		border-color: rgb(255 255 255 / 0.16);
+	}
+	.out-switch button {
+		font-size: 0.55rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		padding: 1px 6px;
+		background: transparent;
+		color: #737373;
+		border: none;
+		cursor: pointer;
+	}
+	.out-switch button.on {
+		background: var(--accent);
+		color: #fff;
+	}
+
+	/* Prose the model wrote around its JSON. Set apart from the structured cards so
+	   it reads as commentary, but never hidden — it is real model output. */
+	.json-aside {
+		font-size: 0.74rem;
+		line-height: 1.55;
+		color: #525252;
+		padding-left: 0.55rem;
+		border-left: 2px solid rgb(0 0 0 / 0.1);
+		margin-bottom: 0.55rem;
+	}
+	.json-aside-after {
+		margin-bottom: 0;
+		margin-top: 0.7rem;
+	}
+
+	/* Raw view: a real code block. Horizontal scroll rather than wrapping, so the
+	   model's own line structure survives — that is what "raw" is for. */
+	.rawblock {
+		position: relative;
+		border-radius: 6px;
+		border: 1px solid rgb(0 0 0 / 0.08);
+		background: #fafafa;
+		overflow: hidden;
+	}
+	:global(.dark) .rawblock {
+		background: rgb(0 0 0 / 0.28);
+		border-color: rgb(255 255 255 / 0.1);
+	}
+	.rawblock-lang {
+		position: absolute;
+		top: 0;
+		right: 0;
+		font-size: 0.5rem;
+		font-weight: 700;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: #a3a3a3;
+		padding: 2px 6px;
+		background: rgb(0 0 0 / 0.04);
+		border-bottom-left-radius: 5px;
+	}
+	:global(.dark) .rawblock-lang {
+		background: rgb(255 255 255 / 0.06);
+	}
+	.rawblock-pre {
+		margin: 0;
+		padding: 0.55rem 0.7rem;
+		overflow-x: auto;
+		font-size: 0.68rem;
+		line-height: 1.5;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		tab-size: 2;
+	}
+	.rawblock-pre code {
+		font: inherit;
+		white-space: pre;
+	}
+
+	/* JSON token colours. Tuned for contrast in both themes rather than for
+	   fidelity to any one editor scheme. */
+	.rawblock :global(.j-key) {
+		color: #0369a1;
+		font-weight: 600;
+	}
+	.rawblock :global(.j-str) {
+		color: #15803d;
+	}
+	.rawblock :global(.j-num) {
+		color: #b45309;
+	}
+	.rawblock :global(.j-lit) {
+		color: #7c3aed;
+		font-weight: 600;
+	}
+	.rawblock :global(.j-brace) {
+		color: #525252;
+		font-weight: 700;
+	}
+	.rawblock :global(.j-punct) {
+		color: #a3a3a3;
+	}
+	:global(.dark) .rawblock :global(.j-key) {
+		color: #7dd3fc;
+	}
+	:global(.dark) .rawblock :global(.j-str) {
+		color: #86efac;
+	}
+	:global(.dark) .rawblock :global(.j-num) {
+		color: #fcd34d;
+	}
+	:global(.dark) .rawblock :global(.j-lit) {
+		color: #c4b5fd;
+	}
+	:global(.dark) .rawblock :global(.j-brace) {
+		color: #d4d4d4;
+	}
+	:global(.dark) .json-aside {
+		color: #a3a3a3;
+		border-left-color: rgb(255 255 255 / 0.14);
 	}
 
 	.reasoning-text {

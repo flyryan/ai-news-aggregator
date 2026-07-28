@@ -55,6 +55,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 const KIND_COLORS: Record<string, string> = {
 	gatherer: '#0ea5e9',
 	analyzer: '#8b5cf6',
+	ranker: '#7c3aed',
 	synthesizer: '#E63946',
 	enricher: '#14b8a6',
 	imagegen: '#ec4899'
@@ -87,8 +88,15 @@ export const OUTCOME_COLORS: Record<string, string> = {
 	retried: '#a855f7'
 };
 
-/** Stage columns, left to right: Scouts gather, Analysts read, the desk writes. */
-export type StageColumnId = 'scouts' | 'analysts' | 'desk';
+/**
+ * Stage columns, left to right, following the work rather than the org chart.
+ *
+ * Reading and ranking used to share one column because they shared one agent. They
+ * are different jobs at different cost tiers — a wide cheap pass over everything,
+ * then one expensive pass that decides the running order — so they get their own
+ * columns now, and each column has a single effort tier worth naming.
+ */
+export type StageColumnId = 'scouts' | 'readers' | 'editors' | 'desk';
 
 export interface StageColumn {
 	id: StageColumnId;
@@ -97,14 +105,23 @@ export interface StageColumn {
 	agents: ReplayAgent[];
 }
 
-const DESK_ORDER = ['continuity', 'freshness', 'orchestrator', 'link_enricher', 'ecosystem', 'hero'];
+const DESK_ORDER = [
+	'continuity',
+	'storyliner',
+	'freshness',
+	'orchestrator',
+	'link_enricher',
+	'ecosystem',
+	'hero'
+];
 
 export function buildStage(agents: ReplayAgent[]): StageColumn[] {
 	const scouts = agents.filter((a) => a.kind === 'gatherer');
-	const analysts = agents.filter((a) => a.kind === 'analyzer');
-	const deskSet = new Set([...scouts, ...analysts]);
+	const readers = agents.filter((a) => a.kind === 'analyzer');
+	const editors = agents.filter((a) => a.kind === 'ranker');
+	const placed = new Set([...scouts, ...readers, ...editors]);
 	const desk = agents
-		.filter((a) => !deskSet.has(a))
+		.filter((a) => !placed.has(a))
 		.sort((a, b) => {
 			const ai = DESK_ORDER.indexOf(a.id);
 			const bi = DESK_ORDER.indexOf(b.id);
@@ -113,15 +130,17 @@ export function buildStage(agents: ReplayAgent[]): StageColumn[] {
 
 	return [
 		{ id: 'scouts', title: 'Scouts', caption: 'Collecting from the wire', agents: scouts },
-		{ id: 'analysts', title: 'Analysts', caption: 'Reading and ranking', agents: analysts },
+		{ id: 'readers', title: 'Readers', caption: 'Summarizing every item', agents: readers },
+		{ id: 'editors', title: 'Editors', caption: 'Ranking what matters', agents: editors },
 		{ id: 'desk', title: 'The Desk', caption: 'Synthesis, copy, art', agents: desk }
 	];
 }
 
 /** Which downstream column a finished call should throw its packet toward. */
 export function downstreamOf(kind: string): StageColumnId | null {
-	if (kind === 'gatherer') return 'analysts';
-	if (kind === 'analyzer') return 'desk';
+	if (kind === 'gatherer') return 'readers';
+	if (kind === 'analyzer') return 'editors';
+	if (kind === 'ranker') return 'desk';
 	return null;
 }
 

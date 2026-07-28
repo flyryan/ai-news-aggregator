@@ -167,7 +167,7 @@ const nextId = () => `c${String(seq++).padStart(3, '0')}`;
 // News runs a pre-filter first.
 seeds.push({
 	id: nextId(),
-	agent_id: 'news_analyzer',
+	agent_id: 'news_triage',
 	phase_id: 'phase-2',
 	caller: 'news_analyzer.filter',
 	task: 'Pre-filter articles',
@@ -205,8 +205,8 @@ ANALYST_PLAN.forEach((plan, planIdx) => {
 			ttft_ms: 12_000 + (b % 4) * 3400,
 			dur_ms: 88_000 + (b % 5) * 21_000,
 			provider_id: provider,
-			profile: 'QUICK',
-			effort: 'high',
+			profile: 'STANDARD',
+			effort: 'xhigh',
 			input_tokens: 148_000 + b * 4200,
 			output_tokens: 7400 + (b % 4) * 900
 		});
@@ -228,8 +228,8 @@ seeds.push({
 	ttft_ms: 15_500,
 	dur_ms: 112_000,
 	provider_id: 'anthropic',
-	profile: 'QUICK',
-	effort: 'high',
+	profile: 'STANDARD',
+	effort: 'xhigh',
 	input_tokens: 161_200,
 	output_tokens: 8900,
 	attempt: 2,
@@ -242,7 +242,7 @@ seeds.push({
 ANALYST_PLAN.forEach((plan, i) => {
 	seeds.push({
 		id: nextId(),
-		agent_id: `${plan.cat}_analyzer`,
+		agent_id: `${plan.cat}_editor`,
 		phase_id: 'phase-2',
 		caller: `${plan.cat}_analyzer.reduce_rank`,
 		task: 'Rank and select',
@@ -273,8 +273,8 @@ ANALYST_PLAN.forEach((plan, i) => {
 		ttft_ms: 8200,
 		dur_ms: 61_000 + i * 8000,
 		provider_id: PROVIDERS[(i + 1) % PROVIDERS.length],
-		profile: 'STANDARD',
-		effort: 'xhigh',
+		profile: 'QUICK',
+		effort: 'high',
 		input_tokens: 74_500,
 		output_tokens: 4100,
 		// A pruned stream: index says the call happened, deltas were dropped.
@@ -284,7 +284,7 @@ ANALYST_PLAN.forEach((plan, i) => {
 
 seeds.push({
 	id: nextId(),
-	agent_id: 'continuity',
+	agent_id: 'storyliner',
 	phase_id: 'phase-2.5',
 	caller: 'continuity.curator',
 	task: 'Curate storylines',
@@ -532,15 +532,33 @@ for (const cat of ['news', 'research', 'social', 'reddit']) {
 		blurb: GATHER_BLURB[cat]
 	});
 }
+// The news pre-filter is its own agent: one role, one effort tier, like every other
+// member of the cast.
+agents.push({
+	id: 'news_triage',
+	label: 'News Triage',
+	kind: 'analyzer',
+	category: 'news',
+	role: 'filter',
+	effort: 'high',
+	phase_ids: ['phase-2'],
+	...agentAgg('news_triage'),
+	items_in: GATHERED.news,
+	items_out: null,
+	status: 'success',
+	blurb: 'Sifts the raw wire for anything actually about AI before the readers spend on it.'
+});
+
 for (const plan of ANALYST_PLAN) {
-	const agg = agentAgg(`${plan.cat}_analyzer`);
 	agents.push({
 		id: `${plan.cat}_analyzer`,
-		label: `${CAT_LABEL[plan.cat]} Analyst`,
+		label: `${CAT_LABEL[plan.cat]} Reader`,
 		kind: 'analyzer',
 		category: plan.cat,
+		role: 'map',
+		effort: 'xhigh',
 		phase_ids: ['phase-2'],
-		...agg,
+		...agentAgg(`${plan.cat}_analyzer`),
 		items_in: GATHERED[plan.cat],
 		items_out: Math.round(GATHERED[plan.cat] * 0.82),
 		status: 'success',
@@ -548,20 +566,51 @@ for (const plan of ANALYST_PLAN) {
 	});
 }
 
-const DESK: [string, string, ReplayIndex['agents'][number]['kind'], string, string[]][] = [
-	['continuity', 'Continuity Editor', 'synthesizer', "Links today's stories to the days before them.", ['phase-2.5']],
-	['freshness', 'Fact Checker', 'synthesizer', 'Checks whether older anchor stories have gone stale.', ['phase-2.5']],
-	['orchestrator', 'Editor in Chief', 'synthesizer', 'Finds the threads running across categories and writes the brief.', ['phase-3', 'phase-4']],
-	['link_enricher', 'Copy Editor', 'enricher', 'Wires every claim in the prose back to the item it came from.', ['phase-4.5']],
-	['ecosystem', 'Archivist', 'enricher', 'Watches for model releases worth recording.', ['phase-4.6']],
-	['hero', 'Illustrator', 'imagegen', "Paints the day's scene around the AATF skunk.", ['phase-4.7']]
+// Ranking is a separate, more expensive job than reading — one max-effort pass over
+// everything the reader summarised.
+for (const plan of ANALYST_PLAN) {
+	agents.push({
+		id: `${plan.cat}_editor`,
+		label: `${CAT_LABEL[plan.cat]} Editor`,
+		kind: 'ranker',
+		category: plan.cat,
+		role: 'reduce',
+		effort: 'max',
+		phase_ids: ['phase-2'],
+		...agentAgg(`${plan.cat}_editor`),
+		items_in: Math.round(GATHERED[plan.cat] * 0.82),
+		items_out: 10,
+		status: 'success',
+		blurb: `Ranks the day's ${plan.cat} items and picks what leads.`
+	});
+}
+
+type DeskRow = [
+	string,
+	string,
+	ReplayIndex['agents'][number]['kind'],
+	NonNullable<ReplayIndex['agents'][number]['role']>,
+	NonNullable<ReplayIndex['agents'][number]['effort']>,
+	string,
+	string[]
 ];
-for (const [id, label, kind, blurb, phase_ids] of DESK) {
+const DESK: DeskRow[] = [
+	['continuity', 'Continuity Desk', 'synthesizer', 'match', 'high', "Matches today's stories against the days before them.", ['phase-2.5']],
+	['storyliner', 'Storyline Curator', 'synthesizer', 'curate', 'max', 'Decides which running threads are still live and worth carrying.', ['phase-2.5']],
+	['freshness', 'Fact Checker', 'synthesizer', 'check', 'high', 'Checks whether older anchor stories have gone stale.', ['phase-2.5']],
+	['orchestrator', 'Editor in Chief', 'synthesizer', 'synthesize', 'max', 'Finds the threads running across categories and writes the brief.', ['phase-3', 'phase-4']],
+	['link_enricher', 'Copy Editor', 'enricher', 'enrich', 'xhigh', 'Wires every claim in the prose back to the item it came from.', ['phase-4.5']],
+	['ecosystem', 'Archivist', 'enricher', 'enrich', 'xhigh', 'Watches for model releases worth recording.', ['phase-4.6']],
+	['hero', 'Illustrator', 'imagegen', 'image', 'high', "Paints the day's scene around the AATF skunk.", ['phase-4.7']]
+];
+for (const [id, label, kind, role, effort, blurb, phase_ids] of DESK) {
 	agents.push({
 		id,
 		label,
 		kind,
 		category: null,
+		role,
+		effort,
 		phase_ids,
 		...agentAgg(id),
 		items_in: null,
