@@ -31,52 +31,18 @@ ROLE_IMAGE = "image"
 # Roles whose streams are always kept in full when the size cap forces a choice.
 MARQUEE_ROLES = frozenset({ROLE_SYNTHESIZE, ROLE_REDUCE, ROLE_CURATE})
 
-# Reasoning effort is a property of the *role*, not of the agent and not of the
-# individual call: every map runs at xhigh, every reduce at max, every check at high.
-# That is the pipeline's core cost trade -- wide cheap passes to read everything, then
-# narrow expensive ones to decide what matters.
-#
-# Because the cast below gives each role its own agent, an agent's effort is constant
-# and the UI can simply state it. Keep this table in step with the analysis profiles in
-# the analyzers; it is the replay's only record of the intended tier.
-ROLE_EFFORT = {
-    ROLE_MAP: "xhigh",
-    ROLE_REDUCE: "max",
-    ROLE_FILTER: "high",
-    ROLE_SYNTHESIZE: "max",
-    ROLE_ENRICH: "xhigh",
-    ROLE_MATCH: "high",
-    ROLE_CURATE: "max",
-    ROLE_CHECK: "high",
-    ROLE_IMAGE: "high",
-}
-
 CATEGORIES = ("news", "research", "social", "reddit")
 
 
 @dataclass(frozen=True)
 class AgentIdentity:
-    """Static description of one member of the cast.
-
-    One agent does one kind of work. The category analysts used to cover both the
-    wide read (``map``, xhigh) and the single ranking pass (``reduce``, max), which
-    made "what effort does the Research Analyst run at?" unanswerable -- twelve calls
-    said xhigh and one said max. Splitting the reader from the ranker gives every lane
-    a single role, and therefore a single effort worth printing next to its name.
-    """
+    """Static description of one member of the cast."""
 
     id: str
     label: str
     kind: str  # gatherer | analyzer | synthesizer | enricher | imagegen
     category: Optional[str] = None
     blurb: str = ""
-    # The role every call this agent makes will carry; None only for gatherers, which
-    # do no LLM work at all.
-    role: Optional[str] = None
-
-    @property
-    def effort(self) -> Optional[str]:
-        return ROLE_EFFORT.get(self.role) if self.role else None
 
 
 @dataclass(frozen=True)
@@ -103,13 +69,6 @@ _ANALYST_BLURBS = {
     "reddit": "Digests community threads and the arguments underneath them.",
 }
 
-_EDITOR_BLURBS = {
-    "news": "Ranks the day's product news and picks what leads.",
-    "research": "Weighs the papers against each other and picks what matters.",
-    "social": "Decides which conversations were actually signal.",
-    "reddit": "Picks the threads worth surfacing.",
-}
-
 _GATHERER_BLURBS = {
     "news": "Pulls RSS feeds and chases links surfaced by social posts.",
     "research": "Queries the arXiv API and research blogs.",
@@ -131,110 +90,59 @@ for _cat in CATEGORIES:
     )
     AGENTS[f"{_cat}_analyzer"] = AgentIdentity(
         id=f"{_cat}_analyzer",
-        label=f"{_CATEGORY_LABELS[_cat]} Reader",
+        label=f"{_CATEGORY_LABELS[_cat]} Analyst",
         kind="analyzer",
         category=_cat,
         blurb=_ANALYST_BLURBS[_cat],
-        role=ROLE_MAP,
-    )
-    # The ranking pass is a different job at a different tier: one max-effort call
-    # that reads every summary the reader produced and decides the running order.
-    AGENTS[f"{_cat}_editor"] = AgentIdentity(
-        id=f"{_cat}_editor",
-        label=f"{_CATEGORY_LABELS[_cat]} Editor",
-        kind="ranker",
-        category=_cat,
-        blurb=_EDITOR_BLURBS[_cat],
-        role=ROLE_REDUCE,
     )
 
 AGENTS.update(
     {
-        "news_triage": AgentIdentity(
-            id="news_triage",
-            label="News Triage",
-            kind="analyzer",
-            category="news",
-            blurb="Sifts the raw wire for anything actually about AI before the readers spend on it.",
-            role=ROLE_FILTER,
-        ),
         "continuity": AgentIdentity(
             id="continuity",
-            label="Continuity Desk",
+            label="Continuity Editor",
             kind="synthesizer",
-            blurb="Matches today's stories against the days before them.",
-            role=ROLE_MATCH,
-        ),
-        "storyliner": AgentIdentity(
-            id="storyliner",
-            label="Storyline Curator",
-            kind="synthesizer",
-            blurb="Decides which running threads are still live and worth carrying.",
-            role=ROLE_CURATE,
+            blurb="Links today's stories to the days before them.",
         ),
         "freshness": AgentIdentity(
             id="freshness",
             label="Fact Checker",
             kind="synthesizer",
             blurb="Checks whether older anchor stories have gone stale.",
-            role=ROLE_CHECK,
         ),
         "orchestrator": AgentIdentity(
             id="orchestrator",
             label="Editor in Chief",
             kind="synthesizer",
             blurb="Finds the threads running across categories and writes the brief.",
-            role=ROLE_SYNTHESIZE,
         ),
         "link_enricher": AgentIdentity(
             id="link_enricher",
             label="Copy Editor",
             kind="enricher",
             blurb="Wires every claim in the prose back to the item it came from.",
-            role=ROLE_ENRICH,
         ),
         "ecosystem": AgentIdentity(
             id="ecosystem",
             label="Archivist",
             kind="enricher",
             blurb="Watches for model releases worth recording.",
-            role=ROLE_ENRICH,
         ),
         "hero": AgentIdentity(
             id="hero",
             label="Illustrator",
             kind="imagegen",
             blurb="Paints the day's scene around the AATF skunk.",
-            role=ROLE_IMAGE,
         ),
     }
 )
 
 
 def agent_ids() -> List[str]:
-    """Cast list in a stable order.
-
-    Grouped by category rather than by role, so a category's whole pipeline reads as
-    one block: News Triage -> News Reader -> News Editor, then the same for research,
-    social and reddit. The Newsroom still splits these into Reader and Editor columns
-    by ``kind``; this order is what the timeline's swimlanes follow, where keeping a
-    category's hand-off adjacent is what makes the xhigh-then-max pattern legible.
-    """
+    """Cast list in a stable, stage-left-to-right order."""
     ordered = [f"{c}_gatherer" for c in CATEGORIES]
-    for cat in CATEGORIES:
-        if cat == "news":
-            ordered.append("news_triage")
-        ordered.append(f"{cat}_analyzer")
-        ordered.append(f"{cat}_editor")
-    ordered += [
-        "continuity",
-        "storyliner",
-        "freshness",
-        "orchestrator",
-        "link_enricher",
-        "ecosystem",
-        "hero",
-    ]
+    ordered += [f"{c}_analyzer" for c in CATEGORIES]
+    ordered += ["continuity", "freshness", "orchestrator", "link_enricher", "ecosystem", "hero"]
     return ordered
 
 
@@ -272,10 +180,10 @@ def resolve_call(caller: str) -> CallIdentity:
 
     if caller.endswith("_analyzer.reduce_rank"):
         cat = caller.split("_analyzer.", 1)[0]
-        return CallIdentity(agent_id=f"{cat}_editor", task="Rank and select", role=ROLE_REDUCE)
+        return CallIdentity(agent_id=f"{cat}_analyzer", task="Rank and select", role=ROLE_REDUCE)
 
     if caller == "news_analyzer.filter":
-        return CallIdentity(agent_id="news_triage", task="Pre-filter articles", role=ROLE_FILTER)
+        return CallIdentity(agent_id="news_analyzer", task="Pre-filter articles", role=ROLE_FILTER)
 
     if caller == "news_analyzer.small_batch":
         return CallIdentity(
@@ -290,7 +198,7 @@ def resolve_call(caller: str) -> CallIdentity:
         )
 
     if caller == "continuity.curator":
-        return CallIdentity(agent_id="storyliner", task="Curate storylines", role=ROLE_CURATE)
+        return CallIdentity(agent_id="continuity", task="Curate storylines", role=ROLE_CURATE)
 
     if caller.startswith("freshness."):
         return CallIdentity(agent_id="freshness", task="Check anchor freshness", role=ROLE_CHECK)

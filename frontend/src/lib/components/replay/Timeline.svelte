@@ -155,18 +155,17 @@
 	})();
 
 	/**
-	 * The effort every call in a lane runs at.
+	 * The effort a lane runs at, when it runs at only one.
 	 *
-	 * Each agent performs exactly one role and each role has one effort tier, so this
-	 * is a property of the lane, not of the individual bars — it belongs beside the
-	 * agent's name rather than encoded into the chart. Read from the agent when the
-	 * generator supplied it, else from the lane's own calls, so days generated before
-	 * the cast was split still label correctly.
+	 * Most agents mix tiers — a category analyst spends xhigh on each batch and max on
+	 * the single ranking pass — so this returns null for them rather than picking a
+	 * winner. Those lanes carry effort on the bars' tooltips instead. Only genuinely
+	 * single-tier lanes (the Fact Checker, the Copy Editor) get a label.
 	 */
 	function laneEffort(agentId: string): string | null {
-		const declared = agentById.get(agentId)?.effort;
-		if (declared) return declared;
-		const efforts = new Set((index.calls ?? []).filter((c) => c.agent_id === agentId).map((c) => c.effort));
+		const efforts = new Set(
+			(index.calls ?? []).filter((c) => c.agent_id === agentId).map((c) => c.effort)
+		);
 		return efforts.size === 1 ? [...efforts][0] : null;
 	}
 

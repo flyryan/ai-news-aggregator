@@ -72,16 +72,7 @@
 		</span>
 		<div class="min-w-0 flex-1">
 			<div class="label">{agent.label}</div>
-			<div class="kind">
-				{agent.kind}
-				{#if agent.effort}
-					<!-- Every call this agent makes runs at this tier, so it belongs on the
-					     station rather than being repeated on each call chip. -->
-					<span class="effort" data-effort={agent.effort} title="Reasoning effort for every call this agent makes"
-						>{agent.effort}</span
-					>
-				{/if}
-			</div>
+			<div class="kind">{agent.kind}</div>
 		</div>
 		{#if total > 0}
 			<div class="counter" title="{completed} of {total} LLM calls complete">
@@ -138,6 +129,11 @@
 						<span class="chip-body">
 							<span class="chip-task">{ac.call.task}</span>
 							<span class="chip-meta">
+								<!-- Effort belongs to the call, not the station: an agent can mix
+								     tiers, so the badge rides the chip. -->
+								{#if ac.call.effort}
+									<span class="effort" data-effort={ac.call.effort}>{ac.call.effort}</span>
+								{/if}
 								<span class="route-tag">{ac.call.provider_id}</span>
 								{#if isImageCall(ac.call)}
 									<!-- No token stream to count: an image arrives whole. Say what it is doing. -->
@@ -190,6 +186,9 @@
 								<span class="chip-check" aria-hidden="true">✓</span>{dc.task}
 							</span>
 							<span class="chip-meta">
+								{#if dc.effort}
+									<span class="effort" data-effort={dc.effort}>{dc.effort}</span>
+								{/if}
 								<span class="route-tag">{dc.provider_id}</span>
 								{#if isImageCall(dc)}
 									<span class="state-tag done-tag">image</span>
@@ -364,18 +363,19 @@
 		color: #a3a3a3;
 	}
 
-	/* Effort tier. Weight rises with the tier so the expensive agents stand out in a
-	   scan of the floor without needing a fourth colour. */
+	/* Effort tier, per call. Colour rises with the tier so the expensive calls stand
+	   out in a scan of the floor; `high` stays neutral because most calls are cheap
+	   and tinting them all would flatten the signal. */
 	.effort {
 		display: inline-block;
-		margin-left: 0.2rem;
 		padding: 0 4px;
 		border-radius: 3px;
-		font-size: 0.52rem;
+		font-size: 0.5rem;
 		font-weight: 700;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.04em;
 		background: rgb(0 0 0 / 0.05);
 		color: #737373;
+		flex: none;
 	}
 	:global(.dark) .effort {
 		background: rgb(255 255 255 / 0.08);

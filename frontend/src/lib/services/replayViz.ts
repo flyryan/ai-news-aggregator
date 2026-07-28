@@ -55,7 +55,6 @@ const CATEGORY_COLORS: Record<string, string> = {
 const KIND_COLORS: Record<string, string> = {
 	gatherer: '#0ea5e9',
 	analyzer: '#8b5cf6',
-	ranker: '#7c3aed',
 	synthesizer: '#E63946',
 	enricher: '#14b8a6',
 	imagegen: '#ec4899'
@@ -88,16 +87,8 @@ export const OUTCOME_COLORS: Record<string, string> = {
 	retried: '#a855f7'
 };
 
-/**
- * Stage columns, left to right, following the work rather than the org chart.
- *
- * Reading and ranking are different jobs at different cost tiers — a wide cheap pass
- * over everything, then one expensive pass that picks the running order — but they
- * belong to the same category, so they share a column and sit adjacent. Grouping by
- * category rather than by role keeps each hand-off (News Reader → News Editor) on one
- * line of sight.
- */
-export type StageColumnId = 'scouts' | 'analysis' | 'desk';
+/** Stage columns, left to right: Scouts gather, Analysts read, the desk writes. */
+export type StageColumnId = 'scouts' | 'analysts' | 'desk';
 
 export interface StageColumn {
 	id: StageColumnId;
@@ -106,24 +97,14 @@ export interface StageColumn {
 	agents: ReplayAgent[];
 }
 
-const DESK_ORDER = [
-	'continuity',
-	'storyliner',
-	'freshness',
-	'orchestrator',
-	'link_enricher',
-	'ecosystem',
-	'hero'
-];
+const DESK_ORDER = ['continuity', 'freshness', 'orchestrator', 'link_enricher', 'ecosystem', 'hero'];
 
 export function buildStage(agents: ReplayAgent[]): StageColumn[] {
 	const scouts = agents.filter((a) => a.kind === 'gatherer');
-	// Already ordered news → research → social → reddit, triage/reader/editor within
-	// each, by the taxonomy's `agent_ids()`. Preserve it rather than re-sorting.
-	const analysis = agents.filter((a) => a.kind === 'analyzer' || a.kind === 'ranker');
-	const placed = new Set([...scouts, ...analysis]);
+	const analysts = agents.filter((a) => a.kind === 'analyzer');
+	const deskSet = new Set([...scouts, ...analysts]);
 	const desk = agents
-		.filter((a) => !placed.has(a))
+		.filter((a) => !deskSet.has(a))
 		.sort((a, b) => {
 			const ai = DESK_ORDER.indexOf(a.id);
 			const bi = DESK_ORDER.indexOf(b.id);
@@ -132,22 +113,15 @@ export function buildStage(agents: ReplayAgent[]): StageColumn[] {
 
 	return [
 		{ id: 'scouts', title: 'Scouts', caption: 'Collecting from the wire', agents: scouts },
-		{
-			id: 'analysis',
-			title: 'Readers & Editors',
-			caption: 'Summarizing, then ranking',
-			agents: analysis
-		},
+		{ id: 'analysts', title: 'Analysts', caption: 'Reading and ranking', agents: analysts },
 		{ id: 'desk', title: 'The Desk', caption: 'Synthesis, copy, art', agents: desk }
 	];
 }
 
 /** Which downstream column a finished call should throw its packet toward. */
 export function downstreamOf(kind: string): StageColumnId | null {
-	if (kind === 'gatherer') return 'analysis';
-	// A reader hands to its editor inside the same column, so only the editor's output
-	// crosses a conveyor.
-	if (kind === 'ranker') return 'desk';
+	if (kind === 'gatherer') return 'analysts';
+	if (kind === 'analyzer') return 'desk';
 	return null;
 }
 
