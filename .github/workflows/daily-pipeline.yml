@@ -65,7 +65,10 @@ jobs:
       MULLVAD_RELAY_FILTER: ${{ vars.MULLVAD_RELAY_FILTER || 'us' }}
       PIPELINE_BASE_URL: ${{ vars.PIPELINE_BASE_URL || 'https://news.aatf.ai' }}
       PIPELINE_COMMIT_PATHS: ${{ vars.PIPELINE_COMMIT_PATHS || 'web/data config/model_releases.yaml config/ecosystem_context.yaml' }}
-      PIPELINE_IMAGE_MODEL: ${{ vars.PIPELINE_IMAGE_MODEL || 'gemini-3-pro-image-preview' }}
+      # `gemini-3-pro-image-preview` was retired from the endpoint and now 400s
+      # ("Invalid model name"), which failed Phase 4.7 on 2026-07-28. The GA name
+      # is the correct default; verify against /v1/models before changing it.
+      PIPELINE_IMAGE_MODEL: ${{ vars.PIPELINE_IMAGE_MODEL || 'gemini-3-pro-image' }}
       LLM_TRUST_ENV_PROXY: ${{ vars.LLM_TRUST_ENV_PROXY || 'false' }}
       LLM_TIMEOUT_SECONDS: ${{ vars.LLM_TIMEOUT_SECONDS || '240' }}
       LLM_MAX_CONCURRENT_REQUESTS: ${{ vars.LLM_MAX_CONCURRENT_REQUESTS || '8' }}

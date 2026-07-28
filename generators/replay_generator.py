@@ -38,7 +38,13 @@ if __name__ == "__main__" and __package__ is None:
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agents.cost_tracker import APICallRecord, CostTracker
-from agents.replay_taxonomy import MARQUEE_ROLES, agent_for, agent_ids, resolve_call
+from agents.replay_taxonomy import (
+    MARQUEE_ROLES,
+    ROLE_IMAGE,
+    agent_for,
+    agent_ids,
+    resolve_call,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -72,11 +78,25 @@ _SOURCE_SUPERSEDED = {"social"}
 
 # Anything matching these in the finished artifact means something leaked that
 # should not be published. Checked before writing, not after.
+#
+# These target credentials and infrastructure, not URLs in general: model output
+# legitimately quotes links (a hero prompt summarising a story about a product
+# launch, say), and failing the whole replay over a public https:// in prose
+# would be a false positive that loses the day's artifact for no security gain.
+# What must never appear is an API key, a bearer token, or the private endpoint
+# host -- so those are matched specifically.
 _SECRET_PATTERNS = (
     re.compile(r"sk-[A-Za-z0-9_\-]{16,}"),
-    re.compile(r"https?://", re.IGNORECASE),
     re.compile(r"\bBearer\s+\S+", re.IGNORECASE),
+    re.compile(r"\b(?:api[_-]?key|auth[_-]?token|secret)\s*[=:]\s*\S+", re.IGNORECASE),
+    # Credentials embedded in a URL, e.g. https://user:pass@host
+    re.compile(r"https?://[^/\s]*:[^/\s]*@", re.IGNORECASE),
 )
+
+# Hosts that identify private infrastructure. Matched case-insensitively anywhere
+# in the artifact. Kept separate from the regex list so the failure message can
+# say which host leaked.
+_FORBIDDEN_HOST_ENV_VARS = ("ANTHROPIC_API_BASE", "ANTHROPIC_BASE_URL", "SCRAPECREATORS_BASE")
 
 
 def _env_int(name: str, default: int, minimum: int = 0) -> int:
@@ -428,6 +448,73 @@ class ReplayGenerator:
         return sources
 
     @staticmethod
+    def _hero_call(
+        orchestrator_result: Dict[str, Any], phases: Sequence[Dict[str, Any]]
+    ) -> Optional[Dict[str, Any]]:
+        """Synthesize the Illustrator's call from the hero phase and its output.
+
+        Hero generation goes through a separate image client that never touches
+        the cost tracker, so it produces no row for :meth:`_build_calls` to find.
+        Without this the replay shows a Hero Image phase lasting a minute with
+        nobody doing anything -- the one visible step whose result you can
+        actually look at, missing from the cast.
+
+        Everything here is read from what the pipeline already recorded: the
+        phase bounds for timing, and summary-level fields for the image and the
+        prompt. Nothing about image generation is re-run or altered.
+        """
+        phase = next((p for p in phases if p["ordinal"] == "4.7"), None)
+        if phase is None or phase.get("status") == "skipped":
+            return None
+
+        image_url = orchestrator_result.get("hero_image_url")
+        prompt = orchestrator_result.get("hero_image_prompt")
+        if not image_url and not prompt:
+            # Phase ran but produced nothing recoverable (image provider absent,
+            # or an older run predating these fields). A station with no result
+            # is worse than none.
+            return None
+
+        # The image model is not an LLM route, so token/cost/provider fields stay
+        # zeroed rather than borrowing plausible-looking numbers from elsewhere.
+        return {
+            "id": "hero",
+            "agent_id": "hero",
+            "phase_id": phase["id"],
+            "caller": "hero_generator.compose",
+            "task": "Paint the day's scene",
+            "role": ROLE_IMAGE,
+            "worker": None,
+            "queued_ms": phase["start_ms"],
+            "start_ms": phase["start_ms"],
+            "first_token_ms": None,
+            "end_ms": phase["end_ms"],
+            "wait_ms": 0,
+            "provider_id": "image",
+            "model": "gemini-3-pro-image",
+            "profile": "STANDARD",
+            "effort": "high",
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_read_tokens": 0,
+            "cost_usd": 0.0,
+            "thinking_chars": 0,
+            "text_chars": len(prompt or ""),
+            "stream_events": 0,
+            "stop_reason": "end_turn",
+            "outcome": "ok" if phase.get("status") == "success" else "failed",
+            "attempt": 1,
+            "fallback_from": None,
+            "retry_reason": None,
+            "has_stream": False,
+            # Replay-only extras. The frontend renders the finished image and the
+            # prompt that produced it, which makes this the one call in the run
+            # whose output you can see rather than read.
+            "image_url": image_url,
+            "image_prompt": prompt,
+        }
+
+    @staticmethod
     def _build_agents(
         calls: Sequence[Dict[str, Any]], sources: Sequence[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
@@ -573,10 +660,15 @@ class ReplayGenerator:
 
     @staticmethod
     def _assert_publishable(index: Dict[str, Any]) -> None:
-        """Refuse to write anything that looks like it carries a secret.
+        """Refuse to write anything that carries a credential or private host.
 
-        The index is metadata only -- no prompts, no URLs, no credentials -- so
-        any match here means a field started carrying something it should not.
+        The artifact is published publicly, so this is the last gate before it
+        lands on disk. It deliberately does *not* reject URLs in general -- the
+        hero prompt embeds model-written story summaries that may legitimately
+        quote a public link, and losing a day's replay over that would be a
+        false positive with no security benefit. Credentials, bearer tokens,
+        key-value secrets and the private endpoint hosts are what must never
+        appear.
         """
         blob = json.dumps(index, ensure_ascii=False)
         for pattern in _SECRET_PATTERNS:
@@ -585,6 +677,22 @@ class ReplayGenerator:
                 raise ValueError(
                     f"Replay index contains disallowed content matching {pattern.pattern!r}: "
                     f"{match.group(0)[:40]!r}"
+                )
+
+        # The configured endpoints are the one host family that is genuinely
+        # sensitive here; compare against the live values rather than hardcoding.
+        lowered = blob.lower()
+        for var in _FORBIDDEN_HOST_ENV_VARS:
+            raw = (os.environ.get(var) or "").strip()
+            if not raw:
+                continue
+            host = raw.split("://", 1)[-1].split("/", 1)[0].strip().lower()
+            # Ignore loopback and empty hosts: they identify nothing.
+            if not host or host.startswith("localhost") or host.startswith("127."):
+                continue
+            if host in lowered:
+                raise ValueError(
+                    f"Replay index leaks the {var} host ({host!r}); refusing to write"
                 )
 
     # -- entry point -----------------------------------------------------
@@ -609,6 +717,13 @@ class ReplayGenerator:
         provisional_end = int(round(float(cost_report.get("duration_seconds") or 0.0) * 1000))
         phases = self._build_phases(records, t0_epoch, provisional_end)
         calls = self._build_calls(cost_report, recorder, tracker, t0_epoch, phases)
+
+        # The Illustrator has no cost row of its own; fold it in so the hero
+        # phase has a visible actor and its result is reachable from the replay.
+        hero = self._hero_call(orchestrator_result, phases)
+        if hero is not None:
+            calls.append(hero)
+            calls.sort(key=lambda c: (c["start_ms"], c["id"]))
 
         duration_ms = max(
             [provisional_end]
