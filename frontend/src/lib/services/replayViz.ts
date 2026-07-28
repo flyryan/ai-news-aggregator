@@ -91,12 +91,13 @@ export const OUTCOME_COLORS: Record<string, string> = {
 /**
  * Stage columns, left to right, following the work rather than the org chart.
  *
- * Reading and ranking used to share one column because they shared one agent. They
- * are different jobs at different cost tiers — a wide cheap pass over everything,
- * then one expensive pass that decides the running order — so they get their own
- * columns now, and each column has a single effort tier worth naming.
+ * Reading and ranking are different jobs at different cost tiers — a wide cheap pass
+ * over everything, then one expensive pass that picks the running order — but they
+ * belong to the same category, so they share a column and sit adjacent. Grouping by
+ * category rather than by role keeps each hand-off (News Reader → News Editor) on one
+ * line of sight.
  */
-export type StageColumnId = 'scouts' | 'readers' | 'editors' | 'desk';
+export type StageColumnId = 'scouts' | 'analysis' | 'desk';
 
 export interface StageColumn {
 	id: StageColumnId;
@@ -117,9 +118,10 @@ const DESK_ORDER = [
 
 export function buildStage(agents: ReplayAgent[]): StageColumn[] {
 	const scouts = agents.filter((a) => a.kind === 'gatherer');
-	const readers = agents.filter((a) => a.kind === 'analyzer');
-	const editors = agents.filter((a) => a.kind === 'ranker');
-	const placed = new Set([...scouts, ...readers, ...editors]);
+	// Already ordered news → research → social → reddit, triage/reader/editor within
+	// each, by the taxonomy's `agent_ids()`. Preserve it rather than re-sorting.
+	const analysis = agents.filter((a) => a.kind === 'analyzer' || a.kind === 'ranker');
+	const placed = new Set([...scouts, ...analysis]);
 	const desk = agents
 		.filter((a) => !placed.has(a))
 		.sort((a, b) => {
@@ -130,16 +132,21 @@ export function buildStage(agents: ReplayAgent[]): StageColumn[] {
 
 	return [
 		{ id: 'scouts', title: 'Scouts', caption: 'Collecting from the wire', agents: scouts },
-		{ id: 'readers', title: 'Readers', caption: 'Summarizing every item', agents: readers },
-		{ id: 'editors', title: 'Editors', caption: 'Ranking what matters', agents: editors },
+		{
+			id: 'analysis',
+			title: 'Readers & Editors',
+			caption: 'Summarizing, then ranking',
+			agents: analysis
+		},
 		{ id: 'desk', title: 'The Desk', caption: 'Synthesis, copy, art', agents: desk }
 	];
 }
 
 /** Which downstream column a finished call should throw its packet toward. */
 export function downstreamOf(kind: string): StageColumnId | null {
-	if (kind === 'gatherer') return 'readers';
-	if (kind === 'analyzer') return 'editors';
+	if (kind === 'gatherer') return 'analysis';
+	// A reader hands to its editor inside the same column, so only the editor's output
+	// crosses a conveyor.
 	if (kind === 'ranker') return 'desk';
 	return null;
 }

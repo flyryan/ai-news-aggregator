@@ -17,6 +17,25 @@
 	export let onSelectCall: (callId: string) => void = () => {};
 
 	$: columns = buildStage(index.agents ?? []);
+
+	/**
+	 * Sub-group a column's agents by category, preserving the taxonomy's order.
+	 *
+	 * The analysis column holds a whole pipeline per category — triage, reader, editor
+	 * — and those three hand work to each other. Banding them keeps that relationship
+	 * visible instead of presenting twelve peers. Agents with no category (the desk)
+	 * each stand alone.
+	 */
+	function groupColumn(col: { agents: ReplayIndex['agents'] }) {
+		const groups: { key: string; agents: ReplayIndex['agents'] }[] = [];
+		for (const agent of col.agents) {
+			const key = agent.category ?? agent.id;
+			const last = groups[groups.length - 1];
+			if (last && last.key === key) last.agents.push(agent);
+			else groups.push({ key, agents: [agent] });
+		}
+		return groups;
+	}
 	$: agentById = new Map((index.agents ?? []).map((a) => [a.id, a]));
 
 	// Sources grouped per gatherer, so a Scout station can show its own feeds.
@@ -102,14 +121,20 @@
 				</header>
 
 				<div class="stations">
-					{#each col.agents as agent (agent.id)}
-						<AgentStation
-							{agent}
-							state={frame.agents.get(agent.id)}
-							sources={sourcesByAgent.get(agent.id) ?? []}
-							{reduced}
-							{onSelectCall}
-						/>
+					{#each groupColumn(col) as group, gi (group.key)}
+						<!-- A category's agents hand work to each other, so they are banded
+						     together with a hairline rather than left as a flat list. -->
+						<div class="group" class:banded={group.agents.length > 1} class:first={gi === 0}>
+							{#each group.agents as agent (agent.id)}
+								<AgentStation
+									{agent}
+									state={frame.agents.get(agent.id)}
+									sources={sourcesByAgent.get(agent.id) ?? []}
+									{reduced}
+									{onSelectCall}
+								/>
+							{/each}
+						</div>
 					{/each}
 				</div>
 			</section>
@@ -316,6 +341,24 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.4rem;
+	}
+
+	/* Agents in the same category sit tight together; the gap between groups is what
+	   separates one category's pipeline from the next. */
+	.group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+	}
+	.group.banded + :global(.group) {
+		margin-top: 0.35rem;
+	}
+	.group.banded:not(.first) {
+		padding-top: 0.55rem;
+		border-top: 1px solid rgb(0 0 0 / 0.07);
+	}
+	:global(.dark) .group.banded:not(.first) {
+		border-top-color: rgb(255 255 255 / 0.09);
 	}
 
 	/* --- the conveyor ------------------------------------------------------ */

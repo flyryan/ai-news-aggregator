@@ -212,11 +212,20 @@ AGENTS.update(
 
 
 def agent_ids() -> List[str]:
-    """Cast list in a stable, stage-left-to-right order."""
+    """Cast list in a stable order.
+
+    Grouped by category rather than by role, so a category's whole pipeline reads as
+    one block: News Triage -> News Reader -> News Editor, then the same for research,
+    social and reddit. The Newsroom still splits these into Reader and Editor columns
+    by ``kind``; this order is what the timeline's swimlanes follow, where keeping a
+    category's hand-off adjacent is what makes the xhigh-then-max pattern legible.
+    """
     ordered = [f"{c}_gatherer" for c in CATEGORIES]
-    ordered += ["news_triage"]
-    ordered += [f"{c}_analyzer" for c in CATEGORIES]
-    ordered += [f"{c}_editor" for c in CATEGORIES]
+    for cat in CATEGORIES:
+        if cat == "news":
+            ordered.append("news_triage")
+        ordered.append(f"{cat}_analyzer")
+        ordered.append(f"{cat}_editor")
     ordered += [
         "continuity",
         "storyliner",
