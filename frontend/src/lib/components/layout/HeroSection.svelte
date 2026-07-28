@@ -6,6 +6,8 @@
 	export let totalItems: number = 0;
 	export let heroImageUrl: string | null = null;
 	export let collectionStatus: string = 'success';
+	/** Link to the replay for this date. Rendered only when the data actually exists. */
+	export let replayUrl: string | null = null;
 
 	$: formattedDate = date ? `${formatDayOfWeek(date)}, ${formatDate(date)}` : '';
 	$: formattedCoverage = coverageDate ? formatDate(coverageDate) : '';
@@ -19,20 +21,31 @@
 				: 'bg-red-500';
 </script>
 
+<!--
+	The caption overlays the image on tablet and up, and sits below it on a phone.
+
+	21:9 is a wide, *short* box: at 393px the image is only ~150px tall, and the
+	date, coverage line, and CTA together need ~130px of that. Overlaying them
+	there covered the artwork almost entirely and still collided. Below `sm` the
+	caption becomes a normal block under the image — everything is legible, nothing
+	overlaps, and the hero art is actually visible.
+-->
 <section class="hero-section mb-8">
-	{#if heroImageUrl}
-		<img src={heroImageUrl} alt="Daily AI scene featuring AATF mascot" class="hero-image" />
-	{:else}
-		<div
-			class="hero-fallback bg-gradient-to-br from-trend-gray-700 to-trend-gray-900 flex items-center justify-center"
-		>
-			<img src="/assets/logo.webp" alt="AATF Logo" class="w-24 h-24 opacity-40" />
-		</div>
-	{/if}
+	<div class="hero-frame">
+		{#if heroImageUrl}
+			<img src={heroImageUrl} alt="Daily AI scene featuring AATF mascot" class="hero-image" />
+		{:else}
+			<div
+				class="hero-fallback bg-gradient-to-br from-trend-gray-700 to-trend-gray-900 flex items-center justify-center"
+			>
+				<img src="/assets/logo.webp" alt="AATF Logo" class="w-24 h-24 opacity-40" />
+			</div>
+		{/if}
+	</div>
 
 	<div class="hero-overlay">
-		<div class="flex items-end justify-between">
-			<div>
+		<div class="hero-row">
+			<div class="min-w-0">
 				<h2 class="hero-date">{formattedDate}</h2>
 				{#if formattedCoverage}
 					<p class="hero-meta">
@@ -45,24 +58,43 @@
 				{/if}
 			</div>
 
-			{#if collectionStatus !== 'success'}
-				<div class="flex items-center gap-2 text-sm text-white/80">
-					<span class={`w-2 h-2 rounded-full ${statusColor}`}></span>
-					<span class="capitalize">{collectionStatus}</span>
-				</div>
-			{/if}
+			<div class="hero-actions">
+				{#if collectionStatus !== 'success'}
+					<div class="flex items-center gap-2 text-sm text-white/80">
+						<span class={`w-2 h-2 rounded-full ${statusColor}`}></span>
+						<span class="capitalize">{collectionStatus}</span>
+					</div>
+				{/if}
+
+				{#if replayUrl}
+					<a
+						class="replay-cta"
+						href={replayUrl}
+						title="Watch the agents that produced this briefing, replayed against the run's real timestamps"
+					>
+						<span class="replay-glyph" aria-hidden="true">▶</span>
+						Watch the replay
+					</a>
+				{/if}
+			</div>
 		</div>
 	</div>
 </section>
 
 <style>
+	/* Mobile: a plain stack — image, then caption. No positioning, nothing overlaps. */
 	.hero-section {
 		position: relative;
 		width: 100%;
+		border-radius: 1rem;
+		overflow: hidden;
+		background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+	}
+
+	.hero-frame {
+		width: 100%;
 		aspect-ratio: 21 / 9;
 		overflow: hidden;
-		border-radius: 1rem;
-		background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
 	}
 
 	.hero-image {
@@ -77,34 +109,130 @@
 	}
 
 	.hero-overlay {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
-		padding: 4rem 1.5rem 1.5rem 1.5rem;
+		padding: 0.85rem 1rem 1rem;
+		background: #16213e;
+	}
+
+	.hero-row {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.6rem;
+	}
+
+	.hero-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		flex: none;
 	}
 
 	.hero-date {
 		color: white;
-		font-size: 1.5rem;
+		font-size: 1.05rem;
 		font-weight: 700;
-		line-height: 1.2;
+		line-height: 1.25;
 	}
 
 	.hero-meta {
-		color: rgba(255, 255, 255, 0.8);
-		font-size: 0.875rem;
-		margin-top: 0.25rem;
+		color: rgba(255, 255, 255, 0.85);
+		font-size: 0.7rem;
+		line-height: 1.35;
+		margin-top: 0.15rem;
+	}
+
+	.replay-cta {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		white-space: nowrap;
+		font-size: 0.85rem;
+		font-weight: 650;
+		color: #fff;
+		padding: 0.45rem 0.85rem;
+		border-radius: 999px;
+		background: rgba(230, 57, 70, 0.9);
+		border: 1px solid rgba(255, 255, 255, 0.28);
+		backdrop-filter: blur(6px);
+		box-shadow: 0 2px 10px -2px rgba(0, 0, 0, 0.45);
+		transition: background 160ms ease, transform 140ms ease, box-shadow 160ms ease;
+	}
+	.replay-cta:hover {
+		background: #e63946;
+		transform: translateY(-1px);
+		box-shadow: 0 6px 18px -4px rgba(230, 57, 70, 0.7);
+	}
+	.replay-cta:focus-visible {
+		outline: 2px solid #fff;
+		outline-offset: 2px;
+	}
+	.replay-glyph {
+		font-size: 0.65rem;
+		line-height: 1;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.replay-cta {
+			transition: none;
+		}
+		.replay-cta:hover {
+			transform: none;
+		}
 	}
 
 	@media (min-width: 640px) {
+		/* Tablet and up: enough height for the caption to ride over the image again. */
+		.hero-section {
+			aspect-ratio: 21 / 9;
+		}
+
+		.hero-frame {
+			height: 100%;
+			aspect-ratio: auto;
+		}
+
+		.hero-overlay {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background: linear-gradient(
+				to top,
+				rgba(0, 0, 0, 0.75) 0%,
+				rgba(0, 0, 0, 0.3) 50%,
+				transparent 100%
+			);
+			padding: 4rem 2rem 1.5rem 2rem;
+		}
+
+		.hero-row {
+			flex-direction: row;
+			align-items: flex-end;
+			justify-content: space-between;
+			gap: 1rem;
+		}
+
 		.hero-date {
 			font-size: 1.75rem;
 		}
 
-		.hero-overlay {
-			padding: 4rem 2rem 1.5rem 2rem;
+		.hero-meta {
+			font-size: 0.875rem;
+			margin-top: 0.25rem;
+		}
+	}
+
+	/* Desktop: the hero is ~800px of artwork, and a phone-sized pill gets lost in it.
+	   Scale the CTA to sit alongside the 1.75rem date rather than under it. */
+	@media (min-width: 1024px) {
+		.replay-cta {
+			font-size: 1rem;
+			gap: 0.55rem;
+			padding: 0.7rem 1.35rem;
+			border-radius: 999px;
+		}
+		.replay-glyph {
+			font-size: 0.8rem;
 		}
 	}
 </style>

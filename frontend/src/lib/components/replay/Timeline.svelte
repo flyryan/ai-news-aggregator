@@ -18,6 +18,12 @@
 	type ColorMode = 'provider' | 'profile';
 	let colorMode: ColorMode = 'provider';
 
+	// Offline-reconstructed runs carry start/end only: `wait_ms` is 0 and
+	// `first_token_ms` is null on every call. Segmenting a bar into wait / TTFT /
+	// streaming would then render one flat slab of "time to first token", which reads
+	// as a bug. Fall back to undivided bars and say so instead of faking the split.
+	$: measured = index.run.timings_measured !== false;
+
 	const LANE_H = 20;
 	const LANE_GAP = 2;
 
@@ -85,8 +91,14 @@
 	}
 
 	// Concurrency sparkline, drawn as an SVG polygon over the same x scale.
+	//
+	// Two series share one y scale: `concActiveMax` is in-flight requests (and matches
+	// run.peak_concurrency in the header), while `concMax` adds the queued backlog on
+	// top and is therefore the taller of the two. They are labelled separately —
+	// reporting the stacked ceiling as "peak concurrency" would contradict the header.
 	$: conc = index.concurrency?.samples ?? [];
 	$: concMax = Math.max(1, ...conc.map((s) => s[1] + s[2]));
+	$: concActiveMax = Math.max(1, ...conc.map((s) => s[1]));
 	$: activePath = (() => {
 		if (conc.length === 0) return '';
 		const pts = conc.map((s) => `${(s[0] / duration) * 100},${100 - (s[1] / concMax) * 100}`);
@@ -134,7 +146,7 @@
 			<h3 class="tl-title">Call timeline</h3>
 			<p class="tl-sub">
 				{index.calls.length} requests · peak concurrency {index.run.peak_concurrency} · click a bar to
-				open it
+				open it{measured ? '' : ' · reconstructed timings'}
 			</p>
 		</div>
 
@@ -161,9 +173,16 @@
 
 	<!-- Segment key: the three parts of every bar -->
 	<div class="key">
-		<span><span class="key-swatch seg-wait"></span>queue wait</span>
-		<span><span class="key-swatch seg-ttft"></span>time to first token</span>
-		<span><span class="key-swatch seg-stream"></span>streaming</span>
+		{#if measured}
+			<span><span class="key-swatch seg-wait"></span>queue wait</span>
+			<span><span class="key-swatch seg-ttft"></span>time to first token</span>
+			<span><span class="key-swatch seg-stream"></span>streaming</span>
+		{:else}
+			<span><span class="key-swatch seg-stream"></span>request start → end</span>
+			<span class="key-note"
+				>timings reconstructed from run logs — no queue wait or first-token split recorded</span
+			>
+		{/if}
 	</div>
 
 	<div class="tl-body">
@@ -208,9 +227,7 @@
 								{@const left = pct(call.queued_ms)}
 								{@const width = Math.max(0.12, pct(call.end_ms - call.queued_ms))}
 								{@const waitW = pct(call.start_ms - call.queued_ms)}
-								{@const ttftW = call.first_token_ms
-									? pct(call.first_token_ms - call.start_ms)
-									: pct(call.end_ms - call.start_ms)}
+								{@const ttftW = call.first_token_ms ? pct(call.first_token_ms - call.start_ms) : 0}
 								<button
 									type="button"
 									class="bar"
@@ -249,7 +266,15 @@
 					{/each}
 				{/each}
 
-				<span class="playhead" style="left: {pct(t)}%"></span>
+				<!-- Moved with transform, not `left`: see PlaybackBar for why a 1.5px line
+				     animated via a layout property shimmers on subpixel boundaries. -->
+				<!-- The clipping layer keeps the full-width playhead wrapper from widening
+				     the track once it is translated past the right edge. -->
+				<span class="playhead-layer">
+					<span class="playhead" style="transform: translateX({pct(t)}%)">
+						<span class="playhead-line"></span>
+					</span>
+				</span>
 			</div>
 
 			<!-- Concurrency: the pipeline breathing -->
@@ -258,8 +283,14 @@
 					<polygon points={totalPath} class="conc-total" />
 					<polygon points={activePath} class="conc-active" />
 				</svg>
-				<span class="conc-playhead" style="left: {pct(t)}%"></span>
-				<span class="conc-label">concurrency · peak {concMax}</span>
+				<span class="conc-playhead" style="transform: translateX({pct(t)}%)">
+					<span class="playhead-line"></span>
+				</span>
+				<span class="conc-label"
+					>concurrency · peak {concActiveMax} in flight{concMax > concActiveMax
+						? ` · ${concMax} incl. queue`
+						: ''}</span
+				>
 			</div>
 
 			<div class="axis">
@@ -350,6 +381,10 @@
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
+	}
+	.key-note {
+		font-style: italic;
+		opacity: 0.85;
 	}
 	.key-swatch {
 		width: 14px;
@@ -509,15 +544,35 @@
 		background: #a855f7;
 	}
 
+	.playhead-layer {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+		pointer-events: none;
+		z-index: 4;
+	}
+
+	/* Full-width wrapper so translateX(%) resolves against the track, with the visible
+	   line hung off its leading edge. Transform-only movement keeps the 1.5px line on
+	   the compositor; animating `left` re-lays-out every frame and the edge shimmers. */
 	.playhead {
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 100%;
+		pointer-events: none;
+		z-index: 4;
+		will-change: transform;
+	}
+	.playhead-line {
 		position: absolute;
 		top: 0;
 		bottom: 0;
+		left: -0.75px;
 		width: 1.5px;
 		background: #E63946;
 		box-shadow: 0 0 8px 0 rgb(230 57 70 / 0.8);
-		pointer-events: none;
-		z-index: 4;
 	}
 
 	.conc {
@@ -544,11 +599,15 @@
 	}
 	.conc-playhead {
 		position: absolute;
+		left: 0;
 		top: 0;
 		bottom: 0;
-		width: 1.5px;
-		background: #E63946;
+		width: 100%;
 		pointer-events: none;
+		will-change: transform;
+	}
+	.conc-playhead .playhead-line {
+		box-shadow: none;
 	}
 	.conc-label {
 		position: absolute;

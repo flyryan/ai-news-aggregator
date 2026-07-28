@@ -37,6 +37,11 @@ export interface ActiveCall {
 	state: CallPhaseState;
 	/** Output tokens emitted so far, linearly interpolated across the stream span. */
 	tokens: number;
+	/**
+	 * True when the run has no recorded first-token time, so `tokens` is spread over
+	 * the whole request instead of the real streaming window. The UI marks it `≈`.
+	 */
+	tokensApprox: boolean;
 }
 
 export interface CallPulse {
@@ -178,8 +183,12 @@ function callStateAt(call: ReplayCall, t: number): CallPhaseState {
 	if (t >= call.end_ms) return 'done';
 	if (t < call.start_ms) return 'queued';
 	const firstToken = call.first_token_ms;
-	if (firstToken != null && t < firstToken) return 'waiting';
-	if (firstToken == null) return 'waiting';
+	// No recorded first-token time (offline-reconstructed runs): we cannot say when
+	// thinking turned into writing, so the call reads as working-and-producing for
+	// its whole span rather than sitting on a fabricated "thinking" phase. The token
+	// counter is flagged approximate instead of invented.
+	if (firstToken == null) return 'streaming';
+	if (t < firstToken) return 'waiting';
 	return 'streaming';
 }
 
@@ -195,14 +204,16 @@ function deriveFrame(p: Prepared, t: number): ReplayFrame {
 		const span = Math.max(1, call.end_ms - call.queued_ms);
 		const progress = Math.min(1, Math.max(0, (t - call.queued_ms) / span));
 		const state = callStateAt(call, t);
+		// Interpolate the token counter across the real streaming window when we have
+		// one; otherwise fall back to the request span and mark the number approximate.
 		let tokens = 0;
-		if (state === 'streaming' && call.first_token_ms != null) {
-			const streamSpan = Math.max(1, call.end_ms - call.first_token_ms);
-			tokens = Math.round(
-				(call.output_tokens || 0) * Math.min(1, (t - call.first_token_ms) / streamSpan)
-			);
+		const tokensApprox = call.first_token_ms == null;
+		if (state === 'streaming') {
+			const from = call.first_token_ms ?? call.start_ms;
+			const streamSpan = Math.max(1, call.end_ms - from);
+			tokens = Math.round((call.output_tokens || 0) * Math.min(1, (t - from) / streamSpan));
 		}
-		active.push({ call, progress, state, tokens });
+		active.push({ call, progress, state, tokens, tokensApprox });
 	}
 
 	// Calls that finished inside the pulse window are "reporting in" right now.

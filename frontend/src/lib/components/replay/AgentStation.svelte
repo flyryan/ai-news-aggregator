@@ -104,7 +104,12 @@
 								{:else if ac.state === 'waiting'}
 									<span class="state-tag thinking">thinking{reduced ? '' : '…'}</span>
 								{:else}
-									<span class="state-tag writing">{formatTokens(ac.tokens)} tok</span>
+									<span
+										class="state-tag writing"
+										title={ac.tokensApprox
+											? 'Estimated from the call span — this run has no recorded first-token time'
+											: undefined}>{ac.tokensApprox ? '≈' : ''}{formatTokens(ac.tokens)} tok</span
+									>
 								{/if}
 							</span>
 						</span>

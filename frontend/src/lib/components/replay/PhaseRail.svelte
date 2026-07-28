@@ -17,16 +17,20 @@
 		running: '#3b82f6'
 	};
 
-	function stateOf(p: (typeof phases)[number]): 'past' | 'now' | 'future' {
-		if (t >= p.end_ms) return 'past';
-		if (t >= p.start_ms) return 'now';
+	// `now` must be an explicit parameter, not a read of the `t` prop from inside the
+	// body: Svelte derives an `{@const}`'s dependencies from the expression it can
+	// see, so `stateOf(p)` would only re-evaluate when `p` changed and the rail would
+	// stay frozen on whichever phase was current at mount.
+	function stateOf(p: (typeof phases)[number], now: number): 'past' | 'now' | 'future' {
+		if (now >= p.end_ms) return 'past';
+		if (now >= p.start_ms) return 'now';
 		return 'future';
 	}
 </script>
 
 <nav class="rail" aria-label="Pipeline phases">
 	{#each phases as p (p.id)}
-		{@const st = stateOf(p)}
+		{@const st = stateOf(p, t)}
 		{@const share = ((p.end_ms - p.start_ms) / duration) * 100}
 		<button
 			type="button"

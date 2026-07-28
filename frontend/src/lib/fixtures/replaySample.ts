@@ -566,18 +566,30 @@ const THINKING_SNIPPETS = [
 	'Writing this up now, leading with the release and treating the reaction as supporting material. '
 ];
 
+// Long calls cycle through these snippets, so the list must wrap cleanly: the last
+// entry ends with a blank line and the first opens a heading. Without that the
+// wrap-around splices `## Executive Summary` onto the tail of a sentence, and the
+// markdown renderer — correctly — treats it as literal text mid-paragraph.
+//
+// The set deliberately exercises every block the renderer supports (heading,
+// paragraph, bullet list, bold, inline code, link) so the demo shows real
+// formatting rather than one undifferentiated wall of prose.
 const TEXT_SNIPPETS = [
 	'## Executive Summary\n\n',
 	'The dominant story today is **inference economics**. ',
 	'Three separate announcements — a hardware partnership, a serving-stack release, and a pricing change — ',
 	'all point at the same pressure: frontier capability is no longer the scarce resource, throughput is. ',
-	'\n\nOn the research side, ',
+	'\n\n### What moved\n\n',
+	'- A hardware partnership aimed squarely at **serving cost**, not training scale\n',
+	'- A serving-stack release claiming a `2.4x` throughput gain on the same silicon\n',
+	'- A pricing change that only makes sense if the first two are real\n',
+	'\n On the research side, ',
 	'arXiv carried a cluster of papers on speculative decoding and KV-cache compression, ',
 	'which reads less like coincidence and more like a field converging on the same bottleneck. ',
 	'\n\nCommunity reaction was notably split. ',
 	'Practitioners on Twitter treated the pricing move as straightforwardly good news; ',
 	'the Reddit threads were more sceptical, focusing on rate limits rather than headline cost. ',
-	'\n\nWorth watching: whether the serving-stack release ships with the benchmarks it references. '
+	'\n\nWorth watching: whether the serving-stack release ships with the benchmarks it references.\n\n'
 ];
 
 function buildStreamFor(call: ReplayCall): ReplayCallStreamLocal {

@@ -12,10 +12,24 @@
 		OUTCOME_COLORS,
 		ttftOf
 	} from '$lib/services/replayViz';
+	import { createStreamRenderer, withCaret } from '$lib/services/replayMarkdown';
+
+	// One renderer per pane: they re-render on the same frames, so a shared cache
+	// would be invalidated by the other caller every time.
+	const renderThinking = createStreamRenderer();
+	const renderAnswer = createStreamRenderer();
 
 	export let call: ReplayCall;
 	export let stream: ReplayCallStream | null = null;
 	export let streamState: 'idle' | 'loading' | 'ready' | 'unavailable' = 'idle';
+	/**
+	 * False when the whole run predates token capture (every call is stream-less), as
+	 * opposed to this one call's deltas having been pruned to fit the size cap. The
+	 * two cases get different copy — "we never recorded it" is not "we dropped it".
+	 */
+	export let runHasStreams = true;
+	/** False for offline-reconstructed runs: no queue wait, no first-token time. */
+	export let timingsMeasured = true;
 	export let t: number;
 	export let reduced = false;
 	export let onSeek: (ms: number) => void = () => {};
@@ -102,19 +116,53 @@
 	$: accent = providerColor(call.provider_id);
 
 	// Keep the newest text in view while it's being written.
-	$: if (bodyEl && autoScroll && (thinkingText || answerText)) {
-		void svelteTick().then(() => {
-			if (bodyEl && autoScroll) bodyEl.scrollTop = bodyEl.scrollHeight;
+	//
+	// Two separate feedback loops have to be broken here, and both lock the tab:
+	//
+	//  1. Svelte instruments *member* assignments on reactive `let`s, so writing
+	//     `bodyEl.scrollTop = …` inside a `$:` block that also reads `bodyEl`
+	//     invalidates `bodyEl` and re-runs the block forever. Aliasing to a plain
+	//     local (`el`) keeps the write out of the reactive graph entirely.
+	//  2. Programmatic scrolling fires `on:scroll`, which would reassign
+	//     `autoScroll`. The `selfScrolling` flag makes our own scroll writes
+	//     invisible to the handler; only genuine user scrolls change intent.
+	let selfScrolling = false;
+
+	function stickToBottom(el: HTMLDivElement) {
+		selfScrolling = true;
+		el.scrollTop = el.scrollHeight;
+		// Cleared after the scroll event has been dispatched, not before.
+		requestAnimationFrame(() => {
+			selfScrolling = false;
 		});
 	}
 
-	function onBodyScroll() {
-		if (!bodyEl) return;
-		const nearBottom = bodyEl.scrollHeight - bodyEl.scrollTop - bodyEl.clientHeight < 40;
-		autoScroll = nearBottom;
+	$: if (bodyEl && autoScroll && (thinkingText || answerText)) {
+		const el = bodyEl;
+		void svelteTick().then(() => {
+			if (autoScroll && el.isConnected) stickToBottom(el);
+		});
+	}
+
+	function onBodyScroll(event: Event) {
+		if (selfScrolling) return;
+		const el = event.currentTarget as HTMLDivElement | null;
+		if (!el) return;
+		const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+		if (nearBottom !== autoScroll) autoScroll = nearBottom;
 	}
 
 	$: hasThinking = call.thinking_chars > 0;
+
+	// Model output is markdown; rendering it as preformatted text turns every
+	// heading and bullet into literal `##` / `-` noise. The caret is spliced into
+	// the last block so it trails the final word instead of dropping a line.
+	// The caret marks where the model is writing *now*, so it belongs to exactly one
+	// pane: the answer once text has started, the reasoning pane before that.
+	$: showCaret = isLive && !streamDone && !reduced;
+	$: caretHtml = showCaret ? '<span class="caret"></span>' : '';
+	$: thinkingHtml = withCaret(renderThinking(thinkingText), answerText ? '' : caretHtml);
+	$: answerHtml = withCaret(renderAnswer(answerText), caretHtml);
 	$: showEmptyStream = streamState === 'unavailable' || (streamState === 'ready' && !prefixes);
 </script>
 
@@ -146,8 +194,17 @@
 
 	<dl class="ts-stats">
 		<div><dt>Duration</dt><dd>{formatDuration(call.end_ms - call.start_ms)}</dd></div>
-		<div><dt>Queue wait</dt><dd>{formatDuration(call.wait_ms)}</dd></div>
-		<div><dt>First token</dt><dd>{ttft != null ? formatDuration(ttft) : '—'}</dd></div>
+		{#if timingsMeasured}
+			<div><dt>Queue wait</dt><dd>{formatDuration(call.wait_ms)}</dd></div>
+			<div><dt>First token</dt><dd>{ttft != null ? formatDuration(ttft) : '—'}</dd></div>
+		{:else}
+			<div>
+				<dt>Queue / TTFT</dt>
+				<dd class="ts-unrecorded" title="This run's timings were reconstructed from logs after the fact">
+					not recorded
+				</dd>
+			</div>
+		{/if}
 		<div><dt>Effort</dt><dd>{call.effort}</dd></div>
 		<div><dt>Input</dt><dd>{formatTokens(call.input_tokens)}</dd></div>
 		<div><dt>Output</dt><dd>{formatTokens(call.output_tokens)}</dd></div>
@@ -190,15 +247,52 @@
 			<p class="ts-note">Loading stream…</p>
 		{:else if showEmptyStream}
 			<div class="ts-note ts-note-block">
-				<p class="font-medium">Stream not retained for this call.</p>
+				<p class="font-medium">
+					{runHasStreams ? 'Stream not retained for this call.' : 'No token capture for this run.'}
+				</p>
 				<p>
-					The replay index keeps every call's timing and token accounting forever; the token-level
-					deltas are pruned by size. This call produced
-					<strong>{formatTokens(call.output_tokens)}</strong> output tokens
-					{#if call.thinking_chars > 0}
-						and <strong>{call.thinking_chars.toLocaleString()}</strong> characters of reasoning
+					{#if runHasStreams}
+						The replay index keeps every call's timing and token accounting forever; the token-level
+						deltas are pruned by size.
+					{:else}
+						This run finished before the recorder existed, so nothing captured the model's output
+						token by token. Everything else about the call is exact — it is accounting, not a guess.
 					{/if}
-					over {formatDuration(call.end_ms - call.start_ms)}.
+				</p>
+				<dl class="ts-fallback">
+					<div>
+						<dt>Wrote</dt>
+						<dd>{formatTokens(call.output_tokens)} output tokens</dd>
+					</div>
+					<div>
+						<dt>Read</dt>
+						<dd>{formatTokens(call.input_tokens)} input tokens</dd>
+					</div>
+					<div>
+						<dt>Took</dt>
+						<dd>{formatDuration(call.end_ms - call.start_ms)}</dd>
+					</div>
+					<div>
+						<dt>Cost</dt>
+						<dd>{formatCost(call.cost_usd)}</dd>
+					</div>
+					<div>
+						<dt>Rate</dt>
+						<dd>
+							{Math.max(
+								1,
+								Math.round(call.output_tokens / Math.max(1, (call.end_ms - call.start_ms) / 1000))
+							)} tok/s
+						</dd>
+					</div>
+				</dl>
+				<p class="ts-fallback-foot">
+					Ran on <strong>{call.model}</strong> at <strong>{call.effort}</strong> effort
+					{#if call.thinking_chars > 0}
+						· {call.thinking_chars.toLocaleString()} characters of reasoning
+					{/if}
+					· the bar above still scrubs the real {formatDuration(call.end_ms - call.queued_ms)} this
+					request occupied.
 				</p>
 			</div>
 		{:else if isBefore}
@@ -218,9 +312,8 @@
 						</span>
 					</h4>
 					{#if thinkingText}
-						<p class="reasoning-text">{thinkingText}<span
-								class="caret"
-								class:hidden={!isLive || streamDone || reduced}></span></p>
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="reasoning-text md">{@html thinkingHtml}</div>
 					{:else}
 						<p class="reasoning-text pending">waiting for the first thinking delta…</p>
 					{/if}
@@ -235,9 +328,8 @@
 					</span>
 				</h4>
 				{#if answerText}
-					<p class="answer-text">{answerText}<span
-							class="caret"
-							class:hidden={!isLive || streamDone || reduced}></span></p>
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					<div class="answer-text md">{@html answerHtml}</div>
 				{:else if isLive}
 					<p class="answer-text pending">
 						{hasThinking && thinkingText ? 'still reasoning…' : 'waiting for first token…'}
@@ -432,6 +524,36 @@
 	.ts-note-block p + p {
 		margin-top: 0.3rem;
 	}
+
+	/* The stats that stand in for a stream we do not have. */
+	.ts-fallback {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem 1.4rem;
+		margin: 0.7rem 0 0.55rem;
+	}
+	.ts-fallback dt {
+		font-size: 0.55rem;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: #a3a3a3;
+	}
+	.ts-fallback dd {
+		font-size: 0.9rem;
+		font-weight: 650;
+		font-variant-numeric: tabular-nums;
+		color: #404040;
+	}
+	:global(.dark) .ts-fallback dd {
+		color: #e5e5e5;
+	}
+	.ts-fallback-foot {
+		font-size: 0.7rem;
+	}
+	.ts-unrecorded {
+		font-style: italic;
+		opacity: 0.75;
+	}
 	.linkish {
 		color: #E63946;
 		text-decoration: underline;
@@ -481,7 +603,6 @@
 		font-style: italic;
 		line-height: 1.6;
 		color: #5b21b6;
-		white-space: pre-wrap;
 		word-break: break-word;
 	}
 	:global(.dark) .reasoning-text {
@@ -492,11 +613,76 @@
 		font-size: 0.82rem;
 		line-height: 1.65;
 		color: #262626;
-		white-space: pre-wrap;
 		word-break: break-word;
 	}
 	:global(.dark) .answer-text {
 		color: #e5e5e5;
+	}
+
+	/* Rendered markdown. `:global` because the HTML comes from {@html}, so the
+	   compiler cannot see these selectors used and would prune them. Scoped under
+	   `.md` so nothing here leaks into the rest of the page. */
+	.md :global(p) {
+		margin: 0 0 0.6em;
+	}
+	.md :global(p:last-child) {
+		margin-bottom: 0;
+	}
+	.md :global(h2),
+	.md :global(h3),
+	.md :global(h4) {
+		font-size: 0.85rem;
+		font-weight: 700;
+		font-style: normal;
+		line-height: 1.35;
+		margin: 1em 0 0.4em;
+	}
+	.md :global(h2:first-child),
+	.md :global(h3:first-child),
+	.md :global(h4:first-child) {
+		margin-top: 0;
+	}
+	.md :global(h3) {
+		font-size: 0.8rem;
+	}
+	.md :global(h4) {
+		font-size: 0.76rem;
+		opacity: 0.85;
+	}
+	.md :global(ul) {
+		margin: 0 0 0.6em;
+		padding-left: 1.1em;
+		list-style: disc;
+	}
+	.md :global(ul:last-child) {
+		margin-bottom: 0;
+	}
+	.md :global(li) {
+		margin-bottom: 0.22em;
+	}
+	/* Numbered lists keep the model's own marker, so drop the bullet. */
+	.md :global(li.md-ord) {
+		list-style: none;
+		margin-left: -1.1em;
+	}
+	.md :global(strong) {
+		font-weight: 700;
+	}
+	.md :global(.md-code) {
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-style: normal;
+		font-size: 0.92em;
+		padding: 0.05em 0.3em;
+		border-radius: 3px;
+		background: rgb(0 0 0 / 0.06);
+	}
+	:global(.dark) .md :global(.md-code) {
+		background: rgb(255 255 255 / 0.09);
+	}
+	.md :global(a) {
+		color: #E63946;
+		text-decoration: underline;
+		text-underline-offset: 2px;
 	}
 
 	.pending {
@@ -504,7 +690,9 @@
 		font-style: italic;
 	}
 
-	.caret {
+	/* Global: the caret is spliced into the sanitised HTML, so the compiler never
+	   sees it in this component's markup and would otherwise prune the rule. */
+	.md :global(.caret) {
 		display: inline-block;
 		width: 0.45em;
 		height: 1em;
@@ -512,9 +700,6 @@
 		vertical-align: text-bottom;
 		background: currentColor;
 		animation: blink 1.05s step-end infinite;
-	}
-	.caret.hidden {
-		display: none;
 	}
 	@keyframes blink {
 		0%,
@@ -528,7 +713,7 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.caret {
+		.md :global(.caret) {
 			animation: none;
 			opacity: 0.6;
 		}

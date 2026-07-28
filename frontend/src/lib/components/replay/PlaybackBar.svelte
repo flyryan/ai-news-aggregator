@@ -156,11 +156,23 @@
 				{/each}
 			</div>
 
-			<div class="filled" style="width: {progress}%"></div>
-			<div class="thumb" style="left: {progress}%">
-				{#if activeCount > 0}
-					<span class="thumb-count">{activeCount}</span>
-				{/if}
+			<!--
+				The two elements that move every frame are driven by `transform`, never by
+				`width`/`left`. Animating a layout property re-lays-out the bar 60×/second and
+				lands the 1.5px playhead on fractional pixels, which the compositor resolves
+				differently frame to frame — the edge shimmers. A scaleX'd fill and a
+				translated line stay on the compositor and hold still.
+
+				The playhead wrapper is full-width on purpose: translateX(%) resolves against
+				the element's own box, so a 100%-wide wrapper makes the percentage read as a
+				percentage of the track.
+			-->
+			<div class="filled" style="transform: scaleX({progress / 100})"></div>
+			<div class="thumb" style="transform: translateX({progress}%)">
+				<span class="thumb-line"></span>
+				<!-- Kept mounted and faded rather than toggled: mounting/unmounting a badge
+				     as the count crosses zero is its own flicker. -->
+				<span class="thumb-count" class:visible={activeCount > 0}>{activeCount}</span>
 			</div>
 		</div>
 	</div>
@@ -328,22 +340,36 @@
 		background: rgb(230 57 70 / 0.5);
 	}
 
+	/* Full-width and squashed by scaleX, so the fill never triggers layout. */
 	.filled {
 		position: absolute;
 		left: 0;
 		top: 0;
 		bottom: 0;
+		width: 100%;
+		transform-origin: left center;
 		background: rgb(230 57 70 / 0.14);
-		border-right: 1.5px solid #E63946;
 		pointer-events: none;
+		will-change: transform;
 	}
 
 	.thumb {
 		position: absolute;
+		left: 0;
 		top: 0;
 		bottom: 0;
-		width: 0;
+		width: 100%;
 		pointer-events: none;
+		will-change: transform;
+	}
+	/* The playhead rides at the wrapper's left edge; the wrapper does the moving. */
+	.thumb-line {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: -0.75px;
+		width: 1.5px;
+		background: #E63946;
 	}
 	.thumb-count {
 		position: absolute;
@@ -357,6 +383,11 @@
 		border-radius: 3px;
 		padding: 0 3px;
 		white-space: nowrap;
+		opacity: 0;
+		transition: opacity 140ms ease;
+	}
+	.thumb-count.visible {
+		opacity: 1;
 	}
 
 	.speeds {
@@ -418,7 +449,8 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.btn-play,
-		.speeds button {
+		.speeds button,
+		.thumb-count {
 			transition: none;
 		}
 	}

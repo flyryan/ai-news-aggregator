@@ -15,6 +15,7 @@
 	import ErrorMessage from '$lib/components/common/ErrorMessage.svelte';
 	import EmptyState from '$lib/components/common/EmptyState.svelte';
 	import { safeHtml } from '$lib/services/safeHtml';
+	import { hasReplayData } from '$lib/services/replayLoader';
 
 	// Data state
 	let summary: DaySummary | null = null;
@@ -48,6 +49,20 @@
 	$: if (!$storeLoading && routeKey !== lastHandledRouteKey) {
 		lastHandledRouteKey = routeKey;
 		void handleRouteChange(dateParam, rawCategoryParam);
+	}
+
+	// Surface the replay CTA only for dates that actually have a replay index —
+	// most historical dates predate the recorder, and a dead link is worse than none.
+	let replayUrl: string | null = null;
+	$: {
+		const forDate = effectiveDate;
+		replayUrl = null;
+		if (forDate) {
+			void hasReplayData(forDate).then((exists) => {
+				// Ignore a probe that resolved after the user moved to another date.
+				if (exists && forDate === effectiveDate) replayUrl = `/replay?date=${forDate}`;
+			});
+		}
 	}
 
 	// Show loading when store is initializing OR when data is loading
@@ -303,6 +318,7 @@
 				totalItems={summary.total_items_analyzed}
 				heroImageUrl={summary.hero_image_url || null}
 				collectionStatus={summary.collection_status?.overall || 'success'}
+				{replayUrl}
 			/>
 		</section>
 

@@ -11,17 +11,28 @@
 
 <header class="bg-gradient-to-r from-trend-red to-guardian-red text-white shadow-lg">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-		<div class="flex items-center justify-between">
-			<div class="flex items-center gap-4">
-				<a href="/" class="flex items-center gap-3 hover:opacity-90 transition-opacity">
+		<!--
+			Mobile geometry, the short version: four 36px icon buttons plus their gaps
+			claim ~190px of a 393px viewport. Whatever the brand block is given, it must
+			fit in the rest — so it needs `min-w-0` (a flex item defaults to
+			`min-width:auto` and refuses to shrink below its content) and a title small
+			enough that its longest word fits. At `text-2xl`, "Aggregator" alone is 121px
+			against ~109px of space, which is exactly how the title came to sit under the
+			GitHub icon.
+		-->
+		<div class="flex items-center justify-between gap-2 sm:gap-4">
+			<div class="flex items-center min-w-0">
+				<a href="/" class="flex items-center gap-2 sm:gap-3 min-w-0 hover:opacity-90 transition-opacity">
 					<img
 						src="/assets/logo.webp"
 						alt="AATF Logo"
-						class="w-12 h-12 rounded-full bg-white p-0.5"
+						class="w-10 h-10 sm:w-12 sm:h-12 flex-none rounded-full bg-white p-0.5"
 					/>
-					<div>
-						<h1 class="text-2xl font-bold tracking-tight">AATF AI News Aggregator</h1>
-						<p class="text-sm text-white/80">
+					<div class="min-w-0">
+						<h1 class="text-lg sm:text-2xl font-bold tracking-tight leading-tight">
+							AATF AI News Aggregator
+						</h1>
+						<p class="text-xs sm:text-sm text-white/80 leading-snug">
 							Powered by Claude Opus 5
 							<span class="new-badge">NEW</span>
 						</p>
@@ -29,7 +40,7 @@
 				</a>
 			</div>
 
-			<div class="flex items-center gap-4">
+			<div class="flex items-center gap-1.5 sm:gap-4 flex-none">
 				{#if dateDisplay}
 					<a
 						href="/archive"
@@ -44,7 +55,7 @@
 					href="https://github.com/flyryan/ai-news-aggregator"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+					class="p-1.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex-none"
 					aria-label="GitHub Repository"
 					title="View source on GitHub"
 				>
@@ -61,7 +72,7 @@
 				<!-- RSS Feed link -->
 				<a
 					href="/feeds"
-					class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+					class="p-1.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex-none"
 					aria-label="RSS Feeds"
 					title="Subscribe to RSS feeds"
 				>
@@ -79,7 +90,7 @@
 				<!-- Search toggle button -->
 				<button
 					on:click={() => showSearch = !showSearch}
-					class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+					class="p-1.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex-none"
 					aria-label="Toggle search"
 				>
 					<svg
@@ -129,5 +140,12 @@
 	@keyframes badge-pulse {
 		0%, 100% { opacity: 1; }
 		50% { opacity: 0.6; }
+	}
+
+	/* The badge is decorative; it must not pulse for anyone who asked motion to stop. */
+	@media (prefers-reduced-motion: reduce) {
+		.new-badge {
+			animation: none;
+		}
 	}
 </style>

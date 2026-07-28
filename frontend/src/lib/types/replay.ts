@@ -39,6 +39,13 @@ export interface ReplayRun {
 	stream_available: boolean;
 	/** Set when the generator had to shrink the stream file to fit the size cap. */
 	stream_truncation?: string | null;
+	/**
+	 * False when the index was reconstructed offline from run logs rather than
+	 * recorded live. Those days have no per-call queue wait (`wait_ms` is 0) and no
+	 * `first_token_ms`, so anything that segments a call by those must degrade.
+	 * Absent means "assume measured" — the field post-dates schema v1's first draft.
+	 */
+	timings_measured?: boolean;
 }
 
 export interface ReplayPhase {
