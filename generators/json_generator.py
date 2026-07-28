@@ -181,6 +181,7 @@ class JSONGenerator:
             'collection_status': self._format_collection_status(collection_status),
             'hero_image_url': result.get('hero_image_url'),
             'hero_image_prompt': result.get('hero_image_prompt'),
+            'hero_image_usage': result.get('hero_image_usage'),
             'generated_at': result.get('generated_at', datetime.now().isoformat()),
             'categories': categories
         }

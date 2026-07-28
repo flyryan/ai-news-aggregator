@@ -32,6 +32,11 @@
 	// The one call whose output is a picture — surface it on the station as a thumbnail
 	// once it lands, so the station reports in with the artefact rather than a number.
 	$: imageResult = isImageAgent && status === 'done' ? (state?.last_done?.image_url ?? null) : null;
+	// The image call itself, whichever state it is in — the footer reads cost off it
+	// rather than off the agent rollup, which the image client never contributes to.
+	$: imageCall = isImageAgent
+		? (state?.last_done ?? activeCalls[0]?.call ?? null)
+		: null;
 	let thumbFailed = false;
 	// A new day's replay reuses this component instance; retry the new URL.
 	$: if (imageResult) thumbFailed = false;
@@ -240,9 +245,17 @@
 	{/if}
 
 	{#if isImageAgent && status !== 'idle'}
-		<!-- Deliberately not tokens/cost: this agent has neither. State it plainly. -->
+		<!-- The image client bypasses the cost tracker, so `state.cost_usd` is always
+		     zero here; the figure comes off the call itself, and only when the
+		     provider actually reported usage. -->
 		<div class="foot">
-			<span>{status === 'done' ? '1 image · ' : ''}image model, not billed per token</span>
+			{#if imageCall?.usage_measured}
+				<span>1 image</span>
+				<span class="foot-dot">·</span>
+				<span>{formatCost(imageCall.cost_usd)}</span>
+			{:else}
+				<span>{status === 'done' ? '1 image · ' : ''}cost not reported by provider</span>
+			{/if}
 		</div>
 	{:else if completed > 0 && (state?.output_tokens ?? 0) > 0}
 		<div class="foot">
@@ -512,10 +525,15 @@
 	:global(.dark) .call-chip {
 		background: rgb(255 255 255 / 0.06);
 	}
-	.call-chip:hover,
 	.call-chip:focus-visible {
 		border-color: var(--route);
 		outline: none;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.call-chip:hover {
+			border-color: var(--route);
+			outline: none;
+		}
 	}
 	.call-chip.queued {
 		opacity: 0.62;
@@ -541,13 +559,19 @@
 	:global(.dark) .call-chip.is-complete .chip-task {
 		color: #a3a3a3;
 	}
-	.call-chip.is-complete:hover .chip-task,
 	.call-chip.is-complete:focus-visible .chip-task {
 		color: #262626;
 	}
-	:global(.dark) .call-chip.is-complete:hover .chip-task,
 	:global(.dark) .call-chip.is-complete:focus-visible .chip-task {
 		color: #e5e5e5;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.call-chip.is-complete:hover .chip-task {
+			color: #262626;
+		}
+		:global(.dark) .call-chip.is-complete:hover .chip-task {
+			color: #e5e5e5;
+		}
 	}
 	.call-chip.is-complete.failed {
 		border-color: color-mix(in srgb, #ef4444 45%, transparent);
@@ -583,12 +607,16 @@
 		border-radius: 4px;
 		cursor: pointer;
 	}
-	.more-btn:hover {
-		color: var(--accent);
-		background: rgb(0 0 0 / 0.03);
+	@media (hover: hover) and (pointer: fine) {
+		.more-btn:hover {
+			color: var(--accent);
+			background: rgb(0 0 0 / 0.03);
+		}
 	}
-	:global(.dark) .more-btn:hover {
-		background: rgb(255 255 255 / 0.05);
+	@media (hover: hover) and (pointer: fine) {
+		:global(.dark) .more-btn:hover {
+			background: rgb(255 255 255 / 0.05);
+		}
 	}
 
 	.chip-fill {
@@ -707,11 +735,17 @@
 		line-height: 0;
 		transition: border-color 150ms ease, box-shadow 150ms ease;
 	}
-	.thumb:hover,
 	.thumb:focus-visible {
 		border-color: var(--accent);
 		box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
 		outline: none;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.thumb:hover {
+			border-color: var(--accent);
+			box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+			outline: none;
+		}
 	}
 	.thumb img {
 		width: 100%;

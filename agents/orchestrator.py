@@ -76,6 +76,9 @@ class OrchestratorResult:
     collection_status: Dict[str, Dict[str, Any]] = field(default_factory=dict)  # source -> status
     hero_image_url: Optional[str] = None  # URL path to generated hero image
     hero_image_prompt: Optional[str] = None  # Prompt used to generate hero image
+    # Token counts and cost for the hero image, when the provider reported them.
+    # None means unreported, which the replay renders as "n/a" -- never as $0.
+    hero_image_usage: Optional[Dict[str, Any]] = None
     phase_status: List[Dict[str, Any]] = field(default_factory=list)  # Phase tracker records
     orchestrator_thinking: Optional[str] = None
     generated_at: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -95,6 +98,7 @@ class OrchestratorResult:
             'collection_status': self.collection_status,
             'hero_image_url': self.hero_image_url,
             'hero_image_prompt': self.hero_image_prompt,
+            'hero_image_usage': self.hero_image_usage,
             'phase_status': self.phase_status,
             'orchestrator_thinking': self.orchestrator_thinking,
             'generated_at': self.generated_at
@@ -489,6 +493,7 @@ class MainOrchestrator:
         # Phase 4.7: Hero Image Generation
         hero_image_url = None
         hero_image_prompt = None
+        hero_image_usage = None
 
         # Build hero topics - use top_topics, or fall back to category themes
         hero_topics = top_topics
@@ -517,6 +522,9 @@ class MainOrchestrator:
                             mtime = int(hero_file.stat().st_mtime)
                             hero_image_url = f"{hero_image_url}?v={mtime}"
                         hero_image_prompt = hero_result['prompt']
+                        # Absent when the provider reported no usage; the replay
+                        # renders "n/a" in that case rather than a fabricated $0.
+                        hero_image_usage = hero_result.get('usage')
                         logger.info(f"Hero image generated: {hero_image_url}")
                         if hero_fallback_used:
                             phases.end_phase('partial', details="used category themes as fallback")
@@ -561,6 +569,7 @@ class MainOrchestrator:
             collection_status=collection_status,
             hero_image_url=hero_image_url,
             hero_image_prompt=hero_image_prompt,
+            hero_image_usage=hero_image_usage,
             phase_status=phases.to_dict(),
             orchestrator_thinking=f"Topic Detection:\n{topic_thinking}\n\nSummary:\n{summary_thinking}"
         )

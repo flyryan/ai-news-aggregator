@@ -475,8 +475,14 @@ class ReplayGenerator:
             # is worse than none.
             return None
 
-        # The image model is not an LLM route, so token/cost/provider fields stay
-        # zeroed rather than borrowing plausible-looking numbers from elsewhere.
+        # The image model is not an LLM route, so it never reaches the cost tracker.
+        # When the provider reported usage the pipeline saved it, and it is a real
+        # measurement worth showing; when it did not, these stay zero and the UI
+        # falls back to "n/a" on the strength of `usage_measured`.
+        usage = orchestrator_result.get("hero_image_usage") or {}
+        image_tokens = int(usage.get("image_tokens") or 0)
+        text_tokens = int(usage.get("text_tokens") or 0)
+
         return {
             "id": "hero",
             "agent_id": "hero",
@@ -491,13 +497,17 @@ class ReplayGenerator:
             "end_ms": phase["end_ms"],
             "wait_ms": 0,
             "provider_id": "image",
-            "model": "gemini-3-pro-image",
+            "model": usage.get("model") or "gemini-3-pro-image",
             "profile": "STANDARD",
             "effort": "high",
-            "input_tokens": 0,
-            "output_tokens": 0,
+            "input_tokens": int(usage.get("input_tokens") or 0),
+            # Both classes are output; the split is preserved below because they
+            # bill at very different rates and the difference is the interesting part.
+            "output_tokens": image_tokens + text_tokens,
+            "image_tokens": image_tokens,
             "cache_read_tokens": 0,
-            "cost_usd": 0.0,
+            "cost_usd": float(usage.get("cost_usd") or 0.0),
+            "usage_measured": bool(usage),
             "thinking_chars": 0,
             "text_chars": len(prompt or ""),
             "stream_events": 0,

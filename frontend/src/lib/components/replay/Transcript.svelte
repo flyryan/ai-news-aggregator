@@ -297,16 +297,35 @@
 	<dl class="ts-stats">
 		<div><dt>Duration</dt><dd>{formatDuration(call.end_ms - call.start_ms)}</dd></div>
 		{#if isImage}
-			<!-- No tokens, no cost, no queue: an image client, not an LLM route. Showing
-			     zeros here would present a structural absence as a measurement. -->
+			<!-- An image client, not an LLM route, so it never reaches the cost tracker.
+			     The provider does report usage though, and when it did we show it: image
+			     tokens bill at ~10x the thinking tokens beside them, which is why the two
+			     are split rather than summed. When it reported nothing, "n/a" — a zero
+			     would present a structural absence as a measurement. -->
 			<div><dt>Model</dt><dd class="ts-model">{call.model}</dd></div>
 			<div><dt>Output</dt><dd>1 image</dd></div>
-			<div>
-				<dt>Tokens / cost</dt>
-				<dd class="ts-unrecorded" title="Image generation is not billed or metered per token">
-					n/a
-				</dd>
-			</div>
+			{#if call.usage_measured}
+				<div>
+					<dt>Image tokens</dt>
+					<dd title="Billed at $120 per million">{formatTokens(call.image_tokens ?? 0)}</dd>
+				</div>
+				{#if (call.output_tokens ?? 0) - (call.image_tokens ?? 0) > 0}
+					<div>
+						<dt>Thinking</dt>
+						<dd title="The model reasoning before it drew — billed at $12 per million">
+							{formatTokens((call.output_tokens ?? 0) - (call.image_tokens ?? 0))}
+						</dd>
+					</div>
+				{/if}
+				<div><dt>Cost</dt><dd>{formatCost(call.cost_usd)}</dd></div>
+			{:else}
+				<div>
+					<dt>Tokens / cost</dt>
+					<dd class="ts-unrecorded" title="This provider reported no usage for the image call">
+						n/a
+					</dd>
+				</div>
+			{/if}
 		{:else if timingsMeasured}
 			<div><dt>Queue wait</dt><dd>{formatDuration(call.wait_ms)}</dd></div>
 			<div><dt>First token</dt><dd>{ttft != null ? formatDuration(ttft) : '—'}</dd></div>
@@ -649,9 +668,11 @@
 		border-radius: 4px;
 		flex: none;
 	}
-	.ts-close:hover {
-		color: #E63946;
-		background: rgb(230 57 70 / 0.1);
+	@media (hover: hover) and (pointer: fine) {
+		.ts-close:hover {
+			color: #E63946;
+			background: rgb(230 57 70 / 0.1);
+		}
 	}
 
 	.ts-stats {
@@ -698,8 +719,10 @@
 	:global(.dark) .jump {
 		color: #a3a3a3;
 	}
-	.jump:hover {
-		color: var(--accent);
+	@media (hover: hover) and (pointer: fine) {
+		.jump:hover {
+			color: var(--accent);
+		}
 	}
 	.mini {
 		position: relative;
@@ -909,10 +932,14 @@
 		color: inherit;
 		cursor: pointer;
 	}
-	.prompt-toggle:hover,
 	.prompt-toggle:focus-visible {
 		color: #E63946;
 		outline: none;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.prompt-toggle:hover {
+			color: #E63946;
+		}
 	}
 	.prompt-caret {
 		display: inline-block;

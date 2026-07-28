@@ -133,6 +133,50 @@ def initialize_generator() -> HeroGenerator:
         sys.exit(1)
 
 
+async def probe_usage() -> int:
+    """Ask the configured image provider for one small image and report its usage.
+
+    Whether an image response carries token counts is a property of the deployment,
+    not of the API schema, so it cannot be settled by reading docs -- only by asking.
+    This writes nothing and uses a deliberately trivial prompt with no reference
+    image, so the call is as cheap as the provider allows.
+    """
+    generator = initialize_generator()
+    client = generator.client
+    logger.info(
+        "Probing %s (%s) for usage reporting...",
+        getattr(client, "model", "?"),
+        type(client).__name__,
+    )
+
+    try:
+        response = await client.generate("A single small grey circle on a white background.")
+    except Exception as e:
+        logger.error(f"Probe failed: {e}")
+        return 1
+
+    print()
+    print("=" * 60)
+    print("IMAGE USAGE PROBE")
+    print("=" * 60)
+    print(f"model reported : {response.model}")
+    print(f"image bytes    : {len(response.image_data):,}")
+    print(f"mime type      : {response.mime_type}")
+    print()
+    if response.usage:
+        print("usage block:")
+        print(json.dumps(response.usage, indent=2, default=str))
+        print()
+        print("=> Costs ARE reportable. Wire these fields into the cost tracker.")
+    else:
+        print("usage block: (none)")
+        print()
+        print("=> This endpoint does not report usage for image calls.")
+        print("   Cost must stay 'n/a', or be derived per-image from a price table.")
+    print("=" * 60)
+    return 0
+
+
 def parse_skip_dates(skip_str: str) -> set[str]:
     """
     Parse skip dates string into a set of date strings.
@@ -199,6 +243,21 @@ def save_summary(web_dir: Path, date: str, summary: dict) -> None:
     logger.info(f"Updated summary.json at {summary_path}")
 
 
+def apply_hero_result(summary: dict, hero_url: str, result: dict) -> None:
+    """Copy a generation result onto the summary, in one place.
+
+    Three call sites used to assign these fields inline, which meant adding
+    ``hero_image_usage`` silently updated none of them -- the cost was computed,
+    logged, and dropped. Funnelling the writes through one function keeps the
+    pipeline's summary.json and this script's in agreement.
+    """
+    summary['hero_image_url'] = hero_url
+    summary['hero_image_prompt'] = result['prompt']
+    # Absent when the provider reported nothing; store None rather than a zero so
+    # the replay can tell "unmeasured" from "free".
+    summary['hero_image_usage'] = result.get('usage')
+
+
 def regenerate_one(generator: HeroGenerator, web_dir: Path, date: str) -> tuple[str, bool, str]:
     """Regenerate hero image for a single date (thread-safe). Returns (date, success, message)."""
     try:
@@ -224,8 +283,7 @@ def regenerate_one(generator: HeroGenerator, web_dir: Path, date: str) -> tuple[
         if hero_file.exists():
             mtime = int(hero_file.stat().st_mtime)
             hero_url = f"{hero_url}?v={mtime}"
-        summary['hero_image_url'] = hero_url
-        summary['hero_image_prompt'] = result['prompt']
+        apply_hero_result(summary, hero_url, result)
         save_summary(web_dir, date, summary)
 
         logger.info(f"Completed: {date}")
@@ -270,8 +328,7 @@ async def regenerate_single(generator: HeroGenerator, web_dir: Path, date: str, 
     if hero_file.exists():
         mtime = int(hero_file.stat().st_mtime)
         hero_url = f"{hero_url}?v={mtime}"
-    summary['hero_image_url'] = hero_url
-    summary['hero_image_prompt'] = result['prompt']
+    apply_hero_result(summary, hero_url, result)
     save_summary(web_dir, date, summary)
 
     logger.info(f"Success! Hero image generated at: {result['path']}")
@@ -312,8 +369,7 @@ async def edit_single(generator: HeroGenerator, web_dir: Path, date: str, edit_i
         if hero_file.exists():
             mtime = int(hero_file.stat().st_mtime)
             hero_url = f"{hero_url}?v={mtime}"
-        summary['hero_image_url'] = hero_url
-        summary['hero_image_prompt'] = result['prompt']
+        apply_hero_result(summary, hero_url, result)
         save_summary(web_dir, date, summary)
     except FileNotFoundError:
         logger.warning("No summary.json found - skipping summary update")
@@ -403,7 +459,19 @@ async def main():
         default="./web",
         help="Web output directory (default: ./web)"
     )
+    parser.add_argument(
+        "--probe-usage",
+        action="store_true",
+        help=(
+            "Send one cheap generation and print the provider's raw usage block, "
+            "then exit without writing any file. Use this to find out whether the "
+            "configured endpoint reports token counts for image calls."
+        )
+    )
     args = parser.parse_args()
+
+    if args.probe_usage:
+        return await probe_usage()
 
     # Validate mutually exclusive options
     if args.edit and args.all:

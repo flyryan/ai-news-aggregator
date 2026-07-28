@@ -15,7 +15,7 @@ import logging
 import random
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 import httpx
 from PIL import Image
@@ -58,6 +58,18 @@ class ImageResponse:
     """Response from image generation."""
     image_data: bytes  # Raw image bytes
     mime_type: str = "image/png"
+    # Token accounting, when the provider reports it.
+    #
+    # The openai-compatible path goes through /v1/chat/completions, whose schema
+    # includes a `usage` block -- but whether a given proxy populates it for an
+    # *image* response is a property of that deployment, not of the schema. The
+    # native path exposes `usage_metadata` on the SDK response, likewise optional.
+    #
+    # None means "the provider told us nothing", which is different from zero. The
+    # replay renders `n/a` for None and a real figure otherwise; it must never show
+    # $0.000 for a call that was in fact billed.
+    usage: Optional[Dict[str, Any]] = None
+    model: Optional[str] = None
 
 
 class BaseImageClient(ABC):
@@ -164,12 +176,34 @@ class NativeGeminiClient(BaseImageClient):
             logger.error(error_msg)
             raise RuntimeError(error_msg) from e
 
+        # The SDK exposes counts as `usage_metadata`; normalise to the same key
+        # names the openai-compatible path yields so downstream code sees one shape.
+        usage = None
+        meta = getattr(response, "usage_metadata", None)
+        if meta is not None:
+            usage = {
+                k: v
+                for k, v in (
+                    ("prompt_tokens", getattr(meta, "prompt_token_count", None)),
+                    ("completion_tokens", getattr(meta, "candidates_token_count", None)),
+                    ("total_tokens", getattr(meta, "total_token_count", None)),
+                )
+                if v is not None
+            } or None
+        logger.info(
+            f"Image usage reported: {usage}"
+            if usage
+            else "Image response carried no usage metadata; cost will show as n/a"
+        )
+
         # Extract image from response parts
         for part in response.parts:
             if part.inline_data:
                 return ImageResponse(
                     image_data=part.inline_data.data,
-                    mime_type=part.inline_data.mime_type or "image/png"
+                    mime_type=part.inline_data.mime_type or "image/png",
+                    usage=usage,
+                    model=self.model,
                 )
 
         raise RuntimeError(
@@ -345,9 +379,22 @@ class OpenAICompatibleClient(BaseImageClient):
 
         # Parse base64 data URL (format: data:image/png;base64,<data>)
         image_base64 = image_url.split(",", 1)[1]
+
+        # `usage` is optional in practice: the schema defines it, but whether this
+        # proxy fills it in for an image response is a deployment detail. Log what
+        # we got (keys only -- the values are counts, but the log is not the place
+        # to grow) so a missing block is diagnosable rather than silent.
+        usage = data.get("usage")
+        if usage:
+            logger.info(f"Image usage reported: {usage}")
+        else:
+            logger.info("Image response carried no usage block; cost will show as n/a")
+
         return ImageResponse(
             image_data=base64.b64decode(image_base64),
-            mime_type="image/png"
+            mime_type="image/png",
+            usage=usage if isinstance(usage, dict) else None,
+            model=data.get("model") or self.model,
         )
 
 

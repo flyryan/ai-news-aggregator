@@ -555,9 +555,11 @@
 		opacity: 1;
 		box-shadow: 0 0 0 1px var(--c), 0 0 10px -2px var(--c);
 	}
-	.bar:hover {
-		filter: brightness(1.15);
-		opacity: 1;
+	@media (hover: hover) and (pointer: fine) {
+		.bar:hover {
+			filter: brightness(1.15);
+			opacity: 1;
+		}
 	}
 	.bar.selected {
 		box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #E63946;

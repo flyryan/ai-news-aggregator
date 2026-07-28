@@ -271,11 +271,15 @@
 		cursor: pointer;
 		color: inherit;
 	}
-	.js-card-head:hover .js-preview {
-		color: #262626;
+	@media (hover: hover) and (pointer: fine) {
+		.js-card-head:hover .js-preview {
+			color: #262626;
+		}
 	}
-	:global(.dark) .js-card-head:hover .js-preview {
-		color: #f5f5f5;
+	@media (hover: hover) and (pointer: fine) {
+		:global(.dark) .js-card-head:hover .js-preview {
+			color: #f5f5f5;
+		}
 	}
 	.js-idx {
 		font-size: 0.58rem;

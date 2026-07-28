@@ -84,8 +84,10 @@
 	:global(.dark) .chip {
 		background: rgb(255 255 255 / 0.05);
 	}
-	.chip:hover {
-		border-color: rgb(230 57 70 / 0.45);
+	@media (hover: hover) and (pointer: fine) {
+		.chip:hover {
+			border-color: rgb(230 57 70 / 0.45);
+		}
 	}
 
 	.chip.future {

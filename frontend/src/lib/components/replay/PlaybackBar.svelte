@@ -228,8 +228,10 @@
 		flex: none;
 		transition: background 150ms ease, transform 120ms ease;
 	}
-	.btn-play:hover {
-		background: #C1272D;
+	@media (hover: hover) and (pointer: fine) {
+		.btn-play:hover {
+			background: #C1272D;
+		}
 	}
 	.btn-play:active {
 		transform: scale(0.94);
@@ -242,9 +244,11 @@
 		font-size: 0.7rem;
 		color: #737373;
 	}
-	.btn-step:hover {
-		color: #E63946;
-		background: rgb(230 57 70 / 0.1);
+	@media (hover: hover) and (pointer: fine) {
+		.btn-step:hover {
+			color: #E63946;
+			background: rgb(230 57 70 / 0.1);
+		}
 	}
 
 	.clock {
@@ -410,9 +414,16 @@
 		background: transparent;
 		transition: background 120ms ease, color 120ms ease;
 	}
-	.speeds button:hover {
-		color: #E63946;
-		background: rgb(230 57 70 / 0.08);
+	/* Hover only where a real pointer exists.
+	   On touch, a tap on an element with a :hover rule paints the hover state and
+	   swallows that first tap -- the speed only changed on the second one. Gating
+	   the rule behind `hover: hover` makes taps single-shot on phones while leaving
+	   mouse behaviour untouched. */
+	@media (hover: hover) and (pointer: fine) {
+		.speeds button:hover {
+			color: #E63946;
+			background: rgb(230 57 70 / 0.08);
+		}
 	}
 	.speeds button.on {
 		background: #E63946;

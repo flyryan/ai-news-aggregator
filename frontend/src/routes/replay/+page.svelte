@@ -623,8 +623,10 @@
 		align-items: center;
 		gap: 0.3rem;
 	}
-	.hint-btn:hover {
-		color: #E63946;
+	@media (hover: hover) and (pointer: fine) {
+		.hint-btn:hover {
+			color: #E63946;
+		}
 	}
 
 	.shortcuts {

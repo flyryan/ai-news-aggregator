@@ -130,6 +130,15 @@ export interface ReplayCall {
 	image_url?: string | null;
 	/** The prompt that produced `image_url`. Markdown-ish, ~5–6k chars. */
 	image_prompt?: string | null;
+	/**
+	 * Image calls only. `usage_measured` distinguishes "the provider reported token
+	 * counts" from "it reported nothing" — without it a zero cost is ambiguous
+	 * between a free call and an unmeasured one. `image_tokens` is the subset of
+	 * `output_tokens` billed at the image rate (~10× the text rate); the remainder
+	 * is the model's own thinking before it drew.
+	 */
+	usage_measured?: boolean;
+	image_tokens?: number;
 }
 
 export interface ReplayConcurrency {

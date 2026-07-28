@@ -11,7 +11,7 @@ import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -34,6 +34,23 @@ class ModelPricing(Enum):
     # Claude Haiku 4.5 pricing
     HAIKU_4_5_INPUT = 1.00
     HAIKU_4_5_OUTPUT = 5.00
+
+    # Gemini 3 Pro Image (Nano Banana Pro) — the hero illustrator.
+    #
+    # Three DIFFERENT rates apply to one response, which is why image cost cannot be
+    # computed the way an LLM call is. `usage.completion_tokens` bundles the image
+    # tokens with the model's own thinking tokens, and pricing the whole bundle at
+    # the image rate overstates a real call by ~22%.
+    #
+    #   input            $2/M    (text prompt, and 560 tok per reference image)
+    #   image output   $120/M    (1120 tok at 1K/2K => $0.134, 2000 tok at 4K => $0.24)
+    #   text/thinking   $12/M    (reasoning_tokens + text_tokens)
+    #
+    # Verified 2026-07-28 against a live generation: 1120 image tokens priced to
+    # $0.1344, matching Google's published $0.134 per 1K/2K image.
+    GEMINI_3_PRO_IMAGE_INPUT = 2.00
+    GEMINI_3_PRO_IMAGE_OUTPUT_IMAGE = 120.00
+    GEMINI_3_PRO_IMAGE_OUTPUT_TEXT = 12.00
 
 
 @dataclass
@@ -74,6 +91,67 @@ class CostBreakdown:
     @property
     def total_cost(self) -> float:
         return self.input_cost + self.output_cost + self.cache_write_cost + self.cache_hit_cost
+
+
+@dataclass
+class ImageCost:
+    """Cost of one image generation, split by the rate each token class is billed at."""
+
+    input_tokens: int = 0
+    image_tokens: int = 0
+    text_tokens: int = 0
+    input_cost: float = 0.0
+    image_cost: float = 0.0
+    text_cost: float = 0.0
+
+    @property
+    def total_cost(self) -> float:
+        return self.input_cost + self.image_cost + self.text_cost
+
+    @property
+    def total_tokens(self) -> int:
+        return self.input_tokens + self.image_tokens + self.text_tokens
+
+
+def price_image_usage(usage: Optional[Dict[str, Any]]) -> Optional[ImageCost]:
+    """Price a Gemini image response from its ``usage`` block.
+
+    Returns None when the provider reported nothing, which is the signal to render
+    "n/a" rather than a zero -- a zero would claim we measured a free call.
+
+    The split matters. ``completion_tokens`` bundles image tokens (billed at $120/M)
+    with the model's thinking tokens (billed at $12/M), so charging the bundle at the
+    image rate overstates a real call by roughly a fifth. When the provider gives us
+    the breakdown we use it; when it only gives a total we fall back to treating the
+    completion as image tokens, which is the conservative (higher) reading and is
+    flagged by ``text_tokens == 0``.
+    """
+    if not usage:
+        return None
+
+    def _int(value: Any) -> int:
+        return int(value) if isinstance(value, (int, float)) else 0
+
+    completion_details = usage.get("completion_tokens_details") or {}
+    input_tokens = _int(usage.get("prompt_tokens"))
+    completion_total = _int(usage.get("completion_tokens"))
+
+    image_tokens = _int(completion_details.get("image_tokens"))
+    text_tokens = _int(completion_details.get("reasoning_tokens")) + _int(
+        completion_details.get("text_tokens")
+    )
+    if not image_tokens and not text_tokens:
+        image_tokens = completion_total
+
+    mtok = 1_000_000
+    return ImageCost(
+        input_tokens=input_tokens,
+        image_tokens=image_tokens,
+        text_tokens=text_tokens,
+        input_cost=(input_tokens / mtok) * ModelPricing.GEMINI_3_PRO_IMAGE_INPUT.value,
+        image_cost=(image_tokens / mtok) * ModelPricing.GEMINI_3_PRO_IMAGE_OUTPUT_IMAGE.value,
+        text_cost=(text_tokens / mtok) * ModelPricing.GEMINI_3_PRO_IMAGE_OUTPUT_TEXT.value,
+    )
 
 
 class CostTracker:

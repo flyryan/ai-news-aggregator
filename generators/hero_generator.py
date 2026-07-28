@@ -17,6 +17,7 @@ import warnings
 from pathlib import Path
 from typing import Optional, List, Any, Dict, TYPE_CHECKING
 
+from agents.cost_tracker import price_image_usage
 from generators.image_optimizer import optimize_hero_image
 
 if TYPE_CHECKING:
@@ -313,12 +314,30 @@ Create a scene that represents these stories. You must include Topic 1 (the top 
             # Return relative URL path for web serving
             relative_url = f"/data/{date}/hero.webp"
 
-            logger.info(f"Hero image generated and optimized: {webp_path}")
+            # Token accounting, when the provider reported it. Priced separately from
+            # LLM calls because an image response bills three token classes at three
+            # different rates -- see agents.cost_tracker.price_image_usage.
+            cost = price_image_usage(response.usage)
+            if cost:
+                logger.info(
+                    f"Hero image cost: ${cost.total_cost:.4f} "
+                    f"({cost.image_tokens} image + {cost.text_tokens} thinking "
+                    f"+ {cost.input_tokens} input tokens)"
+                )
 
-            return {
+            result = {
                 "path": relative_url,
-                "prompt": instructions
+                "prompt": instructions,
             }
+            if cost:
+                result["usage"] = {
+                    "input_tokens": cost.input_tokens,
+                    "image_tokens": cost.image_tokens,
+                    "text_tokens": cost.text_tokens,
+                    "cost_usd": round(cost.total_cost, 6),
+                    "model": response.model,
+                }
+            return result
 
         except RuntimeError as e:
             # ImageClient raises RuntimeError for API errors
