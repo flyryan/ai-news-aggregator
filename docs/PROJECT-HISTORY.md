@@ -1,4 +1,8 @@
-# AI News Aggregator
+# AI News Aggregator — project history
+
+> Historical record of the v1.0 open-source scoping, kept for context on why the
+> project is shaped the way it is. For how things work today see `README.md` and
+> `CLAUDE.md`, which are the maintained references.
 
 ## What This Is
 
