@@ -177,7 +177,9 @@
 					<button
 						type="button"
 						class="call-chip is-complete"
-						class:failed={dc.outcome === 'failed' || dc.outcome === 'refused'}
+						class:failed={(dc.outcome === 'failed' || dc.outcome === 'refused') &&
+							!dc.recovered_by}
+						class:retried={!!dc.recovered_by}
 						style="--route: {providerColor(dc.provider_id)}"
 						on:click={() => onSelectCall(dc.id)}
 						title={isImageCall(dc)
@@ -198,7 +200,14 @@
 								{#if isImageCall(dc)}
 									<span class="state-tag done-tag">image</span>
 								{:else if dc.outcome !== 'ok'}
-									<span class="state-tag bad-tag">{dc.outcome}</span>
+									<!-- A failure that a later attempt recovered is not lost work.
+									     Saying only "failed" implied the batch never made it in. -->
+									<span
+										class="state-tag"
+										class:bad-tag={!dc.recovered_by}
+										class:retried-tag={dc.recovered_by}
+										>{dc.recovered_by ? 'retried' : dc.outcome}</span
+									>
 								{:else}
 									<span class="state-tag done-tag">{formatTokens(dc.output_tokens)} tok</span>
 								{/if}
@@ -585,12 +594,26 @@
 	.call-chip.is-complete.failed .chip-check {
 		color: #ef4444;
 	}
+	.call-chip.is-complete.retried {
+		border-color: color-mix(in srgb, #d97706 40%, transparent);
+	}
+	.call-chip.is-complete.retried .chip-check {
+		color: #d97706;
+	}
 	.state-tag.done-tag {
 		opacity: 0.7;
 	}
 	.state-tag.bad-tag {
 		color: #ef4444;
 		font-weight: 700;
+	}
+	/* Amber, not red: the attempt failed but the work landed on the retry. */
+	.state-tag.retried-tag {
+		color: #d97706;
+		font-weight: 700;
+	}
+	:global(.dark) .state-tag.retried-tag {
+		color: #fbbf24;
 	}
 
 	.more-btn {

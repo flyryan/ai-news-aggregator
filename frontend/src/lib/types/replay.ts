@@ -139,6 +139,18 @@ export interface ReplayCall {
 	 */
 	usage_measured?: boolean;
 	image_tokens?: number;
+	/**
+	 * Failed attempts only. The cost tracker records nothing for a call that never
+	 * returned a response, so its tokens are unknown — but it streamed real output
+	 * and was really billed. `billed: false` means "cost unknown", NOT "free"; the
+	 * UI must not render $0.00 for it.
+	 */
+	billed?: boolean;
+	error_type?: string | null;
+	/** Set on a failed attempt: the id of the retry that succeeded in its place. */
+	recovered_by?: string;
+	/** Set on a successful call that replaced an earlier failed attempt. */
+	recovers?: string;
 }
 
 export interface ReplayConcurrency {

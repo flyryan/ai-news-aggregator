@@ -301,10 +301,21 @@ class ReplayGenerator:
             caller = row.get("caller") or "unknown"
             identity = resolve_call(caller)
 
+            # Take the first span for this caller that actually *succeeded*.
+            #
+            # A failed attempt produces a span but no cost row, so naive positional
+            # pairing hands the failed span to the retry's cost row: the call then
+            # renders "failed" while carrying the successful attempt's tokens and
+            # cost. On 2026-07-28 that mislabelled five batches the pipeline had
+            # logged as 5/5 and 7/7 successful. Skipped spans are not discarded --
+            # they are emitted below as attempts in their own right.
             span: Optional[Dict[str, Any]] = None
             queue = recorded_by_caller.get(caller)
             if queue:
-                span = queue.pop(0)
+                for i, candidate in enumerate(queue):
+                    if (candidate.get("outcome") or "ok") not in ("failed", "refused"):
+                        span = queue.pop(i)
+                        break
 
             duration_ms = int(round(float(row.get("duration_seconds") or 0.0) * 1000))
             if span and span.get("end_ms") is not None:
@@ -372,6 +383,86 @@ class ReplayGenerator:
                     "has_stream": has_stream,
                 }
             )
+
+        # Attempts that produced no cost row.
+        #
+        # `record_call` only runs on a successful response (llm_client.py:1318,
+        # :1406), so a failed attempt is absent from the cost report entirely --
+        # even though it streamed real tokens and was really billed. On 2026-07-28
+        # the five failed batches emitted ~140k characters between them; that spend
+        # is missing from run.total_cost_usd and this generator cannot recover it,
+        # because the token counts only arrive on the response that never came.
+        #
+        # So these rows carry zero tokens and `billed: false` -- meaning "we know
+        # this cost something and we do not know how much", not "it was free". The
+        # UI must not render them as $0.00. Dropping them entirely (the old
+        # behaviour) was worse: a retried batch looked like one clean call, hiding
+        # both the failure and the recovery.
+        for caller, leftovers in recorded_by_caller.items():
+            identity = resolve_call(caller)
+            for span in leftovers:
+                if span.get("end_ms") is None:
+                    continue
+                end_ms = int(span["end_ms"])
+                start_ms = int(span.get("start_ms") or end_ms)
+                queued_ms = int(span.get("queued_ms") or start_ms)
+                context = span.get("context") or {}
+                deltas = span.get("deltas") or {}
+                calls.append(
+                    {
+                        "id": span.get("id") or f"c{len(calls) + 1:03d}",
+                        "agent_id": identity.agent_id,
+                        "phase_id": self._phase_for(start_ms, phases),
+                        "caller": caller,
+                        "task": identity.task,
+                        "role": identity.role,
+                        "worker": identity.worker,
+                        "queued_ms": queued_ms,
+                        "start_ms": start_ms,
+                        "first_token_ms": span.get("first_token_ms"),
+                        "end_ms": end_ms,
+                        "wait_ms": int(span.get("wait_ms") or max(0, start_ms - queued_ms)),
+                        "provider_id": context.get("provider_id") or "unknown",
+                        "model": context.get("provider_model") or "",
+                        "profile": context.get("analysis_profile") or "STANDARD",
+                        "effort": context.get("adaptive_effort") or "high",
+                        "input_tokens": 0,
+                        "output_tokens": 0,
+                        "cache_read_tokens": 0,
+                        "cost_usd": 0.0,
+                        "billed": False,
+                        "thinking_chars": int(span.get("thinking_chars") or 0),
+                        "text_chars": int(span.get("text_chars") or 0),
+                        "stream_events": int(span.get("delta_events") or 0),
+                        "stop_reason": span.get("stop_reason"),
+                        "outcome": span.get("outcome") or "failed",
+                        "error_type": span.get("error_type"),
+                        "attempt": int(context.get("attempt") or 1),
+                        "fallback_from": context.get("fallback_from"),
+                        "retry_reason": context.get("retry_reason"),
+                        "has_stream": bool(deltas.get("t")),
+                    }
+                )
+
+        # Link each failed attempt to the attempt that recovered it, so the UI can
+        # say "retried, succeeded" rather than leaving a bare red row that reads as
+        # lost data. A failure with no later success stays unlinked -- that one
+        # really did lose its batch.
+        by_caller: Dict[str, List[Dict[str, Any]]] = {}
+        for call in calls:
+            by_caller.setdefault(call["caller"], []).append(call)
+        for group in by_caller.values():
+            group.sort(key=lambda c: c["start_ms"])
+            for i, call in enumerate(group):
+                if call["outcome"] not in ("failed", "refused"):
+                    continue
+                successor = next(
+                    (s for s in group[i + 1:] if s["outcome"] not in ("failed", "refused")),
+                    None,
+                )
+                if successor is not None:
+                    call["recovered_by"] = successor["id"]
+                    successor["recovers"] = call["id"]
 
         calls.sort(key=lambda c: (c["start_ms"], c["id"]))
         return calls

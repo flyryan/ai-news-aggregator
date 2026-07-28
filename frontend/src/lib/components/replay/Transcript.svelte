@@ -277,8 +277,18 @@
 				<span class="role">{ROLE_LABELS[call.role] ?? call.role}</span>
 				{#if call.worker != null}<span class="worker">worker {call.worker}</span>{/if}
 				{#if call.outcome !== 'ok'}
-					<span class="outcome" style="--o: {OUTCOME_COLORS[call.outcome] ?? '#737373'}"
-						>{call.outcome}</span
+					<span
+						class="outcome"
+						style="--o: {call.recovered_by ? '#d97706' : (OUTCOME_COLORS[call.outcome] ?? '#737373')}"
+						title={call.recovered_by
+							? 'This attempt failed; a retry completed the work'
+							: undefined}
+						>{call.outcome}{call.recovered_by ? ' · retried' : ''}</span
+					>
+				{/if}
+				{#if call.recovers}
+					<span class="outcome" style="--o: #10b981" title="Completed work an earlier attempt failed to finish"
+						>retry of a failed attempt</span
 					>
 				{/if}
 				{#if call.fallback_from}
@@ -337,7 +347,28 @@
 				</dd>
 			</div>
 		{/if}
-		{#if !isImage}
+		{#if !isImage && call.billed === false}
+			<!-- The request never returned, so the cost tracker recorded nothing for it.
+			     But it streamed real output and was really billed — printing $0.00 here
+			     would claim it was free, which is the one thing we know it wasn't. -->
+			<div><dt>Effort</dt><dd>{call.effort}</dd></div>
+			<div>
+				<dt>Wrote</dt>
+				<dd>{call.text_chars.toLocaleString()} chars before failing</dd>
+			</div>
+			<div>
+				<dt>Tokens / cost</dt>
+				<dd
+					class="ts-unrecorded"
+					title="Token counts arrive with the response. This call never returned one, so its spend is real but unmeasured, and is not included in the run total."
+				>
+					billed, not measured
+				</dd>
+			</div>
+			{#if call.error_type}
+				<div><dt>Error</dt><dd>{call.error_type}</dd></div>
+			{/if}
+		{:else if !isImage}
 			<div><dt>Effort</dt><dd>{call.effort}</dd></div>
 			<div><dt>Input</dt><dd>{formatTokens(call.input_tokens)}</dd></div>
 			<div><dt>Output</dt><dd>{formatTokens(call.output_tokens)}</dd></div>
