@@ -21,6 +21,7 @@ from .base import (
 from .gatherers import NewsGatherer, ResearchGatherer, SocialGatherer, RedditGatherer, LinkFollower
 from .analyzers import NewsAnalyzer, ResearchAnalyzer, SocialAnalyzer, RedditAnalyzer
 from .cost_tracker import get_tracker, reset_tracker
+from .replay_recorder import get_recorder
 from .link_enricher import LinkEnricher
 from .ecosystem_context import EcosystemContextManager
 from .prompt_security import (
@@ -260,6 +261,10 @@ class MainOrchestrator:
         # Initialize cost tracking
         cost_tracker = reset_tracker()
         cost_tracker.start()
+
+        # Arm replay capture on the same origin as the cost tracker, so every
+        # timestamp in the replay is measured from the true start of the run.
+        get_recorder().begin_run(self.target_date)
 
         # Initialize phase tracker
         phases = PhaseTracker()

@@ -25,6 +25,7 @@ import httpx
 import anthropic
 
 from .cost_tracker import get_tracker
+from .replay_recorder import DELTA_TEXT, DELTA_THINKING, get_recorder
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -232,6 +233,10 @@ class AnthropicClient:
     This client wraps the Anthropic SDK to work with either:
     - Direct Anthropic API (x-api-key header authentication)
     - OpenAI-compatible proxies (Bearer token authentication)
+
+    Not instrumented for replay capture: only link_follower uses it, it has no
+    request logging or streaming path to observe, and the replay is built from
+    the async pipeline's calls.
     """
 
     def __init__(
@@ -987,11 +992,18 @@ class AsyncAnthropicClient:
         than 10 minutes").
 
         `progress`, when supplied, is updated in place as blocks arrive so the
-        heartbeat can report what the model is actually doing.
+        heartbeat can report what the model is actually doing. It also carries
+        `replay_call_id`, which is how the replay recorder attaches to this loop
+        without adding another parameter to the call chain.
         """
         async with self._client.messages.stream(**kwargs) as stream:
             if progress is None:
                 return await stream.get_final_message()
+
+            # Hoisted out of the loop: this runs once per token, so even a
+            # module-global lookup per event is worth avoiding.
+            recorder = get_recorder()
+            replay_call_id = progress.get("replay_call_id")
 
             async for event in stream:
                 etype = getattr(event, "type", None)
@@ -1006,9 +1018,17 @@ class AsyncAnthropicClient:
                     # final at message_delta, but text/thinking deltas give a
                     # live signal that generation is progressing.
                     if dtype == "text_delta":
-                        progress["text_chars"] = progress.get("text_chars", 0) + len(getattr(delta, "text", "") or "")
+                        chunk = getattr(delta, "text", "") or ""
+                        progress["text_chars"] = progress.get("text_chars", 0) + len(chunk)
+                        if replay_call_id:
+                            recorder.record_delta(replay_call_id, DELTA_TEXT, chunk)
                     elif dtype == "thinking_delta":
-                        progress["thinking_chars"] = progress.get("thinking_chars", 0) + len(getattr(delta, "thinking", "") or "")
+                        chunk = getattr(delta, "thinking", "") or ""
+                        progress["thinking_chars"] = progress.get("thinking_chars", 0) + len(chunk)
+                        if replay_call_id:
+                            recorder.record_delta(replay_call_id, DELTA_THINKING, chunk)
+                    # signature_delta is deliberately not recorded: it is an
+                    # opaque cryptographic blob with nothing to render.
                     progress["last_chunk_at"] = time.time()
                 elif etype == "message_delta":
                     usage = getattr(event, "usage", None)
@@ -1020,18 +1040,40 @@ class AsyncAnthropicClient:
 
     async def _create_message(self, request_context: Optional[Dict[str, Any]] = None, **kwargs):
         """Create a message under the optional global async LLM concurrency cap."""
+        # Replay capture is independent of LLM_LOG_REQUESTS: the two answer
+        # different questions (operator diagnostics vs. the published artifact),
+        # so turning request logging off must not silently produce an empty
+        # replay. Both branches below therefore open and close a replay span.
+        recorder = get_recorder()
+        replay_call_id = recorder.start_call(None, request_context)
+
         if not self.log_requests:
-            if self._request_semaphore is None:
-                return await self._stream_message(**kwargs)
-            async with self._request_semaphore:
-                return await self._stream_message(**kwargs)
+            # Without logging there is no heartbeat, so `progress` exists purely
+            # to carry the call id into the SSE loop -- and stays None when
+            # capture is off, preserving the original zero-overhead path.
+            progress = {"replay_call_id": replay_call_id} if replay_call_id else None
+            try:
+                if self._request_semaphore is None:
+                    recorder.mark_started(replay_call_id)
+                    response = await self._stream_message(progress=progress, **kwargs)
+                else:
+                    # Marked *after* acquisition so wait_ms measures real queue
+                    # time behind the semaphore rather than always reading zero.
+                    async with self._request_semaphore:
+                        recorder.mark_started(replay_call_id)
+                        response = await self._stream_message(progress=progress, **kwargs)
+            except BaseException as error:
+                recorder.finish_call(replay_call_id, error=error)
+                raise
+            recorder.finish_call(replay_call_id, response=response)
+            return response
 
         queued_at = time.time()
         request_id, _, _ = await self._register_queued_request(request_context)
         acquired = False
         started_at = queued_at
         heartbeat_task = None
-        progress: Dict[str, Any] = {}
+        progress: Dict[str, Any] = {"replay_call_id": replay_call_id}
 
         try:
             if self._request_semaphore is not None:
@@ -1039,6 +1081,7 @@ class AsyncAnthropicClient:
             acquired = True
             started_at = time.time()
             wait_seconds = await self._mark_request_started(request_id, request_context, queued_at)
+            recorder.mark_started(replay_call_id)
             heartbeat_task = self._start_heartbeat(request_id, request_context, started_at, progress)
             response = await self._stream_message(progress=progress, **kwargs)
             await self._mark_request_finished(
@@ -1048,8 +1091,10 @@ class AsyncAnthropicClient:
                 wait_seconds,
                 response=response,
             )
+            recorder.finish_call(replay_call_id, response=response)
             return response
         except BaseException as error:
+            recorder.finish_call(replay_call_id, error=error)
             if acquired:
                 await self._mark_request_finished(
                     request_id,

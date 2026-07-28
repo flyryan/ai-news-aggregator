@@ -29,7 +29,10 @@ sys.path.insert(0, os.path.dirname(__file__))
 from agents import MainOrchestrator
 from agents.config import load_config, ProviderConfig
 from agents.config.prompts import load_prompts, PromptAccessor
+from agents.cost_tracker import get_tracker
+from agents.replay_recorder import get_recorder
 from generators.json_generator import JSONGenerator
+from generators.replay_generator import generate_replay
 from generators.search_indexer import SearchIndexer
 from generators.feed_generator import FeedGenerator
 
@@ -132,6 +135,20 @@ async def run_pipeline(config_dir: str, data_dir: str, web_dir: str, target_date
 
         json_generator = JSONGenerator(web_dir)
         json_generator.generate_from_orchestrator_result(result.to_dict())
+
+        # Generate the LLM replay artifacts. Best-effort by design: generate_replay
+        # swallows its own failures, so a broken replay never costs us a report.
+        logger.info("=" * 60)
+        logger.info("PHASE 6.2: LLM REPLAY GENERATION")
+        logger.info("=" * 60)
+
+        generate_replay(
+            date=result.date,
+            web_dir=web_dir,
+            cost_report=get_tracker().get_json_report(),
+            orchestrator_result=result.to_dict(),
+            recorder_snapshot=get_recorder().snapshot(),
+        )
 
         # Generate RSS/Atom feeds
         logger.info("=" * 60)

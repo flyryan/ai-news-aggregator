@@ -132,6 +132,12 @@ class PhaseTracker:
                 'name': p.name,
                 'status': p.status,
                 'duration': round(p.duration, 2),
+                # Absolute epoch bounds are kept alongside duration so a run can
+                # be reconstructed later (the replay generator places each LLM
+                # call in its phase by containment). Without them, a reloaded
+                # run can only assume phases ran back-to-back.
+                'start_time': p.start_time or None,
+                'end_time': p.end_time or None,
                 'error': p.error,
                 'details': p.details,
             }
