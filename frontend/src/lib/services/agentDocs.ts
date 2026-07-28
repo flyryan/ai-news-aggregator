@@ -52,8 +52,9 @@ const CATEGORY_LABEL: Record<string, string> = {
 const SCOUT_DOCS: Record<string, AgentDoc> = {
 	news_gatherer: {
 		summary:
-			'Pulls the RSS wire — company blogs, product announcements, trade press — and chases links that surfaced in social posts to see if the underlying article is worth reading.',
-		input: 'RSS feeds listed in config/rss_feeds.txt, plus candidate URLs handed over by the social scout.',
+			'Pulls the RSS wire — company blogs, product announcements, trade press — and can follow links found in social posts to read the underlying article.',
+		input:
+			'The feeds listed in config/rss_feeds.txt, plus any followable URLs the social scout turned up.',
 		output: 'Articles with title, source, publication time and extracted body text.',
 		matters:
 			'This is where product launches and company news enter the pipeline. Without it the report is community chatter with no primary sources.',
@@ -61,19 +62,20 @@ const SCOUT_DOCS: Record<string, AgentDoc> = {
 			{
 				role: 'filter',
 				label: 'Link triage',
-				asks: 'Given a batch of URLs found in social posts, decide which are worth the cost of fetching and reading in full.',
-				effort: 'high — a cheap yes/no on each URL, run before any expensive work'
+				asks: 'Shown a URL and the post it appeared in — never the page itself — decide whether it looks like a real article worth fetching.',
+				effort: 'high — a yes/no per URL, run before anything is downloaded'
 			}
 		],
-		note: 'The only gatherer that calls the model. The other three are pure collection.'
+		note: 'The only scout that calls a model, and in practice it rarely gets the chance: Twitter wraps every outbound link in t.co, which is skipped as a redirector, so almost nothing reaches the triage step. Runs after the other three, because it needs their links.'
 	},
 	research_gatherer: {
 		summary:
-			'Queries the arXiv API for new preprints and pulls research blogs and alignment forums.',
-		input: 'arXiv listings for the coverage window, plus the feeds in config/research_feeds.txt.',
-		output: 'Papers and posts with authors, abstract and category.',
+			"Reads the day's new arXiv preprints across seven AI categories, and pulls research blogs and alignment forums.",
+		input:
+			'arXiv announcement feeds for cs.AI, cs.LG, cs.CL, cs.CV, cs.NE, cs.RO and stat.ML, plus the feeds in config/research_feeds.txt.',
+		output: 'Papers and posts with authors, abstract and category — typically the largest haul of the day.',
 		matters: 'The only route by which new research reaches the report.',
-		note: 'arXiv only publishes on weekdays, so a weekend report legitimately has no new papers. Only new and cross-listed submissions are collected — replacements are skipped.'
+		note: 'Only new and cross-listed submissions count; revisions of existing papers are skipped. A weekend report has no arXiv papers at all, and Monday collects a three-day catch-up. LessWrong needs a different route than the other blogs and is the most failure-prone source here.'
 	},
 	social_gatherer: {
 		summary:
@@ -82,17 +84,17 @@ const SCOUT_DOCS: Record<string, AgentDoc> = {
 			'Handles listed in config/twitter_accounts.txt, config/bluesky_accounts.txt and config/mastodon_accounts.txt.',
 		output: 'Posts with author, platform and engagement figures — plus any links they contain, handed to the news scout.',
 		matters:
-			'Catches reaction and context that never becomes an article, and surfaces links to stories the RSS wire missed.',
-		note: 'Tracks each platform separately, so one being down degrades that platform rather than the whole category.'
+			'Catches reaction and context that never becomes an article. Twitter supplies the overwhelming majority of what lands here.',
+		note: 'The only scout that reports per-platform status, so one platform failing degrades that platform rather than the whole category. Makes no model calls — collection only. Twitter is the one paid source in this pipeline besides Reddit.'
 	},
 	reddit_gatherer: {
 		summary:
 			'Reads the subreddits where practitioners argue, and pulls the discussion underneath the headline as well as the post itself.',
 		input: 'Subreddits listed in config/reddit_subreddits.txt, fetched through the ScrapeCreators API.',
-		output: 'Posts with score and comment count; the highest-signal ones also carry a digest of their top comments.',
+		output: 'Posts with score and comment count; the highest-scoring ones also carry a digest of their top comments.',
 		matters:
-			"Community reaction is often the first place a claim gets checked. Without it the report has announcements and no scrutiny of them.",
-		note: "Reddit's free JSON endpoint no longer works for servers, so this runs through a paid API with a hard per-run call budget."
+			'Community reaction is often the first place a claim gets checked. Without it the report has announcements and no scrutiny of them.',
+		note: "Reddit's free endpoint no longer works for servers, so this runs through a paid API with a hard per-run call budget. Only the top posts per subreddit are worth a second call for their comments. Makes no model calls — the comment digest is ranking and truncation, not summarization."
 	}
 };
 

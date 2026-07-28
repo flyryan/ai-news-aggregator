@@ -138,31 +138,10 @@ const nextId = () => `c${String(seq++).padStart(3, '0')}`;
 	});
 });
 
-// Research and Social gatherers each do one summarisation pass over what they pulled.
-[
-	{ agent: 'research_gatherer', at: 132_000, dur: 34_000, provider: 'gcp', task: 'Condense 441 arXiv abstracts', inp: 186_000, out: 4200 },
-	{ agent: 'social_gatherer', at: 88_000, dur: 27_500, provider: 'anthropic', task: 'Cluster 226 posts by thread', inp: 74_000, out: 2600 },
-	{ agent: 'reddit_gatherer', at: 156_000, dur: 22_000, provider: 'aws', task: 'Digest 148 comment threads', inp: 96_000, out: 3100 }
-].forEach((g) => {
-	seeds.push({
-		id: nextId(),
-		agent_id: g.agent,
-		phase_id: 'phase-1',
-		caller: `${g.agent}.summarize`,
-		task: g.task,
-		role: 'map',
-		queued_ms: g.at,
-		wait_ms: 220,
-		ttft_ms: 4800,
-		dur_ms: g.dur,
-		provider_id: g.provider,
-		profile: 'QUICK',
-		effort: 'high',
-		input_tokens: g.inp,
-		output_tokens: g.out,
-		thinking_chars: 0
-	});
-});
+// Only the News scout ever calls a model in Phase 1, via the link follower. The
+// research, social and reddit scouts are pure collection -- earlier versions of
+// this fixture invented `*_gatherer.summarize` calls for them, which made the demo
+// disagree with every real run.
 
 // News runs a pre-filter first.
 seeds.push({
