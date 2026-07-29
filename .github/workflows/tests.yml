@@ -38,6 +38,8 @@ jobs:
         run: python3 -m unittest tests.extract_json_str_test -v
       - name: No unverified reset to a remote ref (CWE-345, 2026-07-29)
         run: python3 -m unittest tests.deploy_signature_gate_test -v
+      - name: Source anomaly detector finds the known outages (2026-07-29)
+        run: python3 -m unittest tests.source_anomaly_test -v
 
   hero-retry:
     name: Hero image retry-window guard

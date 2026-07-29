@@ -490,6 +490,29 @@ jobs:
             exit 1
           fi
 
+      # Silent-degradation check (2026-07-29). The alert below fires only when the
+      # JOB fails. This fires when the job SUCCEEDS and publishes bad data -- arXiv
+      # returned zero on three consecutive Mondays (06-22, 06-29, 07-06) while every
+      # run stayed green and collection_status said "success". Never fails the job:
+      # the report is live, and a false red here would make the real alert
+      # indistinguishable from noise.
+      - name: Check for silently degraded sources
+        if: success() && steps.schedule_gate.outputs.should_run == 'true'
+        continue-on-error: true
+        shell: bash
+        env:
+          PIPELINE_ALERT_TOKEN: ${{ secrets.PIPELINE_ALERT_TOKEN }}
+          PIPELINE_ALERT_URL: ${{ vars.PIPELINE_ALERT_URL || 'https://flybotwebhook.duffplex.com/alert/pipeline' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TARGET_DATE_INPUT: ${{ inputs.target_date }}
+        run: |
+          set -uo pipefail
+          report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
+          # Exits 1 by design when it finds something; that is a finding, not a
+          # job failure.
+          python3 scripts/check_source_anomalies.py \
+            --web-dir ./web --date "$report_date" --alert || true
+
       # Proactive failure alert (2026-06-21). Fires on ANY failure of a run that
       # was supposed to publish (RED synthesis, publish-gate revert, or the
       # commit-landed assertion above). POSTs to the graph-webhooks alert ingress
