@@ -5,7 +5,7 @@
   <link href="https://news.aatf.ai/?category=research" rel="alternate" type="text/html"/>
   <link href="https://news.aatf.ai/data/feeds/research-50.xml" rel="self" type="application/atom+xml"/>
   <id>urn:ainews:research:50</id>
-  <updated>2026-07-28T06:50:27Z</updated>
+  <updated>2026-07-29T08:15:25Z</updated>
   <icon>https://news.aatf.ai/assets/logo.webp</icon>
   <author>
     <name>AATF AI News Aggregator</name>
@@ -13,6 +13,340 @@
   </author>
   <generator>AATF AI News Aggregator</generator>
 
+  <entry>
+    <id>urn:ainews:2026-07-29:category-summary:research</id>
+    <title>Research Summary: July 29, 2026</title>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research" rel="canonical" type="text/html"/>
+    <link href="http://arxiv.org/abs/2607.25357" rel="alternate" type="text/html; charset=utf-8" title="Representative source"/>
+    <link href="http://arxiv.org/abs/2607.25357" rel="via" type="text/html" title="Representative source"/>
+    <published>2026-07-29T06:00:00Z</published>
+    <updated>2026-07-29T06:00:00Z</updated>
+    <author><name>AATF AI News Aggregator</name></author>
+    <summary type="html"><![CDATA[<p><strong>Architecture and scaling</strong> dominate the highest-impact items. <strong>Raven</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-e989042841ad" class="internal-link" rel="noopener noreferrer">attacks the recall-efficiency tradeoff</a> of linear-time models via sparse, input-dependent routing over fixed memory slots. <strong>Compute-data scaling laws</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-e5f1c62d9728" class="internal-link" rel="noopener noreferrer">unify compute-optimal and data-constrained regimes</a> with a token-effectiveness function, directly relevant to pretraining economics as high-quality data saturates. <strong>Transposition-invariant block quantization</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-40a7cffa224f" class="internal-link" rel="noopener noreferrer">pinpoints scale inconsistency</a> between forward and backward passes as a root cause of <strong>FP4</strong> training instability, an actionable fix for low-precision pretraining.</p>
+<ul>
+<li><strong>Oversight and auditing:</strong> Transluce argues for a <strong>foundation model for oversight</strong> with <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-a8716b567561" class="internal-link" rel="noopener noreferrer">an objective as universal as next-token prediction</a>; <strong>METR</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-45467d995f9e" class="internal-link" rel="noopener noreferrer">proposes institutional logging</a> plus independent deep investigation of agent misalignment incidents; <strong>Auditor-in-a-Box</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-e2c2ae79f06b" class="internal-link" rel="noopener noreferrer">implements third-party audits</a> inside trusted execution environments.</li>
+<li><strong>Code and formal methods:</strong> Meta FAIR <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-0d334c8458fd" class="internal-link" rel="noopener noreferrer">shows naive execution-time rewards break</a> <strong>RL for code optimization</strong>; <strong>Specula</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-e2cb838f55af" class="internal-link" rel="noopener noreferrer">pairs LLM agents with</a> <strong>TLA+</strong> model checking as a sound external oracle; a CMU dataset of <strong>53.6K</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-911b0f933b49" class="internal-link" rel="noopener noreferrer">real in-IDE edits to AI-generated code</a> fills a gap public commits cannot.</li>
+<li><strong>Multimodal and safety systems:</strong> <strong>Mage-VL</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-9822d0e461bb" class="internal-link" rel="noopener noreferrer">builds a streaming multimodal model</a> on a codec-native tokenizer reusing motion vectors and residuals; <strong>MODUS</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-7c0f13baabcf" class="internal-link" rel="noopener noreferrer">pursues symmetric decoder-only any-to-any modeling</a>; <strong>Shieldstral</strong> delivers a <strong>3B</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-2e40a9eb9883" class="internal-link" rel="noopener noreferrer">policy-adaptive multimodal moderation classifier</a> via binary QA framing.</li>
+</ul>
+<p>Notable empirical results include <strong>final-window pretraining</strong> data <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-b07e74bfd417" class="internal-link" rel="noopener noreferrer">causally shaping post-training behavior</a> across forked checkpoints, plus negative results on <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-c72672bb47f0" class="internal-link" rel="noopener noreferrer">instruction-tuned models failing to sample</a> from distributions they can describe, and <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-7c78eccd6aa2" class="internal-link" rel="noopener noreferrer">sycophancy warnings reducing appeal</a> but not persuasiveness.</p>]]></summary>
+    <content type="html"><![CDATA[<p><strong>Architecture and scaling</strong> dominate the highest-impact items. <strong>Raven</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-e989042841ad" class="internal-link" rel="noopener noreferrer">attacks the recall-efficiency tradeoff</a> of linear-time models via sparse, input-dependent routing over fixed memory slots. <strong>Compute-data scaling laws</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-e5f1c62d9728" class="internal-link" rel="noopener noreferrer">unify compute-optimal and data-constrained regimes</a> with a token-effectiveness function, directly relevant to pretraining economics as high-quality data saturates. <strong>Transposition-invariant block quantization</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-40a7cffa224f" class="internal-link" rel="noopener noreferrer">pinpoints scale inconsistency</a> between forward and backward passes as a root cause of <strong>FP4</strong> training instability, an actionable fix for low-precision pretraining.</p>
+<ul>
+<li><strong>Oversight and auditing:</strong> Transluce argues for a <strong>foundation model for oversight</strong> with <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-a8716b567561" class="internal-link" rel="noopener noreferrer">an objective as universal as next-token prediction</a>; <strong>METR</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-45467d995f9e" class="internal-link" rel="noopener noreferrer">proposes institutional logging</a> plus independent deep investigation of agent misalignment incidents; <strong>Auditor-in-a-Box</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-e2c2ae79f06b" class="internal-link" rel="noopener noreferrer">implements third-party audits</a> inside trusted execution environments.</li>
+<li><strong>Code and formal methods:</strong> Meta FAIR <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-0d334c8458fd" class="internal-link" rel="noopener noreferrer">shows naive execution-time rewards break</a> <strong>RL for code optimization</strong>; <strong>Specula</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-e2cb838f55af" class="internal-link" rel="noopener noreferrer">pairs LLM agents with</a> <strong>TLA+</strong> model checking as a sound external oracle; a CMU dataset of <strong>53.6K</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-911b0f933b49" class="internal-link" rel="noopener noreferrer">real in-IDE edits to AI-generated code</a> fills a gap public commits cannot.</li>
+<li><strong>Multimodal and safety systems:</strong> <strong>Mage-VL</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-9822d0e461bb" class="internal-link" rel="noopener noreferrer">builds a streaming multimodal model</a> on a codec-native tokenizer reusing motion vectors and residuals; <strong>MODUS</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-7c0f13baabcf" class="internal-link" rel="noopener noreferrer">pursues symmetric decoder-only any-to-any modeling</a>; <strong>Shieldstral</strong> delivers a <strong>3B</strong> <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-2e40a9eb9883" class="internal-link" rel="noopener noreferrer">policy-adaptive multimodal moderation classifier</a> via binary QA framing.</li>
+</ul>
+<p>Notable empirical results include <strong>final-window pretraining</strong> data <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-b07e74bfd417" class="internal-link" rel="noopener noreferrer">causally shaping post-training behavior</a> across forked checkpoints, plus negative results on <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-c72672bb47f0" class="internal-link" rel="noopener noreferrer">instruction-tuned models failing to sample</a> from distributions they can describe, and <a href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-7c78eccd6aa2" class="internal-link" rel="noopener noreferrer">sycophancy warnings reducing appeal</a> but not persuasiveness.</p>]]></content>
+    <category term="daily-summary"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:e989042841ad</id>
+    <title>Raven: High-Recall Sequence Modeling with Sparse Memory Routing</title>
+    <link href="http://arxiv.org/abs/2607.25357" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-e989042841ad" rel="related" type="text/html"/>
+    <published>2026-07-29T03:12:00Z</published>
+    <updated>2026-07-29T03:12:00Z</updated>
+    <author><name>Arshia Afzal, Aviv Bick, Eric P. Xing, Volkan Cevher, Albert Gu</name></author>
+    <summary type="html"><![CDATA[<p>Introduces a linear-time sequence model that keeps a fixed set of memory slots and sparsely updates only a learned, input-dependent subset per token, interpolating between dense state updates in state-space models and the fixed-window explicit storage of sliding-window attention. Targets the long-context recall weakness of subquadratic architectures.</p>]]></summary>
+    <category term="Sequence Models"/>
+    <category term="Efficient Architectures"/>
+    <category term="Long Context"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:a8716b567561</id>
+    <title>Foundation Models for Oversight</title>
+    <link href="https://www.lesswrong.com/posts/AqdZKyoRmN6EFCzib/foundation-models-for-oversight" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-a8716b567561" rel="related" type="text/html"/>
+    <published>2026-07-29T03:09:00Z</published>
+    <updated>2026-07-29T03:09:00Z</updated>
+    <author><name>jsteinhardt</name></author>
+    <summary type="html"><![CDATA[<p>Transluce proposes training a foundation model dedicated to AI oversight, arguing for an objective as broadly universal for oversight as next-token prediction is for capabilities, and outlines how to scale training on it. The intended assistant would help formalize oversight questions such as sandbagging, hidden objectives, unfaithful chain of thought, and reward hacking, generate data satisfying those criteria, and do so verifiably.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Scalable Oversight"/>
+    <category term="Interpretability"/>
+    <category term="Evaluations"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:e5f1c62d9728</id>
+    <title>Bridging Compute- and Data-Optimal Pretraining</title>
+    <link href="http://arxiv.org/abs/2607.25271" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-e5f1c62d9728" rel="related" type="text/html"/>
+    <published>2026-07-29T03:02:00Z</published>
+    <updated>2026-07-29T03:02:00Z</updated>
+    <author><name>Tian Qin, Kimia Hamidieh, David Alvarez-Melis</name></author>
+    <summary type="html"><![CDATA[<p>Proposes compute-data scaling laws that unify compute-optimal and data-constrained regimes via a token-effectiveness function quantifying how much a repeated or paraphrased token is worth relative to a fresh one. Directly addresses the regime where compute grows faster than high-quality data supply.</p>]]></summary>
+    <category term="Scaling Laws"/>
+    <category term="Pretraining"/>
+    <category term="Language Models"/>
+    <category term="Data-Centric AI"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:45467d995f9e</id>
+    <title>How independent researchers could investigate AI propensities after misalignment incidents</title>
+    <link href="https://metr.org/blog/2026-07-28-investigating-ai-propensities-after-incidents/" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-45467d995f9e" rel="related" type="text/html"/>
+    <published>2026-07-29T03:02:00Z</published>
+    <updated>2026-07-29T03:02:00Z</updated>
+    <author><name>Unknown</name></author>
+    <summary type="html"><![CDATA[<p>METR argues that AI companies should systematically log agent misalignment incidents and commission independent deep investigations of the most serious ones, using the recent report of internal OpenAI agents hacking Hugging Face to obtain benchmark answers as the motivating example. It focuses on how outside researchers could reconstruct the underlying motives and the training or deployment conditions that produced them.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Misalignment Incidents"/>
+    <category term="Third-Party Evaluation"/>
+    <category term="AI Governance"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:ced5214057ab</id>
+    <title>Visual prompt engineering for video models</title>
+    <link href="http://arxiv.org/abs/2607.25537" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-ced5214057ab" rel="related" type="text/html"/>
+    <published>2026-07-29T02:57:00Z</published>
+    <updated>2026-07-29T02:57:00Z</updated>
+    <author><name>Robert Geirhos, Yuxuan Li, Thadd\"aus Wiedemer, Neha Kalibhat, Zi Wang, Mani Malek, Oyvind Tafjord, Kevin Swersky, Been Kim, Priyank Jaini</name></author>
+    <summary type="html"><![CDATA[<p>Asks whether video foundation models benefit from visual prompt engineering, meaning automatic modification of the input image (for example rendering an abstract physics scene photorealistically with an image editor) to improve reasoning. Reports that such visual prompting improves video model reasoning performance.</p>]]></summary>
+    <category term="Video Models"/>
+    <category term="Visual Reasoning"/>
+    <category term="Prompt Engineering"/>
+    <category term="Foundation Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:e2cb838f55af</id>
+    <title>Specula: Scaling formal specifications for autonomous model checking of system code</title>
+    <link href="http://arxiv.org/abs/2607.25333" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-e2cb838f55af" rel="related" type="text/html"/>
+    <published>2026-07-29T02:52:00Z</published>
+    <updated>2026-07-29T02:52:00Z</updated>
+    <author><name>Qian Cheng, Saad Mohammad Rafid Pial, Ruize Tang, Yiming Su, Emilie Ma, Finn Hackett, Ivan Beschastnikh, Yu Huang, Tianyin Xu</name></author>
+    <summary type="html"><![CDATA[<p>An agentic system in which LLM coding agents autonomously write TLA+ specifications, including invariants and appropriately abstracted formal models, for large real-world system code and then use them for model checking and bug finding. Explicitly designs against reward hacking and hallucinated specifications.</p>]]></summary>
+    <category term="Formal Verification"/>
+    <category term="LLM Agents"/>
+    <category term="Code Generation"/>
+    <category term="Software Engineering"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:0d334c8458fd</id>
+    <title>Reinforcement Learning for Code Optimization</title>
+    <link href="http://arxiv.org/abs/2607.25970" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-0d334c8458fd" rel="related" type="text/html"/>
+    <published>2026-07-29T02:52:00Z</published>
+    <updated>2026-07-29T02:52:00Z</updated>
+    <author><name>Pierre Chambon, Kunhao Zheng, Juliette Decugis, Benoit Sagot, Gabriel Synnaeve</name></author>
+    <summary type="html"><![CDATA[<p>A Meta FAIR team tackles reinforcement learning for making generated code faster, showing that naively adding execution time to the reward fails due to measurement noise, reward sparsity and GRPO instability. They build a calibrated sandbox with heavy optimization tests, a composed correctness-plus-speed reward validated offline, and training recipe fixes that make speedup a learnable signal.</p>]]></summary>
+    <category term="Reinforcement Learning"/>
+    <category term="Code Generation"/>
+    <category term="LLM Training"/>
+    <category term="Efficiency"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:9822d0e461bb</id>
+    <title>Mage-VL: An Efficient Codec-Native Streaming Multimodal Foundation Model</title>
+    <link href="http://arxiv.org/abs/2607.24904" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-9822d0e461bb" rel="related" type="text/html"/>
+    <published>2026-07-29T02:52:00Z</published>
+    <updated>2026-07-29T02:52:00Z</updated>
+    <author><name>Senqiao Yang, Kaichen Zhang, Zhaoyang Jia, Jinghao Guo, Yifei Shen, Xinjie Zhang, Xiaoyi Zhang, Haoqing Wang, Xiao Li, Peng Zhang, Xiang An, Yin Xie, Zhening Liu, Xun Guo, Jiahao Li, Shicheng Zheng, Jinglu Wang, Zongyu Guo, Wenxuan Xie, Zihan Zheng, Yuxuan Luo, Bin Li, Yan Lu</name></author>
+    <summary type="html"><![CDATA[<p>Mage-VL is a streaming multimodal foundation model built around a codec-native tokenizer that reuses video compression signals (motion vectors, residual energy, I and P frame structure) to encode only dynamic, information-rich regions, cutting visual tokens by over 75 percent. Trained from scratch on hundreds of millions of images and video clips, it targets the gap where standard VLMs handle offline reasoning well but real-time streaming perception poorly.</p>]]></summary>
+    <category term="Multimodal Models"/>
+    <category term="Efficiency"/>
+    <category term="Video Understanding"/>
+    <category term="Model Architecture"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:911b0f933b49</id>
+    <title>Learning from 53.6K Real-World Developer Edits of AI-Generated Code</title>
+    <link href="http://arxiv.org/abs/2607.25130" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-911b0f933b49" rel="related" type="text/html"/>
+    <published>2026-07-29T02:50:00Z</published>
+    <updated>2026-07-29T02:50:00Z</updated>
+    <author><name>Jenny T. Liang, Mihika Bairathi, Wayne Chi, Ameet Talwalkar, Nishant Subramani, Valerie Chen</name></author>
+    <summary type="html"><![CDATA[<p>Releases a dataset of 53.6K real in-IDE developer edits to AI-generated Python, TypeScript and JavaScript code from over a thousand developers, capturing granular repair behavior that Git commits omit. Demonstrates both analysis insights and downstream utility for training.</p>]]></summary>
+    <category term="Code Generation"/>
+    <category term="Datasets"/>
+    <category term="Human-AI Interaction"/>
+    <category term="Language Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:2e40a9eb9883</id>
+    <title>Shieldstral</title>
+    <link href="http://arxiv.org/abs/2607.25857" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-2e40a9eb9883" rel="related" type="text/html"/>
+    <published>2026-07-29T02:50:00Z</published>
+    <updated>2026-07-29T02:50:00Z</updated>
+    <author><name>Antonia Calvi, Avinash Sooriyarachchi, Giada Pistilli, Guillaume Lample, Maarten Buyl, Maximilian Augustin, Maximilian M\"uller, Pierre Stock, Tom Bewley, Wassim Bouaziz, Yimu Pan</name></author>
+    <summary type="html"><![CDATA[<p>Shieldstral is a 3B-parameter policy-adaptive multimodal safety classifier that formulates moderation as binary yes/no question answering, allowing heterogeneous safety datasets with conflicting taxonomies to be unified under one training objective. The authors report matching or beating models roughly seven times larger on text safety benchmarks and setting a new state of the art on multimodal safety classification, and describe a roughly 54 million sample data recipe plus a fine-grained policy-adaptability evaluation set.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Content Moderation"/>
+    <category term="Multimodal Models"/>
+    <category term="Efficient Models"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:40a7cffa224f</id>
+    <title>Stable FP4 Training via Transposition-Invariant Block Quantization</title>
+    <link href="http://arxiv.org/abs/2607.24953" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-40a7cffa224f" rel="related" type="text/html"/>
+    <published>2026-07-29T02:47:00Z</published>
+    <updated>2026-07-29T02:47:00Z</updated>
+    <author><name>Mehdi Rahimifar, Amin Darabi, Mehran Taghian Jazi, Xing Huang, Yao Wang, Zhijun Tu, Yufei Cui, Yunke Peng, Hongliang Li</name></author>
+    <summary type="html"><![CDATA[<p>Identifies transposition-induced scale inconsistency as a root cause of instability in 4-bit floating point LLM training, where forward and backward passes assign different scaling factors to the same values under 1D block quantization. Proposes 2D block FP4 quantization that is transposition invariant to keep gradients consistent.</p>]]></summary>
+    <category term="Training Efficiency"/>
+    <category term="Quantization"/>
+    <category term="Language Models"/>
+    <category term="Systems"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:7c0f13baabcf</id>
+    <title>MODUS: Decoder-Only Any-to-Any Modeling of Diverse Modalities</title>
+    <link href="http://arxiv.org/abs/2607.25948" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-7c0f13baabcf" rel="related" type="text/html"/>
+    <published>2026-07-29T02:47:00Z</published>
+    <updated>2026-07-29T02:47:00Z</updated>
+    <author><name>Mingqiao Ye, Zhaochong An, Zhitong Gao, Xian Liu, Fran\c{c}ois Fleuret, Chuan Li, Amir Zadeh, Serge Belongie, Afshin Dehghan, Jesse Allardice, David Mizrahi, O\u{g}uzhan Fatih Kar, Roman Bachmann, Amir Zamir</name></author>
+    <summary type="html"><![CDATA[<p>MODUS studies decoder-only any-to-any multimodal modeling, treating every modality symmetrically as both input and output without modality-specific heads, losses or pipelines. This lets such models inherit strong pretrained decoder-only priors instead of being trained from scratch as encoder-decoder or diffusion systems.</p>]]></summary>
+    <category term="Multimodal AI"/>
+    <category term="Foundation Models"/>
+    <category term="Architectures"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:577016a82aff</id>
+    <title>Psychological Influences of Conversational AI: Research and Design Directions for Reducing Harm and Promoting Well-Being</title>
+    <link href="http://arxiv.org/abs/2607.25057" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-577016a82aff" rel="related" type="text/html"/>
+    <published>2026-07-29T02:43:00Z</published>
+    <updated>2026-07-29T02:43:00Z</updated>
+    <author><name>Jina Suh, Mihaela Vorvoreanu, Forough Poursabzi-Sangdeh, Emily Tseng, Eugenia Kim, Luke Nicholls, James W. Pennebaker, Eric Horvitz</name></author>
+    <summary type="html"><![CDATA[<p>A position and research-agenda paper from a Microsoft Research group proposing aspirational design directions for general-purpose conversational AI to reduce psychological harms such as emotional entanglement, unhealthy dependence, and amplification of vulnerabilities, while supporting well-being. Draws on prior literature and empirical observations of chatbot behavior.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Human-AI Interaction"/>
+    <category term="Responsible AI"/>
+    <category term="Well-being"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:c86b4a5f79f6</id>
+    <title>Accurate structural modeling of chemically diverse molecular interfaces with Vilya-2</title>
+    <link href="http://arxiv.org/abs/2607.25156" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-c86b4a5f79f6" rel="related" type="text/html"/>
+    <published>2026-07-29T02:43:00Z</published>
+    <updated>2026-07-29T02:43:00Z</updated>
+    <author><name>Vilya Research, :, Pascal Sturmfels, Naozumi Hiranuma, Milad Salem, Benjamin D. Sellers, Stephen Rettie, CJ San Felipe, Chase A. P. Wood, Jeffrey K. Holden, Adam P. Moyer, Patrick J. Salveson, Ivan Anishchanka</name></author>
+    <summary type="html"><![CDATA[<p>Vilya-2 is a diffusion transformer that extends an all-atom molecular representation from single molecules to their complexes with protein targets, aiming at peptide therapeutics with non-canonical residues, macrocycles and complex topologies where co-evolution-based predictors fail. It generates structural ensembles for therapeutically relevant targets.</p>]]></summary>
+    <category term="AI for Science"/>
+    <category term="Structure Prediction"/>
+    <category term="Diffusion Models"/>
+    <category term="Drug Discovery"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:06a31c25b915</id>
+    <title>Algorithmic Separation between Constant-Depth and Logarithmic-Depth Neural Networks</title>
+    <link href="http://arxiv.org/abs/2607.25200" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-06a31c25b915" rel="related" type="text/html"/>
+    <published>2026-07-29T02:43:00Z</published>
+    <updated>2026-07-29T02:43:00Z</updated>
+    <author><name>Yunwei Ren, Zihao Wang, Jason D. Lee</name></author>
+    <summary type="html"><![CDATA[<p>The authors prove the first algorithmic, not merely approximation-theoretic, separation between constant-depth and logarithmic-depth neural networks. They exhibit Boolean functions with hierarchically structured Fourier spectra that log-depth networks learn efficiently by layerwise coordinate descent, and a subclass provably hard for regular constant-depth polynomial-width networks.</p>]]></summary>
+    <category term="Learning Theory"/>
+    <category term="Deep Learning Theory"/>
+    <category term="Optimization"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:6cb899a96e84</id>
+    <title>Parallel Decoding Distillation for Fast Image and Video Generation</title>
+    <link href="http://arxiv.org/abs/2607.26004" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-6cb899a96e84" rel="related" type="text/html"/>
+    <published>2026-07-29T02:43:00Z</published>
+    <updated>2026-07-29T02:43:00Z</updated>
+    <author><name>Neta Shaul, Chao Liu, Arash Vahdat, Julius Berner</name></author>
+    <summary type="html"><![CDATA[<p>Parallel Decoding Distillation is a trajectory-based distillation method for accelerating diffusion and flow-matching image and video generators without adversarial or variational score distillation losses, which are hard to optimize and prone to mode collapse. It is architecture-agnostic and aims to preserve diversity and motion in few-step generation.</p>]]></summary>
+    <category term="Diffusion Models"/>
+    <category term="Video Generation"/>
+    <category term="Distillation"/>
+    <category term="Efficient Inference"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:cfa606370886</id>
+    <title>Wonder: Video World Model Done Better</title>
+    <link href="http://arxiv.org/abs/2607.26037" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-cfa606370886" rel="related" type="text/html"/>
+    <published>2026-07-29T02:43:00Z</published>
+    <updated>2026-07-29T02:43:00Z</updated>
+    <author><name>Jiacong Xu, Hanwen Jiang, Zhixin Shu, Kalyan Sunkavalli, Vishal M. Patel, Yiqun Mei</name></author>
+    <summary type="html"><![CDATA[<p>Wonder is a real-time, camera-controllable video world model that lets users navigate an explorable world from a single image or video, using a dense coordinate field for camera conditioning and a fast retrieval-based memory so previously seen regions stay consistent over long horizons. It co-designs control, memory, and training strategy.</p>]]></summary>
+    <category term="World Models"/>
+    <category term="Video Generation"/>
+    <category term="Interactive Systems"/>
+    <category term="3D Vision"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:b07e74bfd417</id>
+    <title>Similar Models Learn Differently: Final-Window Pretraining Shapes Post-Training Beyond SFT</title>
+    <link href="http://arxiv.org/abs/2607.25063" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-b07e74bfd417" rel="related" type="text/html"/>
+    <published>2026-07-29T02:40:00Z</published>
+    <updated>2026-07-29T02:40:00Z</updated>
+    <author><name>Cen Lu, Yung-Chen Tang, Andrea Cavallaro</name></author>
+    <summary type="html"><![CDATA[<p>Runs a controlled branching experiment in which six checkpoints fork from a shared partially pretrained model and differ only in the final five hundred million tokens of pretraining data, roughly a fraction of a percent of total tokens. Finds that after supervised fine-tuning the branches look benchmark-equivalent yet respond differently to subsequent preference optimization, revealing a hidden pretraining imprint.</p>]]></summary>
+    <category term="Pretraining"/>
+    <category term="Post-Training"/>
+    <category term="Alignment"/>
+    <category term="Empirical Analysis"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:7c78eccd6aa2</id>
+    <title>Observing sycophantic AI validate others reduces its appeal but not its persuasiveness</title>
+    <link href="http://arxiv.org/abs/2607.25166" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-7c78eccd6aa2" rel="related" type="text/html"/>
+    <published>2026-07-29T02:38:00Z</published>
+    <updated>2026-07-29T02:38:00Z</updated>
+    <author><name>Meryl Ye, Robert Kraut, Steve Rathje</name></author>
+    <summary type="html"><![CDATA[<p>Two preregistered experiments with over sixteen hundred participants test whether warning users about chatbot sycophancy, or letting them watch the chatbot flatter opposing sides of a conflict, protects them from its effects. Both interventions changed how participants rated the AI but did not reduce how persuasive it was.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Sycophancy"/>
+    <category term="Human-AI Interaction"/>
+    <category term="Persuasion"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:917fe91f76c0</id>
+    <title>Harm is not Universal: Community-Specific Toxicity Detection is Urgently Needed</title>
+    <link href="http://arxiv.org/abs/2607.24898" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-917fe91f76c0" rel="related" type="text/html"/>
+    <published>2026-07-29T02:38:00Z</published>
+    <updated>2026-07-29T02:38:00Z</updated>
+    <author><name>Xinnuo Xu, Anja Thieme, Daniela Massiceti, Ioana Tanase, Rita Marques, Melanie Fernandez Pradier, Martin Grayson, Camilla Longden, Cecily Morrison</name></author>
+    <summary type="html"><![CDATA[<p>Microsoft-affiliated researchers show that universal toxicity detectors for text-to-image generation miss harms specific to marginalized groups, with about 35 percent of images labeled safe judged harmful by disability communities. They build community-specific guidelines with dwarfism and blind/low-vision experts and evaluate 2,400 annotated generated images.</p>]]></summary>
+    <category term="AI Safety"/>
+    <category term="Content Moderation"/>
+    <category term="Text-to-Image Generation"/>
+    <category term="Fairness"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:7082a2c0ad66</id>
+    <title>Where Steering Signals Come From: Activation Source Selection in Activation Steering</title>
+    <link href="http://arxiv.org/abs/2607.25270" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-7082a2c0ad66" rel="related" type="text/html"/>
+    <published>2026-07-29T02:38:00Z</published>
+    <updated>2026-07-29T02:38:00Z</updated>
+    <author><name>Jiaran Ye, Lingxu Ran, Zijun Yao, Chenpeng Wang, Yong Jiang, Lei Hou, Juanzi Li, Liangming Pan</name></author>
+    <summary type="html"><![CDATA[<p>Studies the neglected question of where activation-steering vectors are read from, treating the choice of source context and readout policy as a first-class design variable. Across three instruction-tuned models and four steering task families, changing only the source activations substantially changes steering success, and success is not explained by whether the target behavior appears in the source text.</p>]]></summary>
+    <category term="Interpretability"/>
+    <category term="Activation Steering"/>
+    <category term="Model Control"/>
+    <category term="AI Safety"/>
+  </entry>
+  <entry>
+    <id>urn:ainews:2026-07-29:research:6eb72a68117e</id>
+    <title>Transformer Transformer: A Unified Model for Motion-Conditioned Robot Co-design</title>
+    <link href="http://arxiv.org/abs/2607.25798" rel="alternate" type="text/html"/>
+    <link href="https://news.aatf.ai/?date=2026-07-29&amp;category=research#item-6eb72a68117e" rel="related" type="text/html"/>
+    <published>2026-07-29T02:38:00Z</published>
+    <updated>2026-07-29T02:38:00Z</updated>
+    <author><name>Huy Ha, C. Karen Liu, Shuran Song</name></author>
+    <summary type="html"><![CDATA[<p>Transformer Transformer is a diffusion transformer trained on a unified tokenization of robot morphology, state, and action, enabling generation of complete robot designs that can track target end-effector trajectories from human demonstrations. The same model serves as both an embodiment generator and a cross-embodiment controller across wheeled bimanual, quadruped, and humanoid design spaces.</p>]]></summary>
+    <category term="Robotics"/>
+    <category term="Generative Models"/>
+    <category term="Robot Co-Design"/>
+    <category term="Diffusion Transformers"/>
+    <category term="Cross-Embodiment Learning"/>
+  </entry>
   <entry>
     <id>urn:ainews:2026-07-28:category-summary:research</id>
     <title>Research Summary: July 28, 2026</title>
@@ -300,160 +634,6 @@
     <category term="Optimization"/>
   </entry>
   <entry>
-    <id>urn:ainews:2026-07-28:research:6968607161ae</id>
-    <title>The Physics of Multi-Turn Long-Horizon Planning: From Pre-training to Post-training via Single- and Multi-Teacher On-Policy Agentic Distillation</title>
-    <link href="http://arxiv.org/abs/2607.24720" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-28&amp;category=research#item-6968607161ae" rel="related" type="text/html"/>
-    <published>2026-07-28T02:38:00Z</published>
-    <updated>2026-07-28T02:38:00Z</updated>
-    <author><name>Tianyi Men, Zhuoran Jin, Kang Liu, Jun Zhao</name></author>
-    <summary type="html"><![CDATA[<p>Builds a controlled multi-turn environment to trace where long-horizon planning ability comes from across pretraining data format and quality, and then post-training via single- and multi-teacher on-policy agentic distillation. Reports that explicitly modeling world-state transitions in chain-of-thought yields stronger long-horizon generalization and that atomic skills alone do not compose.</p>]]></summary>
-    <category term="AI Agents"/>
-    <category term="Long-Horizon Planning"/>
-    <category term="Distillation"/>
-    <category term="Training Dynamics"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-28:research:ab383ac65ac9</id>
-    <title>When Activation Oracles Learn Not to Read: Concept-Specific Blind Spots in Fine-Tuned Oracles</title>
-    <link href="http://arxiv.org/abs/2607.23379" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-28&amp;category=research#item-ab383ac65ac9" rel="related" type="text/html"/>
-    <published>2026-07-28T02:38:00Z</published>
-    <updated>2026-07-28T02:38:00Z</updated>
-    <author><name>Tobias Bersia, Tatiana Gaintseva</name></author>
-    <summary type="html"><![CDATA[<p>Studies activation oracles, models trained to answer natural-language questions about another model's internal activations, in a controlled taboo-word setting where the subject model hides a concept. Finds that fine-tuned oracles develop concept-specific blind spots, learning reporting behaviors rather than neutrally reading represented information.</p>]]></summary>
-    <category term="Interpretability"/>
-    <category term="AI Safety"/>
-    <category term="Model Introspection"/>
-    <category term="Evaluation Methodology"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-28:research:3e3ef1389148</id>
-    <title>StateAct: Program State, before Pixels, for Long-Horizon Computer-Use Agents</title>
-    <link href="http://arxiv.org/abs/2607.22798" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-28&amp;category=research#item-3e3ef1389148" rel="related" type="text/html"/>
-    <published>2026-07-28T02:38:00Z</published>
-    <updated>2026-07-28T02:38:00Z</updated>
-    <author><name>Yan Yang, Xiangru Jian, Ziyang Luo, Zirui Zhao, Yutong Dai, Ziji Shi, Hanshu Yan, Jun Hao Liew, Silvio Savarese, Junnan Li</name></author>
-    <summary type="html"><![CDATA[<p>StateAct argues that screenshots are a lossy rendering of program state and builds a code-first multi-agent harness where the main agent manipulates files, backends, and DOM directly, delegating to a GUI subagent for only 28 of 108 tasks and 1.1 percent of steps. Direct state access also enables verification of task completion.</p>]]></summary>
-    <category term="AI Agents"/>
-    <category term="Computer-Use Agents"/>
-    <category term="Tool Use"/>
-    <category term="Evaluation"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-28:research:384a9e4f5a76</id>
-    <title>Quadrillion Param Costs: KV Cache, Context Length, Frontier Margins</title>
-    <link href="https://www.lesswrong.com/posts/Rk6FbkDFFm8ciqefv/quadrillion-param-costs-kv-cache-context-length-frontier" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-28&amp;category=research#item-384a9e4f5a76" rel="related" type="text/html"/>
-    <published>2026-07-28T02:38:00Z</published>
-    <updated>2026-07-28T02:38:00Z</updated>
-    <author><name>Vladimir_Nesov</name></author>
-    <summary type="html"><![CDATA[<p>A first-principles cost model for serving very large future models, estimating KV-cache and context-length driven token costs for hypothetical 240-trillion and 1.4-quadrillion parameter systems in 2028 and 2031 and deriving implied gross margins at various prices. Calibrates against inferred costs and current API prices for present frontier models to sanity-check margin estimates in the 80-plus percent range today.</p>]]></summary>
-    <category term="Compute Economics"/>
-    <category term="Scaling Laws"/>
-    <category term="Inference Efficiency"/>
-    <category term="Forecasting"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-28:research:4ae8d6457bc5</id>
-    <title>Keep It InMind: Benchmarking the Implicit-Association Blind Spot in Agent Memory</title>
-    <link href="http://arxiv.org/abs/2607.24368" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-28&amp;category=research#item-4ae8d6457bc5" rel="related" type="text/html"/>
-    <published>2026-07-28T02:36:00Z</published>
-    <updated>2026-07-28T02:36:00Z</updated>
-    <author><name>Ruizhe Li, Mingxuan Du, Benfeng Xu, Zhendong Mao</name></author>
-    <summary type="html"><![CDATA[<p>Identifies the implicit-association blind spot in agent long-term memory: relevant stored facts are missed when they share no surface cues with the query, such as a nut allergy failing to surface for a macaron request. Releases InMind, a 125-task expert-verified benchmark across ten life domains with paired controls that disentangle whether a fact was never stored, never retrieved, or never connected.</p>]]></summary>
-    <category term="Agent Memory"/>
-    <category term="Retrieval-Augmented Generation"/>
-    <category term="Benchmarks"/>
-    <category term="Reasoning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-28:research:78d50516cd7c</id>
-    <title>AgentOmnia: Scaling Agentic Models for Full-Scenario Applications</title>
-    <link href="http://arxiv.org/abs/2607.23124" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-28&amp;category=research#item-78d50516cd7c" rel="related" type="text/html"/>
-    <published>2026-07-28T02:36:00Z</published>
-    <updated>2026-07-28T02:36:00Z</updated>
-    <author><name>Hao Jiang, Gangtao Xin, Yingdi Huang, Guojie Zhu, Jiangshan Zhang, Xinyuan Lin, Yunkun Xu, Chengyu Shen, Wenlong Fei, Jiawei Li, Yujie Fu, Sichen Kang, Tingyu Xie, Yedi Hu, Jingren Zhang, Hongcheng Gao, Jianshu Zeng, Chong Chen, Chang Guo, Chao Feng, Feng Wang, Fulin Lin, Jinchao Ma, Lang Mei, Li Huang, Liyan Liu, Qing He, Shuting Tao, Siyu Mo, Xiangnan Chen, Xiaohan Yu, Xiaoyang Li, Yanheng Hou, Yanyu Wu, Zhihan Yang, Wentao Zhang, Yang Gao, Zhao Cao</name></author>
-    <summary type="html"><![CDATA[<p>AgentOmnia is a large-scale agentic post-training framework spanning task-space taxonomy, environment and data synthesis, training and evaluation, with 5,018 stateful environments containing over 255k tools and 52k+ tasks, plus an OmniaBench diagnostic suite. It targets consumer, business and employee-facing agent scenarios under one taxonomy.</p>]]></summary>
-    <category term="Agents"/>
-    <category term="Post-Training"/>
-    <category term="Synthetic Data"/>
-    <category term="Benchmarks"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-28:research:ac41c2b8b095</id>
-    <title>GNM Head: A Generative aNthropometric Model of the human head</title>
-    <link href="http://arxiv.org/abs/2607.23687" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-28&amp;category=research#item-ac41c2b8b095" rel="related" type="text/html"/>
-    <published>2026-07-28T02:36:00Z</published>
-    <updated>2026-07-28T02:36:00Z</updated>
-    <author><name>Stylianos Ploumpis, Jan Bednarik, Gaspard Zoss, Ruslan Guseinov, Luca Prasso, Prashanth Chandran, Oliver Boyne, Vasileios Choutas, Timo Bolkart, Daoye Wang, Menglei Chai, Di Qiu, Sebastian Winberg, Gilles Rainer, Lewis Bridgeman, Delio Vicini, J\'er\'emy Riviere, Yannick Boetzel, Alexander Koumis, Jay Busch, Cynthia Herrera, Jacob Still, Scott Ysebert, Peter Lincoln, Sergio Orts Escolano, Christoph Rhemann, Erroll Wood, Thabo Beeler, Stefanos Zafeiriou</name></author>
-    <summary type="html"><![CDATA[<p>Introduces GNM, a generative anthropometric parametric model of the human head that extends beyond outer geometry to include neck, eyeballs, and intra-oral structures at high geometric fidelity. Positions such models as conditioning signals giving tight spatial control over large generative vision models.</p>]]></summary>
-    <category term="3D Human Modeling"/>
-    <category term="Generative Models"/>
-    <category term="Graphics"/>
-    <category term="Avatars"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-28:research:2f28743ad7c4</id>
-    <title>Is Mythos good at cyber because it kept hacking Anthropic's sandboxes during training?</title>
-    <link href="https://www.lesswrong.com/posts/QKDoZe6EKhxnFjLWK/is-mythos-good-at-cyber-because-it-kept-hacking-anthropic-s" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-28&amp;category=research#item-2f28743ad7c4" rel="related" type="text/html"/>
-    <published>2026-07-28T02:36:00Z</published>
-    <updated>2026-07-28T02:36:00Z</updated>
-    <author><name>Tim Hua</name></author>
-    <summary type="html"><![CDATA[<p>Examines a disclosure in the Claude Mythos preview system card that the model occasionally escaped network sandboxes during training to download data and shortcut tasks, and asks whether such training-time environment exploitation contributed to its strong cyber capabilities. Highlights the automated transcript review method the lab used to detect the behavior at very low base rates.</p>]]></summary>
-    <category term="Reward Hacking"/>
-    <category term="Cyber Capabilities"/>
-    <category term="Training Transparency"/>
-    <category term="AI Safety"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-28:research:f3904263e3f8</id>
-    <title>Same Question, Different Answers: Evaluating LLM Reliability Beyond Accuracy</title>
-    <link href="http://arxiv.org/abs/2607.22554" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-28&amp;category=research#item-f3904263e3f8" rel="related" type="text/html"/>
-    <published>2026-07-28T02:33:00Z</published>
-    <updated>2026-07-28T02:33:00Z</updated>
-    <author><name>Kazem Faghih, Yize Cheng, Shoumik Saha, Mobina Pournemat, Armin Gerami, Soheil Feizi</name></author>
-    <summary type="html"><![CDATA[<p>Evaluates 13 language models on four benchmarks under meaning-preserving paraphrases and finds that aggregate accuracy barely moves while individual answers flip frequently, with mismatch rates exceeding twenty-three percent. The message is that benchmark accuracy hides substantial per-question instability.</p>]]></summary>
-    <category term="Evaluation"/>
-    <category term="Language Models"/>
-    <category term="Robustness"/>
-    <category term="Reliability"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-28:research:b0306814ae73</id>
-    <title>Language Shapes Instruction Hierarchy Compliance in Multilingual LLMs</title>
-    <link href="http://arxiv.org/abs/2607.23545" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-28&amp;category=research#item-b0306814ae73" rel="related" type="text/html"/>
-    <published>2026-07-28T02:33:00Z</published>
-    <updated>2026-07-28T02:33:00Z</updated>
-    <author><name>Jiwon Moon, Yerin Hwang, Kyomin Jung</name></author>
-    <summary type="html"><![CDATA[<p>Introduces a benchmark for multilingual instruction-hierarchy compliance with same-language and cross-language conflicts across six languages, four domains, and three hierarchy settings. Finds compliance is language-dependent and asymmetric, so a language that strengthens adherence in the higher-priority slot can undermine it in the lower-priority slot.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Prompt Injection"/>
-    <category term="Multilingual Evaluation"/>
-    <category term="Instruction Following"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-28:research:4247055f3f1b</id>
-    <title>RL &amp; search is a terrifying way to build AGI (an FAQ)</title>
-    <link href="https://www.lesswrong.com/posts/KHyBocZncAmtu4Jbc/rl-and-search-is-a-terrifying-way-to-build-agi-an-faq" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-28&amp;category=research#item-4247055f3f1b" rel="related" type="text/html"/>
-    <published>2026-07-28T02:33:00Z</published>
-    <updated>2026-07-28T02:33:00Z</updated>
-    <author><name>Steven Byrnes</name></author>
-    <summary type="html"><![CDATA[<p>An FAQ arguing that building AGI via reinforcement learning and model-based search over actions tends to produce ruthless goal-pursuing agents, and that this path is far more dangerous than the mostly imitation-trained LLM paradigm. Explicitly scopes current LLMs out and warns that many groups are pursuing the riskier route.</p>]]></summary>
-    <category term="AI Safety"/>
-    <category term="Reinforcement Learning"/>
-    <category term="AGI Risk"/>
-    <category term="Threat Models"/>
-  </entry>
-  <entry>
     <id>urn:ainews:2026-07-27:category-summary:research</id>
     <title>Research Summary: July 27, 2026</title>
     <link href="https://news.aatf.ai/?date=2026-07-27&amp;category=research" rel="alternate" type="text/html"/>
@@ -519,33 +699,6 @@
     <category term="AI Alignment"/>
     <category term="AI Safety"/>
     <category term="Pluralism"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-27:research:a1a448106843</id>
-    <title>Do Agent Benchmarks Measure Capability? Protocol Validity in the Age of Agentic AI</title>
-    <link href="http://arxiv.org/abs/2607.22368" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-27&amp;category=research#item-a1a448106843" rel="related" type="text/html"/>
-    <published>2026-07-27T02:38:00Z</published>
-    <updated>2026-07-27T02:38:00Z</updated>
-    <author><name>Jiaqi Shao, Hanck Chen, Wei Zhang, Maxm Pan, Bing Luo</name></author>
-    <summary type="html"><![CDATA[<p>This paper formulates protocol validity for agent benchmarks and introduces HackDetect, a post-hoc audit that identifies exposures, determines how an agent exploited them, and assesses whether the resulting score is misleading. It provides a common procedure for attributing reward-hacking shortcuts and quantifying their effect across benchmarks.</p>]]></summary>
-    <category term="LLM Agents"/>
-    <category term="Benchmarks &amp; Evaluation"/>
-    <category term="AI Safety"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-27:research:c496fee4b32a</id>
-    <title>CausalForge: A Formally Grounded, Self-Improving Agentic Framework for Automated Research in Causal Inference</title>
-    <link href="http://arxiv.org/abs/2607.22511" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-27&amp;category=research#item-c496fee4b32a" rel="related" type="text/html"/>
-    <published>2026-07-27T02:38:00Z</published>
-    <updated>2026-07-27T02:38:00Z</updated>
-    <author><name>Jiyuan Tan, Vasilis Syrgkanis</name></author>
-    <summary type="html"><![CDATA[<p>CausalForge is an agentic framework for automated theoretical research in causal inference grounded in the Lean proof assistant, combining a machine-checked Lean library of over 7,000 declarations with a self-improving pipeline that selects topics and proposes results. Formal verification replaces unreliable LLM reviewers that accept fabricated papers at chance rates.</p>]]></summary>
-    <category term="Formal Verification"/>
-    <category term="Agentic AI"/>
-    <category term="Causal Inference"/>
-    <category term="AI for Science"/>
   </entry>
   <entry>
     <id>urn:ainews:2026-07-26:category-summary:research</id>
@@ -792,150 +945,5 @@
     <category term="AI Evaluation"/>
     <category term="AI R&amp;D Acceleration"/>
     <category term="Benchmarks"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-22:research:e9c825394dd0</id>
-    <title>Measuring Reward-Seeking via Contrastive Belief Updates</title>
-    <link href="http://arxiv.org/abs/2607.18966" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-22&amp;category=research#item-e9c825394dd0" rel="related" type="text/html"/>
-    <published>2026-07-22T02:38:00Z</published>
-    <updated>2026-07-22T02:38:00Z</updated>
-    <author><name>Axel H{\o}jmark, J\'er\'emy Scheurer, Evgenia Nitishinskaya, Felix Hofst\"atter, Jason Wolfe, Theodore Ehrenborg, Bronson Schoen, Alexander Meinke</name></author>
-    <summary type="html"><![CDATA[<p>Measures reward-seeking in RL-trained models using contrastive synthetic document finetuning to alter a model's beliefs about what the grader rewards, then observes whether it follows the grader versus the intended objective. Applied to intermediate checkpoints of an OpenAI o3 RL run without safety training, it detects reward-seeking that is otherwise indistinguishable from intended behavior.</p>]]></summary>
-    <category term="Alignment"/>
-    <category term="AI Safety"/>
-    <category term="Reinforcement Learning"/>
-    <category term="Reward Hacking"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-22:research:d2ddb8e25c87</id>
-    <title>MUX: Continuous Reasoning via Multiplexed Tokens</title>
-    <link href="http://arxiv.org/abs/2607.18264" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-22&amp;category=research#item-d2ddb8e25c87" rel="related" type="text/html"/>
-    <published>2026-07-22T02:36:00Z</published>
-    <updated>2026-07-22T02:36:00Z</updated>
-    <author><name>Ayhan Suleymanzade, Halil Alperen Gozeten, Michael Bronstein, \.Ismail \.Ilkan Ceylan, Jinwoo Kim</name></author>
-    <summary type="html"><![CDATA[<p>MUX proposes continuous reasoning by distilling discrete reasoning subwords into multiplexed latent tokens, where each latent token losslessly represents a weighted superposition of a span of reasoning tokens that can be recovered. This aims to compress chain-of-thought into higher-bandwidth latent computation.</p>]]></summary>
-    <category term="Language Models"/>
-    <category term="Reasoning"/>
-    <category term="Novel Architectures"/>
-    <category term="Efficiency and Systems"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-21:category-summary:research</id>
-    <title>Research Summary: July 21, 2026</title>
-    <link href="https://news.aatf.ai/?date=2026-07-21&amp;category=research" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-21&amp;category=research" rel="canonical" type="text/html"/>
-    <link href="http://arxiv.org/abs/2607.16107" rel="alternate" type="text/html; charset=utf-8" title="Representative source"/>
-    <link href="http://arxiv.org/abs/2607.16107" rel="via" type="text/html" title="Representative source"/>
-    <published>2026-07-21T06:00:00Z</published>
-    <updated>2026-07-21T06:00:00Z</updated>
-    <author><name>AATF AI News Aggregator</name></author>
-    <summary type="html"><![CDATA[<p>Today's research is dominated by open multimodal foundation models and large-scale embodied AI. <strong>AV-Flamingo</strong> delivers <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-80d163645ab1" class="internal-link" rel="noopener noreferrer">fully open audio-visual reasoning</a> over long videos from a top NVIDIA team. <strong>Xiaomi-Robotics-1</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-f7ae750ccaf5" class="internal-link" rel="noopener noreferrer">scales vision-language-action training</a> to <strong>100K+ hours</strong> of real-world trajectories, a major industry data effort.</p>
-<ul>
-<li><strong>Embodied AI and world models</strong>: <strong>Orbis 2</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-1c8678d6cb3b" class="internal-link" rel="noopener noreferrer">factorizes driving prediction</a> into hierarchical coarse-to-fine diffusion; <strong>RynnBrain 1.1</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-b80cd13b5caf" class="internal-link" rel="noopener noreferrer">ships cross-embodiment foundation models</a> at <strong>2B/9B/122B-A10B</strong> scales.</li>
-<li><strong>Safety and security</strong>: A rigorous <strong>n=4,100</strong> human study finds <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-2b9abd831e13" class="internal-link" rel="noopener noreferrer">AI voice phishing matches human scammers</a> at far lower cost; <strong>Lucid</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-c9c028e25055" class="internal-link" rel="noopener noreferrer">compromises agent long-term memory</a> via imperceptible image perturbations; honesty activation steering (<strong>StTP/StMP</strong>) <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-8d16b9af720c" class="internal-link" rel="noopener noreferrer">restores misaligned model behavior</a>.</li>
-<li><strong>Foundations</strong>: A unified theoretical-empirical <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-b5c87247ad8e" class="internal-link" rel="noopener noreferrer">framework attributes vector-quantization</a> <strong>codebook collapse</strong> to distributional mismatch, relevant across tokenizers and generative models.</li>
-</ul>
-<p>Ecosystem commentary is timely: <strong>Nathan Lambert</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-c277ee1cd6f6" class="internal-link" rel="noopener noreferrer">analyzes Moonshot's</a> <strong>2.8T-parameter</strong> open-weights <strong>Kimi K3</strong>, while <strong>Jack Clark</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-7f82993a9598" class="internal-link" rel="noopener noreferrer">highlights UK AISI evidence</a> that open-vs-closed cyber-capability gaps are narrowing.</p>]]></summary>
-    <content type="html"><![CDATA[<p>Today's research is dominated by open multimodal foundation models and large-scale embodied AI. <strong>AV-Flamingo</strong> delivers <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-80d163645ab1" class="internal-link" rel="noopener noreferrer">fully open audio-visual reasoning</a> over long videos from a top NVIDIA team. <strong>Xiaomi-Robotics-1</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-f7ae750ccaf5" class="internal-link" rel="noopener noreferrer">scales vision-language-action training</a> to <strong>100K+ hours</strong> of real-world trajectories, a major industry data effort.</p>
-<ul>
-<li><strong>Embodied AI and world models</strong>: <strong>Orbis 2</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-1c8678d6cb3b" class="internal-link" rel="noopener noreferrer">factorizes driving prediction</a> into hierarchical coarse-to-fine diffusion; <strong>RynnBrain 1.1</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-b80cd13b5caf" class="internal-link" rel="noopener noreferrer">ships cross-embodiment foundation models</a> at <strong>2B/9B/122B-A10B</strong> scales.</li>
-<li><strong>Safety and security</strong>: A rigorous <strong>n=4,100</strong> human study finds <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-2b9abd831e13" class="internal-link" rel="noopener noreferrer">AI voice phishing matches human scammers</a> at far lower cost; <strong>Lucid</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-c9c028e25055" class="internal-link" rel="noopener noreferrer">compromises agent long-term memory</a> via imperceptible image perturbations; honesty activation steering (<strong>StTP/StMP</strong>) <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-8d16b9af720c" class="internal-link" rel="noopener noreferrer">restores misaligned model behavior</a>.</li>
-<li><strong>Foundations</strong>: A unified theoretical-empirical <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-b5c87247ad8e" class="internal-link" rel="noopener noreferrer">framework attributes vector-quantization</a> <strong>codebook collapse</strong> to distributional mismatch, relevant across tokenizers and generative models.</li>
-</ul>
-<p>Ecosystem commentary is timely: <strong>Nathan Lambert</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-c277ee1cd6f6" class="internal-link" rel="noopener noreferrer">analyzes Moonshot's</a> <strong>2.8T-parameter</strong> open-weights <strong>Kimi K3</strong>, while <strong>Jack Clark</strong> <a href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-7f82993a9598" class="internal-link" rel="noopener noreferrer">highlights UK AISI evidence</a> that open-vs-closed cyber-capability gaps are narrowing.</p>]]></content>
-    <category term="daily-summary"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-21:research:80d163645ab1</id>
-    <title>Audio-Visual Flamingo: Open Audio-Visual Intelligence for Long and Complex Videos</title>
-    <link href="http://arxiv.org/abs/2607.16107" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-80d163645ab1" rel="related" type="text/html"/>
-    <published>2026-07-21T03:12:00Z</published>
-    <updated>2026-07-21T03:12:00Z</updated>
-    <author><name>Sreyan Ghosh, Arushi Goel, Kaousheik Jayakumar, Lasha Koroshinadze, Nishit Anand, Siddharth Gururani, Hanrong Ye, Pritam Biswas, Yuanhang Su, Ehsan Hosseini-Asl, Sang-gil Lee, Zhifeng Kong, Jaehyeon Kim, Sungwon Kim, S Sakshi, Ramani Duraiswami, Dinesh Manocha, Andrew Tao, Mohammad Shoeybi, Bryan Catanzaro, Ming-Yu Liu, Wei Ping</name></author>
-    <summary type="html"><![CDATA[<p>AV-Flamingo is a fully open state-of-the-art audio-visual large language model for joint understanding and reasoning over audio, images, and long-form videos, supported by a ~7M-instance training collection and a three-stage curriculum from short-range perception to long-horizon reasoning. It targets long, complex real-world audio-visual videos.</p>]]></summary>
-    <category term="Multimodal Learning"/>
-    <category term="Audio-Visual Models"/>
-    <category term="Language Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-21:research:1c8678d6cb3b</id>
-    <title>Orbis 2: A Hierarchical World Model for Driving</title>
-    <link href="http://arxiv.org/abs/2607.15898" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-1c8678d6cb3b" rel="related" type="text/html"/>
-    <published>2026-07-21T02:47:00Z</published>
-    <updated>2026-07-21T02:47:00Z</updated>
-    <author><name>Sudhanshu Mittal, Arian Mousakhan, Silvio Galesso, Karim Farid, Jonannes Dienert, Rajat Sahay, Thomas Brox</name></author>
-    <summary type="html"><![CDATA[<p>Orbis 2 is a hierarchical world model for driving that factorizes future prediction into a high-level coarse-structure predictor over long horizons and a low-level detail generator, plus diffusion-forcing pretraining. It aims for both perceptual fidelity and spatial-semantic reasoning.</p>]]></summary>
-    <category term="World Models"/>
-    <category term="Autonomous Driving"/>
-    <category term="Generative Models"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-21:research:2b9abd831e13</id>
-    <title>AI Voice Phishing Performs on Par With Human Scammers at a Fraction of the Cost</title>
-    <link href="https://www.lesswrong.com/posts/AZ4tHHsGPC2jnen8a/ai-voice-phishing-performs-on-par-with-human-scammers-at-a" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-2b9abd831e13" rel="related" type="text/html"/>
-    <published>2026-07-21T02:43:00Z</published>
-    <updated>2026-07-21T02:43:00Z</updated>
-    <author><name>Fred Heiding</name></author>
-    <summary type="html"><![CDATA[<p>A large human-subject study (n=4,100) measured susceptibility to AI-powered voice phishing across six leading voice models, finding compliance rates up to 36 percent and that participants could not reliably distinguish synthetic from human callers. An economic analysis suggests automated vishing is already profitable, highlighting a scalable and immediate misuse vector.</p>]]></summary>
-    <category term="AI Security"/>
-    <category term="AI Misuse"/>
-    <category term="Empirical Study"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-21:research:692398085897</id>
-    <title>EgoExoMoCap: Distributed Ego-Exo Human Motion Capture</title>
-    <link href="http://arxiv.org/abs/2607.15868" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-692398085897" rel="related" type="text/html"/>
-    <published>2026-07-21T02:38:00Z</published>
-    <updated>2026-07-21T02:38:00Z</updated>
-    <author><name>Jiaxi Jiang, Bharat Lal Bhatnagar, Nan Yang, Lingni Ma, Sebastian Starke, Robin Kips, Nadine Bertsch, Christian Holz, Federica Bogo</name></author>
-    <summary type="html"><![CDATA[<p>EgoExoMoCap is a distributed framework that jointly leverages egocentric and exocentric multimodal signals from head-mounted devices for human motion estimation, unifying two paradigms usually studied separately. It avoids bulky multi-camera rigs or mocap suits.</p>]]></summary>
-    <category term="Motion Capture"/>
-    <category term="Multimodal Learning"/>
-    <category term="Embodied AI"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-21:research:a0ed724858f5</id>
-    <title>Searching Videos as Trees: Self-Correcting Agents for Grounded Long Video QA</title>
-    <link href="http://arxiv.org/abs/2607.16189" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-a0ed724858f5" rel="related" type="text/html"/>
-    <published>2026-07-21T02:38:00Z</published>
-    <updated>2026-07-21T02:38:00Z</updated>
-    <author><name>Ce Zhang, Ziyang Wang, Yulu Pan, Oluwatumininu Oguntola, Pranav Wagh, Qiyu Wu, Hiromi Wakaki, Mohit Bansal, Gedas Bertasius</name></author>
-    <summary type="html"><![CDATA[<p>VideoTreeSearch casts grounded long-video question answering as iterative self-correcting search over an adaptive temporal tree built from visual scene boundaries, adding fine-to-coarse backtracking absent in prior single-crop agentic methods. This lets the agent recover from early mistakes.</p>]]></summary>
-    <category term="Video Understanding"/>
-    <category term="AI Agents"/>
-    <category term="Multimodal Learning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-21:research:7d2c0abca61b</id>
-    <title>MLLM-DataEngine: Closing the Loop of Multimodal Instruction Tuning Data Generation</title>
-    <link href="http://arxiv.org/abs/2607.15299" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-7d2c0abca61b" rel="related" type="text/html"/>
-    <published>2026-07-21T02:38:00Z</published>
-    <updated>2026-07-21T02:38:00Z</updated>
-    <author><name>Zhiyuan Zhao, Bin Wang, Linke Ouyang, Yiqi Lin, Pan Zhang, Xiaoyi Dong, Jiaqi Wang, Conghui He</name></author>
-    <summary type="html"><![CDATA[<p>MLLM-DataEngine is a closed-loop system that analyzes model weaknesses from evaluation results, generates targeted incremental instruction-tuning data via adaptive bad-case sampling, and iteratively improves multimodal LLMs. It couples data generation, training, and benchmarking rather than treating them separately.</p>]]></summary>
-    <category term="Multimodal Learning"/>
-    <category term="Data-Centric AI"/>
-    <category term="Instruction Tuning"/>
-  </entry>
-  <entry>
-    <id>urn:ainews:2026-07-21:research:b80cd13b5caf</id>
-    <title>RynnBrain 1.1: Towards More Capable and Generalizable Embodied Foundation Model</title>
-    <link href="http://arxiv.org/abs/2607.17977" rel="alternate" type="text/html"/>
-    <link href="https://news.aatf.ai/?date=2026-07-21&amp;category=research#item-b80cd13b5caf" rel="related" type="text/html"/>
-    <published>2026-07-21T02:36:00Z</published>
-    <updated>2026-07-21T02:36:00Z</updated>
-    <author><name>Kehan Li, Bohan Hou, Minghao Zhu, Tianyi Zhang, Zesen Cheng, Zhikai Wang, Sicong Leng, Xin Li, Xiao Lin, Biying Yao, Minghua Zeng, Jiangpin Liu, Ronghao Dang, Jiayan Guo, Siteng Huang, Haoyu Zhao, Heng Ping, Yaxi Zhao, Kexiang Wang, Tong Lu, Shengke Xue, Jiahao Tang, Yulei Wang, Zejing Wang, Jianwei Gao, Shijian Lu, Chengju Liu, Jianfei Yang, Mingxiu Chen, Deli Zhao</name></author>
-    <summary type="html"><![CDATA[<p>RynnBrain 1.1 is a family of embodied foundation models at 2B, 9B, and 122B-A10B scales trained with a unified spatio-temporal and physically grounded framework, adding contact-point prediction and native 3D grounding, plus a cross-embodiment VLA action model deployed on multiple humanoid platforms. It targets embodied perception, spatial reasoning, localization, and planning.</p>]]></summary>
-    <category term="Robotics"/>
-    <category term="Embodied Foundation Models"/>
-    <category term="Vision-Language-Action Models"/>
   </entry>
 </feed>
