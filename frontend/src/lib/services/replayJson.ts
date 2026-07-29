@@ -290,7 +290,28 @@ export function countItems(v: PartialValue | null): number {
  * Prefers a human-meaningful field over the raw first key: an item's `summary` or
  * `title` says far more in a collapsed row than `{"id": "e5b5cb99aa82", …}`.
  */
-const PREVIEW_KEYS = ['summary', 'title', 'name', 'text', 'description', 'label', 'theme'];
+const PREVIEW_KEYS = [
+	'summary',
+	'title',
+	'name',
+	'text',
+	'description',
+	'label',
+	'theme',
+	// The continuity agents' records are mostly ids; these are their prose fields.
+	'reasoning',
+	'reference_text'
+];
+
+/**
+ * True for entries that identify rather than describe — item-id keys and bare
+ * hash values. A collapsed row faced with `83712bd56768` tells the reader
+ * nothing; these are skipped when choosing a preview so the row leads with
+ * whatever prose the record carries instead.
+ */
+function isIdLike(key: string, value: string): boolean {
+	return /(^|_)ids?$/i.test(key) || /^[0-9a-f]{6,}$/i.test(value.trim());
+}
 
 export function previewOf(v: PartialValue | null, max = 120): string {
 	if (!v) return '';
@@ -306,11 +327,21 @@ export function previewOf(v: PartialValue | null, max = 120): string {
 		case 'array':
 			return `${v.items.length} item${v.items.length === 1 ? '' : 's'}`;
 		case 'object': {
+			// Suffix match as well as exact: the curator writes `original_title`, which
+			// is exactly the story name a collapsed decision row should lead with.
 			for (const key of PREVIEW_KEYS) {
-				const hit = v.entries.find((e) => e.key === key && e.value?.kind === 'string');
+				const hit = v.entries.find(
+					(e) =>
+						(e.key === key || e.key.endsWith(`_${key}`)) && e.value?.kind === 'string'
+				);
 				if (hit) return truncate((hit.value as { value: string }).value, max);
 			}
-			const first = v.entries.find((e) => e.value?.kind === 'string');
+			const strings = v.entries.filter((e) => e.value?.kind === 'string');
+			const prose = strings.find(
+				(e) => !isIdLike(e.key, (e.value as { value: string }).value)
+			);
+			// A record that is nothing but ids still shows one — a hash beats "3 fields".
+			const first = prose ?? strings[0];
 			if (first) return truncate((first.value as { value: string }).value, max);
 			return v.entries.length === 0 ? '{}' : `${v.entries.length} fields`;
 		}

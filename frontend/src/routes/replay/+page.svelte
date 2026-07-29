@@ -125,86 +125,217 @@
 		engine?.destroy();
 		engine = null;
 		frame = null;
-		revealObserver?.disconnect();
-		revealObserver = null;
+		releasePin('teardown');
 	}
 
 	onDestroy(teardown);
 
-	/** The transcript pane and the sticky control dock that overlaps its bottom. */
+	/** The transcript pane, which the pin below keeps in view. */
 	let transcriptEl: HTMLDivElement | null = null;
-	let dockEl: HTMLDivElement | null = null;
 
 	/**
-	 * Bring the transcript into view after selecting a call.
+	 * Keep the open transcript pinned at the bottom of the page.
 	 *
-	 * The pane renders below the stage, and the timeline is ~1000px tall, so clicking
-	 * a bar near the top of the chart used to open a panel entirely off-screen — the
-	 * click read as doing nothing at all.
+	 * A one-shot scroll cannot hold this position: the Newsroom above the pane grows
+	 * continuously during playback, so the transcript is pushed down the document
+	 * while you read it. The pin re-asserts the position whenever the page's height
+	 * changes, and releases the moment the user scrolls up — from then on the page
+	 * is theirs.
 	 *
-	 * `scrollIntoView` is not enough. `block: 'nearest'` does the minimum needed to
-	 * touch the viewport edge, which leaves the pane's bottom under the sticky dock;
-	 * `block: 'end'` aligns to the viewport, which *includes* the dock. So the target
-	 * is computed against the space the dock actually leaves.
+	 * Target: the very bottom of the page, capped only so the pane's top edge never
+	 * leaves the window. Page-bottom (rather than "pane bottom clears the dock") is
+	 * what makes growth *anywhere* above land as new content sliding in from the top
+	 * while the pane holds still — the chat-log pattern.
 	 *
-	 * The timing matters more than the arithmetic. `await tick()` only guarantees
-	 * Svelte has patched the DOM — the pane is still growing at that point (the stats
-	 * row, the stream block, the JSON cards all land after), so measuring there reads
-	 * a height that is too short and under-scrolls. That is the "first click doesn't
-	 * go far enough, second click does" symptom: by the second click the pane is
-	 * already at full height. Measuring on the next animation frame, after layout has
-	 * settled, makes the first click behave like the second.
+	 * Every scroll here is instant, never smooth. A smooth scroll animates across
+	 * frames in which the layout keeps changing, so it chases a moving target — and
+	 * it animates *while* the card sort (FLIP) animates, which composed into the
+	 * "really weird and jerky" motion. An instant correction between paints is
+	 * invisible: the pane simply holds still while content slides in above.
 	 *
-	 * A ResizeObserver then re-runs it for content that arrives later still (a lazily
-	 * parsed stream, an image). It fires once and disconnects, so it can't fight the
-	 * user's own scrolling afterwards.
-	 *
-	 * Never scrolls upward: a pane already in view stays put, so clicking chip after
-	 * chip in the Newsroom doesn't yank the page every time.
+	 * Release is driven by explicit input only — wheel-up, touch, page-up keys —
+	 * plus one structural signal: writes that stop sticking (see `holdPin`). Scroll
+	 * events are deliberately NOT used to infer intent. Two attempts died there:
+	 * a one-frame self-scroll flag saturated while the loop corrected every frame,
+	 * and position heuristics lost races against the browser clamping transient
+	 * layout shrinks (a phase transition swaps whole station blocks). Only inputs a
+	 * person can produce are treated as a person.
 	 */
-	let revealObserver: ResizeObserver | null = null;
+	let pinning = false;
+	let pinRaf = 0;
+	/** The last position the pin wrote, to judge whether the write stuck. */
+	let lastPinY = 0;
 
-	function scrollPaneIntoView() {
-		if (!transcriptEl || typeof window === 'undefined') return;
-		const rect = transcriptEl.getBoundingClientRect();
-		const dockHeight = dockEl?.getBoundingClientRect().height ?? 0;
-		const gap = 16;
-		const usableBottom = window.innerHeight - dockHeight - gap;
-		// How far to scroll for the whole pane to clear the dock...
-		const needed = rect.bottom - usableBottom;
-		// ...capped so the pane's own header (name, caller, stats) stays on screen
-		// when the pane is taller than the space available.
-		const keepHeaderVisible = rect.top - gap;
-		const delta = Math.min(needed, keepHeaderVisible);
-		if (delta <= 1) return;
-		window.scrollBy({ top: delta, behavior: reduced ? 'auto' : 'smooth' });
+	/** The browser's actual scroll limit — NOT `scrollHeight - innerHeight`, which
+	 * runs ~16px past it (root margins, scrollbar gutter). A target computed past
+	 * the real limit gets clamped on every write, which the stuck-write detector
+	 * would read as an external scroller and release. This off-by-a-little was the
+	 * root cause of every "the pin just let go" failure in this feature's history. */
+	function scrollLimit(): number {
+		const se = document.scrollingElement ?? document.documentElement;
+		return Math.max(0, se.scrollHeight - se.clientHeight);
+	}
+
+	function pinTarget(): number | null {
+		if (!transcriptEl || typeof window === 'undefined') return null;
+		const gap = 12;
+		const paneTopAbs = window.scrollY + transcriptEl.getBoundingClientRect().top;
+		return Math.max(0, Math.round(Math.min(scrollLimit(), paneTopAbs - gap)));
+	}
+
+	/** Consecutive frames where the position we wrote did not stick. */
+	let pinMisses = 0;
+
+	// Debug handle for diagnosing pin behaviour in a live session. Reads closure
+	// state; costs nothing unless called.
+	if (typeof window !== 'undefined') {
+		(window as unknown as Record<string, unknown>).__pinDebug = () => ({
+			pinning,
+			pinMisses,
+			lastPinY,
+			releaseReason,
+			target: pinTarget(),
+			scrollY: window.scrollY,
+			limit: scrollLimit()
+		});
+	}
+
+	function holdPin() {
+		if (!pinning) return;
+		const target = pinTarget();
+		if (target === null) return;
+		const y = window.scrollY;
+		// Did the previous frame's write hold? One miss is the browser clamping a
+		// transient shrink (a phase transition swaps whole station blocks) — the
+		// rewrite below sticks and the counter resets. Three consecutive misses
+		// means an outside scroller (a scrollbar drag) owns the page: hand it over
+		// rather than fight. ~50ms of contention, below perception.
+		//
+		// A write clamped at the page's true bottom is NOT a miss — it is the pin
+		// succeeding against an optimistic target. Without this, any residual gap
+		// between the computed target and the reachable limit reads as three
+		// failures and self-releases.
+		if (Math.abs(y - lastPinY) > 4) {
+			if (y >= scrollLimit() - 2) {
+				lastPinY = y;
+				pinMisses = 0;
+			} else {
+				pinMisses += 1;
+				if (pinMisses >= 3) {
+					releasePin('writes-not-sticking');
+					return;
+				}
+			}
+		} else {
+			pinMisses = 0;
+		}
+		if (Math.abs(target - y) < 2) {
+			lastPinY = y;
+			return;
+		}
+		// 'instant', never 'auto': app.css sets `html { scroll-behavior: smooth }`,
+		// and 'auto' defers to CSS — so what looked like an instant jump was a
+		// ~300ms animation restarted every frame. Position crept instead of landing,
+		// the stuck-write detector read that as an external scroller, and the pin
+		// released itself. 'instant' is the only value that overrides the CSS.
+		window.scrollTo({ top: target, behavior: 'instant' });
+		lastPinY = target;
+	}
+
+	/**
+	 * Release is driven by explicit input, not by watching scroll positions.
+	 *
+	 * Two positional heuristics were tried and both lost races against the layout:
+	 * a one-frame "self scroll" flag saturated while the loop corrected every frame,
+	 * and a lands-on-target check broke when the document shrank (browser clamps
+	 * scrollY up) and regrew within a frame — the clamp read as a user move. Wheel,
+	 * touch and keys are unambiguous: they can only come from a person.
+	 *
+	 * Direction and place both matter. Wheel-up *over the pane* is someone reading
+	 * the pane — the pin exists to serve exactly that, so it stays. Wheel-up over
+	 * the stage or the background is someone leaving for the top of the page.
+	 */
+	function overPane(target: EventTarget | null): boolean {
+		return !!(transcriptEl && target instanceof Node && transcriptEl.contains(target));
+	}
+
+	/**
+	 * True when a wheel-up over the pane will be consumed by one of the pane's own
+	 * scrollers (the transcript body, an open prompt block). If every scroller on
+	 * the path is already at its top, the wheel chains out to the page — the reader
+	 * is trying to go *above* the pane, which is a release.
+	 */
+	function paneConsumesWheelUp(target: EventTarget | null): boolean {
+		let node: Element | null =
+			target instanceof Element ? target : target instanceof Node ? target.parentElement : null;
+		while (node && node !== transcriptEl) {
+			if (node instanceof HTMLElement && node.scrollTop > 0) return true;
+			node = node.parentElement;
+		}
+		return false;
+	}
+
+	function onWheel(event: WheelEvent) {
+		if (!pinning || event.deltaY >= 0) return;
+		if (overPane(event.target) && paneConsumesWheelUp(event.target)) return;
+		releasePin('wheel-up');
+	}
+
+	function onTouchMove(event: TouchEvent) {
+		if (!pinning) return;
+		if (overPane(event.target)) return;
+		releasePin('touch');
+	}
+
+
+	/** Why the pin last released — debug breadcrumb, visible via window.__pinDebug. */
+	let releaseReason = '';
+
+	function releasePin(reason = 'unknown') {
+		releaseReason = reason;
+		pinning = false;
+		if (pinRaf) {
+			cancelAnimationFrame(pinRaf);
+			pinRaf = 0;
+		}
+		if (typeof document !== 'undefined') {
+			document.documentElement.style.overflowAnchor = '';
+		}
+	}
+
+	/**
+	 * A plain rAF loop, not a ResizeObserver, and that is deliberate. The first
+	 * version observed `document.body`, whose own box never resizes here — the page
+	 * grows inside wrappers — so the observer fired once and went silent while the
+	 * pane drifted away. Rather than hunt for the right element to observe (fragile
+	 * against any layout refactor), the loop just compares target to position every
+	 * frame while pinned. It no-ops within 2px, so a quiet page costs one rect read
+	 * per frame — and a replay that is playing is re-rendering every frame anyway.
+	 */
+	function pinLoop() {
+		if (!pinning) return;
+		holdPin();
+		pinRaf = requestAnimationFrame(pinLoop);
 	}
 
 	async function revealTranscript() {
 		await tick();
 		if (!transcriptEl || typeof window === 'undefined') return;
 
-		revealObserver?.disconnect();
-		revealObserver = null;
+		if (pinRaf) cancelAnimationFrame(pinRaf);
+		pinning = true;
+		document.documentElement.style.overflowAnchor = 'none';
 
+		// One frame later: `tick()` only guarantees Svelte patched the DOM, and the
+		// pane is still growing at that point, so measuring immediately under-scrolls.
 		requestAnimationFrame(() => {
-			scrollPaneIntoView();
-
-			// Catch late-arriving content that changes the pane's height.
-			if (typeof ResizeObserver === 'undefined' || !transcriptEl) return;
-			let settled = false;
-			revealObserver = new ResizeObserver(() => {
-				if (settled) return;
-				settled = true;
-				requestAnimationFrame(() => {
-					scrollPaneIntoView();
-					revealObserver?.disconnect();
-					revealObserver = null;
-				});
-			});
-			revealObserver.observe(transcriptEl);
+			holdPin();
+			pinRaf = requestAnimationFrame(pinLoop);
 		});
 	}
+
+	// Closing the pane (× or Escape) removes the thing being pinned to.
+	$: if (!selectedCall && pinning) releasePin('pane-closed');
 
 	/**
 	 * Fetch the day's prompts, once, on first unfold.
@@ -263,6 +394,13 @@
 		if (!engine) return;
 		const target = event.target as HTMLElement | null;
 		if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+			return;
+		}
+
+		// Keyboard page-scrolling upward hands the page back, same as wheel-up.
+		// These keys are not otherwise bound, so the browser scrolls as normal.
+		if (pinning && (event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'Home')) {
+			releasePin('key-up');
 			return;
 		}
 
@@ -347,7 +485,7 @@
 	/>
 </svelte:head>
 
-<svelte:window on:keydown={onKeydown} />
+<svelte:window on:keydown={onKeydown} on:wheel|passive={onWheel} on:touchmove|passive={onTouchMove} />
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 	<!-- Title block -->
@@ -561,7 +699,7 @@
 		{/if}
 
 		<!-- Persistent controls -->
-		<div class="dock" bind:this={dockEl}>
+		<div class="dock">
 			<PlaybackBar
 				{index}
 				t={frame.t}
