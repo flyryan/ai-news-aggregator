@@ -34,6 +34,23 @@ export default defineConfig({
 	server: {
 		fs: {
 			allow: ['..']
+		},
+		proxy: {
+			// The admin panel talks to the admin service. In production the two are
+			// the same origin behind the Cloudflare tunnel; in dev the service runs
+			// separately, so forward /api to it. Start it with:
+			//   ./scripts/admin_dev.sh
+			'/api': {
+				target: 'http://127.0.0.1:8200',
+				changeOrigin: false
+			},
+			// Preview rendering is served by the admin service too. In production
+			// both live on the admin origin behind the tunnel; in dev SvelteKit
+			// would otherwise claim /preview and 404 it.
+			'/preview': {
+				target: 'http://127.0.0.1:8200',
+				changeOrigin: false
+			}
 		}
 	}
 });

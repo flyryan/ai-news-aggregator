@@ -8,7 +8,25 @@
 	import Header from '$lib/components/layout/Header.svelte';
 	import Navigation from '$lib/components/layout/Navigation.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
+	import { isPreview, previewLabel } from '$lib/services/dataBase';
 	import '../app.css';
+
+	// Draft banner. Read on mount: the attribute lives on <body>, which is not
+	// available during SSR/prerender.
+	let showPreviewBanner = false;
+	let previewBannerLabel: string | null = null;
+	onMount(() => {
+		try {
+			showPreviewBanner = isPreview();
+			previewBannerLabel = previewLabel();
+		} catch (e) {
+			// A malformed base throws by design rather than falling back to live
+			// data. Surface it loudly instead of rendering something misleading.
+			console.error(e);
+			showPreviewBanner = true;
+			previewBannerLabel = 'Preview misconfigured — this page may not be showing draft data';
+		}
+	});
 
 	onMount(async () => {
 		initializeTheme();
@@ -37,6 +55,12 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col">
+	{#if showPreviewBanner}
+		<div class="preview-banner" role="status">
+			<strong>Draft.</strong>
+			{previewBannerLabel ?? 'This is unpublished content'} — not visible to readers.
+		</div>
+	{/if}
 	<Header />
 	<Navigation />
 
@@ -46,3 +70,19 @@
 
 	<Footer />
 </div>
+
+<style>
+	.preview-banner {
+		position: sticky;
+		top: 0;
+		z-index: 60;
+		padding: 0.45rem 1rem;
+		text-align: center;
+		font-size: 0.8rem;
+		color: #fff;
+		background: #e63946;
+		/* Deliberately loud and sticky. The failure this prevents is an operator
+		   reading a draft, believing it is live, and "fixing" something that was
+		   never broken -- or approving a page they never actually looked at. */
+	}
+</style>

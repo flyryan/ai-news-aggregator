@@ -3,6 +3,7 @@
  */
 
 import type { DataIndex, DaySummary, CategoryData, Category } from '$lib/types';
+import { dataUrl } from './dataBase';
 
 const cache = new Map<string, unknown>();
 type LoadIndexOptions = {
@@ -18,7 +19,9 @@ export async function loadIndex({ forceRefresh = false }: LoadIndexOptions = {})
 		return cache.get(cacheKey) as DataIndex;
 	}
 
-	const indexUrl = forceRefresh ? `/data/index.json?t=${Date.now()}` : '/data/index.json';
+	const indexUrl = forceRefresh
+		? dataUrl(`/data/index.json?t=${Date.now()}`)
+		: dataUrl('/data/index.json');
 	const response = await fetch(indexUrl, forceRefresh ? { cache: 'no-store' } : undefined);
 	if (!response.ok) {
 		throw new Error(`Failed to load data index: ${response.status}`);
@@ -45,7 +48,7 @@ export async function loadDaySummary(date: string): Promise<DaySummary> {
 		return cache.get(cacheKey) as DaySummary;
 	}
 
-	const response = await fetch(`/data/${date}/summary.json`);
+	const response = await fetch(dataUrl(`/data/${date}/summary.json`));
 	if (!response.ok) {
 		throw new Error(`Failed to load summary for ${date}: ${response.status}`);
 	}
@@ -64,7 +67,7 @@ export async function loadCategoryData(date: string, category: Category): Promis
 		return cache.get(cacheKey) as CategoryData;
 	}
 
-	const response = await fetch(`/data/${date}/${category}.json`);
+	const response = await fetch(dataUrl(`/data/${date}/${category}.json`));
 	if (!response.ok) {
 		throw new Error(`Failed to load ${category} data for ${date}: ${response.status}`);
 	}

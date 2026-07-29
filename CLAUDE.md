@@ -53,6 +53,22 @@ npm run check                   # TypeScript type checking
 
 There are no unit tests, linting, or type checking configured.
 
+### Admin Panel Development
+
+```bash
+./scripts/admin_dev.sh            # admin service on :8200 (auth bypassed, dev only)
+cd frontend && npm run dev        # panel at http://localhost:5173/admin
+```
+
+The Vite dev server proxies `/api` and `/preview` to the local service. `ADMIN_DEV=1`
+bypasses Cloudflare Access verification and is set only by `scripts/admin_dev.sh` — it is
+never written into the host env file, and a guard test fails if it is set while the suite
+runs.
+
+Actions will not work locally: they start systemd units that exist only on the host.
+Everything else — health, cost, balances, runs, previews — works from committed data plus
+the GitHub API.
+
 ### Web-Only Host Deployment
 ```bash
 git fetch origin

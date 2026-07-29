@@ -8,6 +8,7 @@
  */
 
 import type { SearchDocument, SearchResult, Category } from '$lib/types';
+import { dataBase, dataUrl } from './dataBase';
 
 interface CorpusDoc extends SearchDocument {
 	ref: string;
@@ -52,13 +53,14 @@ function spawnWorker(): Promise<boolean> {
 
 		worker.addEventListener('message', onMessage);
 		worker.addEventListener('error', () => resolve(false));
-		worker.postMessage({ type: 'init' });
+		// Resolve the base here: the worker has no document to read it from.
+		worker.postMessage({ type: 'init', dataBase: dataBase() });
 	});
 }
 
 async function initializeFallback(): Promise<boolean> {
 	try {
-		const response = await fetch('/data/search-corpus.json');
+		const response = await fetch(dataUrl('/data/search-corpus.json'));
 		if (!response.ok) return false;
 		fallbackDocs = await response.json();
 		docCount = fallbackDocs?.length ?? 0;

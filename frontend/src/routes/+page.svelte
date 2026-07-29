@@ -16,6 +16,7 @@
 	import EmptyState from '$lib/components/common/EmptyState.svelte';
 	import { safeHtml } from '$lib/services/safeHtml';
 	import { hasReplayData } from '$lib/services/replayLoader';
+	import { dataUrl } from '$lib/services/dataBase';
 
 	// Data state
 	let summary: DaySummary | null = null;
@@ -316,7 +317,7 @@
 				date={summary.date}
 				coverageDate={summary.coverage_date}
 				totalItems={summary.total_items_analyzed}
-				heroImageUrl={summary.hero_image_url || null}
+				heroImageUrl={summary.hero_image_url ? dataUrl(summary.hero_image_url) : null}
 				collectionStatus={summary.collection_status?.overall || 'success'}
 				{replayUrl}
 			/>

@@ -2,6 +2,19 @@
 set -e
 cd /home/ubuntu/ai-news-aggregator
 
+# Serialise against admin-panel actions, which take the same lock. Without this
+# a push landing mid-rebuild runs `git reset --hard` and `git clean -fd` on the
+# build context of a running `docker compose build`.
+#
+# Re-exec under flock rather than wrapping the body, so the lock covers every
+# exit path including the signature-gate abort below. Skipped when the lock file
+# does not exist, so a host without the admin service is unaffected.
+LOCK_FILE="/var/lib/aatf-admin/privileged.lock"
+if [ -z "${DEPLOY_LOCK_HELD:-}" ] && [ -e "$LOCK_FILE" ]; then
+    export DEPLOY_LOCK_HELD=1
+    exec /usr/bin/flock --wait 1800 "$LOCK_FILE" "$0" "$@"
+fi
+
 LOG_FILE="logs/deploy.log"
 log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S'): $1" >> "$LOG_FILE"

@@ -1,0 +1,107 @@
+export interface HealthAnomaly {
+	date: string;
+	source: string;
+	count: number;
+	baseline: number;
+	weekday: string;
+	ratio: number;
+	detail: string;
+}
+
+export interface HealthSeries {
+	sources: string[];
+	dates: string[];
+	/** null means no report published that day — not "collected nothing". */
+	series: Record<string, (number | null)[]>;
+	anomalies: HealthAnomaly[];
+}
+
+export interface CostRun {
+	date: string;
+	cost_usd: number;
+	llm_calls: number;
+	input_tokens: number;
+	output_tokens: number;
+	items: number;
+	status: string;
+	duration_ms: number;
+	/** false = reconstructed offline; timings are not measurements. */
+	timings_measured: boolean;
+}
+
+export interface BalanceHistoryPoint {
+	ts: string;
+	balance: number;
+	balance_usd: number | null;
+}
+
+export interface Balance {
+	vendor: string;
+	label: string;
+	unit: string;
+	balance: number | null;
+	balance_usd: number | null;
+	error: string;
+	history: BalanceHistoryPoint[];
+	burn_per_day: number | null;
+	days_remaining: number | null;
+	urgent: boolean;
+}
+
+export interface WorkflowRun {
+	id: number;
+	status: string;
+	conclusion: string | null;
+	event: string;
+	created_at: string;
+	updated_at: string;
+	html_url: string;
+	run_attempt: number;
+	duration_seconds: number;
+	/** false = a schedule-gate no-op, not a real pipeline run. */
+	did_real_work: boolean;
+}
+
+export interface LatestReport {
+	date: string;
+	total_items: number;
+	categories: Record<string, { count: number; file_size: number }>;
+	topics: number;
+	generated_at: string | null;
+	has_replay: boolean;
+}
+
+export interface ActionSpec {
+	name: string;
+	description: string;
+	needs_arg: boolean;
+	danger: 'low' | 'medium' | 'high';
+}
+
+export interface ActionStatus {
+	unit: string;
+	active_state: string;
+	result: string;
+	exit_code: number | null;
+	finished: boolean;
+	succeeded: boolean;
+}
+
+export interface AuditEntry {
+	id: number;
+	ts: string;
+	principal: string;
+	action: string;
+	target: string | null;
+	outcome: string;
+	detail: string;
+}
+
+export interface PreviewJob {
+	job_id: string;
+	kind: 'hero' | 'report';
+	date: string;
+	created_at: string;
+	size_bytes: number;
+	url: string;
+}

@@ -6,6 +6,7 @@
  * every failure path here degrades to "no typewriter", never to a broken page.
  */
 
+import { dataUrl } from './dataBase';
 import type { ReplayIndex, ReplayPrompts, ReplayStream } from '$lib/types/replay';
 
 const cache = new Map<string, unknown>();
@@ -13,15 +14,15 @@ const probeCache = new Map<string, Promise<boolean>>();
 const inFlight = new Map<string, Promise<unknown>>();
 
 export function replayIndexUrl(date: string): string {
-	return `/data/${date}/replay-index.json`;
+	return dataUrl(`/data/${date}/replay-index.json`);
 }
 
 export function replayStreamUrl(date: string): string {
-	return `/data/${date}/replay-stream.json.gz`;
+	return dataUrl(`/data/${date}/replay-stream.json.gz`);
 }
 
 export function replayPromptsUrl(date: string): string {
-	return `/data/${date}/replay-prompts.json.gz`;
+	return dataUrl(`/data/${date}/replay-prompts.json.gz`);
 }
 
 /** Load the replay index for a date. Throws when the date has no replay data. */

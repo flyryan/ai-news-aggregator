@@ -12,7 +12,9 @@ interface CorpusDoc extends SearchDocument {
 	ref: string;
 }
 
-type InitMessage = { type: 'init' };
+// The worker has no `document`, so it cannot read the data-base attribute
+// itself. The main thread resolves it and passes it in with the init message.
+type InitMessage = { type: 'init'; dataBase?: string };
 type SearchMessage = {
 	type: 'search';
 	id: number;
@@ -39,8 +41,8 @@ function buildIndex(docs: CorpusDoc[]): MiniSearch<CorpusDoc> {
 	return index;
 }
 
-async function init(): Promise<void> {
-	const response = await fetch('/data/search-corpus.json');
+async function init(dataBase = ''): Promise<void> {
+	const response = await fetch(`${dataBase}/data/search-corpus.json`);
 	if (!response.ok) {
 		throw new Error(`Failed to fetch corpus: ${response.status}`);
 	}
@@ -86,7 +88,7 @@ function runSearch(msg: SearchMessage): void {
 self.onmessage = (event: MessageEvent<IncomingMessage>) => {
 	const msg = event.data;
 	if (msg.type === 'init') {
-		init().catch((e) => {
+		init(msg.dataBase ?? '').catch((e) => {
 			postMessage({ type: 'error', message: String(e) });
 		});
 	} else if (msg.type === 'search') {
