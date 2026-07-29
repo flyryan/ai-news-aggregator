@@ -1,0 +1,24 @@
+# Re-sync the admin service's own code from the checkout and restart it.
+#
+# The service runs from /opt/aatf-admin rather than the checkout so a
+# git reset --hard cannot swap code under a live process. The cost is that
+# admin changes need this step; this unit is that step.
+#
+# Deliberately does NOT take the privileged lock: it restarts the admin service,
+# which would otherwise deadlock against a lock that service is waiting on.
+[Unit]
+Description=AATF admin self-redeploy
+
+[Service]
+Type=oneshot
+User=root
+
+ExecStart=/usr/bin/rsync -a --delete --exclude __pycache__ \
+    /home/ubuntu/ai-news-aggregator/admin_service/ /opt/aatf-admin/admin_service/
+ExecStart=/opt/aatf-admin/venv/bin/pip install --quiet -r \
+    /home/ubuntu/ai-news-aggregator/admin_service/requirements.txt
+ExecStart=/usr/bin/systemctl restart aatf-admin.service
+
+TimeoutStartSec=600
+StandardOutput=journal
+StandardError=journal

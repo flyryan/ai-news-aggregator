@@ -1,0 +1,29 @@
+# Regenerate the hero image for one report date. %i is the date.
+#
+# Writes into the preview area, not web/data: hero.webp is git-tracked, so a
+# direct write would be reverted by the next deploy. Promotion is a separate,
+# explicit step.
+#
+# --web-dir redirects the whole output tree (regenerate_hero.py builds both
+# hero.webp and summary.json beneath it), so preview needs no code change.
+# -y skips the confirmation prompt, which would hang a non-interactive unit.
+#
+# Runs as ubuntu rather than root: it only needs the pipeline venv and the
+# preview directory, and the image API key is scoped to that user's env file.
+[Unit]
+Description=AATF hero regeneration for %i
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/ai-news-aggregator
+EnvironmentFile=/etc/aatf-admin/hero.env
+
+ExecStart=/usr/bin/flock /var/lib/aatf-admin/privileged.lock \
+    /home/ubuntu/ai-news-aggregator/venv/bin/python3 \
+    scripts/regenerate_hero.py %i -y \
+    --web-dir /var/lib/aatf-admin/previews/hero-%i/web
+
+TimeoutStartSec=900
+StandardOutput=journal
+StandardError=journal

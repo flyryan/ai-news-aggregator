@@ -1,0 +1,31 @@
+# Rebuild and restart the public web container.
+#
+# Runs as root because it drives docker. The admin service cannot do this
+# itself: aatfadmin is deliberately not in the docker group, since docker group
+# membership is effective root and would make an auth bug on the panel a host
+# compromise.
+#
+# Not a child of the admin process, so restarting or redeploying the panel
+# mid-build does not kill the build.
+[Unit]
+Description=AATF rebuild web container
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/home/ubuntu/ai-news-aggregator
+
+# Build first, and only swap containers if the build succeeded. `up -d --build`
+# in one step can tear down a working container and then fail to replace it,
+# and restart: unless-stopped will loop the broken image.
+#
+# The service name is explicit: an unscoped `up -d` rebuilds every service in
+# the compose project, including anything added later.
+ExecStart=/usr/bin/flock /var/lib/aatf-admin/privileged.lock \
+    /usr/bin/docker compose -f docker-compose.web.yml build ai-news-aggregator
+ExecStart=/usr/bin/flock /var/lib/aatf-admin/privileged.lock \
+    /usr/bin/docker compose -f docker-compose.web.yml up -d ai-news-aggregator
+
+TimeoutStartSec=1200
+StandardOutput=journal
+StandardError=journal

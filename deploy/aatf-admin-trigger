@@ -1,0 +1,49 @@
+#!/bin/bash
+# The only command aatfadmin may run under sudo.
+#
+# Maps a fixed set of action names onto pre-declared systemd units. The action
+# is matched against a literal case list before anything else happens, and the
+# only free-form input -- the hero date -- is pattern-validated before it can
+# reach a systemd instance name.
+#
+# Defense in depth: the sudoers rule also constrains the date with a character
+# class glob, so an injection attempt is refused by sudo before this script even
+# runs. Both layers verified on the host.
+#
+# Usage: aatf-admin-trigger <action> [arg]
+# Exit:  0 started | 2 unknown action | 3 invalid argument
+set -euo pipefail
+
+ACTION="${1:-}"
+ARG="${2:-}"
+
+start_unit() {
+    # --no-block so the caller returns immediately; the panel polls status.
+    /usr/bin/systemctl start --no-block "$1"
+    echo "$1"
+}
+
+case "$ACTION" in
+    rebuild-web)
+        start_unit aatf-rebuild-web.service
+        ;;
+    git-sync)
+        start_unit aatf-git-sync.service
+        ;;
+    admin-redeploy)
+        start_unit aatf-admin-redeploy.service
+        ;;
+    hero-regen)
+        # The date becomes a systemd instance name. Validate by pattern rather
+        # than escaping: anything that is not exactly YYYY-MM-DD is refused.
+        if ! printf '%s' "$ARG" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+            echo "invalid date: expected YYYY-MM-DD" >&2
+            exit 3
+        fi
+        start_unit "aatf-hero-regen@${ARG}.service"
+        ;;
+    *)
+        echo "unknown action: ${ACTION}" >&2
+        exit 2
+        ;;
+esac

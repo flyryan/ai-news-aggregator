@@ -1,0 +1,18 @@
+# Sync the host checkout to a signature-verified origin/main.
+#
+# Delegates to scripts/verified_sync.sh so this path enforces the same
+# CWE-345 signed-commit gate as the deploy webhook. Never bypass it.
+[Unit]
+Description=AATF verified git sync
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/home/ubuntu/ai-news-aggregator
+
+ExecStart=/usr/bin/flock /var/lib/aatf-admin/privileged.lock \
+    /home/ubuntu/ai-news-aggregator/scripts/verified_sync.sh
+
+TimeoutStartSec=600
+StandardOutput=journal
+StandardError=journal
