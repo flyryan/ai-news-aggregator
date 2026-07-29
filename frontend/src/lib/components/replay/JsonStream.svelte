@@ -68,21 +68,33 @@
 	 *
 	 * While a call is still streaming the last card is mid-write. Sorting it by a score
 	 * that has not been parsed yet would make it jump around under the cursor, so it is
-	 * pinned to the end until the array completes. Everything already written sorts
-	 * normally, which is the effect worth watching: the ranking assembling itself.
+	 * pinned to the end until the array completes.
 	 *
 	 * Cards with no score keep their model order among themselves, after the scored
 	 * ones — an unscored card has no position to claim.
 	 */
+	/**
+	 * Sorting applies live: watching the ranking assemble itself as each score lands is
+	 * the point of this view, so it must not wait for the response to finish.
+	 *
+	 * Everything this depends on is read *inside* the reactive block on purpose. Svelte
+	 * derives a `$:` statement's dependencies from the variables it reads directly, so
+	 * factoring the body out into `computeOrder(sortMode)` silently narrowed them to
+	 * `sortMode` alone — the order then never recomputed as `items` grew, and a
+	 * streaming call rendered only its first card while the header counted the rest.
+	 */
 	$: viewOrder = (() => {
 		const idx = items.map((_, i) => i);
 		if (sortMode === 'order') return idx;
+		// The last card is mid-write and its score has not parsed yet, so it is pinned
+		// to the end rather than thrashing position under the cursor.
 		const writingIdx = live && !complete ? items.length - 1 : -1;
 		const scored = idx.filter((i) => i !== writingIdx);
 		scored.sort((a, b) => {
 			const sa = scoreOf(items[a]);
 			const sb = scoreOf(items[b]);
 			if (sa && sb) return sb.n - sa.n || a - b;
+			// Unscored cards hold model order among themselves, after the scored ones.
 			if (sa) return -1;
 			if (sb) return 1;
 			return a - b;
@@ -146,8 +158,8 @@
 				</span>
 			{/if}
 			{#if hasScores}
-				<!-- Sorting stays live while the call streams: watching the ranking
-				     reorder itself as each score lands is the interesting part. -->
+				<!-- Applies once the stream lands, so the sort animation and the
+				     follow-the-newest scroll never move the list at the same time. -->
 				<span class="js-sort" role="group" aria-label="Sort items">
 					<button
 						type="button"

@@ -125,12 +125,15 @@
 		engine?.destroy();
 		engine = null;
 		frame = null;
+		revealObserver?.disconnect();
+		revealObserver = null;
 	}
 
 	onDestroy(teardown);
 
-	/** The transcript pane, so selecting a call can bring it into view. */
+	/** The transcript pane and the sticky control dock that overlaps its bottom. */
 	let transcriptEl: HTMLDivElement | null = null;
+	let dockEl: HTMLDivElement | null = null;
 
 	/**
 	 * Bring the transcript into view after selecting a call.
@@ -139,13 +142,68 @@
 	 * a bar near the top of the chart used to open a panel entirely off-screen — the
 	 * click read as doing nothing at all.
 	 *
-	 * `block: 'nearest'` rather than 'start': it scrolls only when the pane is actually
-	 * out of view, so clicking chip after chip in the Newsroom (where the pane is
-	 * already on screen) doesn't yank the page on every click.
+	 * `scrollIntoView` is not enough. `block: 'nearest'` does the minimum needed to
+	 * touch the viewport edge, which leaves the pane's bottom under the sticky dock;
+	 * `block: 'end'` aligns to the viewport, which *includes* the dock. So the target
+	 * is computed against the space the dock actually leaves.
+	 *
+	 * The timing matters more than the arithmetic. `await tick()` only guarantees
+	 * Svelte has patched the DOM — the pane is still growing at that point (the stats
+	 * row, the stream block, the JSON cards all land after), so measuring there reads
+	 * a height that is too short and under-scrolls. That is the "first click doesn't
+	 * go far enough, second click does" symptom: by the second click the pane is
+	 * already at full height. Measuring on the next animation frame, after layout has
+	 * settled, makes the first click behave like the second.
+	 *
+	 * A ResizeObserver then re-runs it for content that arrives later still (a lazily
+	 * parsed stream, an image). It fires once and disconnects, so it can't fight the
+	 * user's own scrolling afterwards.
+	 *
+	 * Never scrolls upward: a pane already in view stays put, so clicking chip after
+	 * chip in the Newsroom doesn't yank the page every time.
 	 */
+	let revealObserver: ResizeObserver | null = null;
+
+	function scrollPaneIntoView() {
+		if (!transcriptEl || typeof window === 'undefined') return;
+		const rect = transcriptEl.getBoundingClientRect();
+		const dockHeight = dockEl?.getBoundingClientRect().height ?? 0;
+		const gap = 16;
+		const usableBottom = window.innerHeight - dockHeight - gap;
+		// How far to scroll for the whole pane to clear the dock...
+		const needed = rect.bottom - usableBottom;
+		// ...capped so the pane's own header (name, caller, stats) stays on screen
+		// when the pane is taller than the space available.
+		const keepHeaderVisible = rect.top - gap;
+		const delta = Math.min(needed, keepHeaderVisible);
+		if (delta <= 1) return;
+		window.scrollBy({ top: delta, behavior: reduced ? 'auto' : 'smooth' });
+	}
+
 	async function revealTranscript() {
 		await tick();
-		transcriptEl?.scrollIntoView({ block: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
+		if (!transcriptEl || typeof window === 'undefined') return;
+
+		revealObserver?.disconnect();
+		revealObserver = null;
+
+		requestAnimationFrame(() => {
+			scrollPaneIntoView();
+
+			// Catch late-arriving content that changes the pane's height.
+			if (typeof ResizeObserver === 'undefined' || !transcriptEl) return;
+			let settled = false;
+			revealObserver = new ResizeObserver(() => {
+				if (settled) return;
+				settled = true;
+				requestAnimationFrame(() => {
+					scrollPaneIntoView();
+					revealObserver?.disconnect();
+					revealObserver = null;
+				});
+			});
+			revealObserver.observe(transcriptEl);
+		});
 	}
 
 	/**
@@ -503,7 +561,7 @@
 		{/if}
 
 		<!-- Persistent controls -->
-		<div class="dock">
+		<div class="dock" bind:this={dockEl}>
 			<PlaybackBar
 				{index}
 				t={frame.t}

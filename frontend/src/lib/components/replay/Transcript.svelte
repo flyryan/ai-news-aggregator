@@ -54,7 +54,17 @@
 	export let onClose: () => void = () => {};
 
 	let bodyEl: HTMLDivElement | null = null;
-	let autoScroll = true;
+	/**
+	 * Off until the reader asks for it by scrolling to the bottom themselves.
+	 *
+	 * This used to default on, so a pane opened on a live call immediately started
+	 * chasing the newest token. Filling in for the first time is exactly when the
+	 * content is growing fastest and the list is reordering as scores land, so the
+	 * viewport lurched on every frame and the whole pane read as warping. Following
+	 * the stream is a fine thing to want — it is just something to opt into, once,
+	 * rather than the state every pane opens in.
+	 */
+	let autoScroll = false;
 
 	// Prefix sums over the deltas: rendering at time `t` is a binary search plus a
 	// slice, never a per-frame accumulation. Recomputed only when the call changes.
@@ -157,6 +167,21 @@
 		requestAnimationFrame(() => {
 			selfScrolling = false;
 		});
+	}
+
+	// Each call opens at the top of its own body, following nothing. Without the reset
+	// a pane inherited the previous call's "stuck to bottom" state and dropped you into
+	// the middle of the output, past the header and the prompt.
+	$: if (call.id) {
+		autoScroll = false;
+		const el = bodyEl;
+		if (el) {
+			selfScrolling = true;
+			el.scrollTop = 0;
+			requestAnimationFrame(() => {
+				selfScrolling = false;
+			});
+		}
 	}
 
 	$: if (bodyEl && autoScroll && (thinkingText || answerText)) {
@@ -467,6 +492,12 @@
 				>
 					<span class="prompt-caret" class:open={promptOpen} aria-hidden="true">▸</span>
 					The prompt
+					<!-- The caret alone read as decoration next to an all-caps label, so the
+					     action is spelled out. It also states what you get, since the whole
+					     point is that this is the exact text the model received. -->
+					<span class="prompt-hint">
+						{promptOpen ? '(hide)' : '(click to see what the model was sent)'}
+					</span>
 				</button>
 				<span class="answer-meta">
 					{#if promptChars}
