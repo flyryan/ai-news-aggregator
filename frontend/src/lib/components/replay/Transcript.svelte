@@ -50,6 +50,9 @@
 	export let promptsState: 'idle' | 'loading' | 'ready' | 'unavailable' = 'idle';
 	/** Fetches the prompts artifact; called the first time a prompt is unfolded. */
 	export let onLoadPrompts: () => void | Promise<void> = () => {};
+	/** id → item title for the day, so hash-only output reads as stories. */
+	export let itemIndex: Map<string, string> | null = null;
+	export let onNeedItemIndex: () => void | Promise<void> = () => {};
 	export let onSeek: (ms: number) => void = () => {};
 	export let onClose: () => void = () => {};
 
@@ -143,6 +146,47 @@
 	// bar was full — the number and the bar were measuring different things.
 	$: localT = Math.min(Math.max(0, t - call.queued_ms), call.end_ms - call.queued_ms);
 	$: localSpan = Math.max(1, call.end_ms - call.queued_ms);
+
+	/**
+	 * The mini bar seeks within the call, the way the main scrubber seeks within
+	 * the run. It was display-only, which made it read as a broken control: a bar
+	 * with a moving fill and a clock invites clicking, and the only affordances
+	 * that responded were the start/end jumps either side of it.
+	 */
+	let miniDragging = false;
+	function miniSeekFromEvent(event: PointerEvent) {
+		const el = event.currentTarget as HTMLElement | null;
+		if (!el) return;
+		const rect = el.getBoundingClientRect();
+		const f = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+		onSeek(call.queued_ms + f * localSpan);
+	}
+	function miniPointerDown(event: PointerEvent) {
+		miniDragging = true;
+		(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+		miniSeekFromEvent(event);
+	}
+	function miniPointerMove(event: PointerEvent) {
+		if (miniDragging) miniSeekFromEvent(event);
+	}
+	function miniPointerUp(event: PointerEvent) {
+		miniDragging = false;
+		try {
+			(event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
+		} catch {
+			/* capture may already be gone */
+		}
+	}
+	function miniKey(event: KeyboardEvent) {
+		const step = localSpan / 40;
+		if (event.key === 'ArrowLeft') {
+			event.preventDefault();
+			onSeek(Math.max(call.queued_ms, t - step));
+		} else if (event.key === 'ArrowRight') {
+			event.preventDefault();
+			onSeek(Math.min(call.end_ms, t + step));
+		}
+	}
 
 	$: ttft = ttftOf(call);
 	$: accent = providerColor(call.provider_id);
@@ -481,7 +525,21 @@
 			on:click={() => onSeek(call.queued_ms)}
 			title="Jump to the start of this call">⏮ start</button
 		>
-		<div class="mini">
+		<div
+			class="mini"
+			role="slider"
+			tabindex="0"
+			aria-label="Position within this call"
+			aria-valuemin={0}
+			aria-valuemax={Math.round(localSpan / 1000)}
+			aria-valuenow={Math.round(localT / 1000)}
+			aria-valuetext="{formatDuration(localT)} into the call"
+			on:pointerdown={miniPointerDown}
+			on:pointermove={miniPointerMove}
+			on:pointerup={miniPointerUp}
+			on:pointercancel={miniPointerUp}
+			on:keydown={miniKey}
+		>
 			<span class="mini-fill" style="width: {(localT / localSpan) * 100}%"></span>
 			{#if call.first_token_ms != null}
 				<span
@@ -727,6 +785,8 @@
 						root={parsedJson.root}
 						complete={parsedJson.complete}
 						live={isLive}
+						{itemIndex}
+						{onNeedItemIndex}
 						{reduced}
 					/>
 					{#if parsedJson.epilogue}
@@ -902,6 +962,22 @@
 		border-radius: 999px;
 		background: rgb(0 0 0 / 0.1);
 		overflow: visible;
+		cursor: pointer;
+		touch-action: none;
+	}
+	/* A 4px strip is a hostile click target; widen the hit area without changing
+	   the visual weight. */
+	.mini::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: -8px;
+		bottom: -8px;
+	}
+	.mini:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 6px;
 	}
 	:global(.dark) .mini {
 		background: rgb(255 255 255 / 0.12);

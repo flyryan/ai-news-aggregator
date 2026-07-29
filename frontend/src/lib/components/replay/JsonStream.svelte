@@ -15,12 +15,54 @@
 	 */
 	import { flip } from 'svelte/animate';
 	import type { PartialValue, PartialEntry } from '$lib/services/replayJson';
-	import { humaniseKey, previewOf, principalArray, scoreFraction } from '$lib/services/replayJson';
+	import {
+		humaniseKey,
+		looksLikeItemId,
+		previewOf,
+		principalArray,
+		scoreFraction
+	} from '$lib/services/replayJson';
 
 	export let root: PartialValue;
 	export let complete = false;
 	export let live = false;
 	export let reduced = false;
+	/**
+	 * id → item title for the replay's date, so output that references items only
+	 * by hash (the continuity matcher, the curator) reads as stories instead.
+	 * Null until the page loads it — see `onNeedItemIndex`.
+	 */
+	export let itemIndex: Map<string, string> | null = null;
+	/** Asks the page to fetch the day's items; called once, when hashes appear. */
+	export let onNeedItemIndex: () => void | Promise<void> = () => {};
+
+	// Reactive on purpose: the resolver's identity changes when the index lands,
+	// which is what makes every already-rendered preview re-evaluate. A stable
+	// function reading `itemIndex` from closure would leave stale hashes on screen.
+	$: resolver = itemIndex
+		? (s: string) => itemIndex?.get(s.trim()) ?? null
+		: undefined;
+
+	// Request the item index the first time id-shaped strings show up. Scanning is
+	// bounded: one look at the first few items is enough to know whether this call's
+	// output talks in hashes at all.
+	let requestedIndex = false;
+	$: if (!requestedIndex && !itemIndex && hasIdStrings(items)) {
+		requestedIndex = true;
+		void onNeedItemIndex();
+	}
+
+	function hasIdStrings(list: PartialValue[]): boolean {
+		for (const item of list.slice(0, 25)) {
+			if (item.kind === 'string' && looksLikeItemId(item.value)) return true;
+			if (item.kind === 'object') {
+				for (const e of item.entries) {
+					if (e.value?.kind === 'string' && looksLikeItemId(e.value.value)) return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	$: principal = principalArray(root);
 	$: cards = principal?.value.kind === 'array' ? principal.value.items : [];
@@ -195,7 +237,7 @@
 						<!-- The model's own position, kept even when sorted by score: it is how
 						     you tell what the sort actually moved. -->
 						<span class="js-idx">{i + 1}</span>
-						<span class="js-preview">{previewOf(item, 160)}</span>
+						<span class="js-preview">{previewOf(item, 160, resolver)}</span>
 						{#if score}
 							<span
 								class="js-badge"
@@ -225,14 +267,27 @@
 										{:else if isArrayOfStrings(e.value)}
 											<span class="js-tags">
 												{#each e.value.kind === 'array' ? e.value.items : [] as tag, ti (ti)}
-													<span class="js-tag">{tag.kind === 'string' ? tag.value : ''}</span>
+													{@const raw = tag.kind === 'string' ? tag.value : ''}
+													{@const resolved = resolver?.(raw) ?? null}
+													<span class="js-tag" title={resolved ? raw : undefined}
+														>{resolved ?? raw}</span
+													>
 												{/each}
 											</span>
 										{:else if e.value.kind === 'string'}
-											<span class="js-str">{e.value.value}{#if !e.value.complete}<span
-														class="js-cursor"
-													></span>{/if}</span
-											>
+											{@const resolved = resolver?.(e.value.value) ?? null}
+											{#if resolved}
+												<!-- The id resolved to its item: lead with the story, keep the
+												     hash for anyone cross-referencing the raw JSON. -->
+												<span class="js-str"
+													>{resolved} <span class="js-id-hash">{e.value.value}</span></span
+												>
+											{:else}
+												<span class="js-str">{e.value.value}{#if !e.value.complete}<span
+															class="js-cursor"
+														></span>{/if}</span
+												>
+											{/if}
 										{:else if e.value.kind === 'number'}
 											<span class="js-num">{e.value.value}</span>
 										{:else if e.value.kind === 'boolean'}
@@ -274,11 +329,11 @@
 			{:else if e.value.kind === 'array'}
 				<ol class="js-bullets">
 					{#each e.value.items as v, vi (vi)}
-						<li>{previewOf(v, 220)}</li>
+						<li>{previewOf(v, 220, resolver)}</li>
 					{/each}
 				</ol>
 			{:else}
-				<p class="js-side-text">{previewOf(e.value, 300)}</p>
+				<p class="js-side-text">{previewOf(e.value, 300, resolver)}</p>
 			{/if}
 		</section>
 	{/each}
@@ -483,6 +538,15 @@
 	.js-sort button.on {
 		color: #fff;
 		background: var(--accent, #E63946);
+	}
+
+	/* The raw id beside its resolved title: present for cross-referencing the raw
+	   JSON view, quiet enough not to compete with the story name. */
+	.js-id-hash {
+		font-family: ui-monospace, monospace;
+		font-size: 0.58rem;
+		color: #a3a3a3;
+		opacity: 0.8;
 	}
 
 	.js-caret {

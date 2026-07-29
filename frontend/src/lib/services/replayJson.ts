@@ -310,14 +310,29 @@ const PREVIEW_KEYS = [
  * whatever prose the record carries instead.
  */
 function isIdLike(key: string, value: string): boolean {
-	return /(^|_)ids?$/i.test(key) || /^[0-9a-f]{6,}$/i.test(value.trim());
+	return /(^|_)ids?$/i.test(key) || looksLikeItemId(value);
 }
 
-export function previewOf(v: PartialValue | null, max = 120): string {
+/** True for a bare item-id hash (this pipeline's ids are 12 hex chars). */
+export function looksLikeItemId(value: string): boolean {
+	return /^[0-9a-f]{6,}$/i.test(value.trim());
+}
+
+/** Resolves an item-id hash to something human (its title), or null. */
+export type IdResolver = (id: string) => string | null;
+
+export function previewOf(v: PartialValue | null, max = 120, resolve?: IdResolver): string {
 	if (!v) return '';
 	switch (v.kind) {
-		case 'string':
+		case 'string': {
+			// A bare id (the matcher's `no_match` array is exactly this) resolves to
+			// its item's title when the caller can supply one.
+			if (resolve) {
+				const title = resolve(v.value.trim());
+				if (title) return truncate(title, max);
+			}
 			return truncate(v.value, max);
+		}
 		case 'number':
 			return v.value;
 		case 'boolean':
@@ -340,9 +355,17 @@ export function previewOf(v: PartialValue | null, max = 120): string {
 			const prose = strings.find(
 				(e) => !isIdLike(e.key, (e.value as { value: string }).value)
 			);
-			// A record that is nothing but ids still shows one — a hash beats "3 fields".
-			const first = prose ?? strings[0];
-			if (first) return truncate((first.value as { value: string }).value, max);
+			if (prose) return truncate((prose.value as { value: string }).value, max);
+			// All ids: resolve one to its item title when possible.
+			if (resolve) {
+				for (const e of strings) {
+					const title = resolve((e.value as { value: string }).value.trim());
+					if (title) return truncate(title, max);
+				}
+			}
+			// A record that is nothing but unresolvable ids still shows one — a hash
+			// beats "3 fields".
+			if (strings[0]) return truncate((strings[0].value as { value: string }).value, max);
 			return v.entries.length === 0 ? '{}' : `${v.entries.length} fields`;
 		}
 	}

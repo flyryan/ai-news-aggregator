@@ -5,6 +5,8 @@
 	import { currentDate, resolveLatestDate } from '$lib/stores/dateStore';
 	import { parseDate, formatDate } from '$lib/services/dateUtils';
 	import { loadReplayIndex, loadReplayPrompts, loadReplayStream } from '$lib/services/replayLoader';
+	import { loadCategoryData } from '$lib/services/dataLoader';
+	import type { Category } from '$lib/types';
 	import {
 		createReplayEngine,
 		SPEEDS,
@@ -48,6 +50,29 @@
 	// unfolds one, so this stays idle through normal playback.
 	let prompts: ReplayPrompts | null = null;
 	let promptsState: 'idle' | 'loading' | 'ready' | 'unavailable' = 'idle';
+	// id → title for the day's items, so structured output that references items by
+	// hash (the continuity agents) reads as stories. Lazy: several MB of category
+	// JSON, fetched once, and only when an open pane actually shows hashes.
+	let itemIndex: Map<string, string> | null = null;
+	let itemIndexState: 'idle' | 'loading' | 'done' = 'idle';
+
+	async function ensureItemIndex() {
+		if (itemIndexState !== 'idle' || !index || isDemo) return;
+		itemIndexState = 'loading';
+		const date = index.date;
+		const categories: Category[] = ['news', 'research', 'social', 'reddit'];
+		const results = await Promise.allSettled(categories.map((c) => loadCategoryData(date, c)));
+		const map = new Map<string, string>();
+		for (const r of results) {
+			if (r.status !== 'fulfilled') continue;
+			for (const item of r.value.items ?? []) {
+				if (item.id && item.title) map.set(item.id, item.title);
+			}
+		}
+		// Partial coverage is fine — an unresolved id just stays a hash.
+		itemIndex = map.size > 0 ? map : null;
+		itemIndexState = 'done';
+	}
 
 	let unsubFrame: (() => void) | null = null;
 	let unsubPlaying: (() => void) | null = null;
@@ -89,6 +114,8 @@
 		streamState = 'idle';
 		prompts = null;
 		promptsState = 'idle';
+		itemIndex = null;
+		itemIndexState = 'idle';
 
 		try {
 			if (key === 'demo') {
@@ -687,6 +714,8 @@
 					{prompts}
 					{promptsState}
 					onLoadPrompts={ensurePrompts}
+					{itemIndex}
+					onNeedItemIndex={ensureItemIndex}
 					onSeek={(ms) => engine?.seek(ms)}
 					onClose={() => (selectedCallId = null)}
 				/>
