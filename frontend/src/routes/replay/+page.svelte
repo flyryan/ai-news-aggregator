@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
 	import { currentDate, resolveLatestDate } from '$lib/stores/dateStore';
 	import { parseDate, formatDate } from '$lib/services/dateUtils';
-	import { loadReplayIndex, loadReplayStream } from '$lib/services/replayLoader';
+	import { loadReplayIndex, loadReplayPrompts, loadReplayStream } from '$lib/services/replayLoader';
 	import {
 		createReplayEngine,
 		SPEEDS,
@@ -13,7 +13,13 @@
 		type Speed
 	} from '$lib/services/replayEngine';
 	import { formatClock, formatTokens, formatCost, formatDuration } from '$lib/services/replayViz';
-	import type { ReplayCall, ReplayCallStream, ReplayIndex, ReplayStream } from '$lib/types/replay';
+	import type {
+		ReplayCall,
+		ReplayCallStream,
+		ReplayIndex,
+		ReplayPrompts,
+		ReplayStream
+	} from '$lib/types/replay';
 	import { REPLAY_SAMPLE, REPLAY_SAMPLE_STREAM } from '$lib/fixtures/replaySample';
 	import Newsroom from '$lib/components/replay/Newsroom.svelte';
 	import Timeline from '$lib/components/replay/Timeline.svelte';
@@ -38,6 +44,10 @@
 	let selectedCallId: string | null = null;
 	let stream: ReplayStream | null = null;
 	let streamState: 'idle' | 'loading' | 'ready' | 'unavailable' = 'idle';
+	// Prompts are the largest artifact and are only fetched when someone actually
+	// unfolds one, so this stays idle through normal playback.
+	let prompts: ReplayPrompts | null = null;
+	let promptsState: 'idle' | 'loading' | 'ready' | 'unavailable' = 'idle';
 
 	let unsubFrame: (() => void) | null = null;
 	let unsubPlaying: (() => void) | null = null;
@@ -77,6 +87,8 @@
 		selectedCallId = null;
 		stream = null;
 		streamState = 'idle';
+		prompts = null;
+		promptsState = 'idle';
 
 		try {
 			if (key === 'demo') {
@@ -117,9 +129,54 @@
 
 	onDestroy(teardown);
 
+	/** The transcript pane, so selecting a call can bring it into view. */
+	let transcriptEl: HTMLDivElement | null = null;
+
+	/**
+	 * Bring the transcript into view after selecting a call.
+	 *
+	 * The pane renders below the stage, and the timeline is ~1000px tall, so clicking
+	 * a bar near the top of the chart used to open a panel entirely off-screen — the
+	 * click read as doing nothing at all.
+	 *
+	 * `block: 'nearest'` rather than 'start': it scrolls only when the pane is actually
+	 * out of view, so clicking chip after chip in the Newsroom (where the pane is
+	 * already on screen) doesn't yank the page on every click.
+	 */
+	async function revealTranscript() {
+		await tick();
+		transcriptEl?.scrollIntoView({ block: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
+	}
+
+	/**
+	 * Fetch the day's prompts, once, on first unfold.
+	 *
+	 * Not fetched with the index: at ~600 KB gzipped it is the largest artifact, and
+	 * most visits never open a prompt. The loader dedupes concurrent calls, so the
+	 * `loading` guard here is only about the UI state.
+	 */
+	async function ensurePrompts() {
+		if (promptsState !== 'idle' || !index) return;
+		if (isDemo) {
+			promptsState = 'unavailable';
+			return;
+		}
+		// The index says whether the file was published, so an absent one costs no
+		// request at all. Older days predate the flag; those still try, and fail soft.
+		if (index.run.prompts_available === false) {
+			promptsState = 'unavailable';
+			return;
+		}
+		promptsState = 'loading';
+		const loaded = await loadReplayPrompts(index.date);
+		prompts = loaded;
+		promptsState = loaded ? 'ready' : 'unavailable';
+	}
+
 	/** Opening a transcript is the only thing that fetches the (optional) stream file. */
 	async function selectCall(callId: string) {
 		selectedCallId = callId;
+		void revealTranscript();
 		if (streamState !== 'idle' || !index) return;
 
 		// The hero call is an image, not a token stream — it carries its own result in
@@ -422,7 +479,7 @@
 
 		<!-- Transcript, opened by clicking any call -->
 		{#if selectedCall}
-			<div class="mb-3">
+			<div class="mb-3" bind:this={transcriptEl}>
 				<Transcript
 					call={selectedCall}
 					stream={selectedStream as ReplayCallStream | null}
@@ -431,6 +488,9 @@
 					timingsMeasured={index.run.timings_measured !== false}
 					t={frame.t}
 					{reduced}
+					{prompts}
+					{promptsState}
+					onLoadPrompts={ensurePrompts}
 					onSeek={(ms) => engine?.seek(ms)}
 					onClose={() => (selectedCallId = null)}
 				/>

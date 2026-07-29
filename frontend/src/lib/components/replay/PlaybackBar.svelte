@@ -17,6 +17,13 @@
 	$: duration = Math.max(1, index.duration_ms || 1);
 	$: progress = (t / duration) * 100;
 
+	// Whole-pixel playhead offset. A percentage resolves to a fractional translate, and
+	// because the thumb is its own compositor layer the fraction makes the compositor
+	// resample a hard-edged line across different device columns every frame — which
+	// reads as a shimmer on slow movement. See Timeline.svelte for the full note.
+	let scrubW = 0;
+	$: thumbPx = Math.round((Math.min(t, duration) / duration) * scrubW) || 0;
+
 	// Density strip: where the calls actually are, so dead air is visible on the bar.
 	$: density = (() => {
 		const BUCKETS = 160;
@@ -120,6 +127,7 @@
 	<div class="scrub-area">
 		<div
 			class="scrub"
+			bind:clientWidth={scrubW}
 			role="slider"
 			tabindex="0"
 			aria-label="Playback position"
@@ -168,7 +176,7 @@
 				percentage of the track.
 			-->
 			<div class="filled" style="transform: scaleX({progress / 100})"></div>
-			<div class="thumb" style="transform: translateX({progress}%)">
+			<div class="thumb" style="transform: translateX({thumbPx}px)">
 				<span class="thumb-line"></span>
 				<!-- Kept mounted and faded rather than toggled: mounting/unmounting a badge
 				     as the count crosses zero is its own flicker. -->
@@ -362,17 +370,19 @@
 		left: 0;
 		top: 0;
 		bottom: 0;
-		width: 100%;
+		width: 0;
 		pointer-events: none;
 		will-change: transform;
 	}
-	/* The playhead rides at the wrapper's left edge; the wrapper does the moving. */
+	/* The playhead rides at the wrapper's left edge; the wrapper does the moving.
+	   Whole-pixel geometry: 1.5px at -0.75px never aligns to a device pixel at any
+	   dpr, so the line was permanently antialiased and re-spread on every frame. */
 	.thumb-line {
 		position: absolute;
 		top: 0;
 		bottom: 0;
-		left: -0.75px;
-		width: 1.5px;
+		left: -1px;
+		width: 2px;
 		background: #E63946;
 	}
 	.thumb-count {

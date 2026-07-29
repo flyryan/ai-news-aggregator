@@ -40,6 +40,12 @@ export interface ReplayRun {
 	/** Set when the generator had to shrink the stream file to fit the size cap. */
 	stream_truncation?: string | null;
 	/**
+	 * Whether `replay-prompts.json.gz` was published for this date. False once the
+	 * file ages out of retention; absent on days that predate prompt capture, which
+	 * are treated as "try and fail soft" rather than assumed either way.
+	 */
+	prompts_available?: boolean;
+	/**
 	 * False when the index was reconstructed offline from run logs rather than
 	 * recorded live. Those days have no per-call queue wait (`wait_ms` is 0) and no
 	 * `first_token_ms`, so anything that segments a call by those must degrade.
@@ -78,6 +84,17 @@ export interface ReplayAgent {
 export interface ReplaySource {
 	agent_id: string;
 	name: string;
+	/**
+	 * True only when the gatherer recorded this source's own span. False or absent
+	 * means the row was stretched across the whole gathering phase and must not be
+	 * drawn as a measurement.
+	 *
+	 * The default is deliberately the opposite of `run.timings_measured`: every day
+	 * published before 2026-07-29 genuinely has no per-source timing, so treating
+	 * absence as "measured" would present six identical phase-wide slabs as though
+	 * each had been individually clocked.
+	 */
+	timing_measured?: boolean;
 	items: number;
 	status: ReplaySourceStatus;
 	start_ms: number;
@@ -192,4 +209,30 @@ export interface ReplayStream {
 	schema: number;
 	date: string;
 	calls: Record<string, ReplayCallStream>;
+}
+
+/** One call's prompt, exactly as it was sent to the provider. */
+export interface ReplayCallPrompt {
+	/** System prompt: ecosystem grounding + injection preamble + instructions. */
+	system?: string | null;
+	/** The user message(s), including the nonce-fenced source data. */
+	messages?: string | null;
+	/** Total chars actually sent, even if the text above was capped. */
+	chars?: number;
+	/** True when the recorder's size cap trimmed the text held here. */
+	truncated?: boolean;
+}
+
+/**
+ * Lazily-fetched companion to the index: `web/data/{date}/replay-prompts.json.gz`.
+ *
+ * Kept out of the index because it is the largest artifact by far (~600 KB
+ * gzipped) and only matters once a detail pane is opened. Absent for days
+ * published before prompt capture existed, and for days past the retention
+ * window — both must degrade to "not retained", never to an error.
+ */
+export interface ReplayPrompts {
+	schema: number;
+	date: string;
+	calls: Record<string, ReplayCallPrompt>;
 }

@@ -82,17 +82,25 @@ class SocialGatherer(BaseGatherer):
         with ThreadPoolExecutor(max_workers=6) as executor:
             tasks = []
 
+            # Each platform times itself, so the replay can draw three real bars
+            # instead of one slab: they run concurrently but finish minutes apart.
+            def timed(key, fn):
+                def run():
+                    with self.time_source(key):
+                        return fn()
+                return run
+
             # Twitter collection
             if self.twitter_users and TWITTERAPI_IO_KEY:
-                tasks.append(loop.run_in_executor(executor, self._collect_twitter))
+                tasks.append(loop.run_in_executor(executor, timed('twitter', self._collect_twitter)))
 
             # Bluesky collection
             if self.bluesky_handles:
-                tasks.append(loop.run_in_executor(executor, self._collect_bluesky))
+                tasks.append(loop.run_in_executor(executor, timed('bluesky', self._collect_bluesky)))
 
             # Mastodon collection
             if self.mastodon_accounts:
-                tasks.append(loop.run_in_executor(executor, self._collect_mastodon))
+                tasks.append(loop.run_in_executor(executor, timed('mastodon', self._collect_mastodon)))
 
             if tasks:
                 results = await asyncio.gather(*tasks)

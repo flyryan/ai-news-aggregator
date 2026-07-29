@@ -1,11 +1,17 @@
 """Builds the LLM replay artifacts from a completed pipeline run.
 
-Two files land in ``web/data/{date}/``:
+Three files land in ``web/data/{date}/``:
 
 * ``replay-index.json`` -- small, permanent, and self-sufficient. Everything the
   replay UI needs to draw the newsroom, the Gantt and the funnel.
 * ``replay-stream.json.gz`` -- the per-call output deltas that drive the
   typewriter. Heavy, prunable, and capped; the index works without it.
+* ``replay-prompts.json.gz`` -- the prompt each call actually sent. The largest of
+  the three (~600 KB gzipped), fetched only when a detail pane is opened, and
+  pruned after ``PROMPT_RETENTION_DAYS``. The index and stream work without it.
+
+The two ``.gz`` files are inflated in the browser via ``DecompressionStream``
+rather than by ``Content-Encoding``; nginx serves them as opaque binaries.
 
 ``docs/replay-schema.md`` is the contract. This module shapes raw material into
 it from three sources, in decreasing order of fidelity:
@@ -27,7 +33,7 @@ import json
 import logging
 import os
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 if __name__ == "__main__" and __package__ is None:
@@ -57,6 +63,18 @@ CONCURRENCY_INTERVAL_MS = 2000
 
 DEFAULT_MAX_STREAM_BYTES = 600_000
 
+# Prompts are the biggest artifact -- a run sends ~2.7 MB of prompt to produce
+# ~370 KB of output, because every analyzer batch carries its items. This is a
+# reporting threshold rather than a hard ladder like the stream's: the file is
+# fetched only when a detail pane opens, so an oversized one costs page-load
+# nothing, and truncating a prompt is worse than publishing a large file.
+DEFAULT_MAX_PROMPT_BYTES = 1_500_000
+
+# Prompt artifacts older than this are pruned on each run. Retention is by age
+# here (unlike the stream's size-based pruning) because the cost being managed is
+# git history growth -- ~220 MB/year if kept forever -- not page weight.
+PROMPT_RETENTION_DAYS = 30
+
 # Phase names come from the orchestrator as "Phase 2.5: Continuity Detection".
 _PHASE_NAME_RE = re.compile(r"^Phase\s+(?P<ordinal>[\d.]+)\s*:\s*(?P<label>.+)$")
 
@@ -71,10 +89,17 @@ _SOURCE_LABELS = {
     "social_twitter": ("social_gatherer", "Twitter"),
     "social_bluesky": ("social_gatherer", "Bluesky"),
     "social_mastodon": ("social_gatherer", "Mastodon"),
+    # Timed separately from each other since 2026-07-29; on older days neither key
+    # exists and the combined "research" row above is what renders.
+    "research_arxiv": ("research_gatherer", "arXiv"),
+    "research_blogs": ("research_gatherer", "Research blogs"),
 }
 
-# Aggregate rows would double-count against their per-platform children.
+# Aggregate rows would double-count against their per-source children. `research`
+# is only superseded on runs that actually recorded the split -- older days have no
+# children for it, and dropping it there would lose the row entirely.
 _SOURCE_SUPERSEDED = {"social"}
+_SOURCE_SUPERSEDED_IF_SPLIT = {"research": ("research_arxiv", "research_blogs")}
 
 # Anything matching these in the finished artifact means something leaked that
 # should not be published. Checked before writing, not after.
@@ -158,6 +183,7 @@ class ReplayGenerator:
         self,
         web_dir: str,
         max_stream_bytes: Optional[int] = None,
+        max_prompt_bytes: Optional[int] = None,
     ):
         self.web_dir = web_dir
         self.data_dir = os.path.join(web_dir, "data")
@@ -165,6 +191,11 @@ class ReplayGenerator:
             max_stream_bytes
             if max_stream_bytes is not None
             else _env_int("LLM_REPLAY_MAX_BYTES", DEFAULT_MAX_STREAM_BYTES, minimum=1024)
+        )
+        self.max_prompt_bytes = (
+            max_prompt_bytes
+            if max_prompt_bytes is not None
+            else _env_int("LLM_REPLAY_MAX_PROMPT_BYTES", DEFAULT_MAX_PROMPT_BYTES, minimum=1024)
         )
 
     # -- timebase --------------------------------------------------------
@@ -512,21 +543,54 @@ class ReplayGenerator:
 
     @staticmethod
     def _build_sources(
-        collection_status: Dict[str, Any], phases: Sequence[Dict[str, Any]]
+        collection_status: Dict[str, Any],
+        phases: Sequence[Dict[str, Any]],
+        t0: Optional[float] = None,
     ) -> List[Dict[str, Any]]:
         """Turn per-source collection results into stage props.
 
-        Gathering has no per-source timing, so every source is stretched across
-        the gathering phase. That is honest at the resolution we have: the
-        gatherers genuinely do run concurrently for that whole window.
+        Gatherers record their own wall-clock span per source (``started_at`` /
+        ``ended_at`` epochs, same convention as ``PhaseTracker``), which becomes a
+        real staggered bar. When a source has no timing -- an un-instrumented
+        gatherer, or a day published before this existed -- it falls back to the
+        gathering phase's span and is flagged ``timing_measured: false`` so the UI
+        can draw it as an estimate rather than passing it off as a measurement.
+
+        The fallback is per source, not per run: one stale row must not downgrade
+        the rows that were genuinely measured.
         """
         gathering = next((p for p in phases if p["ordinal"] == "1"), None)
-        start_ms = gathering["start_ms"] if gathering else 0
-        end_ms = gathering["end_ms"] if gathering else 0
+        fallback_start = gathering["start_ms"] if gathering else 0
+        fallback_end = gathering["end_ms"] if gathering else 0
+
+        status = collection_status or {}
+        superseded = set(_SOURCE_SUPERSEDED)
+        # Only drop an aggregate row when its children are actually present.
+        for parent, children in _SOURCE_SUPERSEDED_IF_SPLIT.items():
+            if any(c in status for c in children):
+                superseded.add(parent)
+
+        def offsets(value: Dict[str, Any]) -> Tuple[int, int, bool]:
+            """Real ms offsets for one source, or the phase span if unmeasured."""
+            started = value.get("started_at")
+            ended = value.get("ended_at")
+            if t0 is None or not isinstance(started, (int, float)) or not isinstance(
+                ended, (int, float)
+            ):
+                return fallback_start, fallback_end, False
+            start_ms = int(round((float(started) - t0) * 1000))
+            end_ms = int(round((float(ended) - t0) * 1000))
+            # A resumed run replays gathering from a checkpoint written under an
+            # *earlier* t0, so those epochs predate this run's origin and would
+            # land at large negative offsets. Clamping them to 0 would invent a
+            # measurement; treat them as absent instead.
+            if start_ms < 0 or end_ms < start_ms:
+                return fallback_start, fallback_end, False
+            return start_ms, end_ms, True
 
         sources: List[Dict[str, Any]] = []
-        for key, value in (collection_status or {}).items():
-            if key in _SOURCE_SUPERSEDED:
+        for key, value in status.items():
+            if key in superseded:
                 continue
             mapping = _SOURCE_LABELS.get(key)
             if not mapping:
@@ -534,6 +598,7 @@ class ReplayGenerator:
             if not isinstance(value, dict):
                 continue
             agent_id, label = mapping
+            start_ms, end_ms, measured = offsets(value)
             sources.append(
                 {
                     "agent_id": agent_id,
@@ -542,6 +607,7 @@ class ReplayGenerator:
                     "status": value.get("status") or "success",
                     "start_ms": start_ms,
                     "end_ms": end_ms,
+                    "timing_measured": measured,
                 }
             )
         return sources
@@ -681,6 +747,71 @@ class ReplayGenerator:
 
     # -- stream artifact -------------------------------------------------
 
+    def _build_prompts(
+        self,
+        recorder: Optional[Dict[str, Any]],
+        calls: List[Dict[str, Any]],
+        date: str,
+    ) -> Optional[bytes]:
+        """Gzip the per-call prompts into their own artifact.
+
+        Separate from the index because it is by far the largest thing published
+        (~600 KB gzipped vs the index's ~55 KB): the index loads on every page
+        view, while this is fetched only when a detail pane is opened.
+
+        The hero is folded in here too. Its "call" is synthesized by
+        :meth:`_hero_call` rather than recorded, so it never passes through the
+        recorder -- routing it through the same map means the UI has exactly one
+        place to look for any call's prompt.
+
+        Returns ``None`` when nothing was captured, which the frontend renders as
+        "not retained for this date".
+        """
+        out: Dict[str, Any] = {}
+
+        for span in (recorder or {}).get("calls") or []:
+            prompt = span.get("prompt") or {}
+            system = prompt.get("system")
+            messages = prompt.get("messages")
+            if not system and not messages:
+                continue
+            entry: Dict[str, Any] = {}
+            if system:
+                entry["system"] = system
+            if messages:
+                entry["messages"] = messages
+            if span.get("prompt_chars"):
+                entry["chars"] = span["prompt_chars"]
+            if span.get("prompt_truncated"):
+                entry["truncated"] = True
+            out[span["id"]] = entry
+
+        # The image prompt already rides on the call itself (it is what the
+        # Illustrator's pane renders); mirror it so both paths agree.
+        for call in calls:
+            prompt = call.get("image_prompt")
+            if prompt and call["id"] not in out:
+                out[call["id"]] = {"messages": prompt, "chars": len(prompt)}
+
+        if not out:
+            return None
+
+        document = {"schema": SCHEMA_VERSION, "date": date, "calls": out}
+        raw = json.dumps(document, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        blob = gzip.compress(raw, compresslevel=9)
+
+        # Prompts are already capped per call and per run by the recorder, so this
+        # is a backstop that reports rather than degrades: losing prompts is far
+        # less bad than losing the timeline, and the file is independently
+        # fetched, so an oversized one costs nothing until someone opens a pane.
+        if len(blob) > self.max_prompt_bytes:
+            logger.warning(
+                f"Replay prompts artifact is {len(blob)} bytes, over the "
+                f"{self.max_prompt_bytes} byte guidance; publishing anyway "
+                "(it is lazily fetched, so it does not slow the page)."
+            )
+        return blob
+
     def _build_stream(
         self, recorder: Optional[Dict[str, Any]], calls: List[Dict[str, Any]], date: str
     ) -> Tuple[Optional[bytes], Optional[str]]:
@@ -768,23 +899,26 @@ class ReplayGenerator:
     # -- safety ----------------------------------------------------------
 
     @staticmethod
-    def _assert_publishable(index: Dict[str, Any]) -> None:
+    def _assert_publishable(index: Dict[str, Any], what: str = "index") -> None:
         """Refuse to write anything that carries a credential or private host.
 
         The artifact is published publicly, so this is the last gate before it
-        lands on disk. It deliberately does *not* reject URLs in general -- the
-        hero prompt embeds model-written story summaries that may legitimately
-        quote a public link, and losing a day's replay over that would be a
-        false positive with no security benefit. Credentials, bearer tokens,
-        key-value secrets and the private endpoint hosts are what must never
-        appear.
+        lands on disk. It deliberately does *not* reject URLs in general --
+        prompts and model output both quote public links legitimately, and losing
+        a day's replay over that would be a false positive with no security
+        benefit. Credentials, bearer tokens, key-value secrets and the private
+        endpoint hosts are what must never appear.
+
+        Runs over the prompt artifact as well as the index. That is where this
+        check earns its keep: prompts are assembled from config and collected
+        data, so unlike the index they are not a fixed set of known fields.
         """
         blob = json.dumps(index, ensure_ascii=False)
         for pattern in _SECRET_PATTERNS:
             match = pattern.search(blob)
             if match:
                 raise ValueError(
-                    f"Replay index contains disallowed content matching {pattern.pattern!r}: "
+                    f"Replay {what} contains disallowed content matching {pattern.pattern!r}: "
                     f"{match.group(0)[:40]!r}"
                 )
 
@@ -801,7 +935,7 @@ class ReplayGenerator:
                 continue
             if host in lowered:
                 raise ValueError(
-                    f"Replay index leaks the {var} host ({host!r}); refusing to write"
+                    f"Replay {what} leaks the {var} host ({host!r}); refusing to write"
                 )
 
     # -- entry point -----------------------------------------------------
@@ -843,11 +977,14 @@ class ReplayGenerator:
         if phases and duration_ms > phases[-1]["end_ms"]:
             phases[-1]["end_ms"] = duration_ms
 
-        sources = self._build_sources(orchestrator_result.get("collection_status") or {}, phases)
+        sources = self._build_sources(
+            orchestrator_result.get("collection_status") or {}, phases, t0_epoch
+        )
         agents = self._build_agents(calls, sources)
         concurrency, peak = self._concurrency(calls, duration_ms, CONCURRENCY_INTERVAL_MS)
 
         stream_blob, truncation = self._build_stream(recorder, calls, date)
+        prompt_blob = self._build_prompts(recorder, calls, date)
 
         tokens = cost_report.get("tokens") or {}
         status = "success"
@@ -874,6 +1011,9 @@ class ReplayGenerator:
                 "peak_concurrency": peak,
                 "stream_available": stream_blob is not None,
                 "stream_truncation": truncation,
+                # Lets the pane say "not retained for this date" without first
+                # firing a 404 for a ~600 KB file that isn't there.
+                "prompts_available": prompt_blob is not None,
                 # Offline regeneration reconstructs phase boundaries and derives
                 # call spans from completion timestamps; surfaced so the UI can
                 # say so rather than implying per-event precision it lacks.
@@ -887,10 +1027,25 @@ class ReplayGenerator:
         }
 
         self._assert_publishable(index)
-        return index, stream_blob
+        # The prompts artifact is the one place a credential could realistically
+        # reach the public site: prompts are assembled from config and collected
+        # data, so this gate is now doing real work rather than guarding a single
+        # static hero prompt. Scan the decompressed text, not the gzip bytes.
+        if prompt_blob is not None:
+            self._assert_publishable(
+                json.loads(gzip.decompress(prompt_blob).decode("utf-8")),
+                what="prompt artifact",
+            )
+        return index, stream_blob, prompt_blob
 
-    def write(self, date: str, index: Dict[str, Any], stream_blob: Optional[bytes]) -> str:
-        """Write both artifacts into ``web/data/{date}/`` and return the index path."""
+    def write(
+        self,
+        date: str,
+        index: Dict[str, Any],
+        stream_blob: Optional[bytes],
+        prompt_blob: Optional[bytes] = None,
+    ) -> str:
+        """Write the artifacts into ``web/data/{date}/`` and return the index path."""
         date_dir = os.path.join(self.data_dir, date)
         os.makedirs(date_dir, exist_ok=True)
 
@@ -907,13 +1062,67 @@ class ReplayGenerator:
             # run's deltas behind claiming to describe this one.
             os.remove(stream_path)
 
+        prompt_path = os.path.join(date_dir, "replay-prompts.json.gz")
+        if prompt_blob is not None:
+            with open(prompt_path, "wb") as handle:
+                handle.write(prompt_blob)
+        elif os.path.exists(prompt_path):
+            os.remove(prompt_path)
+
+        self._prune_prompts(keep_date=date)
+
         index_kb = os.path.getsize(index_path) / 1024
         stream_kb = len(stream_blob) / 1024 if stream_blob else 0
+        prompt_kb = len(prompt_blob) / 1024 if prompt_blob else 0
         logger.info(
             f"Generated replay-index.json ({index_kb:.1f} KB, {len(index['calls'])} calls)"
             + (f" + replay-stream.json.gz ({stream_kb:.1f} KB)" if stream_blob else " (no stream)")
+            + (f" + replay-prompts.json.gz ({prompt_kb:.1f} KB)" if prompt_blob else "")
         )
         return index_path
+
+    def _prune_prompts(self, keep_date: str) -> None:
+        """Delete prompt artifacts older than the retention window.
+
+        Prompts are ~600 KB/day and every version stays in git history forever, so
+        without this the repo gains ~220 MB/year for files almost nobody opens.
+        Only the prompts are pruned: the index and stream are what make an old day
+        still watchable, and they are an order of magnitude smaller.
+
+        Never raises -- failing to prune is untidy, failing the run is not
+        acceptable for a housekeeping step.
+        """
+        try:
+            cutoff = datetime.strptime(keep_date, "%Y-%m-%d") - timedelta(
+                days=PROMPT_RETENTION_DAYS
+            )
+        except ValueError:
+            return
+
+        removed = 0
+        try:
+            for name in os.listdir(self.data_dir):
+                if name == keep_date:
+                    continue
+                try:
+                    when = datetime.strptime(name, "%Y-%m-%d")
+                except ValueError:
+                    continue  # not a date directory
+                if when >= cutoff:
+                    continue
+                stale = os.path.join(self.data_dir, name, "replay-prompts.json.gz")
+                if os.path.exists(stale):
+                    os.remove(stale)
+                    removed += 1
+        except OSError as exc:
+            logger.warning(f"Could not prune old replay prompts: {exc}")
+            return
+
+        if removed:
+            logger.info(
+                f"Pruned {removed} replay prompt artifact(s) older than "
+                f"{PROMPT_RETENTION_DAYS} days"
+            )
 
 
 def generate_replay(
@@ -931,14 +1140,14 @@ def generate_replay(
     """
     try:
         generator = ReplayGenerator(web_dir)
-        index, stream_blob = generator.build(
+        index, stream_blob, prompt_blob = generator.build(
             date=date,
             cost_report=cost_report,
             orchestrator_result=orchestrator_result,
             recorder_snapshot=recorder_snapshot,
             phase_records=phase_records,
         )
-        return generator.write(date, index, stream_blob)
+        return generator.write(date, index, stream_blob, prompt_blob)
     except Exception as error:  # noqa: BLE001 -- deliberate: never fail the run
         logger.warning(f"Replay generation failed ({type(error).__name__}: {error})", exc_info=True)
         return None
@@ -971,12 +1180,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             parser.error(f"missing {path}")
 
     generator = ReplayGenerator(args.web_dir)
-    index, stream_blob = generator.build(
+    index, stream_blob, prompt_blob = generator.build(
         date=args.date,
         cost_report=_load_json(cost_path),
         orchestrator_result=_load_json(result_path),
     )
-    path = generator.write(args.date, index, stream_blob)
+    path = generator.write(args.date, index, stream_blob, prompt_blob)
     print(f"wrote {path} ({os.path.getsize(path) / 1024:.1f} KB)")
     return 0
 

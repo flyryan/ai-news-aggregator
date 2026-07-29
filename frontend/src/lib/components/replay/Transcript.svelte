@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick as svelteTick } from 'svelte';
-	import type { ReplayCall, ReplayCallStream } from '$lib/types/replay';
+	import type { ReplayCall, ReplayCallStream, ReplayPrompts } from '$lib/types/replay';
 	import {
 		providerColor,
 		profileColor,
@@ -21,9 +21,12 @@
 	// would be invalidated by the other caller every time.
 	const renderThinking = createStreamRenderer();
 	const renderAnswer = createStreamRenderer();
-	// The hero prompt is static, but it goes through the same renderer so the two
-	// panes share one markdown dialect.
+	// Prompts are static rather than streamed, but they go through the same renderer
+	// so every pane shares one markdown dialect. System and user get their own
+	// instance because they render together and would evict each other from a
+	// single-entry cache.
 	const renderPrompt = createStreamRenderer();
+	const renderPromptSystem = createStreamRenderer();
 	// Prose the model wrote around its JSON payload. Both are markdown in practice —
 	// one call opened with a 3k-char `## Analysis` write-up before its fence.
 	const renderPreamble = createStreamRenderer();
@@ -42,6 +45,11 @@
 	export let timingsMeasured = true;
 	export let t: number;
 	export let reduced = false;
+	/** The day's prompts, once fetched. Null until then, or when not retained. */
+	export let prompts: ReplayPrompts | null = null;
+	export let promptsState: 'idle' | 'loading' | 'ready' | 'unavailable' = 'idle';
+	/** Fetches the prompts artifact; called the first time a prompt is unfolded. */
+	export let onLoadPrompts: () => void | Promise<void> = () => {};
 	export let onSeek: (ms: number) => void = () => {};
 	export let onClose: () => void = () => {};
 
@@ -239,24 +247,43 @@
 	let imageFailed = false;
 	$: if (call.id) imageFailed = false;
 
-	// The prompt is ~5.6k chars — the image is the headline, so it starts folded.
+	// Prompts are big (a research batch sends ~130k chars), so this always starts
+	// folded and the artifact holding them is only fetched when it is opened.
 	let promptOpen = false;
 	$: if (call.id) promptOpen = false;
-	$: promptHtml = isImage && imagePrompt ? renderPrompt(imagePrompt) : '';
 
 	/**
-	 * Unfolding the prompt reveals it *below* a full-width 21:9 image, i.e. below the
-	 * body's scroll fold — the click would otherwise appear to do nothing. Bring the
-	 * heading to the top of the pane so the text the user asked for is what they see.
+	 * The prompt for the selected call.
+	 *
+	 * The hero carries its own on the call record — it is synthesized rather than
+	 * recorded, so it never went through the recorder. Every other call reads from
+	 * the lazily-fetched prompts artifact.
+	 */
+	$: promptEntry = prompts?.calls?.[call.id] ?? null;
+	$: promptSystem = promptEntry?.system ?? null;
+	$: promptMessages = promptEntry?.messages ?? (isImage ? imagePrompt : null);
+	$: promptChars =
+		promptEntry?.chars ??
+		(isImage && imagePrompt ? imagePrompt.length : null);
+	$: promptTruncated = promptEntry?.truncated === true;
+	$: hasPrompt = !!(promptSystem || promptMessages);
+	// Rendering happens only while open: these are large enough that formatting them
+	// eagerly for every pane the user clicks through would be wasted work.
+	$: promptSystemHtml = promptOpen && promptSystem ? renderPromptSystem(promptSystem) : '';
+	$: promptMessagesHtml = promptOpen && promptMessages ? renderPrompt(promptMessages) : '';
+
+	/**
+	 * Open the prompt, fetching the artifact on first use.
+	 *
+	 * `autoScroll = false` matters even though the section now sits at the top: a live
+	 * call's stream auto-scrolls the body to the bottom on every delta, which would
+	 * drag the prompt out of view the moment it was revealed.
 	 */
 	function togglePrompt() {
 		promptOpen = !promptOpen;
 		if (!promptOpen) return;
 		autoScroll = false;
-		void svelteTick().then(() => {
-			const el = bodyEl?.querySelector('.prompt');
-			el?.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
-		});
+		void onLoadPrompts();
 	}
 
 	// The image lands at the end of the call, not progressively: before then, show
@@ -426,6 +453,63 @@
 	</div>
 
 	<div class="ts-body" class:ts-body-art={isImage} bind:this={bodyEl} on:scroll={onBodyScroll}>
+		<!-- What the model was asked, above what it answered. Outside the isImage
+		     branch: every call has a prompt, and it is the half of the exchange the
+		     replay used to omit entirely. Folded by default — a research batch sends
+		     ~130k chars, which must not be the first thing in a 22rem scroller. -->
+		<section class="prompt">
+			<h4>
+				<button
+					type="button"
+					class="prompt-toggle"
+					on:click={togglePrompt}
+					aria-expanded={promptOpen}
+				>
+					<span class="prompt-caret" class:open={promptOpen} aria-hidden="true">▸</span>
+					The prompt
+				</button>
+				<span class="answer-meta">
+					{#if promptChars}
+						{promptChars.toLocaleString()} chars{#if promptTruncated} · trimmed{/if}
+					{:else if promptsState === 'loading'}
+						loading…
+					{:else if call.input_tokens}
+						{formatTokens(call.input_tokens)} tokens in
+					{/if}
+				</span>
+			</h4>
+			{#if promptOpen}
+				{#if promptsState === 'loading' && !hasPrompt}
+					<p class="answer-text pending">Loading the prompt…</p>
+				{:else if hasPrompt}
+					{#if promptSystemHtml}
+						<p class="prompt-part">System</p>
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="prompt-text md">{@html promptSystemHtml}</div>
+					{/if}
+					{#if promptMessagesHtml}
+						{#if promptSystemHtml}<p class="prompt-part">User</p>{/if}
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="prompt-text md">{@html promptMessagesHtml}</div>
+					{/if}
+					{#if promptTruncated}
+						<p class="prompt-peek">
+							Trimmed to fit the artifact's size cap — the head of the prompt is shown.
+						</p>
+					{/if}
+				{:else}
+					<p class="answer-text pending">
+						Prompts are not retained for this date. The timeline and transcript are unaffected.
+					</p>
+				{/if}
+			{:else if isImage}
+				<p class="prompt-peek">
+					Assembled from the day's detected topics, the mascot reference, and a fixed style
+					brief.
+				</p>
+			{/if}
+		</section>
+
 		{#if isImage}
 			<!-- The picture first: it is the whole point of this one call. -->
 			<section class="art">
@@ -461,36 +545,6 @@
 				{/if}
 			</section>
 
-			<section class="prompt">
-				<h4>
-					<button
-						type="button"
-						class="prompt-toggle"
-						on:click={togglePrompt}
-						aria-expanded={promptOpen}
-					>
-						<span class="prompt-caret" class:open={promptOpen} aria-hidden="true">▸</span>
-						The prompt
-					</button>
-					<span class="answer-meta">
-						{#if imagePrompt}{imagePrompt.length.toLocaleString()} chars{:else}not recorded{/if}
-					</span>
-				</h4>
-				{#if promptOpen}
-					{#if promptHtml}
-						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-						<div class="prompt-text md">{@html promptHtml}</div>
-					{:else}
-						<p class="answer-text pending">No prompt was captured for this call.</p>
-					{/if}
-				{:else if imagePrompt}
-					<p class="prompt-peek">
-						Assembled from the day's detected topics, the mascot reference, and a fixed style
-						brief — the only prompt in this replay that is safe to publish, because it contains
-						no source content.
-					</p>
-				{/if}
-			</section>
 		{:else if streamState === 'loading'}
 			<p class="ts-note">Loading stream…</p>
 		{:else if showEmptyStream}
@@ -999,6 +1053,29 @@
 		color: #737373;
 		font-style: italic;
 	}
+	/* Sits above everything else in the body, so it needs its own gap; `.art` used
+	   to supply the spacing when the prompt followed it. */
+	.prompt {
+		margin-bottom: 0.9rem;
+	}
+
+	/* System vs user. The two halves read very differently — one is the operator's
+	   instructions, the other the fenced source data — and unlabelled they run
+	   together into one wall. */
+	.prompt-part {
+		font-size: 0.52rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: #a3a3a3;
+		margin: 0.4rem 0 0.2rem;
+	}
+	.prompt-part:first-of-type {
+		margin-top: 0;
+	}
+
+	/* Accent-tinted rather than the hardcoded image pink it used to carry: this now
+	   renders for every call, so it follows the call's own route colour. */
 	.prompt-text {
 		font-size: 0.76rem;
 		line-height: 1.6;
@@ -1006,12 +1083,16 @@
 		word-break: break-word;
 		padding: 0.55rem 0.7rem;
 		border-radius: 0.5rem;
-		border-left: 2px solid #ec4899;
-		background: rgb(236 72 153 / 0.06);
+		border-left: 2px solid var(--accent);
+		background: color-mix(in srgb, var(--accent) 6%, transparent);
+		/* A 130k-char prompt would otherwise own the whole scroller. Bounded here so
+		   the answer below stays reachable; the block scrolls internally. */
+		max-height: 26rem;
+		overflow-y: auto;
 	}
 	:global(.dark) .prompt-text {
 		color: #d4d4d4;
-		background: rgb(236 72 153 / 0.1);
+		background: color-mix(in srgb, var(--accent) 12%, transparent);
 	}
 
 	.ts-model {

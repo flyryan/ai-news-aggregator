@@ -147,6 +147,45 @@ def _messages_char_count(messages: List[Dict[str, Any]]) -> int:
     return sum(_content_char_count(message.get("content")) for message in messages)
 
 
+def _content_text(content: Any) -> str:
+    """Flatten a message content field to the text that was actually sent.
+
+    Content is either a plain string or the SDK's block list; the block form is
+    rendered as its text parts so the replay shows prose rather than a JSON dump
+    of the wire format.
+    """
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: List[str] = []
+        for block in content:
+            if isinstance(block, str):
+                parts.append(block)
+            elif isinstance(block, dict):
+                text = block.get("text")
+                parts.append(text if isinstance(text, str) else json.dumps(block, default=str))
+            else:
+                parts.append(str(block))
+        return "\n".join(parts)
+    return json.dumps(content, ensure_ascii=False, default=str)
+
+
+def _messages_text(messages: List[Dict[str, Any]]) -> str:
+    """The user-side prompt as sent, for the replay artifact.
+
+    Roles are labelled because a call can carry more than one message and the
+    boundary matters when reading it back. This is metadata assembly, not the hot
+    path: it runs once per request, before the SSE loop opens.
+    """
+    rendered: List[str] = []
+    for message in messages:
+        role = str(message.get("role") or "user").upper()
+        rendered.append(f"[{role}]\n{_content_text(message.get('content'))}")
+    return "\n\n".join(rendered)
+
+
 def _uses_adaptive_thinking(model: str) -> bool:
     """True if model requires adaptive thinking (Opus 4.7 and later).
 
@@ -1313,6 +1352,13 @@ class AsyncAnthropicClient:
             "message_count": len(messages),
             "message_chars": _messages_char_count(messages),
             "system_chars": _content_char_count(system),
+            # The prompt as sent, for the replay's detail pane. The recorder pops
+            # these out of the context into their own artifact, so they never
+            # inflate the index that every page view loads. Assembled here rather
+            # than in the recorder because this is the only place that still has
+            # the un-serialised `messages`/`system` values.
+            "system_text": _content_text(system) or None,
+            "messages_text": _messages_text(messages) or None,
         }
         if routing_context:
             request_context.update(routing_context)
@@ -1447,6 +1493,13 @@ class AsyncAnthropicClient:
             "message_count": len(messages),
             "message_chars": _messages_char_count(messages),
             "system_chars": _content_char_count(system),
+            # The prompt as sent, for the replay's detail pane. The recorder pops
+            # these out of the context into their own artifact, so they never
+            # inflate the index that every page view loads. Assembled here rather
+            # than in the recorder because this is the only place that still has
+            # the un-serialised `messages`/`system` values.
+            "system_text": _content_text(system) or None,
+            "messages_text": _messages_text(messages) or None,
         }
         if routing_context:
             request_context.update(routing_context)

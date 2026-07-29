@@ -146,7 +146,8 @@ class RedditGatherer(BaseGatherer):
         # shared default executor used by the concurrently-running social/research gatherers.
         loop = asyncio.get_event_loop()
         with ThreadPoolExecutor(max_workers=1, thread_name_prefix='reddit-driver') as driver:
-            all_posts = await loop.run_in_executor(driver, self._gather_sync)
+            with self.time_source('reddit'):
+                all_posts = await loop.run_in_executor(driver, self._gather_sync)
 
         logger.info(f"Collected {len(all_posts)} posts from Reddit")
         self.save_to_file(all_posts, f'reddit_{self.target_date}.json')

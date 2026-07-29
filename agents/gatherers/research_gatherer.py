@@ -159,11 +159,26 @@ class ResearchGatherer(BaseGatherer):
         logger.info(f"Starting research collection")
         logger.info(f"Report date: {self.report_date}, Coverage date: {self.coverage_date}")
 
-        # Run arXiv and research blog collection in parallel
-        arxiv_task = self._collect_arxiv()
-        research_blog_task = self._collect_research_blogs()
+        # Run arXiv and research blog collection in parallel.
+        # Timed separately: they are concurrent but have very different durations
+        # (arXiv is a fan-out over RSS categories, LessWrong is a sequential GraphQL
+        # call with a browser fallback), and the replay drew them as one bar before.
+        async def _timed_arxiv():
+            with self.time_source('research_arxiv'):
+                return await self._collect_arxiv()
 
-        arxiv_papers, blog_posts = await asyncio.gather(arxiv_task, research_blog_task)
+        async def _timed_blogs():
+            with self.time_source('research_blogs'):
+                return await self._collect_research_blogs()
+
+        arxiv_papers, blog_posts = await asyncio.gather(_timed_arxiv(), _timed_blogs())
+
+        # Per-stream counts, so the replay's two bars carry their own item totals
+        # rather than both reporting the combined research figure.
+        self.source_counts = {
+            'research_arxiv': len(arxiv_papers),
+            'research_blogs': len(blog_posts),
+        }
 
         # Combine results
         all_items = arxiv_papers + blog_posts

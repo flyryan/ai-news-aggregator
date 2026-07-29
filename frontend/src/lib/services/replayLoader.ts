@@ -6,10 +6,11 @@
  * every failure path here degrades to "no typewriter", never to a broken page.
  */
 
-import type { ReplayIndex, ReplayStream } from '$lib/types/replay';
+import type { ReplayIndex, ReplayPrompts, ReplayStream } from '$lib/types/replay';
 
 const cache = new Map<string, unknown>();
 const probeCache = new Map<string, Promise<boolean>>();
+const inFlight = new Map<string, Promise<unknown>>();
 
 export function replayIndexUrl(date: string): string {
 	return `/data/${date}/replay-index.json`;
@@ -17,6 +18,10 @@ export function replayIndexUrl(date: string): string {
 
 export function replayStreamUrl(date: string): string {
 	return `/data/${date}/replay-stream.json.gz`;
+}
+
+export function replayPromptsUrl(date: string): string {
+	return `/data/${date}/replay-prompts.json.gz`;
 }
 
 /** Load the replay index for a date. Throws when the date has no replay data. */
@@ -83,6 +88,56 @@ export async function loadReplayStream(date: string): Promise<ReplayStream | nul
 }
 
 /**
+ * Lazily load the per-call prompts. Returns null (never throws) when the file is
+ * absent — days published before prompt capture existed, and days whose prompts
+ * have aged out of the retention window, both land here and must degrade to
+ * "not retained" rather than to an error.
+ *
+ * This is the largest replay artifact (~600 KB gzipped), which is exactly why it
+ * is not in the index: `/replay` renders without it and only pays for it when a
+ * detail pane is actually opened. The in-flight map dedupes the burst of calls
+ * that happens when a user clicks through several panes quickly.
+ */
+export async function loadReplayPrompts(date: string): Promise<ReplayPrompts | null> {
+	const cacheKey = `replay-prompts-${date}`;
+	if (cache.has(cacheKey)) {
+		return cache.get(cacheKey) as ReplayPrompts | null;
+	}
+	const pending = inFlight.get(cacheKey);
+	if (pending) return pending as Promise<ReplayPrompts | null>;
+
+	const task = (async () => {
+		let result: ReplayPrompts | null = null;
+		try {
+			if (!supportsGzipDecompression()) {
+				throw new Error('DecompressionStream unavailable');
+			}
+			const response = await fetch(replayPromptsUrl(date));
+			if (!response.ok) {
+				throw new Error(`prompts ${response.status}`);
+			}
+			const buffer = await response.arrayBuffer();
+			// Same magic-byte check as the stream: some dev servers decode
+			// Content-Encoding for us, and double-inflating throws.
+			const head = new Uint8Array(buffer.slice(0, 2));
+			const text =
+				head[0] === 0x1f && head[1] === 0x8b
+					? await inflateGzip(buffer)
+					: new TextDecoder().decode(buffer);
+			result = JSON.parse(text) as ReplayPrompts;
+		} catch {
+			result = null;
+		}
+		cache.set(cacheKey, result);
+		inFlight.delete(cacheKey);
+		return result;
+	})();
+
+	inFlight.set(cacheKey, task);
+	return task;
+}
+
+/**
  * Cheap existence check used to decide whether to surface the replay entry
  * link. Never throws, and caches the in-flight promise so repeated renders
  * don't refetch.
@@ -113,4 +168,5 @@ export function hasReplayData(date: string): Promise<boolean> {
 export function clearReplayCache(): void {
 	cache.clear();
 	probeCache.clear();
+	inFlight.clear();
 }

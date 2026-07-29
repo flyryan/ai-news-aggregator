@@ -786,7 +786,35 @@ class MainOrchestrator:
             results['news'] = []
             collection_status['news'] = {'status': 'failed', 'count': 0, 'error': str(e)}
 
+        self._attach_source_timing(collection_status)
+
         return results, collection_status
+
+    def _attach_source_timing(self, collection_status: Dict[str, Dict[str, Any]]) -> None:
+        """Fold each gatherer's per-source spans into the status dict.
+
+        Gatherers record wall-clock start/end per source key (see
+        `BaseGatherer.time_source`); the replay turns those into real staggered
+        collection bars instead of stretching every source across the whole phase.
+
+        Keys a gatherer times but never reports a count for are added as their own
+        rows — that is how `research_arxiv` / `research_blogs` become two bars from
+        one gatherer. Timing is purely additive: a gatherer that records nothing
+        leaves its row untouched and the replay falls back to the phase span.
+        """
+        for gatherer in self.gatherers.values():
+            timing = getattr(gatherer, 'source_timing', None)
+            if not timing:
+                continue
+            counts = getattr(gatherer, 'source_counts', None) or {}
+            for key, span in timing.items():
+                row = collection_status.setdefault(
+                    key, {'status': 'success', 'count': 0, 'error': None}
+                )
+                if key in counts:
+                    row['count'] = counts[key]
+                row['started_at'] = span.get('started_at')
+                row['ended_at'] = span.get('ended_at')
 
     async def _analyze_all(
         self,

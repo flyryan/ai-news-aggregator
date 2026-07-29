@@ -100,8 +100,11 @@ class NewsGatherer(BaseGatherer):
         all_articles = []
 
         # Phase 1: Collect from RSS feeds
+        # Timed as just the RSS stage: the replay row is labelled "RSS feeds", and the
+        # link-following below is a different kind of work on a different input.
         logger.info(f"Collecting from {len(self.feeds)} RSS feeds")
-        rss_articles = await self._collect_rss()
+        with self.time_source('news'):
+            rss_articles = await self._collect_rss()
         all_articles.extend(rss_articles)
         logger.info(f"Collected {len(rss_articles)} articles from RSS")
 

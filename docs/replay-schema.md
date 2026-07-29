@@ -99,9 +99,17 @@ This needs **no nginx change** and works with the dev Vite middleware
       "agent_id": "research_gatherer",
       "name": "arXiv",
       "items": 412,
-      "status": "success",           // success | partial | failed
+      "status": "success",           // success | partial | failed | skipped | pending
       "start_ms": 1200,
-      "end_ms": 96400
+      "end_ms": 96400,
+      // True only when the gatherer recorded this source's own span. False (or
+      // ABSENT, on any day published before 2026-07-29) means the row was
+      // stretched across the whole gathering phase instead and must not be drawn
+      // as a measurement. Note this default is the opposite of run.timings_measured:
+      // every pre-existing day genuinely lacks the data, so absent means unmeasured.
+      // Per-source, not per-run -- one resumed or un-instrumented source does not
+      // make the others unmeasured.
+      "timing_measured": true
     }
   ],
 
@@ -250,9 +258,23 @@ Non-negotiables, in priority order over completeness:
    sets a `truncated` flag rather than growing without limit.
 4. **Off by default in dev, on in CI.** `LLM_REPLAY_CAPTURE` (default `true`),
    `LLM_REPLAY_COALESCE_MS` (default `80`), `LLM_REPLAY_MAX_BYTES` (default `600000`).
-5. **No prompt content, ever.** Only model *output* deltas are captured. Prompts, system
-   prompts, and message bodies must not enter the recorder. This is what makes the
-   artifact safe to publish.
+5. **Prompts are captured and published; credentials never are.** The prompt each call
+   sent is recorded off the hot path (once per call, in `start_call`, never inside the
+   SSE loop) and published as `replay-prompts.json.gz`. This project is a showcase and
+   is fully open source — `config/prompts.yaml`, the analyzers and the workflows are
+   already public — so the instructions the models were given are part of what the
+   replay exists to show.
+
+   What must never appear is a credential or a private endpoint host.
+   `replay_generator._assert_publishable` enforces that over the prompt artifact as
+   well as the index, and it is load-bearing here in a way it was not before: prompts
+   embed *collected third-party text* (Reddit comments, article bodies), so unlike the
+   index they are not a closed set of known fields.
+
+   Prompts are bounded like deltas — `LLM_REPLAY_MAX_PROMPT_CHARS` per call,
+   `LLM_REPLAY_MAX_TOTAL_PROMPT_CHARS` per run — and truncation is always marked, never
+   silent. `LLM_REPLAY_CAPTURE_PROMPTS=false` disables capture without losing the
+   timeline.
 
 ## Privacy / publication
 

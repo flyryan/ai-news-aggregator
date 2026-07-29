@@ -13,6 +13,7 @@
 	 * deliberately (a pulsing rail on the newest card) rather than hidden — watching
 	 * the array grow is the point.
 	 */
+	import { flip } from 'svelte/animate';
 	import type { PartialValue, PartialEntry } from '$lib/services/replayJson';
 	import { humaniseKey, previewOf, principalArray, scoreFraction } from '$lib/services/replayJson';
 
@@ -30,6 +31,78 @@
 	$: rootArrayItems = root.kind === 'array' ? root.items : [];
 	$: items = cards.length > 0 ? cards : rootArrayItems;
 	$: itemsLabel = principal ? humaniseKey(principal.key) : 'items';
+
+	/**
+	 * The score on a card, if it has one.
+	 *
+	 * `scoreFraction` already encodes which keys count as a score and that the scale is
+	 * 0-100; reusing it keeps the collapsed badge and the expanded bar in agreement.
+	 * Returns the raw number too, since the badge prints it.
+	 */
+	function scoreOf(item: PartialValue): { n: number; frac: number } | null {
+		if (item.kind !== 'object') return null;
+		for (const e of item.entries) {
+			const frac = scoreFraction(e.key, e.value);
+			if (frac !== null && e.value?.kind === 'number') return { n: Number(e.value.value), frac };
+		}
+		return null;
+	}
+
+	/** Which field the badge is showing, so its tooltip can name it. */
+	function scoreKeyOf(item: PartialValue): string | null {
+		if (item.kind !== 'object') return null;
+		for (const e of item.entries) {
+			if (scoreFraction(e.key, e.value) !== null) return e.key;
+		}
+		return null;
+	}
+
+	type SortMode = 'score' | 'order';
+	let sortMode: SortMode = 'score';
+	// A new call resets the view; the default is score because the ranking is the point.
+	$: if (root) sortMode = 'score';
+
+	/**
+	 * Render order, as indices into `items`. The underlying array is never reordered —
+	 * the streaming parser appends to it, and sorting it in place would fight that.
+	 *
+	 * While a call is still streaming the last card is mid-write. Sorting it by a score
+	 * that has not been parsed yet would make it jump around under the cursor, so it is
+	 * pinned to the end until the array completes. Everything already written sorts
+	 * normally, which is the effect worth watching: the ranking assembling itself.
+	 *
+	 * Cards with no score keep their model order among themselves, after the scored
+	 * ones — an unscored card has no position to claim.
+	 */
+	$: viewOrder = (() => {
+		const idx = items.map((_, i) => i);
+		if (sortMode === 'order') return idx;
+		const writingIdx = live && !complete ? items.length - 1 : -1;
+		const scored = idx.filter((i) => i !== writingIdx);
+		scored.sort((a, b) => {
+			const sa = scoreOf(items[a]);
+			const sb = scoreOf(items[b]);
+			if (sa && sb) return sb.n - sa.n || a - b;
+			if (sa) return -1;
+			if (sb) return 1;
+			return a - b;
+		});
+		return writingIdx >= 0 ? [...scored, writingIdx] : scored;
+	})();
+
+	// Any score at all to sort by? Matches (topics, matches) have none, and offering a
+	// sort control that does nothing is worse than not offering one.
+	$: hasScores = items.some((it) => scoreOf(it) !== null);
+
+	/**
+	 * Stable identity for a card, so reordering animates instead of re-mounting.
+	 *
+	 * Keying by array index would make a sort look like every card's *content*
+	 * changed, which re-renders the in-progress card and kills its typewriter. The
+	 * index is part of the key because it is the only thing that is stable while a
+	 * card's own text is still arriving.
+	 */
+	const cardKey = (i: number) => i;
 
 	/** Cards are numerous; only the newest few stay expanded while streaming. */
 	let expanded = new Set<number>();
@@ -72,16 +145,52 @@
 					<i></i><i></i><i></i>
 				</span>
 			{/if}
+			{#if hasScores}
+				<!-- Sorting stays live while the call streams: watching the ranking
+				     reorder itself as each score lands is the interesting part. -->
+				<span class="js-sort" role="group" aria-label="Sort items">
+					<button
+						type="button"
+						class:on={sortMode === 'score'}
+						on:click={() => (sortMode = 'score')}
+						aria-pressed={sortMode === 'score'}
+						title="Highest scoring first">Score</button
+					>
+					<button
+						type="button"
+						class:on={sortMode === 'order'}
+						on:click={() => (sortMode = 'order')}
+						aria-pressed={sortMode === 'order'}
+						title="The order the model emitted them">Model order</button
+					>
+				</span>
+			{/if}
 		</div>
 
 		<ol class="js-cards">
-			{#each items as item, i (i)}
+			{#each viewOrder as i (cardKey(i))}
+				{@const item = items[i]}
 				{@const open = isOpen(i, items.length, expanded)}
 				{@const writing = live && !complete && i === items.length - 1}
-				<li class="js-card" class:writing class:open>
+				{@const score = scoreOf(item)}
+				<li
+					class="js-card"
+					class:writing
+					class:open
+					animate:flip={{ duration: reduced ? 0 : 320 }}
+				>
 					<button type="button" class="js-card-head" on:click={() => toggle(i)}>
+						<!-- The model's own position, kept even when sorted by score: it is how
+						     you tell what the sort actually moved. -->
 						<span class="js-idx">{i + 1}</span>
 						<span class="js-preview">{previewOf(item, 160)}</span>
+						{#if score}
+							<span
+								class="js-badge"
+								style="--f: {score.frac}"
+								title="{humaniseKey(scoreKeyOf(item) ?? 'score')}: {score.n}">{score.n}</span
+							>
+						{/if}
 						<span class="js-caret" class:open aria-hidden="true">▸</span>
 					</button>
 
@@ -308,6 +417,62 @@
 	:global(.dark) .js-card.open .js-preview {
 		color: #f5f5f5;
 	}
+	/* The score, on the collapsed row. Tinted by value rather than a bar: at this size
+	   a bar is a smear, whereas a number you can actually read is the thing being
+	   sorted on. The expanded field keeps its bar. */
+	.js-badge {
+		flex: none;
+		font-size: 0.6rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+		padding: 0 5px;
+		border-radius: 3px;
+		color: #525252;
+		background: rgb(0 0 0 / 0.05);
+		/* --f is 0..1; high scores lift toward the accent so a scan finds them. */
+		background: color-mix(in srgb, var(--accent, #E63946) calc(var(--f) * 22%), rgb(0 0 0 / 0.05));
+	}
+	:global(.dark) .js-badge {
+		color: #d4d4d4;
+		background: color-mix(
+			in srgb,
+			var(--accent, #E63946) calc(var(--f) * 30%),
+			rgb(255 255 255 / 0.08)
+		);
+	}
+
+	.js-sort {
+		display: inline-flex;
+		margin-left: auto;
+		flex: none;
+		border-radius: 5px;
+		overflow: hidden;
+		border: 1px solid rgb(0 0 0 / 0.12);
+	}
+	:global(.dark) .js-sort {
+		border-color: rgb(255 255 255 / 0.14);
+	}
+	.js-sort button {
+		font-size: 0.55rem;
+		font-weight: 650;
+		letter-spacing: 0.03em;
+		padding: 2px 6px;
+		color: #737373;
+		background: transparent;
+		cursor: pointer;
+		transition: background 120ms ease, color 120ms ease;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.js-sort button:hover {
+			color: var(--accent, #E63946);
+			background: rgb(0 0 0 / 0.04);
+		}
+	}
+	.js-sort button.on {
+		color: #fff;
+		background: var(--accent, #E63946);
+	}
+
 	.js-caret {
 		flex: none;
 		font-size: 0.6rem;
@@ -488,7 +653,8 @@
 		.js-live i {
 			animation: none;
 		}
-		.js-caret {
+		.js-caret,
+		.js-sort button {
 			transition: none;
 		}
 	}

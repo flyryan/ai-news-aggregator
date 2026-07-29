@@ -7,9 +7,11 @@ and analyze AI/ML news from various sources.
 
 import os
 import json
+import time
 import logging
 import hashlib
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional, Set, Tuple
@@ -355,6 +357,16 @@ class BaseGatherer(ABC):
         self.data_dir = data_dir
         self.target_date = target_date
 
+        # Per-source wall-clock spans, filled in by `time_source`. Keys match the
+        # source keys the orchestrator reports in `collection_status`, so the replay
+        # can join the two. Empty when a gatherer records nothing, which the replay
+        # treats as "not measured" rather than as zero.
+        self.source_timing: Dict[str, Dict[str, float]] = {}
+
+        # Optional per-source item counts, for gatherers whose single category row
+        # covers several independently-timed streams (research = arXiv + blogs).
+        self.source_counts: Dict[str, int] = {}
+
         # A window of <= 0 hours collects nothing, and would do so silently: every
         # source would report success with zero items. Refuse it rather than publish
         # an empty report.
@@ -405,6 +417,35 @@ class BaseGatherer(ABC):
             f"{self.__class__.__name__} initialized: report={self.report_date}, "
             f"coverage={self.coverage_date} ({self.start_time} to {self.end_time}){span_note}"
         )
+
+    @contextmanager
+    def time_source(self, key: str):
+        """Record wall-clock start/end for one named source.
+
+        The replay draws a bar per source. Without this every source was stretched
+        across the whole gathering phase, so four scouts that finished minutes apart
+        all rendered as one identical slab.
+
+        Timestamps are ``time.time()`` epoch floats, matching ``PhaseTracker``'s
+        convention exactly -- the replay generator subtracts the run's ``t0`` from
+        them the same way it does for phases. Deliberately *not* the recorder's
+        ``_ms()``: that is private, and it mutates a shared monotonic clamp whose
+        ordering guarantee assumes the event loop, whereas these run in worker
+        threads (RSS, Reddit and all three social platforms are thread-pooled).
+
+        Writes into ``self.source_timing[key]``, which subclasses expose alongside
+        their counts. Always records an end, including on the exception path -- a
+        source that died at 40s is a fact worth drawing, and leaving it open would
+        make the bar run to the end of the phase and read as a hang.
+        """
+        started = time.time()
+        try:
+            yield
+        finally:
+            self.source_timing[key] = {
+                'started_at': started,
+                'ended_at': time.time(),
+            }
 
     @property
     @abstractmethod
