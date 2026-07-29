@@ -14,6 +14,7 @@
 	 * the array grow is the point.
 	 */
 	import { flip } from 'svelte/animate';
+	import { createStreamRenderer, withCaret } from '$lib/services/replayMarkdown';
 	import type { PartialValue, PartialEntry } from '$lib/services/replayJson';
 	import {
 		humaniseKey,
@@ -184,6 +185,27 @@
 		return e.value?.kind === 'string' && e.value.value.length > 90;
 	}
 
+	/**
+	 * Prose the models write here is the same markdown the site renders everywhere
+	 * else — bold, internal `/?date=…` links. Shown as source text it reads as
+	 * broken output (the enricher's `enriched_text` is one wall of `**` and
+	 * bracketed links), so long strings render through the stream renderer instead.
+	 *
+	 * One renderer per field, each with its own one-entry memo: during playback
+	 * every frame re-renders the component, and only the field actually receiving
+	 * text should pay for a re-parse. Entries are input-checked, so reusing a key
+	 * across calls is safe; the map stays bounded by the largest call's field count.
+	 */
+	const mdRenderers = new Map<string, (t: string) => string>();
+	function md(key: string, text: string, complete: boolean): string {
+		let r = mdRenderers.get(key);
+		if (!r) {
+			r = createStreamRenderer();
+			mdRenderers.set(key, r);
+		}
+		return withCaret(r(text), complete ? '' : '<span class="caret"></span>');
+	}
+
 	function isArrayOfStrings(v: PartialValue | null): boolean {
 		return !!v && v.kind === 'array' && v.items.every((x) => x.kind === 'string');
 	}
@@ -282,6 +304,10 @@
 												<span class="js-str"
 													>{resolved} <span class="js-id-hash">{e.value.value}</span></span
 												>
+											{:else if isProse(e)}
+												<div class="js-md">
+													{@html md(`f${i}:${e.key}`, e.value.value, e.value.complete)}
+												</div>
 											{:else}
 												<span class="js-str">{e.value.value}{#if !e.value.complete}<span
 															class="js-cursor"
@@ -323,9 +349,9 @@
 					{/each}
 				</ul>
 			{:else if e.value.kind === 'string'}
-				<p class="js-side-text">
-					{e.value.value}{#if !e.value.complete}<span class="js-cursor"></span>{/if}
-				</p>
+				<div class="js-side-text js-md">
+					{@html md(`side:${e.key}`, e.value.value, e.value.complete)}
+				</div>
 			{:else if e.value.kind === 'array'}
 				<ol class="js-bullets">
 					{#each e.value.items as v, vi (vi)}
@@ -677,6 +703,81 @@
 	:global(.dark) .js-side-text {
 		color: #d4d4d4;
 	}
+
+	/* Rendered markdown inside prose fields. `:global` because the HTML arrives via
+	   {@html}, so the compiler cannot see these selectors used; scoped under `.js-md`
+	   so nothing leaks. Sized down to match the structured view's compact type. */
+	.js-md {
+		white-space: normal;
+		overflow-wrap: anywhere;
+	}
+	.js-md :global(p) {
+		margin: 0 0 0.55em;
+	}
+	.js-md :global(p:last-child) {
+		margin-bottom: 0;
+	}
+	.js-md :global(strong) {
+		font-weight: 700;
+		color: #262626;
+	}
+	:global(.dark) .js-md :global(strong) {
+		color: #f5f5f5;
+	}
+	.js-md :global(a) {
+		color: var(--accent, #E63946);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+	.js-md :global(ul) {
+		margin: 0 0 0.55em;
+		padding-left: 1.1em;
+		list-style: disc;
+	}
+	.js-md :global(ul:last-child) {
+		margin-bottom: 0;
+	}
+	.js-md :global(li) {
+		margin-bottom: 0.2em;
+	}
+	.js-md :global(li.md-ord) {
+		list-style: none;
+		margin-left: -1.1em;
+	}
+	.js-md :global(h2),
+	.js-md :global(h3),
+	.js-md :global(h4) {
+		font-size: 0.8rem;
+		font-weight: 700;
+		margin: 0.9em 0 0.3em;
+	}
+	.js-md :global(h2:first-child),
+	.js-md :global(h3:first-child),
+	.js-md :global(h4:first-child) {
+		margin-top: 0;
+	}
+	.js-md :global(.md-code) {
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-style: normal;
+		font-size: 0.92em;
+		padding: 0.05em 0.3em;
+		border-radius: 3px;
+		background: rgb(0 0 0 / 0.06);
+	}
+	:global(.dark) .js-md :global(.md-code) {
+		background: rgb(255 255 255 / 0.09);
+	}
+	/* The caret is spliced into the sanitised HTML (see `md()`), so the compiler
+	   never sees it in this component's markup and would otherwise prune the rule. */
+	.js-md :global(.caret) {
+		display: inline-block;
+		width: 0.42em;
+		height: 1em;
+		margin-left: 1px;
+		vertical-align: text-bottom;
+		background: var(--accent, #E63946);
+		animation: jscaret 1s steps(2, start) infinite;
+	}
 	.js-bullets {
 		display: flex;
 		flex-direction: column;
@@ -718,6 +819,7 @@
 	}
 
 	.js-reduced .js-cursor,
+	.js-reduced .js-md :global(.caret),
 	.js-reduced .js-card.writing,
 	.js-reduced .js-live i {
 		animation: none;
@@ -725,6 +827,7 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.js-cursor,
+		.js-md :global(.caret),
 		.js-card.writing,
 		.js-live i {
 			animation: none;

@@ -355,7 +355,20 @@ export function previewOf(v: PartialValue | null, max = 120, resolve?: IdResolve
 			const prose = strings.find(
 				(e) => !isIdLike(e.key, (e.value as { value: string }).value)
 			);
-			if (prose) return truncate((prose.value as { value: string }).value, max);
+			if (prose) {
+				const anchor = (prose.value as { value: string }).value;
+				// A record whose only prose is a short label — the link enricher's
+				// {phrase, item_id, category} — names its anchor text but not its
+				// target. Resolve the id it carries and show where the link points.
+				if (resolve) {
+					for (const e of strings) {
+						if (e === prose) continue;
+						const title = resolve((e.value as { value: string }).value.trim());
+						if (title && title !== anchor) return truncate(`${anchor} → ${title}`, max);
+					}
+				}
+				return truncate(anchor, max);
+			}
 			// All ids: resolve one to its item title when possible.
 			if (resolve) {
 				for (const e of strings) {
