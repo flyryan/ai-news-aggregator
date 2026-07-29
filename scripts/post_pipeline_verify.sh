@@ -111,14 +111,25 @@ force_sync_aws() {
         ssh_opts+=(-o "UserKnownHostsFile=$SSH_KNOWN_HOSTS")
     fi
 
-    echo "[FIX] Forcing git sync on AWS host..."
+    echo "[FIX] Forcing verified git sync on AWS host..."
+    # Route through verified_sync.sh so this path enforces the same CWE-345
+    # signed-commit gate as scripts/deploy.sh. Previously this ran a raw
+    # `git reset --hard origin/main` and, with REBUILD_WEB=true, immediately
+    # built and ran the result -- a bypass of the gate on the same checkout.
+    local remote_cmd="cd '$REMOTE_REPO' && ./scripts/verified_sync.sh"
     if [ "$REBUILD_WEB" = "true" ]; then
-        ssh "${ssh_opts[@]}" "$host" \
-            "cd '$REMOTE_REPO' && git fetch origin && git reset --hard origin/main && docker compose -f '$COMPOSE_FILE' up -d --build" 2>&1
-    else
-        ssh "${ssh_opts[@]}" "$host" \
-            "cd '$REMOTE_REPO' && git fetch origin && git reset --hard origin/main" 2>&1
+        remote_cmd="$remote_cmd --rebuild --compose-file '$COMPOSE_FILE'"
     fi
+
+    if ssh "${ssh_opts[@]}" "$host" "$remote_cmd" 2>&1; then
+        return 0
+    fi
+
+    local rc=$?
+    echo "[FAIL] Verified sync refused or failed (exit $rc)."
+    echo "       If the tip is unsigned, sign and re-push rather than bypassing:"
+    echo "       the gate is what stops an attacker-pushed commit from running here."
+    return "$rc"
 }
 
 # Check current state
