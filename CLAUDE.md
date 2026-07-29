@@ -293,7 +293,7 @@ MULLVAD_RELAY_FILTER  # Mullvad relay hostname prefix for CI tunnel selection (o
 TARGET_DATE           # Report date (YYYY-MM-DD), coverage is day before. Defaults to today.
 ENABLE_CRON           # Enable scheduled collection (default: false)
 COLLECTION_SCHEDULE   # Cron schedule (default: 0 6 * * *), requires ENABLE_CRON=true
-LOOKBACK_HOURS        # Data window in hours (default: 24)
+LOOKBACK_HOURS        # Collection window in hours, counting back from the end of the coverage day (default: 24 = exactly that day). Does not widen arXiv/LessWrong, which query by calendar date.
 TZ                    # Timezone (default: America/New_York)
 ```
 

@@ -353,29 +353,58 @@ class BaseGatherer(ABC):
         """
         self.config_dir = config_dir
         self.data_dir = data_dir
-        self.lookback_hours = lookback_hours
         self.target_date = target_date
 
-        # Set up date range
-        # target_date is the REPORT date, coverage is the day BEFORE
+        # A window of <= 0 hours collects nothing, and would do so silently: every
+        # source would report success with zero items. Refuse it rather than publish
+        # an empty report.
+        if lookback_hours <= 0:
+            raise ValueError(
+                f"lookback_hours must be positive, got {lookback_hours}. "
+                "The collection window would be empty."
+            )
+        self.lookback_hours = lookback_hours
+
+        # Set up date range.
+        #
+        # `target_date` is the REPORT date; coverage ends at the close of the day
+        # BEFORE it. `lookback_hours` then sets how far back from that the window
+        # reaches. At the default 24 this is exactly the coverage day, 00:00:00 to
+        # 23:59:59.999999 — the behaviour every published report has used. Raising it
+        # extends backward into earlier days without moving the end of the window, so
+        # the report still covers "up to end of yesterday" and simply reaches further.
+        #
+        # Scope, so this is not oversold: the window governs every source that filters
+        # by item timestamp — all of Twitter/Bluesky/Mastodon, Reddit's paging stop,
+        # RSS, and the research blog feeds. It does NOT widen arXiv or LessWrong,
+        # which query their APIs by calendar date (`report_date` / `coverage_date`)
+        # rather than by this range; widening those means changing those queries too.
         if target_date:
             self.report_date = target_date
             report_date_obj = datetime.strptime(target_date, '%Y-%m-%d')
-            # Coverage is the previous day
             coverage_date_obj = report_date_obj - timedelta(days=1)
-            self.coverage_date = coverage_date_obj.strftime('%Y-%m-%d')
-            self.start_time = coverage_date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
-            self.end_time = coverage_date_obj.replace(hour=23, minute=59, second=59, microsecond=999999)
         else:
-            # Default: report today, coverage yesterday
+            # Default: report today, coverage yesterday.
             now = datetime.now()
             self.report_date = now.strftime('%Y-%m-%d')
             coverage_date_obj = now - timedelta(days=1)
-            self.coverage_date = coverage_date_obj.strftime('%Y-%m-%d')
-            self.start_time = coverage_date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
-            self.end_time = coverage_date_obj.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-        logger.info(f"{self.__class__.__name__} initialized: report={self.report_date}, coverage={self.coverage_date} ({self.start_time} to {self.end_time})")
+        self.coverage_date = coverage_date_obj.strftime('%Y-%m-%d')
+
+        # Anchor on the exclusive end (midnight opening the report day) so that
+        # subtracting exactly 24h lands on 00:00:00 of the coverage day rather than
+        # a second short of it.
+        window_end_exclusive = coverage_date_obj.replace(
+            hour=0, minute=0, second=0, microsecond=0
+        ) + timedelta(days=1)
+        self.start_time = window_end_exclusive - timedelta(hours=lookback_hours)
+        self.end_time = window_end_exclusive - timedelta(microseconds=1)
+
+        span_note = "" if lookback_hours == 24 else f" [LOOKBACK_HOURS={lookback_hours}]"
+        logger.info(
+            f"{self.__class__.__name__} initialized: report={self.report_date}, "
+            f"coverage={self.coverage_date} ({self.start_time} to {self.end_time}){span_note}"
+        )
 
     @property
     @abstractmethod
