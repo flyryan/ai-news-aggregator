@@ -401,22 +401,51 @@
 		{/if}
 		{#if !isImage && call.billed === false}
 			<!-- The request never returned, so the cost tracker recorded nothing for it.
-			     But it streamed real output and was really billed — printing $0.00 here
-			     would claim it was free, which is the one thing we know it wasn't. -->
+			     Printing $0.00 would claim it was free, which is the one thing we know
+			     it wasn't: the prompt was ingested and charged either way. -->
 			<div><dt>Effort</dt><dd>{call.effort}</dd></div>
 			<div>
 				<dt>Wrote</dt>
-				<dd>{call.text_chars.toLocaleString()} chars before failing</dd>
-			</div>
-			<div>
-				<dt>Tokens / cost</dt>
-				<dd
-					class="ts-unrecorded"
-					title="Token counts arrive with the response. This call never returned one, so its spend is real but unmeasured, and is not included in the run total."
-				>
-					billed, not measured
+				<dd>
+					{#if call.text_chars > 0}
+						{call.text_chars.toLocaleString()} chars before failing
+					{:else}
+						nothing — died before the first token
+					{/if}
 				</dd>
 			</div>
+			{#if call.input_tokens_estimated}
+				<!-- The one inferred number in the whole artifact. The retry sent the same
+				     prompt, so its input count is a sound estimate of what this attempt
+				     was charged. Marked with ~ everywhere it appears, and excluded from
+				     the run total, which stays a sum of measured spend. -->
+				<div>
+					<dt>Input <span class="est-tag">est.</span></dt>
+					<dd
+						class="ts-estimated"
+						title="Estimated from the retry, which sent the same prompt. This attempt never reported usage, so the figure is inferred, not measured — and is not in the run total."
+						>~{formatTokens(call.input_tokens_estimated)}</dd
+					>
+				</div>
+				<div>
+					<dt>Cost <span class="est-tag">est.</span></dt>
+					<dd
+						class="ts-estimated"
+						title="Input-only estimate: the model never wrote, so there is no output cost to account for. Inferred from the retry's prompt size."
+						>~{formatCost(call.cost_usd_estimated ?? 0)}</dd
+					>
+				</div>
+			{:else}
+				<div>
+					<dt>Tokens / cost</dt>
+					<dd
+						class="ts-unrecorded"
+						title="This attempt never reported usage, and no retry was available to estimate its prompt size from. Its real spend is unknown and is not in the run total."
+					>
+						not reported
+					</dd>
+				</div>
+			{/if}
 			{#if call.error_type}
 				<div><dt>Error</dt><dd>{call.error_type}</dd></div>
 			{/if}
@@ -599,7 +628,13 @@
 					</div>
 					<div>
 						<dt>Read</dt>
-						<dd>{formatTokens(call.input_tokens)} input tokens</dd>
+						{#if call.input_tokens_estimated}
+							<dd class="ts-estimated" title="Estimated from the retry, which sent the same prompt."
+								>~{formatTokens(call.input_tokens_estimated)} input tokens</dd
+							>
+						{:else}
+							<dd>{formatTokens(call.input_tokens)} input tokens</dd>
+						{/if}
 					</div>
 					<div>
 						<dt>Took</dt>
@@ -607,7 +642,15 @@
 					</div>
 					<div>
 						<dt>Cost</dt>
-						<dd>{formatCost(call.cost_usd)}</dd>
+						{#if call.cost_usd_estimated}
+							<dd
+								class="ts-estimated"
+								title="Input-only estimate — the model never wrote. Not included in the run total."
+								>~{formatCost(call.cost_usd_estimated)}</dd
+							>
+						{:else}
+							<dd>{formatCost(call.cost_usd)}</dd>
+						{/if}
 					</div>
 					<div>
 						<dt>Rate</dt>
@@ -951,6 +994,27 @@
 	.ts-unrecorded {
 		font-style: italic;
 		opacity: 0.75;
+	}
+
+	/* Inferred figures are set apart from measured ones on sight, not just by the `~`.
+	   Amber rather than the neutral grey of an unmeasured value: this is a number you
+	   can act on, it just isn't one we observed. */
+	.ts-estimated {
+		color: #b45309;
+		font-variant-numeric: tabular-nums;
+	}
+	:global(.dark) .ts-estimated {
+		color: #fbbf24;
+	}
+	.est-tag {
+		font-size: 0.48rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		color: #b45309;
+		opacity: 0.9;
+	}
+	:global(.dark) .est-tag {
+		color: #fbbf24;
 	}
 	.linkish {
 		color: #E63946;

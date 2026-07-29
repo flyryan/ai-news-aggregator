@@ -502,9 +502,46 @@ class ReplayGenerator:
                 if successor is not None:
                     call["recovered_by"] = successor["id"]
                     successor["recovers"] = call["id"]
+                    self._estimate_failed_input(call, successor, tracker)
 
         calls.sort(key=lambda c: (c["start_ms"], c["id"]))
         return calls
+
+    @staticmethod
+    def _estimate_failed_input(
+        call: Dict[str, Any], successor: Dict[str, Any], tracker: CostTracker
+    ) -> None:
+        """Attribute a timed-out attempt's input cost from its retry.
+
+        A request that dies before the provider's first SSE event leaves nothing to
+        measure -- not even a zero. But the prompt was still ingested and still
+        charged, so reporting $0.000 states the one thing we know to be false. The
+        retry sends the *same* prompt, so its input token count is a sound estimate
+        of what the failed attempt cost.
+
+        This is the only inferred figure in the artifact, and it is flagged as such:
+        `input_estimated` marks it, and the UI must never present it as measured.
+        Deliberately narrow, so the flag stays meaningful:
+
+        * only when nothing at all was measured (a call that streamed before dying
+          has real numbers from the stream and keeps them),
+        * only input -- output is genuinely unknowable, since the model never wrote,
+        * only from a same-caller retry, which is the only case where the prompt is
+          known to be identical.
+
+        The estimate stays out of the run total, which remains a sum of measured
+        spend. Surfacing it per call is the point; silently inflating the headline
+        figure with an inference is not.
+        """
+        if call.get("input_tokens") or call.get("output_tokens"):
+            return  # something was measured; never overwrite it with a guess
+        if call.get("text_chars"):
+            return  # it wrote, so the stream carried usage worth trusting
+        inherited = successor.get("input_tokens") or 0
+        if inherited <= 0:
+            return
+        call["input_tokens_estimated"] = inherited
+        call["cost_usd_estimated"] = round((inherited / 1_000_000) * tracker.input_price, 6)
 
     # -- derived series --------------------------------------------------
 

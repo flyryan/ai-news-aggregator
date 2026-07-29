@@ -170,6 +170,19 @@ export interface ReplayCall {
 	 * and is included in the run total either way.
 	 */
 	billed_exact?: boolean;
+	/**
+	 * INFERRED, not measured — the only such field in the artifact.
+	 *
+	 * Set on a failed attempt that died before the provider sent any SSE event, so
+	 * nothing at all was measured for it. The prompt was still ingested and charged,
+	 * so this carries the input token count of the retry, which sent the identical
+	 * prompt. Excluded from the run total, which stays a sum of measured spend.
+	 *
+	 * Any UI showing these must mark them as estimates (`~`), never as measurements.
+	 */
+	input_tokens_estimated?: number;
+	/** Input-only cost for `input_tokens_estimated`. The model never wrote. */
+	cost_usd_estimated?: number;
 	error_type?: string | null;
 	/** Set on a failed attempt: the id of the retry that succeeded in its place. */
 	recovered_by?: string;

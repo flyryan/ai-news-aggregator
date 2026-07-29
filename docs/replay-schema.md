@@ -140,6 +140,22 @@ This needs **no nginx change** and works with the dev Vite middleware
       "cache_read_tokens": 0,
       "cost_usd": 1.16,
 
+      // INFERRED, not measured — the only such fields in the artifact, and the one
+      // documented exception to "every number on screen was observed".
+      //
+      // Present only on a failed attempt that died before the provider sent any SSE
+      // event, so nothing at all was measured for it. The prompt was still ingested
+      // and charged, so reporting $0.000 would assert the one thing known to be
+      // false. The value is the input token count of the retry, which sent the
+      // identical prompt.
+      //
+      // Rules: input only (the model never wrote, so output is unknowable); only
+      // from a same-caller retry; never overwrites a measured figure; excluded from
+      // run.total_cost_usd, which stays a sum of measured spend. Any UI showing
+      // these must mark them as estimates.
+      "input_tokens_estimated": 20220,
+      "cost_usd_estimated": 0.1011,
+
       "thinking_chars": 4210,
       "text_chars": 31880,
       "stream_events": 1447,
