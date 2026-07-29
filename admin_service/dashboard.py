@@ -18,7 +18,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
-__all__ = ["health_series", "cost_series", "latest_report"]
+__all__ = ["health_series", "cost_series", "latest_report", "source_day_detail"]
+
+# The four top-level sources each have their own category file. The three social
+# platforms live inside social.json, distinguished by `source_type`.
+_CATEGORY_FILES = {"news", "research", "social", "reddit"}
+_SOCIAL_PLATFORMS = {"twitter", "bluesky", "mastodon"}
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -130,6 +135,135 @@ def cost_series(web_dir: Path, days: int = 90) -> list[dict[str, Any]]:
         })
 
     return rows
+
+
+def source_day_detail(web_dir: Path, source: str, date: str) -> dict[str, Any]:
+    """Everything known about one source on one day.
+
+    The count alone says a source is low; the per-feed breakdown says WHICH
+    upstream stopped, which is the actual question. On 2026-06-22 research
+    collected 8 items and the breakdown is "LessWrong: 8" with every arXiv feed
+    absent -- that is the diagnosis, and it is one click away rather than an
+    inference from a small number.
+    """
+    web_dir = Path(web_dir)
+    day_dir = web_dir / "data" / date
+
+    detail: dict[str, Any] = {
+        "source": source,
+        "date": date,
+        "published": day_dir.is_dir(),
+        "count": None,
+        "status": None,
+        "error": None,
+        "display_name": source,
+        "baseline": None,
+        "weekday": None,
+        "ratio": None,
+        "anomalous": False,
+        "feeds": [],
+        "sample_titles": [],
+        "report_url": None,
+        "replay_url": None,
+        "note": None,
+    }
+
+    if not day_dir.is_dir():
+        detail["note"] = "No report was published for this date."
+        return detail
+
+    detail["report_url"] = f"/?date={date}"
+    if (day_dir / "replay-index.json").is_file():
+        detail["replay_url"] = f"/replay?date={date}"
+
+    # --- reported status for this source ---------------------------------
+    try:
+        summary = json.loads((day_dir / "summary.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        summary = {}
+
+    status_block = summary.get("collection_status") or {}
+    for key in ("sources", "social_platforms"):
+        for entry in status_block.get(key) or []:
+            if entry.get("name") == source:
+                detail["count"] = entry.get("count")
+                detail["status"] = entry.get("status")
+                detail["error"] = entry.get("error")
+                detail["display_name"] = entry.get("display_name") or source
+                break
+
+    # --- same-weekday baseline and anomaly verdict ------------------------
+    detector = _load_detector()
+    readings = detector.load_history(web_dir)
+    same = [
+        r.count
+        for r in readings
+        if r.source == source
+        and r.date < date
+        and detector.report_weekday(r.date) == detector.report_weekday(date)
+    ]
+    prior = same[-detector.DEFAULT_WINDOW:]
+    if len(prior) >= 4:
+        import statistics
+
+        baseline = statistics.median(prior)
+        detail["baseline"] = round(baseline)
+        if detail["count"] is not None and baseline:
+            detail["ratio"] = round(detail["count"] / baseline, 3)
+    detail["weekday"] = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")[
+        detector.report_weekday(date)
+    ]
+    detail["anomalous"] = any(
+        a.date == date and a.source == source for a in detector.detect(readings)
+    )
+
+    # --- which upstream feeds actually contributed ------------------------
+    if source in _CATEGORY_FILES:
+        items = _load_items(day_dir / f"{source}.json")
+    elif source in _SOCIAL_PLATFORMS:
+        items = [
+            i
+            for i in _load_items(day_dir / "social.json")
+            if (i.get("source_type") or "").lower() == source
+        ]
+    else:
+        items = []
+
+    counts: dict[str, int] = {}
+    for item in items:
+        name = item.get("source") or "unknown"
+        counts[name] = counts.get(name, 0) + 1
+    detail["feeds"] = [
+        {"name": name, "count": n}
+        for name, n in sorted(counts.items(), key=lambda kv: -kv[1])
+    ]
+
+    detail["sample_titles"] = [
+        (i.get("title") or "").strip()
+        for i in sorted(
+            items, key=lambda i: -(i.get("importance_score") or 0)
+        )[:3]
+        if (i.get("title") or "").strip()
+    ]
+
+    if detail["count"] == 0:
+        detail["note"] = "This source returned nothing on this day."
+    elif detail["anomalous"]:
+        detail["note"] = (
+            "Well below the same-weekday norm. Compare the feeds below against a "
+            "healthy day to see which upstream stopped."
+        )
+
+    return detail
+
+
+def _load_items(path: Path) -> list[dict[str, Any]]:
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return []
+    items = payload if isinstance(payload, list) else payload.get("items", [])
+    return [i for i in items if isinstance(i, dict)]
 
 
 def latest_report(web_dir: Path) -> dict[str, Any] | None:

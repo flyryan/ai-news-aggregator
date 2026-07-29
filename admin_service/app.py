@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
@@ -20,7 +21,7 @@ from .actions import ACTIONS, ActionError, ActionRunner
 from .auth import CF_JWT_HEADER, AccessVerifier, AuthError, NotAuthorized, Principal
 from .balances import fetch_balances
 from .config import AdminSettings
-from .dashboard import cost_series, health_series, latest_report
+from .dashboard import cost_series, health_series, latest_report, source_day_detail
 from .github import GitHubClient, GitHubError
 from .preview import PreviewError, PreviewManager
 from .store import AdminStore
@@ -110,6 +111,18 @@ def create_app(
         days: int = 90, principal: Principal = Depends(require_principal)
     ) -> dict:
         return health_series(settings.repo_dir / "web", days=max(7, min(days, 365)))
+
+    @app.get("/api/dashboard/source-day")
+    def dashboard_source_day(
+        source: str, date: str, principal: Principal = Depends(require_principal)
+    ) -> dict:
+        # `source` and `date` are used to build filenames, so validate their
+        # shape rather than trusting them into a path join.
+        if not re.fullmatch(r"[a-z_]{1,32}", source):
+            raise HTTPException(status_code=400, detail="Invalid source.")
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date):
+            raise HTTPException(status_code=400, detail="Invalid date.")
+        return source_day_detail(settings.repo_dir / "web", source, date)
 
     @app.get("/api/dashboard/cost")
     def dashboard_cost(

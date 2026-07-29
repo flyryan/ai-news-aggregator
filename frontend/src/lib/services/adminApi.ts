@@ -7,6 +7,7 @@ import type {
 	HealthSeries,
 	LatestReport,
 	PreviewJob,
+	SourceDayDetail,
 	WorkflowRun
 } from '$lib/types/admin';
 
@@ -47,6 +48,11 @@ async function post<T>(path: string): Promise<T> {
 export const getLatest = () => get<{ latest: LatestReport | null }>('/api/dashboard/latest');
 export const getHealth = (days = 90) => get<HealthSeries>(`/api/dashboard/health?days=${days}`);
 export const getCost = (days = 90) => get<{ runs: CostRun[] }>(`/api/dashboard/cost?days=${days}`);
+export const getSourceDay = (source: string, date: string) =>
+	get<SourceDayDetail>(
+		`/api/dashboard/source-day?source=${encodeURIComponent(source)}&date=${encodeURIComponent(date)}`
+	);
+
 export const getBalances = () => get<{ balances: Balance[] }>('/api/dashboard/balances');
 export const getRuns = (limit = 30) =>
 	get<{ runs: WorkflowRun[]; error?: string }>(`/api/dashboard/runs?limit=${limit}`);

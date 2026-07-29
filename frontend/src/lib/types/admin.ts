@@ -105,3 +105,28 @@ export interface PreviewJob {
 	size_bytes: number;
 	url: string;
 }
+
+export interface SourceFeed {
+	name: string;
+	count: number;
+}
+
+export interface SourceDayDetail {
+	source: string;
+	date: string;
+	published: boolean;
+	count: number | null;
+	status: string | null;
+	error: string | null;
+	display_name: string;
+	baseline: number | null;
+	weekday: string | null;
+	ratio: number | null;
+	anomalous: boolean;
+	/** Which upstream feeds contributed. The absent ones are the diagnosis. */
+	feeds: SourceFeed[];
+	sample_titles: string[];
+	report_url: string | null;
+	replay_url: string | null;
+	note: string | null;
+}
