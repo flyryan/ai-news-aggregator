@@ -11,19 +11,110 @@
 	 * spend) stay on the station itself — mixing the two would make it unclear
 	 * which numbers describe today and which describe the pipeline in general.
 	 */
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import type { AgentDoc } from '$lib/services/agentDocs';
 
 	export let label: string;
 	export let doc: AgentDoc;
 	export let accent = '#E63946';
+	/** The station this was opened from; the panel is positioned against it. */
+	export let anchor: HTMLElement | null = null;
 	export let onClose: () => void = () => {};
 
 	let panel: HTMLDivElement | null = null;
 
+	/**
+	 * Move an element to `document.body`.
+	 *
+	 * `position: fixed` is only viewport-relative if no ancestor establishes a
+	 * containing block — and a live station carries `transform: translateY(-1px)`
+	 * for its lift, which does exactly that. Coordinates measured against the
+	 * viewport were then applied relative to the card, putting panels for the lower
+	 * stations hundreds of pixels below the fold.
+	 *
+	 * Reparenting to the body is the reliable fix: it cannot be broken by a future
+	 * transform, filter, or `will-change` added anywhere in the stage.
+	 */
+	function portal(node: HTMLElement) {
+		document.body.appendChild(node);
+		return {
+			destroy() {
+				node.remove();
+			}
+		};
+	}
+
+	// Positioned with `fixed` and measured coordinates rather than `absolute`
+	// inside the station.
+	//
+	// The stage clips to its rounded corners (`overflow: hidden`), and lifting that
+	// is not an option — it is what keeps the ambient backdrop and the conveyor
+	// animations inside the frame. An absolutely-positioned child is clipped by any
+	// scrolling or hidden ancestor, so a panel opened on a lower station had its
+	// bottom cut off. `fixed` takes it out of that chain entirely, at the cost of
+	// having to place it ourselves.
+	let top = 0;
+	let left = 0;
+	let width = 0;
+	let maxHeight = 0;
+	let placeAbove = false;
+
+	const MARGIN = 8;
+	const MIN_WIDTH = 300;
+	const GAP = 4;
+	const IDEAL_HEIGHT = 384; // 24rem, the design cap
+
+	function place() {
+		if (!anchor) return;
+		const a = anchor.getBoundingClientRect();
+		const vh = window.innerHeight;
+		const vw = window.innerWidth;
+
+		// Decide from the space available, not from the panel's current height.
+		// Measuring the panel first made placement race its own layout: on the first
+		// pass the height is whatever the content wants, which may exceed the cap
+		// that is about to be applied, so the branch was chosen on a number that
+		// never ends up being true. Space is known before anything renders.
+		const spaceBelow = vh - a.bottom - GAP - MARGIN;
+		const spaceAbove = a.top - GAP - MARGIN;
+		placeAbove = spaceBelow < Math.min(IDEAL_HEIGHT, spaceAbove);
+
+		// Cap the panel to the side it is on, so it always scrolls internally rather
+		// than running off the viewport. This is what actually guarantees no clipping.
+		maxHeight = Math.max(140, Math.min(IDEAL_HEIGHT, placeAbove ? spaceAbove : spaceBelow));
+		top = placeAbove ? a.top - GAP - maxHeight : a.bottom + GAP;
+		// Guard against sub-pixel drift pushing it past an edge.
+		top = Math.min(Math.max(MARGIN, top), vh - maxHeight - MARGIN);
+
+		// Match the station's width where possible, but never go under MIN_WIDTH or
+		// off either edge — a narrow desk column would otherwise squeeze the text.
+		width = Math.min(Math.max(a.width, MIN_WIDTH), vw - MARGIN * 2);
+		left = Math.min(Math.max(MARGIN, a.left), vw - width - MARGIN);
+	}
+
 	onMount(() => {
-		// Focus the panel so Escape works and screen readers land inside it.
-		panel?.focus();
+		void tick().then(() => {
+			// Focus first, then place. Focusing can scroll an ancestor even with
+			// `preventScroll` (browsers honour it inconsistently for nested scroll
+			// containers), and the coordinates are measured from the anchor's live
+			// viewport position — so placing first meant computing against a layout
+			// that focus then moved out from under us. That is how three panels ended
+			// up positioned hundreds of pixels below the fold.
+			panel?.focus({ preventScroll: true });
+			place();
+			// One more frame for any scroll the focus triggered to settle.
+			requestAnimationFrame(place);
+		});
+
+		// Reposition rather than reflow: the replay animates constantly and the page
+		// can scroll underneath an open panel.
+		const onMove = () => place();
+		window.addEventListener('scroll', onMove, true);
+		window.addEventListener('resize', onMove);
+		return () => {
+			window.removeEventListener('scroll', onMove, true);
+			window.removeEventListener('resize', onMove);
+		};
 	});
 
 	function onKeydown(event: KeyboardEvent) {
@@ -37,6 +128,7 @@
 <!-- Click-away layer. Pointer events only; Escape is handled on the panel. -->
 <div
 	class="scrim"
+	use:portal
 	role="presentation"
 	on:click={onClose}
 	on:keydown={() => {}}
@@ -44,7 +136,9 @@
 
 <div
 	class="info"
-	style="--accent: {accent}"
+	use:portal
+	class:above={placeAbove}
+	style="--accent: {accent}; top: {top}px; left: {left}px; width: {width}px; max-height: {maxHeight}px"
 	role="dialog"
 	aria-modal="false"
 	aria-label="About {label}"
@@ -98,14 +192,11 @@
 		background: transparent;
 	}
 
+	/* `fixed`, with coordinates set inline from a measurement of the station — see
+	   the note in the script. Escapes the stage's `overflow: hidden`. */
 	.info {
-		position: absolute;
+		position: fixed;
 		z-index: 41;
-		top: 100%;
-		left: 0;
-		right: 0;
-		margin-top: 4px;
-		max-height: 24rem;
 		overflow-y: auto;
 		padding: 0.7rem 0.8rem 0.8rem;
 		border-radius: 8px;
@@ -270,11 +361,17 @@
 		.scrim {
 			background: rgb(0 0 0 / 0.35);
 		}
+		/* Full-width sheet pinned to the bottom. `!important` because the desktop
+		   path sets top/left/width inline from a measurement, and those would
+		   otherwise win over this rule. */
 		.info {
-			position: fixed;
-			inset: auto 0 0 0;
+			top: auto !important;
+			bottom: 0;
+			left: 0 !important;
+			right: 0;
+			width: auto !important;
 			margin: 0;
-			max-height: 78vh;
+			max-height: 78vh !important;
 			border-radius: 12px 12px 0 0;
 			border-left: none;
 			border-right: none;

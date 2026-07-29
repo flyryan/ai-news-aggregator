@@ -23,6 +23,8 @@
 	// onto nothing is worse than no button.
 	$: doc = agentDoc(agent.id);
 	let infoOpen = false;
+	/** The panel positions itself against this, since it renders outside the card. */
+	let stationEl: HTMLDivElement | null = null;
 	// A new day's replay reuses this component instance; don't leave a panel open
 	// describing the agent that used to be in this slot.
 	$: if (agent.id) infoOpen = false;
@@ -75,6 +77,7 @@
 	class:is-done={status === 'done'}
 	class:info-open={infoOpen}
 	style="--accent: {color}; --flash: {flash};"
+	bind:this={stationEl}
 >
 	<!-- Completion flash: fires the instant a call ends, decays over ~2.2s of run time -->
 	<div class="flash-layer" aria-hidden="true"></div>
@@ -114,7 +117,13 @@
 	</div>
 
 	{#if doc && infoOpen}
-		<AgentInfo label={agent.label} {doc} accent={color} onClose={() => (infoOpen = false)} />
+		<AgentInfo
+			label={agent.label}
+			{doc}
+			accent={color}
+			anchor={stationEl}
+			onClose={() => (infoOpen = false)}
+		/>
 	{/if}
 
 	{#if total > 0}
@@ -317,8 +326,7 @@
 		padding: 0.7rem 0.75rem 0.6rem;
 		background: rgb(255 255 255 / 0.72);
 		border: 1px solid rgb(0 0 0 / 0.08);
-		/* Clips the flash layer to the rounded corners — but it would also clip the
-		   info popover, which hangs below the card. Lifted while one is open. */
+		/* Clips the flash layer to the rounded corners. */
 		overflow: hidden;
 		transition:
 			border-color 220ms ease,
@@ -343,14 +351,10 @@
 		opacity: 0.92;
 		border-color: color-mix(in srgb, var(--accent) 34%, transparent);
 	}
-	/* The popover hangs below the card, so the clip has to come off — and the card
-	   has to sit above its neighbours or they cover the panel.
-	   `opacity` matters too: an idle station is dimmed to 0.44, and opacity applies
-	   to the whole subtree, so the panel rendered see-through no matter what
-	   background it set. A station being read is not idle. */
+	/* The panel renders `fixed`, outside this card and outside the stage's clip, so
+	   no overflow or stacking changes are needed here. Opacity still is: an idle
+	   station dims its whole subtree, and a station being read is not idle. */
 	.station.info-open {
-		overflow: visible;
-		z-index: 42;
 		opacity: 1;
 	}
 
