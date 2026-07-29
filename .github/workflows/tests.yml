@@ -60,3 +60,22 @@ jobs:
         run: python3 -m pip install --no-input "httpx>=0.27.0" "google-genai>=1.0.0" "Pillow>=10.0.0"
       - name: Hero image retry behavior
         run: python3 -m unittest tests.image_client_retry_test -v
+
+  admin-auth:
+    name: Admin panel Access-JWT verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # The admin panel holds a GitHub PAT and can dispatch ~$8-11 pipeline runs.
+    # An earlier version of this service authenticated on header PRESENCE, so
+    # `curl -H 'cf-access-authenticated-user-email: x'` was a full admin session
+    # and the audit log recorded whatever identity the caller typed. This job
+    # fails the build if that class of bug returns.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps for JWT verification
+        run: python3 -m pip install --no-input "PyJWT[crypto]>=2.9" "fastapi>=0.115"
+      - name: Access-JWT verification rejects forged, expired, and mis-scoped tokens
+        run: python3 -m unittest tests.admin_auth_test -v

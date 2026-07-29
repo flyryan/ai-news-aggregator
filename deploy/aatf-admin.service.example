@@ -1,0 +1,43 @@
+# Admin panel service. Runs as an unprivileged dedicated user, binds loopback,
+# and is reached only through the Cloudflare tunnel at admin.aatf.ai.
+#
+# aatfadmin is deliberately NOT in the docker group. Privileged actions go
+# through sudo-allowlisted oneshot units (see deploy/units/), so a flaw here
+# cannot rebuild containers or reach the docker socket directly.
+#
+# Install: see deploy/setup_admin_service.sh
+[Unit]
+Description=AATF admin panel
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=aatfadmin
+Group=aatfadmin
+WorkingDirectory=/opt/aatf-admin
+
+# Secrets and access configuration. Root-owned, mode 0640, group aatfadmin.
+EnvironmentFile=/etc/aatf-admin/admin.env
+
+# --factory so AdminSettings.from_env() runs at startup and can stop the unit.
+# A module-level app instance would build at import time, turning a config error
+# into an import traceback in whatever happens to import the module.
+ExecStart=/opt/aatf-admin/venv/bin/uvicorn \
+    --factory admin_service.app:create_app \
+    --host 127.0.0.1 --port 8200 \
+    --no-server-header --log-level info
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/aatf-admin
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target
