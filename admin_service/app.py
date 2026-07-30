@@ -411,6 +411,13 @@ def create_app(
         if path.startswith(("api/", "preview/")):
             raise HTTPException(status_code=404, detail="Not found.")
 
+        # Typing the bare hostname should land on the panel -- that is what
+        # this origin is for. Only the truly bare root redirects: query-param
+        # roots are real pages here (`/?preview=` renders a draft, `/?date=`
+        # browses a report) and must not bounce to /admin.
+        if path == "" and not request.query_params:
+            return RedirectResponse("/admin", status_code=307)
+
         # Live data and assets come from the checkout, which the git sync keeps
         # current; the exported bundle deliberately excludes both.
         if path.startswith(("data/", "assets/")):
