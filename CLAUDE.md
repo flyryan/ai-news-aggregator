@@ -69,6 +69,30 @@ Actions will not work locally: they start systemd units that exist only on the h
 Everything else — health, cost, balances, runs, previews — works from committed data plus
 the GitHub API.
 
+**Serving model (host):** the admin service serves the same built SPA bundle as the
+public site, exported out of the web Docker image by `deploy/export_web_bundle.sh` into
+`/var/lib/aatf-admin/site` (the host has no node; `web/_app` is gitignored). `/data` and
+`/assets` are served live from the checkout. A preview renders at
+`/?preview=<job>&date=<date>` — the admin origin injects the data base as `<body>`
+attributes on that URL; `/preview/<job>/...` serves only the preview's data files. To
+view a preview in local dev, open it on `:8200`, not the Vite origin — the layout shows
+a loud misconfiguration banner if `?preview=` is present but no attribute was injected.
+
+**Promotion** runs as `aatf-promote@<job>.service` → `scripts/promote_preview.sh` (as
+ubuntu: signed commit + push to main), never inside the admin service — `aatfadmin`
+cannot write the checkout and holds no signing key by design. The publishable-file
+allowlist exists in both `admin_service/preview.py` and the promote script on purpose;
+`tests/preview_wiring_test.py` pins them equal, along with the deterministic
+`<kind>-<date>` job ids the hero unit and sudoers globs depend on.
+
+**Agent rebuild trigger:** `scripts/trigger_rebuild.sh` POSTs an HMAC-signed request to
+the `rebuild-web` hook on `webhook.aatf.ai` (secret from `AATF_REBUILD_WEBHOOK_SECRET`
+or `~/.config/aatf/rebuild-webhook-secret`), which starts the same
+`aatf-rebuild-web.service` the panel uses: build → swap on success → verify
+`/data/index.json` serves → refresh the admin bundle, all under the shared privileged
+lock. Host provisioning is `sudo deploy/setup_admin_service.sh` (idempotent; installs
+the wrapper, sudoers, units, ACLs, and env placeholders).
+
 ### Web-Only Host Deployment
 ```bash
 git fetch origin
