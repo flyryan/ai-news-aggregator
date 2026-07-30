@@ -36,14 +36,21 @@ ExecStart=/opt/aatf-admin/venv/bin/uvicorn \
 Restart=on-failure
 RestartSec=5
 
-NoNewPrivileges=true
+# Hardening is mount-based ONLY, deliberately. The service's entire privilege
+# model is "exec sudo against a six-line allowlist", and NoNewPrivileges=true
+# blocks sudo outright — as do ProtectKernelTunables=, ProtectControlGroups=,
+# and RestrictSUIDSGID=, which all IMPLY NoNewPrivileges for a non-root unit.
+# The first panel-driven action failed exactly this way. The sudoers policy is
+# the boundary here, and it is far narrower than NNP: it enumerates six exact
+# invocations with character-class-constrained arguments.
+#
+# /run/sudo is sudo's timestamp directory; ProtectSystem=strict mounts /run
+# read-only and sudo refuses without it. The "-" tolerates it not existing yet
+# on a freshly booted host (sudo's tmpfiles.d creates it).
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/var/lib/aatf-admin
-ProtectKernelTunables=true
-ProtectControlGroups=true
-RestrictSUIDSGID=true
+ReadWritePaths=/var/lib/aatf-admin -/run/sudo
 
 [Install]
 WantedBy=multi-user.target
