@@ -7,7 +7,11 @@ Description=AATF verified git sync
 
 [Service]
 Type=oneshot
-User=root
+# ubuntu, not root: the checkout is ubuntu's, and root running git in another
+# user's repo trips the dubious-ownership refusal ("not in a git directory").
+# The sync needs nothing root can do that ubuntu cannot — the deploy webhook
+# runs these exact operations as ubuntu already.
+User=ubuntu
 WorkingDirectory=/home/ubuntu/ai-news-aggregator
 
 ExecStart=/usr/bin/flock /var/lib/aatf-admin/privileged.lock \
