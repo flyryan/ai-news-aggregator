@@ -316,10 +316,17 @@
 	let imageFailed = false;
 	$: if (call.id) imageFailed = false;
 
-	// Prompts are big (a research batch sends ~130k chars), so this always starts
-	// folded and the artifact holding them is only fetched when it is opened.
-	let promptOpen = false;
-	$: if (call.id) promptOpen = false;
+	// Prompts are big (a research batch sends ~130k chars), so both folds always
+	// start closed and the artifact holding them is only fetched when one is
+	// opened. System and user fold independently: they are different documents —
+	// the operator's instructions vs the fenced source data — and a reader
+	// usually wants exactly one of them.
+	let systemPromptOpen = false;
+	let userPromptOpen = false;
+	$: if (call.id) {
+		systemPromptOpen = false;
+		userPromptOpen = false;
+	}
 
 	/**
 	 * The prompt for the selected call.
@@ -331,28 +338,30 @@
 	$: promptEntry = prompts?.calls?.[call.id] ?? null;
 	$: promptSystem = promptEntry?.system ?? null;
 	$: promptMessages = promptEntry?.messages ?? (isImage ? imagePrompt : null);
-	$: promptChars =
-		promptEntry?.chars ??
-		(isImage && imagePrompt ? imagePrompt.length : null);
 	$: promptTruncated = promptEntry?.truncated === true;
-	$: hasPrompt = !!(promptSystem || promptMessages);
 	// Rendering happens only while open: these are large enough that formatting them
 	// eagerly for every pane the user clicks through would be wasted work.
-	$: promptSystemHtml = promptOpen && promptSystem ? renderPromptSystem(promptSystem) : '';
-	$: promptMessagesHtml = promptOpen && promptMessages ? renderPrompt(promptMessages) : '';
+	$: promptSystemHtml = systemPromptOpen && promptSystem ? renderPromptSystem(promptSystem) : '';
+	$: promptMessagesHtml = userPromptOpen && promptMessages ? renderPrompt(promptMessages) : '';
 
 	/**
-	 * Open the prompt, fetching the artifact on first use.
+	 * Opening either fold fetches the artifact on first use.
 	 *
-	 * `autoScroll = false` matters even though the section now sits at the top: a live
+	 * `autoScroll = false` matters even though the sections sit at the top: a live
 	 * call's stream auto-scrolls the body to the bottom on every delta, which would
 	 * drag the prompt out of view the moment it was revealed.
 	 */
-	function togglePrompt() {
-		promptOpen = !promptOpen;
-		if (!promptOpen) return;
+	function promptFoldOpened() {
 		autoScroll = false;
 		void onLoadPrompts();
+	}
+	function toggleSystemPrompt() {
+		systemPromptOpen = !systemPromptOpen;
+		if (systemPromptOpen) promptFoldOpened();
+	}
+	function toggleUserPrompt() {
+		userPromptOpen = !userPromptOpen;
+		if (userPromptOpen) promptFoldOpened();
 	}
 
 	// The image lands at the end of the call, not progressively: before then, show
@@ -567,54 +576,89 @@
 	<div class="ts-body" class:ts-body-art={isImage} bind:this={bodyEl} on:scroll={onBodyScroll}>
 		<!-- What the model was asked, above what it answered. Outside the isImage
 		     branch: every call has a prompt, and it is the half of the exchange the
-		     replay used to omit entirely. Folded by default — a research batch sends
-		     ~130k chars, which must not be the first thing in a 22rem scroller. -->
+		     replay used to omit entirely. Two independent folds — the system prompt
+		     and the user prompt are different documents — both closed by default: a
+		     research batch sends ~130k chars, which must not be the first thing in
+		     a 22rem scroller. -->
+		{#if !isImage}
+			<section class="prompt">
+				<h4>
+					<button
+						type="button"
+						class="prompt-toggle"
+						on:click={toggleSystemPrompt}
+						aria-expanded={systemPromptOpen}
+					>
+						<span class="prompt-caret" class:open={systemPromptOpen} aria-hidden="true">▸</span>
+						System prompt
+						<!-- The caret alone read as decoration next to an all-caps label, so the
+						     hint states what you get: the exact text the model received. -->
+						<span class="prompt-hint">
+							{systemPromptOpen ? '(hide)' : '(the instructions it ran under)'}
+						</span>
+					</button>
+					<span class="answer-meta">
+						{#if promptSystem}
+							{promptSystem.length.toLocaleString()} chars
+						{:else if systemPromptOpen && promptsState === 'loading'}
+							loading…
+						{/if}
+					</span>
+				</h4>
+				{#if systemPromptOpen}
+					{#if promptsState === 'loading' && !promptEntry}
+						<p class="answer-text pending">Loading the prompt…</p>
+					{:else if promptSystemHtml}
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<div class="prompt-text md">{@html promptSystemHtml}</div>
+					{:else if promptEntry}
+						<p class="prompt-peek">No system prompt was sent on this call.</p>
+					{:else}
+						<p class="answer-text pending">
+							Prompts are not retained for this date. The timeline and transcript are unaffected.
+						</p>
+					{/if}
+				{/if}
+			</section>
+		{/if}
+
 		<section class="prompt">
 			<h4>
 				<button
 					type="button"
 					class="prompt-toggle"
-					on:click={togglePrompt}
-					aria-expanded={promptOpen}
+					on:click={toggleUserPrompt}
+					aria-expanded={userPromptOpen}
 				>
-					<span class="prompt-caret" class:open={promptOpen} aria-hidden="true">▸</span>
-					The prompt
-					<!-- The caret alone read as decoration next to an all-caps label, so the
-					     action is spelled out. It also states what you get, since the whole
-					     point is that this is the exact text the model received. -->
+					<span class="prompt-caret" class:open={userPromptOpen} aria-hidden="true">▸</span>
+					{isImage ? 'The prompt' : 'User prompt'}
 					<span class="prompt-hint">
-						{promptOpen ? '(hide)' : '(click to see what the model was sent)'}
+						{userPromptOpen ? '(hide)' : '(click to see what the model was sent)'}
 					</span>
 				</button>
 				<span class="answer-meta">
-					{#if promptChars}
-						{promptChars.toLocaleString()} chars{#if promptTruncated} · trimmed{/if}
-					{:else if promptsState === 'loading'}
+					{#if promptMessages}
+						{promptMessages.length.toLocaleString()} chars{#if promptTruncated} · trimmed{/if}
+					{:else if userPromptOpen && promptsState === 'loading'}
 						loading…
 					{:else if call.input_tokens}
 						{formatTokens(call.input_tokens)} tokens in
 					{/if}
 				</span>
 			</h4>
-			{#if promptOpen}
-				{#if promptsState === 'loading' && !hasPrompt}
+			{#if userPromptOpen}
+				{#if promptsState === 'loading' && !promptMessages}
 					<p class="answer-text pending">Loading the prompt…</p>
-				{:else if hasPrompt}
-					{#if promptSystemHtml}
-						<p class="prompt-part">System</p>
-						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-						<div class="prompt-text md">{@html promptSystemHtml}</div>
-					{/if}
-					{#if promptMessagesHtml}
-						{#if promptSystemHtml}<p class="prompt-part">User</p>{/if}
-						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-						<div class="prompt-text md">{@html promptMessagesHtml}</div>
-					{/if}
+				{:else if promptMessagesHtml}
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					<div class="prompt-text md">{@html promptMessagesHtml}</div>
 					{#if promptTruncated}
 						<p class="prompt-peek">
 							Trimmed to fit the artifact's size cap — the head of the prompt is shown.
 						</p>
 					{/if}
+				{:else if promptEntry}
+					<p class="prompt-peek">No user message was retained for this call.</p>
 				{:else}
 					<p class="answer-text pending">
 						Prompts are not retained for this date. The timeline and transcript are unaffected.
@@ -1225,24 +1269,13 @@
 		font-style: italic;
 	}
 	/* Sits above everything else in the body, so it needs its own gap; `.art` used
-	   to supply the spacing when the prompt followed it. */
+	   to supply the spacing when the prompt followed it. The two folds stack, so
+	   the gap between them is tighter than the gap to the output below. */
 	.prompt {
 		margin-bottom: 0.9rem;
 	}
-
-	/* System vs user. The two halves read very differently — one is the operator's
-	   instructions, the other the fenced source data — and unlabelled they run
-	   together into one wall. */
-	.prompt-part {
-		font-size: 0.52rem;
-		font-weight: 700;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: #a3a3a3;
-		margin: 0.4rem 0 0.2rem;
-	}
-	.prompt-part:first-of-type {
-		margin-top: 0;
+	.prompt + .prompt {
+		margin-top: -0.45rem;
 	}
 
 	/* Accent-tinted rather than the hardcoded image pink it used to carry: this now
