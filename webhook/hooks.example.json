@@ -27,5 +27,28 @@
         }
       ]
     }
+  },
+  {
+    "id": "rebuild-web",
+    "execute-command": "/usr/bin/sudo",
+    "pass-arguments-to-command": [
+      { "source": "string", "name": "-n" },
+      { "source": "string", "name": "/usr/bin/systemctl" },
+      { "source": "string", "name": "start" },
+      { "source": "string", "name": "--no-block" },
+      { "source": "string", "name": "aatf-rebuild-web.service" }
+    ],
+    "command-working-directory": "/home/ubuntu/ai-news-aggregator",
+    "response-message": "rebuild started: aatf-rebuild-web.service (journalctl -u aatf-rebuild-web -f)",
+    "trigger-rule": {
+      "match": {
+        "type": "payload-hmac-sha256",
+        "secret": "CHANGE_ME_DIFFERENT_SECRET_FOR_AGENT_REBUILDS",
+        "parameter": {
+          "source": "header",
+          "name": "X-Hub-Signature-256"
+        }
+      }
+    }
   }
 ]
