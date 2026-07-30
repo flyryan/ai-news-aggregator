@@ -8,12 +8,14 @@ that would help someone probing the origin.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import re
+from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 
 from datetime import datetime
 
@@ -38,14 +40,45 @@ def create_app(
     verifier = verifier or AccessVerifier(settings)
     store = store or AdminStore(settings.state_db)
 
-    app = FastAPI(title="AATF admin", docs_url=None, redoc_url=None, openapi_url=None)
-    app.state.settings = settings
-    app.state.verifier = verifier
-    app.state.store = store
-
     runner = ActionRunner(store)
     previews = PreviewManager(settings, store)
     github = GitHubClient(settings.github_repo, settings.github_token)
+
+    def _reap_previews() -> None:
+        # The previous admin service left 2.4 GB of orphaned worktrees behind;
+        # retention is load-bearing, not tidiness. Never let it hurt the app.
+        try:
+            removed = previews.reap()
+            if removed:
+                logger.info("reaped %d expired preview(s)", removed)
+        except Exception:  # noqa: BLE001 - retention must never take the panel down
+            logger.exception("preview reaping failed")
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        _reap_previews()
+
+        async def daily() -> None:
+            while True:
+                await asyncio.sleep(24 * 3600)
+                _reap_previews()
+
+        task = asyncio.create_task(daily())
+        try:
+            yield
+        finally:
+            task.cancel()
+
+    app = FastAPI(
+        title="AATF admin",
+        docs_url=None,
+        redoc_url=None,
+        openapi_url=None,
+        lifespan=lifespan,
+    )
+    app.state.settings = settings
+    app.state.verifier = verifier
+    app.state.store = store
     app.state.runner = runner
     app.state.previews = previews
     app.state.github = github
@@ -181,6 +214,9 @@ def create_app(
                     "danger": spec.danger,
                 }
                 for spec in ACTIONS.values()
+                # promote is driven by the Preview panel with its own confirm
+                # flow; listing it here would offer a raw job-id text box.
+                if not spec.internal
             ]
         }
 
@@ -278,12 +314,33 @@ def create_app(
     def promote_preview(
         job_id: str, principal: Principal = Depends(require_principal)
     ) -> dict:
+        """Start the publish unit for a preview.
+
+        Publishing is asynchronous: this returns the systemd unit, the panel
+        polls /api/actions/status/{unit}, and scripts/promote_preview.sh (as
+        ubuntu) copies, signs, pushes, and deletes the preview on success.
+        """
         try:
-            copied = previews.promote(job_id, principal.email)
+            files = previews.publishable_files(job_id)
         except PreviewError as exc:
-            store.record_action(principal.email, "preview-promote", job_id, "failed", str(exc)[:400])
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        if not files:
+            store.record_action(
+                principal.email, "preview-promote", job_id, "refused",
+                "no publishable files",
+            )
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "This preview has no publishable files yet -- generation "
+                    "may still be running, or it may have failed."
+                ),
+            )
+        try:
+            unit = runner.start("promote", principal.email, arg=job_id)
+        except ActionError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
-        return {"promoted": True, "files": copied}
+        return {"started": True, "unit": unit, "files": files}
 
     @app.delete("/api/previews/{job_id}")
     def discard_preview(
@@ -300,11 +357,13 @@ def create_app(
     def serve_preview(
         job_id: str, path: str = "", principal: Principal = Depends(require_principal)
     ):
-        """Serve the real built bundle against a preview's data.
+        """Serve a preview's data files, and route its page to the SPA.
 
-        HTML is served byte-for-byte apart from two attributes added to the
-        existing <body> tag. Rewriting more would change the bytes the page's
-        CSP hash covers and blank the page.
+        Only `data/...` is served from the preview tree. The page itself lives
+        at `/?preview=<job>&date=<date>`: the SvelteKit router has no
+        /preview/... route, so serving the bundle at this path would hydrate
+        straight into the 404 page instead of the report. The redirect keeps
+        old-style preview URLs working.
         """
         preview = previews.get(job_id)
         if preview is None:
@@ -314,41 +373,100 @@ def create_app(
         if path.startswith("data/"):
             root = previews.web_dir(job_id).resolve()
             candidate = (root / path).resolve()
-            if not str(candidate).startswith(str(root)):
+            if not candidate.is_relative_to(root):
                 raise HTTPException(status_code=400, detail="Invalid path.")
             if candidate.is_file():
                 return FileResponse(candidate)
             raise HTTPException(status_code=404, detail="Not in this preview.")
 
-        # Everything else comes from the built site.
-        site_root = (settings.repo_dir / "web").resolve()
-        target = (site_root / (path or "index.html")).resolve()
-        if not str(target).startswith(str(site_root)):
+        if path in ("", "index.html"):
+            return RedirectResponse(
+                f"/?preview={preview.job_id}&date={preview.date}", status_code=307
+            )
+        raise HTTPException(status_code=404, detail="Previews serve only their data files.")
+
+    # --- the site itself ------------------------------------------------------
+    #
+    # The panel is the same built SPA the public site serves; the admin origin
+    # must serve it because adminApi fetches relative paths on this origin. The
+    # host has no node and web/_app is gitignored, so the bundle comes from
+    # deploy/export_web_bundle.sh (extracted from the web Docker image); the
+    # checkout fallback exists for local dev, where npm run build populates web/.
+    # Registered last: every /api and /preview route above wins first.
+
+    def _bundle_root() -> Path:
+        exported = settings.site_dir
+        if (exported / "index.html").is_file():
+            return exported.resolve()
+        return (settings.repo_dir / "web").resolve()
+
+    _MEDIA_TYPES = {".webp": "image/webp", ".gz": "application/gzip", ".xml": "application/xml"}
+
+    _PREVIEW_ID = re.compile(r"^(hero|report)-\d{4}-\d{2}-\d{2}$")
+
+    @app.get("/{path:path}")
+    def serve_site(
+        request: Request, path: str = "", principal: Principal = Depends(require_principal)
+    ):
+        if path.startswith(("api/", "preview/")):
+            raise HTTPException(status_code=404, detail="Not found.")
+
+        # Live data and assets come from the checkout, which the git sync keeps
+        # current; the exported bundle deliberately excludes both.
+        if path.startswith(("data/", "assets/")):
+            root = (settings.repo_dir / "web").resolve()
+            candidate = (root / path).resolve()
+            if not candidate.is_relative_to(root):
+                raise HTTPException(status_code=400, detail="Invalid path.")
+            if not candidate.is_file():
+                raise HTTPException(status_code=404, detail="Not found.")
+            return FileResponse(candidate, media_type=_MEDIA_TYPES.get(candidate.suffix))
+
+        root = _bundle_root()
+        target = (root / (path or "index.html")).resolve()
+        if not target.is_relative_to(root):
             raise HTTPException(status_code=400, detail="Invalid path.")
         if target.is_dir():
             target = target / "index.html"
         if not target.is_file():
-            target = site_root / "index.html"
+            # SPA fallback: /admin, /archive?date=..., /replay all hydrate from
+            # the shell, same as nginx's try_files on the public origin.
+            target = root / "index.html"
         if not target.is_file():
             raise HTTPException(
                 status_code=503,
-                detail="The site bundle is not built. Run `npm run build` in frontend/.",
+                detail=(
+                    "No site bundle. On the host run deploy/export_web_bundle.sh; "
+                    "locally run `npm run build` in frontend/."
+                ),
             )
 
         if target.suffix != ".html":
-            return FileResponse(target)
+            return FileResponse(target, media_type=_MEDIA_TYPES.get(target.suffix))
 
         html = target.read_text()
-        base = f"/preview/{job_id}"
-        label = f"{preview.kind} preview for {preview.date}"
-        # One targeted attribute insertion on the existing <body> tag. The page
-        # already carries data-sveltekit-preload-data, so this is the same shape
-        # of change and leaves the inline script -- and its CSP hash -- untouched.
-        html = html.replace(
-            "<body ",
-            f'<body data-aatf-data-base="{base}" data-aatf-preview-label="{label}" ',
-            1,
-        )
+
+        # ?preview=<job> renders the SPA against that preview's data tree. The
+        # base travels as a data-* attribute on the existing <body> tag -- an
+        # injected inline <script> would be blocked by the page's CSP hash. An
+        # unknown or malformed job 404s: silently serving live data under a
+        # preview URL is the exact failure this design exists to prevent.
+        job_id = request.query_params.get("preview")
+        if job_id is not None:
+            if not _PREVIEW_ID.fullmatch(job_id):
+                raise HTTPException(status_code=404, detail="Invalid preview id.")
+            preview = previews.get(job_id)
+            if preview is None:
+                raise HTTPException(status_code=404, detail="No such preview.")
+            label = f"{preview.kind} preview for {preview.date}"
+            # One targeted attribute insertion on the existing <body> tag; the
+            # inline hydration script -- and its CSP hash -- stay untouched.
+            html = html.replace(
+                "<body ",
+                f'<body data-aatf-data-base="/preview/{preview.job_id}" '
+                f'data-aatf-preview-label="{label}" ',
+                1,
+            )
         return HTMLResponse(html)
 
     return app

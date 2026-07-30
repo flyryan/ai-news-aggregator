@@ -36,6 +36,7 @@ class ActionSpec:
     needs_arg: bool
     description: str
     danger: str  # "low" | "medium" | "high" -- drives UI confirmation
+    internal: bool = False  # driven by a dedicated flow, hidden from the generic action list
 
 
 ACTIONS: dict[str, ActionSpec] = {
@@ -66,6 +67,14 @@ ACTIONS: dict[str, ActionSpec] = {
         needs_arg=False,
         description="Re-sync and restart the admin service itself",
         danger="medium",
+    ),
+    "promote": ActionSpec(
+        name="promote",
+        unit="aatf-promote@{arg}.service",
+        needs_arg=True,  # the preview job id, <kind>-YYYY-MM-DD
+        description="Publish an approved preview to the live site",
+        danger="high",  # signed commit to main; deploys to the public site
+        internal=True,  # the Preview panel drives this, with its own confirm
     ),
 }
 

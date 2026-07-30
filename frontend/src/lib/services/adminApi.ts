@@ -83,8 +83,10 @@ export const getPreviews = () => get<{ previews: PreviewJob[] }>('/api/previews'
 export const createPreview = (kind: 'hero' | 'report', date: string) =>
 	post<PreviewJob>(`/api/previews?kind=${kind}&date=${encodeURIComponent(date)}`);
 
+// Publishing is asynchronous: the service starts aatf-promote@<job>.service
+// and returns the unit; callers poll getActionStatus until it finishes.
 export const promotePreview = (jobId: string) =>
-	post<{ promoted: boolean; files: string[] }>(
+	post<{ started: boolean; unit: string; files: string[] }>(
 		`/api/previews/${encodeURIComponent(jobId)}/promote`
 	);
 

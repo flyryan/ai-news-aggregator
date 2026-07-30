@@ -6,18 +6,17 @@ That is not tidiness: scripts/deploy.sh runs `git reset --hard` and
 the next push. Keeping drafts off the public origin entirely also means an
 unapproved report is not fetchable by URL.
 
-Promotion copies approved files into the checkout and commits them SSH-signed,
-because scripts/deploy.sh:27-35 refuses an unsigned tip -- an unsigned
-promotion would leave the site frozen on stale content with only a log line to
-say why.
+Promotion runs as a privileged oneshot unit (aatf-promote@.service ->
+scripts/promote_preview.sh), not in this process: aatfadmin cannot write the
+checkout, holds no signing key, and must not -- a panel compromise that could
+commit to main would put arbitrary content on the public site. This module
+only creates, lists, serves, and reaps.
 """
 
 from __future__ import annotations
 
 import json
 import shutil
-import subprocess
-import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -31,6 +30,9 @@ VALID_KINDS = ("hero", "report")
 
 # Only the files the pipeline itself publishes. Never sweep the whole tree: a
 # stray file in a preview should not become a published artifact.
+#
+# scripts/promote_preview.sh enforces the same list independently -- it cannot
+# trust this process. tests/preview_wiring_test.py pins the two copies equal.
 PUBLISHABLE = (
     "summary.json",
     "hero.webp",
@@ -40,6 +42,7 @@ PUBLISHABLE = (
     "reddit.json",
     "replay-index.json",
     "replay-stream.json.gz",
+    "replay-prompts.json.gz",
 )
 
 
@@ -71,7 +74,11 @@ class Preview:
             "date": self.date,
             "created_at": self.created_at,
             "size_bytes": self.size_bytes,
-            "url": f"/preview/{self.job_id}/",
+            # The SPA page for this preview. Not /preview/<job>/: the SvelteKit
+            # router has no route there, so the bundle would hydrate into the
+            # 404 page. The query form renders `/` with the preview data base
+            # injected by serve_site; /preview/<job>/ serves only data files.
+            "url": f"/?preview={self.job_id}&date={self.date}",
         }
 
 
@@ -103,8 +110,15 @@ class PreviewManager:
         if not _is_iso_date(date):
             raise PreviewError(f"invalid date: {date}")
 
-        job_id = f"{kind}-{date}-{uuid.uuid4().hex[:8]}"
+        # The id is deterministic because two other layers must derive the same
+        # path from only (kind, date): aatf-hero-regen@<date>.service hardcodes
+        # previews/hero-<date>/web, and the sudoers glob for promotion can only
+        # constrain a kind-date shape, not a random suffix. One preview per
+        # (kind, date); recreating replaces the old draft.
+        job_id = f"{kind}-{date}"
         job_dir = self._job_dir(job_id)
+        if job_dir.exists():
+            shutil.rmtree(job_dir)
         (job_dir / "web" / "data" / date).mkdir(parents=True, exist_ok=True)
 
         meta = {
@@ -177,80 +191,20 @@ class PreviewManager:
         shutil.rmtree(preview.path, ignore_errors=True)
 
     # --- promotion --------------------------------------------------------
+    #
+    # There is deliberately no promote() here. Publishing writes the checkout
+    # and creates a signed commit, and this process can do neither (and must
+    # not be able to). The endpoint validates the preview, then starts
+    # aatf-promote@<job>.service through the sudo wrapper like any other
+    # privileged action; scripts/promote_preview.sh does the work as ubuntu.
 
-    def promote(self, job_id: str, principal: str) -> list[str]:
-        """Copy approved files into the checkout and commit them, signed."""
+    def publishable_files(self, job_id: str) -> list[str]:
+        """Names of PUBLISHABLE files this preview actually contains."""
         preview = self.get(job_id)
         if preview is None:
             raise PreviewError(f"no such preview: {job_id}")
-
         source_dir = self.web_dir(job_id) / "data" / preview.date
-        if not source_dir.is_dir():
-            raise PreviewError("preview contains no generated data")
-
-        repo = self._settings.repo_dir
-        target_dir = repo / "web" / "data" / preview.date
-        target_dir.mkdir(parents=True, exist_ok=True)
-
-        copied: list[str] = []
-        for name in PUBLISHABLE:
-            source = source_dir / name
-            if source.is_file():
-                shutil.copy2(source, target_dir / name)
-                copied.append(f"web/data/{preview.date}/{name}")
-
-        if not copied:
-            raise PreviewError("preview contained no publishable files")
-
-        self._commit(repo, copied, preview, principal)
-        self._store.record_action(
-            principal, "preview-promote", preview.job_id, "success",
-            f"{len(copied)} file(s) for {preview.date}",
-        )
-        shutil.rmtree(preview.path, ignore_errors=True)
-        return copied
-
-    def _commit(self, repo: Path, paths: list[str], preview: Preview, principal: str) -> None:
-        def git(*args: str) -> subprocess.CompletedProcess:
-            return subprocess.run(
-                ["git", "-C", str(repo), *args],
-                capture_output=True, text=True, timeout=120, check=False,
-            )
-
-        # Check signing is configured BEFORE committing. An unsigned tip makes
-        # deploy.sh abort, which freezes the site on stale content -- a failure
-        # that surfaces far from its cause.
-        signing_key = git("config", "--get", "user.signingkey").stdout.strip()
-        gpg_sign = git("config", "--get", "commit.gpgsign").stdout.strip()
-        if not signing_key or gpg_sign != "true":
-            raise PreviewError(
-                "commit signing is not configured on this host, so the promoted "
-                "commit would be rejected by the deploy gate and the site would "
-                "stay on the previous report. Configure user.signingkey and "
-                "commit.gpgsign before promoting."
-            )
-
-        add = git("add", "--", *paths)
-        if add.returncode != 0:
-            raise PreviewError(f"git add failed: {add.stderr.strip()[:200]}")
-
-        message = (
-            f"data: promote {preview.kind} preview for {preview.date}\n\n"
-            f"Approved via the admin panel by {principal}.\n"
-            f"Preview job {preview.job_id}."
-        )
-        commit = git("commit", "-S", "-m", message)
-        if commit.returncode != 0:
-            if "nothing to commit" in (commit.stdout + commit.stderr).lower():
-                raise PreviewError("promoted files were identical to what is published")
-            raise PreviewError(f"git commit failed: {commit.stderr.strip()[:200]}")
-
-        push = git("push", "origin", "HEAD:main")
-        if push.returncode != 0:
-            raise PreviewError(
-                f"commit created but push failed: {push.stderr.strip()[:200]}. "
-                "The change is committed locally; resolve and push manually."
-            )
+        return [name for name in PUBLISHABLE if (source_dir / name).is_file()]
 
     # --- retention --------------------------------------------------------
 

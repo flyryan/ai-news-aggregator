@@ -19,6 +19,15 @@ User=ubuntu
 WorkingDirectory=/home/ubuntu/ai-news-aggregator
 EnvironmentFile=/etc/aatf-admin/hero.env
 
+# The preview tree is owned by aatfadmin with a setgid group directory
+# (deploy/setup_admin_service.sh puts ubuntu in the aatfadmin group). 0002 so
+# the files written here stay group-writable: the admin service must be able
+# to serve and later delete them.
+UMask=0002
+
+# previews/hero-%i matches PreviewManager's deterministic job id (hero-<date>).
+# The panel creates the preview first, so this directory exists and is seeded
+# with the live summary.json the script needs for its prompt.
 ExecStart=/usr/bin/flock /var/lib/aatf-admin/privileged.lock \
     /home/ubuntu/ai-news-aggregator/venv/bin/python3 \
     scripts/regenerate_hero.py %i -y \

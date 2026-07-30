@@ -1,0 +1,22 @@
+# Publish an approved preview. %i is the job id (e.g. hero-2026-07-29),
+# pattern-checked by sudoers and the trigger wrapper before it gets here, and
+# re-validated by the script itself.
+#
+# Runs as ubuntu, not aatfadmin: publishing means writing the checkout and
+# creating an SSH-signed commit, and both the tree and the signing key belong
+# to ubuntu. Keeping the admin service unable to do this directly is the
+# point -- a panel compromise must not be able to put content on main.
+[Unit]
+Description=AATF publish preview %i
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/ai-news-aggregator
+
+ExecStart=/usr/bin/flock /var/lib/aatf-admin/privileged.lock \
+    /home/ubuntu/ai-news-aggregator/scripts/promote_preview.sh %i
+
+TimeoutStartSec=300
+StandardOutput=journal
+StandardError=journal

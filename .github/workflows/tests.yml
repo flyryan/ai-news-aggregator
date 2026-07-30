@@ -40,6 +40,12 @@ jobs:
         run: python3 -m unittest tests.deploy_signature_gate_test -v
       - name: Source anomaly detector finds the known outages (2026-07-29)
         run: python3 -m unittest tests.source_anomaly_test -v
+      - name: Privileged-action path is not widenable (sudoers/wrapper/units)
+        run: python3 -m unittest tests.admin_actions_test -v
+      - name: Preview cannot silently render live data (data-base resolver)
+        run: python3 -m unittest tests.preview_base_test -v
+      - name: Preview job ids, unit paths, and allowlists stay in lockstep
+        run: python3 -m unittest tests.preview_wiring_test -v
 
   hero-retry:
     name: Hero image retry-window guard

@@ -34,7 +34,7 @@ WRAPPER = REPO_ROOT / "deploy" / "aatf-admin-trigger"
 SUDOERS = REPO_ROOT / "deploy" / "aatf-admin.sudoers"
 UNITS_DIR = REPO_ROOT / "deploy" / "units"
 
-EXPECTED_ACTIONS = {"rebuild-web", "git-sync", "hero-regen", "admin-redeploy"}
+EXPECTED_ACTIONS = {"rebuild-web", "git-sync", "hero-regen", "admin-redeploy", "promote"}
 
 
 def _sudoers_command_lines():
@@ -148,6 +148,7 @@ class UnitsTest(unittest.TestCase):
             "aatf-git-sync.service",
             "aatf-hero-regen@.service",
             "aatf-admin-redeploy.service",
+            "aatf-promote@.service",
         }
         self.assertEqual(expected, names)
 
@@ -155,7 +156,7 @@ class UnitsTest(unittest.TestCase):
         # admin-redeploy is exempt: it restarts the admin service and would
         # deadlock against a lock that service is waiting on.
         for name in ("aatf-rebuild-web.service", "aatf-git-sync.service",
-                     "aatf-hero-regen@.service"):
+                     "aatf-hero-regen@.service", "aatf-promote@.service"):
             body = (UNITS_DIR / name).read_text()
             self.assertIn(
                 "flock", body,
@@ -164,15 +165,17 @@ class UnitsTest(unittest.TestCase):
             )
 
     def test_rebuild_is_scoped_to_the_service_name(self):
-        # Check ExecStart lines only. The comments deliberately discuss
-        # `up -d --build` to explain why it is not used, and matching prose
-        # would fail the test for saying the right thing.
+        # The rebuild sequence lives in deploy/rebuild_web.sh so one flock span
+        # covers build -> up -> verify. Check its non-comment lines; the
+        # comments deliberately discuss `up -d --build` to explain why it is
+        # not used, and matching prose would fail the test for saying the
+        # right thing.
+        script = REPO_ROOT / "deploy" / "rebuild_web.sh"
         exec_lines = [
-            line for line in (UNITS_DIR / "aatf-rebuild-web.service").read_text().splitlines()
+            line for line in script.read_text().splitlines()
             if line.strip() and not line.strip().startswith("#")
         ]
         body = "\n".join(exec_lines)
-        self.assertIn("ai-news-aggregator", body)
         self.assertNotIn(
             "up -d --build", body,
             "unscoped `up -d --build` rebuilds every service in the project and "
@@ -182,6 +185,27 @@ class UnitsTest(unittest.TestCase):
             "build ai-news-aggregator", body,
             "the build step must name the service, or a second compose service "
             "added later gets rebuilt silently",
+        )
+        self.assertIn(
+            "up -d ai-news-aggregator", body,
+            "the swap must only happen as its own step after a successful build",
+        )
+        # And the unit itself must delegate to that script under the lock.
+        unit_lines = [
+            line for line in (UNITS_DIR / "aatf-rebuild-web.service").read_text().splitlines()
+            if line.strip() and not line.strip().startswith("#")
+        ]
+        unit_body = "\n".join(unit_lines)
+        self.assertIn("rebuild_web.sh", unit_body)
+        self.assertIn("flock", unit_body)
+
+    def test_rebuild_verifies_content_before_reporting_success(self):
+        body = (REPO_ROOT / "deploy" / "rebuild_web.sh").read_text()
+        self.assertIn(
+            "/data/index.json", body,
+            "a rebuild must prove the site serves content before reporting "
+            "success -- a broken image plus restart:unless-stopped loops the "
+            "site down while the unit reads green",
         )
 
     def test_hero_unit_writes_to_the_preview_tree(self):

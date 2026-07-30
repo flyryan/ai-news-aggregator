@@ -26,9 +26,13 @@ aatfadmin ALL=(root) NOPASSWD: /usr/local/sbin/aatf-admin-trigger admin-redeploy
 # reaches a unit name.
 aatfadmin ALL=(root) NOPASSWD: /usr/local/sbin/aatf-admin-trigger hero-regen [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]
 
-# Read-only status for the panel's action view. Journal reads do NOT need sudo --
-# aatfadmin is added to the systemd-journal group instead, because reading logs
-# is not a privileged action and should not be granted like one.
-aatfadmin ALL=(root) NOPASSWD: /usr/bin/systemctl show aatf-rebuild-web.service
-aatfadmin ALL=(root) NOPASSWD: /usr/bin/systemctl show aatf-git-sync.service
-aatfadmin ALL=(root) NOPASSWD: /usr/bin/systemctl show aatf-admin-redeploy.service
+# promote takes a preview job id, <kind>-YYYY-MM-DD. One rule per kind so the
+# prefix stays a literal rather than a pattern; the wrapper and
+# scripts/promote_preview.sh both re-validate the full shape.
+aatfadmin ALL=(root) NOPASSWD: /usr/local/sbin/aatf-admin-trigger promote hero-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]
+aatfadmin ALL=(root) NOPASSWD: /usr/local/sbin/aatf-admin-trigger promote report-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]
+
+# No grants for status or logs, deliberately. `systemctl show <unit>` works
+# unprivileged (the panel's ActionRunner.status calls it without sudo), and
+# journal reads come from membership in the systemd-journal group -- reading
+# state is not a privileged action and must not be granted like one.

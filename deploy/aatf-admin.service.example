@@ -20,6 +20,12 @@ WorkingDirectory=/opt/aatf-admin
 # Secrets and access configuration. Root-owned, mode 0640, group aatfadmin.
 EnvironmentFile=/etc/aatf-admin/admin.env
 
+# Previews are written by two users: this service (aatfadmin) creates and
+# seeds them, the hero unit (ubuntu, in the aatfadmin group) writes generated
+# output into them. 0002 keeps everything group-writable under the setgid
+# previews directory so each side can read and delete the other's files.
+UMask=0002
+
 # --factory so AdminSettings.from_env() runs at startup and can stop the unit.
 # A module-level app instance would build at import time, turning a config error
 # into an import traceback in whatever happens to import the module.

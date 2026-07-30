@@ -41,6 +41,7 @@ class AdminSettings:
     port: int
     state_db: Path
     repo_dir: Path
+    site_dir: Path
     github_token: str
     github_repo: str
 
@@ -89,6 +90,11 @@ class AdminSettings:
             port=int(env.get("ADMIN_PORT") or 8200),
             state_db=Path(env.get("ADMIN_STATE_DB") or "/var/lib/aatf-admin/admin.sqlite3"),
             repo_dir=Path(env.get("ADMIN_REPO_DIR") or "/home/ubuntu/ai-news-aggregator"),
+            # Where the built SPA bundle lives. The host has no node, so the
+            # bundle is exported out of the web Docker image by
+            # deploy/export_web_bundle.sh; the checkout's web/ only has the
+            # bundle in local dev, which is the fallback when this is absent.
+            site_dir=Path(env.get("ADMIN_SITE_DIR") or "/var/lib/aatf-admin/site"),
             # Optional: read-only views work without it; actions and logs do not.
             github_token=(env.get("ADMIN_GITHUB_TOKEN") or "").strip(),
             github_repo=(env.get("ADMIN_GITHUB_REPO") or "flyryan/ai-news-aggregator").strip(),

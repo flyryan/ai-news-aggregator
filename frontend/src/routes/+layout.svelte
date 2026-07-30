@@ -19,6 +19,17 @@
 		try {
 			showPreviewBanner = isPreview();
 			previewBannerLabel = previewLabel();
+			// The URL claiming ?preview= while the body attribute is absent means
+			// this page was NOT served by the admin origin's injection path -- a
+			// dev server or a misroute. Every fetch would silently read LIVE data
+			// under a preview URL, which is the exact failure the data-base design
+			// exists to prevent. Same loud banner as a malformed base.
+			if (!showPreviewBanner && $page.url.searchParams.has('preview')) {
+				showPreviewBanner = true;
+				previewBannerLabel =
+					'Preview misconfigured: this origin did not inject the preview data base, so ' +
+					'you are looking at LIVE data. Open the preview from the admin origin';
+			}
 		} catch (e) {
 			// A malformed base throws by design rather than falling back to live
 			// data. Surface it loudly instead of rendering something misleading.

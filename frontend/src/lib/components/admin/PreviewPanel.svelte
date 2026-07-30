@@ -3,11 +3,13 @@
 	import {
 		createPreview,
 		discardPreview,
+		getActionLogs,
+		getActionStatus,
 		getPreviews,
 		promotePreview,
 		runAction
 	} from '$lib/services/adminApi';
-	import type { PreviewJob } from '$lib/types/admin';
+	import type { ActionStatus, PreviewJob } from '$lib/types/admin';
 
 	let previews = $state<PreviewJob[]>([]);
 	let error = $state<string | null>(null);
@@ -44,14 +46,38 @@
 		}
 	}
 
+	// Publishing runs as a host unit (copy, signed commit, push); poll systemd
+	// for the terminal result rather than inferring success from silence.
+	async function waitForUnit(unit: string, timeoutMs = 180_000): Promise<ActionStatus> {
+		const deadline = Date.now() + timeoutMs;
+		for (;;) {
+			const status = await getActionStatus(unit);
+			if (status.finished) return status;
+			if (Date.now() > deadline) {
+				throw new Error(`Timed out waiting for ${unit}; check its logs in Actions.`);
+			}
+			await new Promise((resolve) => setTimeout(resolve, 3000));
+		}
+	}
+
 	async function promote(job: PreviewJob) {
 		confirmingPromote = null;
 		error = null;
 		notice = null;
 		busy = job.job_id;
 		try {
-			const result = await promotePreview(job.job_id);
-			notice = `Published ${result.files.length} file(s) for ${job.date}. The site updates on the next deploy.`;
+			const started = await promotePreview(job.job_id);
+			notice = `Publishing ${started.files.length} file(s) for ${job.date}…`;
+			const status = await waitForUnit(started.unit);
+			if (status.succeeded) {
+				notice = `Published ${started.files.length} file(s) for ${job.date}. The push triggers the deploy webhook; the site updates in about a minute.`;
+			} else {
+				// Surface the unit's own words -- "identical to what is published"
+				// and "signing is not configured" both land here.
+				const logs = await getActionLogs(started.unit, 20).catch(() => null);
+				const tail = logs?.lines.slice(-3).join(' ') ?? '';
+				error = `Publish failed (${status.result}). ${tail}`.trim();
+			}
 			await refresh();
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Could not publish this preview.';
