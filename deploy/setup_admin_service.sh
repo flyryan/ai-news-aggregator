@@ -70,7 +70,8 @@ else
     chmod o+x /home/ubuntu
 fi
 
-echo "Installing the sudo wrapper, sudoers policy, and action units..."
+echo "Installing the sudo wrapper, sudoers policy, and units..."
+install -o root -g root -m 0644 "$HERE/aatf-admin.service.example" "$UNIT_DST"
 install -o root -g root -m 0755 "$HERE/aatf-admin-trigger" "$WRAPPER_DST"
 
 # visudo validates BEFORE the file is live; a syntax error in sudoers.d can
