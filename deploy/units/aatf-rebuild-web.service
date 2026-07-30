@@ -7,6 +7,10 @@
 #
 # Not a child of the admin process, so restarting or redeploying the panel
 # mid-build does not kill the build.
+#
+# The sequence lives in deploy/rebuild_web.sh so ONE flock span covers
+# build -> up -> verify -> bundle export. Locking each step separately would
+# let a deploy-webhook push git-reset the build context between steps.
 [Unit]
 Description=AATF rebuild web container
 
@@ -15,16 +19,8 @@ Type=oneshot
 User=root
 WorkingDirectory=/home/ubuntu/ai-news-aggregator
 
-# Build first, and only swap containers if the build succeeded. `up -d --build`
-# in one step can tear down a working container and then fail to replace it,
-# and restart: unless-stopped will loop the broken image.
-#
-# The service name is explicit: an unscoped `up -d` rebuilds every service in
-# the compose project, including anything added later.
 ExecStart=/usr/bin/flock /var/lib/aatf-admin/privileged.lock \
-    /usr/bin/docker compose -f docker-compose.web.yml build ai-news-aggregator
-ExecStart=/usr/bin/flock /var/lib/aatf-admin/privileged.lock \
-    /usr/bin/docker compose -f docker-compose.web.yml up -d ai-news-aggregator
+    /home/ubuntu/ai-news-aggregator/deploy/rebuild_web.sh
 
 TimeoutStartSec=1200
 StandardOutput=journal
