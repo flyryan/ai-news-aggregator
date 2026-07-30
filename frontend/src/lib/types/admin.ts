@@ -50,16 +50,45 @@ export interface Balance {
 
 export interface WorkflowRun {
 	id: number;
+	run_number: number;
 	status: string;
 	conclusion: string | null;
 	event: string;
+	display_title: string | null;
+	actor: string | null;
+	head_sha: string | null;
 	created_at: string;
 	updated_at: string;
 	html_url: string;
 	run_attempt: number;
 	duration_seconds: number;
+	/** The ET calendar date the run nominally reports on. */
+	report_date: string | null;
+	/** Whether web/data/<report_date>/summary.json exists. */
+	published: boolean;
+	/** Total LLM cost from that date's replay index, when one exists. */
+	cost_usd: number | null;
 	/** false = a schedule-gate no-op, not a real pipeline run. */
 	did_real_work: boolean;
+}
+
+export interface RunStep {
+	name: string;
+	status: string;
+	conclusion: string | null;
+	duration_seconds: number | null;
+}
+
+export interface RunJob {
+	id: number;
+	name: string;
+	status: string;
+	conclusion: string | null;
+	started_at: string | null;
+	completed_at: string | null;
+	duration_seconds: number | null;
+	html_url: string;
+	steps: RunStep[];
 }
 
 export interface LatestReport {

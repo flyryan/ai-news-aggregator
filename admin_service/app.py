@@ -18,6 +18,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from .actions import ACTIONS, ActionError, ActionRunner
 from .auth import CF_JWT_HEADER, AccessVerifier, AuthError, NotAuthorized, Principal
@@ -183,16 +184,33 @@ def create_app(
             # A GitHub outage or missing token must degrade this panel, not the page.
             return {"runs": [], "error": str(exc)}
 
+        # Join each run to what it published. The nominal run fires at 3 AM ET
+        # and produces that ET day's report, so the run's ET calendar date IS
+        # the report date (backfill dispatches with an explicit target_date are
+        # the rare exception, and for those `published` simply reflects the
+        # nominal date).
+        eastern = ZoneInfo("America/New_York")
+        web_dir = settings.repo_dir / "web"
+        costs = {row["date"]: row["cost_usd"] for row in cost_series(web_dir, days=120)}
+
         for run in runs:
             duration = 0
-            if run.get("created_at") and run.get("updated_at"):
+            report_date = None
+            if run.get("created_at"):
                 try:
                     started = datetime.fromisoformat(run["created_at"].replace("Z", "+00:00"))
-                    ended = datetime.fromisoformat(run["updated_at"].replace("Z", "+00:00"))
-                    duration = int((ended - started).total_seconds())
+                    report_date = started.astimezone(eastern).strftime("%Y-%m-%d")
+                    if run.get("updated_at"):
+                        ended = datetime.fromisoformat(run["updated_at"].replace("Z", "+00:00"))
+                        duration = int((ended - started).total_seconds())
                 except ValueError:
                     duration = 0
             run["duration_seconds"] = duration
+            run["report_date"] = report_date
+            run["published"] = bool(
+                report_date and (web_dir / "data" / report_date / "summary.json").is_file()
+            )
+            run["cost_usd"] = costs.get(report_date)
             # 13 of 50 "successful" runs are 15-second schedule-gate no-ops.
             # Counting them halves the apparent success rate and wrecks duration
             # averages, so mark them rather than filtering silently -- a hidden
@@ -200,6 +218,29 @@ def create_app(
             run["did_real_work"] = duration >= 120
 
         return {"runs": runs}
+
+    @app.get("/api/dashboard/runs/{run_id}/jobs")
+    def dashboard_run_jobs(
+        run_id: int, principal: Principal = Depends(require_principal)
+    ) -> dict:
+        try:
+            return {"jobs": github.run_jobs(run_id)}
+        except GitHubError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    @app.get("/api/dashboard/runs/{run_id}/logs")
+    def dashboard_run_logs(
+        run_id: int, lines: int = 400, principal: Principal = Depends(require_principal)
+    ) -> dict:
+        """Tail of the run's job logs. Requires ADMIN_GITHUB_TOKEN: run
+        metadata is public on this repo, but the logs endpoint 403s
+        unauthenticated -- which is what makes the PAT mandatory."""
+        try:
+            text = github.job_logs(run_id)
+        except GitHubError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+        tail = text.splitlines()[-max(50, min(lines, 2000)):]
+        return {"run_id": run_id, "lines": tail}
 
     # --- privileged actions -------------------------------------------------
 

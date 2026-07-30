@@ -7,6 +7,7 @@ import type {
 	HealthSeries,
 	LatestReport,
 	PreviewJob,
+	RunJob,
 	SourceDayDetail,
 	WorkflowRun
 } from '$lib/types/admin';
@@ -56,6 +57,10 @@ export const getSourceDay = (source: string, date: string) =>
 export const getBalances = () => get<{ balances: Balance[] }>('/api/dashboard/balances');
 export const getRuns = (limit = 30) =>
 	get<{ runs: WorkflowRun[]; error?: string }>(`/api/dashboard/runs?limit=${limit}`);
+export const getRunJobs = (runId: number) =>
+	get<{ jobs: RunJob[] }>(`/api/dashboard/runs/${runId}/jobs`);
+export const getRunLogs = (runId: number, lines = 400) =>
+	get<{ run_id: number; lines: string[] }>(`/api/dashboard/runs/${runId}/logs?lines=${lines}`);
 export const getActions = () => get<{ actions: ActionSpec[] }>('/api/actions');
 export const getAudit = (limit = 50) => get<{ actions: AuditEntry[] }>(`/api/audit?limit=${limit}`);
 

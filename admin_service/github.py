@@ -68,15 +68,61 @@ class GitHubClient:
         for run in payload.get("workflow_runs", []):
             runs.append({
                 "id": run.get("id"),
+                "run_number": run.get("run_number"),
                 "status": run.get("status"),
                 "conclusion": run.get("conclusion"),
                 "event": run.get("event"),
+                "display_title": run.get("display_title"),
+                "actor": (run.get("actor") or {}).get("login"),
+                "head_sha": run.get("head_sha"),
                 "created_at": run.get("created_at"),
                 "updated_at": run.get("updated_at"),
                 "html_url": run.get("html_url"),
                 "run_attempt": run.get("run_attempt"),
             })
         return runs
+
+    def run_jobs(self, run_id: int) -> list[dict]:
+        """Jobs and steps for one run — the expandable detail in the panel.
+
+        Public on this repo (unlike logs), so it works without a token.
+        """
+        def seconds(started: str | None, completed: str | None) -> int | None:
+            if not started or not completed:
+                return None
+            try:
+                from datetime import datetime
+                a = datetime.fromisoformat(started.replace("Z", "+00:00"))
+                b = datetime.fromisoformat(completed.replace("Z", "+00:00"))
+                return max(0, int((b - a).total_seconds()))
+            except ValueError:
+                return None
+
+        payload = self._get(f"/actions/runs/{run_id}/jobs", per_page=20)
+        jobs = []
+        for job in payload.get("jobs", []):
+            jobs.append({
+                "id": job.get("id"),
+                "name": job.get("name"),
+                "status": job.get("status"),
+                "conclusion": job.get("conclusion"),
+                "started_at": job.get("started_at"),
+                "completed_at": job.get("completed_at"),
+                "duration_seconds": seconds(job.get("started_at"), job.get("completed_at")),
+                "html_url": job.get("html_url"),
+                "steps": [
+                    {
+                        "name": step.get("name"),
+                        "status": step.get("status"),
+                        "conclusion": step.get("conclusion"),
+                        "duration_seconds": seconds(
+                            step.get("started_at"), step.get("completed_at")
+                        ),
+                    }
+                    for step in (job.get("steps") or [])
+                ],
+            })
+        return jobs
 
     def in_flight(self, workflow: str = "daily-pipeline.yml") -> dict | None:
         """A queued or running run, if any.
