@@ -32,6 +32,11 @@ from .prompt_security import (
     normalize_untrusted_text,
 )
 from .staleness_checker import StalenessChecker
+from .summary_context import (
+    build_executive_context,
+    format_previous_coverage,
+    load_previous_summaries,
+)
 from .phase_tracker import PhaseTracker
 from .config import ProviderConfig
 from typing import TYPE_CHECKING
@@ -1062,33 +1067,8 @@ RELEASE-DATE GROUNDING (mandatory check for any topic that names or implies a mo
         Returns:
             Formatted string with previous summaries for context.
         """
-        from datetime import datetime, timedelta
-
-        target_dt = datetime.strptime(self.target_date, '%Y-%m-%d')
-        previous_summaries = []
-
-        for days_ago in range(1, lookback_days + 1):
-            check_date = target_dt - timedelta(days=days_ago)
-            date_str = check_date.strftime('%Y-%m-%d')
-            summary_path = os.path.join(self.web_dir, 'data', date_str, 'summary.json')
-
-            if not os.path.exists(summary_path):
-                continue
-
-            try:
-                with open(summary_path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                exec_summary = data.get('executive_summary', '')
-                if exec_summary:
-                    previous_summaries.append(f"=== {date_str} ===\n{exec_summary}")
-            except Exception as e:
-                logger.warning(f"Failed to load previous summary for {date_str}: {e}")
-                continue
-
-        if not previous_summaries:
-            return ""
-
-        return "PREVIOUS DAYS' COVERAGE (do NOT repeat these as new/breaking news):\n\n" + "\n\n".join(previous_summaries)
+        pairs = load_previous_summaries(self.web_dir, self.target_date, lookback_days)
+        return format_previous_coverage(pairs)
 
     async def _generate_executive_summary(
         self,
@@ -1106,31 +1086,23 @@ RELEASE-DATE GROUNDING (mandatory check for any topic that names or implies a mo
         # Load previous days' summaries to avoid repetition
         previous_coverage = self._load_previous_summaries(lookback_days=3)
 
-        # Build context
-        context_parts = [f"Date: {self.target_date}", ""]
-
-        # Add previous coverage context first (important for avoiding repetition)
-        if previous_coverage:
-            context_parts.append(previous_coverage)
-            context_parts.append("")
-
-        context_parts.append("TOP TOPICS:")
-        for i, topic in enumerate(top_topics[:6], 1):
-            context_parts.append(f"{i}. {topic.name}: {topic.description}")
-        context_parts.append("")
-
+        # Build context (scaffolding shared with scripts/regenerate_summary.py)
+        topics = [(topic.name, topic.description) for topic in top_topics[:6]]
+        categories = []
         for category, report in category_reports.items():
-            context_parts.append(f"--- {category.upper()} ---")
-            context_parts.append(f"Summary: {report.category_summary}")
             summary_items = [
                 item for item in report.top_items
                 if not self._exclude_from_summaries(item)
             ]
-            if summary_items:
-                context_parts.append("Top story: " + normalize_untrusted_text(summary_items[0].item.title)[:300])
-            context_parts.append("")
+            top_story = (
+                normalize_untrusted_text(summary_items[0].item.title)[:300]
+                if summary_items else None
+            )
+            categories.append((category, report.category_summary, top_story))
 
-        context = "\n".join(context_parts)
+        context = build_executive_context(
+            self.target_date, previous_coverage, topics, categories
+        )
 
         # CWE-1427: summary instructions travel in the system prompt; the
         # aggregated context travels in the user message inside a nonce fence.
@@ -1174,7 +1146,8 @@ FORMATTING RULES:
 - Do NOT use phrases like "significant developments", "noteworthy", or "thought leaders"
 
 CRITICAL - AVOID REPETITION:
-- Review the PREVIOUS DAYS' COVERAGE section above carefully
+- The fenced context separates PREVIOUS DAYS' COVERAGE (prior reports, context only, closed by the "=== END PREVIOUS DAYS' COVERAGE ===" marker) from TODAY'S DATA. Base the summary ONLY on the TODAY'S DATA section.
+- Review the PREVIOUS DAYS' COVERAGE section carefully
 - If a story was already a headline/top story in previous days, do NOT present it as breaking news again
 - For ongoing stories, frame as "continuing developments" or focus on what's NEW today
 - Prioritize genuinely new stories over rehashing recent headlines

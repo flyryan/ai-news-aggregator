@@ -264,8 +264,8 @@ class LinkEnricher:
         # item list and text to enrich travel in the user message inside a
         # nonce fence, as labeled sections the instruction pointers name.
         nonce = new_fence_nonce()
-        items_pointer = "[Provided in the user message inside the <source_data> fence, under AVAILABLE ITEMS.]"
-        text_pointer = "[Provided in the user message inside the <source_data> fence, under TEXT TO ENRICH.]"
+        items_pointer = "[Provided in the user message inside the <source_data> fence, between the \"=== AVAILABLE ITEMS ===\" and \"=== END AVAILABLE ITEMS ===\" markers.]"
+        text_pointer = "[Provided in the user message inside the <source_data> fence, between the \"=== TEXT TO ENRICH ===\" and \"=== END TEXT TO ENRICH ===\" markers.]"
         if self.prompt_accessor:
             instructions = self.prompt_accessor.get_post_processing_prompt(
                 'link_enrichment',
@@ -319,9 +319,13 @@ CRITICAL JSON FORMATTING:
 Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not entities. Avoid bold markers inside links."""
 
         system_prompt = build_hardened_system(instructions, nonce)
+        # Explicit END markers: the text block is arbitrary multi-paragraph
+        # markdown, so its boundary must not depend on where the fence closes.
         fenced_payload = (
-            f"AVAILABLE ITEMS (ordered by importance):\n{items_json}\n\n"
-            f"TEXT TO ENRICH:\n{text}"
+            f"=== AVAILABLE ITEMS (ordered by importance) ===\n{items_json}\n"
+            f"=== END AVAILABLE ITEMS ===\n\n"
+            f"=== TEXT TO ENRICH ===\n{text}\n"
+            f"=== END TEXT TO ENRICH ==="
         )
         user_message = build_fenced_user_message(
             fenced_payload, nonce,

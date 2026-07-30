@@ -33,6 +33,12 @@ from agents.config import load_config
 from agents.config.prompts import PromptAccessor, load_prompts
 from agents.llm_client import AsyncAnthropicClient
 from agents.ecosystem_context import EcosystemContextManager
+from agents.prompt_security import (
+    DATA_POINTER,
+    build_fenced_user_message,
+    build_hardened_system,
+    new_fence_nonce,
+)
 from agents.link_enricher import LinkEnricher
 from generators.json_generator import JSONGenerator
 
@@ -157,11 +163,23 @@ async def resume(target_date: str, web_dir: str = './web', config_dir: str = './
         print(f"Ranking {len(top_candidates)} candidates...")
 
         ranking_context = analyzer._build_ranking_context(top_candidates, themes)
-        ranking_prompt = analyzer._get_ranking_prompt(ranking_context)
+
+        # CWE-1427 parity with base._reduce_phase: ranking instructions travel
+        # in the system prompt, the candidate context in a nonce-fenced user
+        # message.
+        nonce = new_fence_nonce()
+        ranking_instructions = analyzer._get_ranking_prompt(DATA_POINTER)
+        system_prompt = build_hardened_system(
+            ranking_instructions, nonce, grounding=analyzer.grounding_context
+        )
+        ranking_user = build_fenced_user_message(
+            ranking_context, nonce,
+            task_line="Rank the fenced analysis results below according to your system instructions.",
+        )
 
         response = await async_client.call_with_thinking(
-            messages=[{"role": "user", "content": ranking_prompt}],
-            system=analyzer.grounding_context,
+            messages=[{"role": "user", "content": ranking_user}],
+            system=system_prompt,
             profile=analyzer.thinking_budget,
             caller="research_analyzer.resume_reduce_rank",
             # Match the pipeline reduce path: full output ceiling at max effort

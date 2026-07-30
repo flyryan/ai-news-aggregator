@@ -983,11 +983,15 @@ class BaseAnalyzer(ABC):
         top_candidates: List[AnalyzedItem],
         themes: List[CategoryTheme]
     ) -> str:
-        """Build context for final ranking phase."""
+        """Build context for final ranking phase.
+
+        Every block gets a `=== X ===` header so no section is the unlabeled
+        one -- _reduce_phase appends a third block in the same style.
+        """
         parts = []
 
         # Add top candidates
-        parts.append("TOP CANDIDATES (by initial score):\n")
+        parts.append("=== TOP CANDIDATES (by initial score) ===\n")
         for i, item in enumerate(top_candidates[:30], 1):
             parts.append(f"{i}. [{item.item.id}] {self._clip_context_text(item.item.title, 300)}")
             parts.append(f"   Score: {item.importance_score} | {item.reasoning[:100] if item.reasoning else 'N/A'}")
@@ -995,7 +999,7 @@ class BaseAnalyzer(ABC):
             parts.append("")
 
         # Add aggregated themes
-        parts.append("\nDETECTED THEMES:\n")
+        parts.append("\n=== DETECTED THEMES ===\n")
         for theme in themes[:5]:
             parts.append(f"- {theme.name}: {theme.description} ({theme.item_count} items)")
 
@@ -1072,7 +1076,7 @@ class BaseAnalyzer(ABC):
             if self._exclude_from_summaries(item)
         ]
         if excluded_summary_items:
-            ranking_context += "\n\nFRESHNESS-EXCLUDED ITEMS (do not include in top_10 or category_summary):\n"
+            ranking_context += "\n\n=== FRESHNESS-EXCLUDED ITEMS (do not include in top_10 or category_summary) ===\n"
             for item in excluded_summary_items[:12]:
                 metadata = item.item.metadata if isinstance(item.item.metadata, dict) else {}
                 freshness = metadata.get('freshness') if isinstance(metadata.get('freshness'), dict) else {}

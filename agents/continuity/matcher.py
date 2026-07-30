@@ -12,6 +12,12 @@ from typing import List, Dict, Any
 
 from ..llm_client import AsyncAnthropicClient, ThinkingLevel
 from ..base import AnalyzedItem, StoryMatch
+from ..prompt_security import (
+    build_fenced_user_message,
+    build_hardened_system,
+    new_fence_nonce,
+    normalize_untrusted_text,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -60,11 +66,20 @@ class StoryMatcher:
         # Build context for historical items
         historical_context = self._build_historical_context(historical_items)
 
-        prompt = self._build_prompt(today_context, historical_context)
+        # CWE-1427: matching instructions travel in the system prompt; the
+        # item lists (untrusted titles/summaries) travel in the user message
+        # inside a nonce fence.
+        nonce = new_fence_nonce()
+        system_prompt = build_hardened_system(self._build_instructions(), nonce)
+        user_message = build_fenced_user_message(
+            f"{today_context}\n\n{historical_context}", nonce,
+            task_line="Match the fenced items below according to your system instructions.",
+        )
 
         try:
             response = await self.async_client.call_with_thinking(
-                messages=[{"role": "user", "content": prompt}],
+                messages=[{"role": "user", "content": user_message}],
+                system=system_prompt,
                 profile=ThinkingLevel.QUICK,  # Fast matching
                 caller=f"continuity.matcher.{self.category}"
             )
@@ -79,40 +94,44 @@ class StoryMatcher:
 
     def _build_today_context(self, items: List[AnalyzedItem]) -> str:
         """Build context string for today's items."""
-        parts = []
-        for item in items:
-            parts.append(f"ID: {item.item.id}")
-            parts.append(f"Title: {item.item.title}")
-            parts.append(f"Summary: {item.summary[:300] if item.summary else 'N/A'}")
-            parts.append(f"Source: {item.item.source}")
+        parts = [f"=== TODAY'S {self.category.upper()} ITEMS ===", ""]
+        for i, item in enumerate(items, 1):
+            parts.append(f"ITEM {i}:")
+            parts.append(f"  ID: {item.item.id}")
+            parts.append(f"  Title: {normalize_untrusted_text(item.item.title)[:300]}")
+            summary = normalize_untrusted_text(item.summary)[:300] if item.summary else 'N/A'
+            parts.append(f"  Summary: {summary}")
+            parts.append(f"  Source: {normalize_untrusted_text(item.item.source)}")
             parts.append("")
+        parts.append(f"=== END TODAY'S {self.category.upper()} ITEMS ===")
         return "\n".join(parts)
 
     def _build_historical_context(self, items: List[Dict[str, Any]]) -> str:
         """Build context string for historical items."""
-        parts = []
-        for item in items:
-            parts.append(f"ID: {item.get('id', 'unknown')}")
-            parts.append(f"Date: {item.get('date', 'unknown')}")
-            parts.append(f"Category: {item.get('category', 'unknown')}")
-            parts.append(f"Title: {item.get('title', 'unknown')}")
+        parts = ["=== HISTORICAL ITEMS (past 2 days, all categories) ===", ""]
+        for i, item in enumerate(items, 1):
+            parts.append(f"ITEM {i}:")
+            parts.append(f"  ID: {item.get('id', 'unknown')}")
+            parts.append(f"  Date: {item.get('date', 'unknown')}")
+            parts.append(f"  Category: {item.get('category', 'unknown')}")
+            parts.append(f"  Title: {normalize_untrusted_text(item.get('title', 'unknown'))[:300]}")
             summary = item.get('summary', '')
-            parts.append(f"Summary: {summary[:300] if summary else 'N/A'}")
+            parts.append(f"  Summary: {normalize_untrusted_text(summary)[:300] if summary else 'N/A'}")
             parts.append("")
+        parts.append("=== END HISTORICAL ITEMS ===")
         return "\n".join(parts)
 
-    def _build_prompt(self, today_context: str, historical_context: str) -> str:
-        """Build the matching prompt."""
+    def _build_instructions(self) -> str:
+        """Build the matching instructions (system prompt)."""
         return f"""You are finding story matches for an AI news publication.
 
 TASK: For each of today's {self.category.upper()} items, determine if it covers the
 SAME underlying story as any historical item (from ANY category).
 
-TODAY'S {self.category.upper()} ITEMS:
-{today_context}
-
-HISTORICAL ITEMS (past 2 days, all categories):
-{historical_context}
+The items are provided in the user message inside the <source_data> fence, as
+two sections: "=== TODAY'S {self.category.upper()} ITEMS ===" and
+"=== HISTORICAL ITEMS (past 2 days, all categories) ===", each closed by a
+matching "=== END ... ===" marker.
 
 MATCHING CRITERIA:
 - A match means the SAME underlying event/announcement/development

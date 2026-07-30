@@ -8,7 +8,7 @@ import asyncio
 import json
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 # Load environment variables
@@ -21,6 +21,18 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from agents.llm_client import AsyncAnthropicClient, ThinkingLevel
 from agents.config.prompts import PromptAccessor, load_prompts
 from agents.config import load_config
+from agents.prompt_security import (
+    DATA_POINTER,
+    build_fenced_user_message,
+    build_hardened_system,
+    new_fence_nonce,
+    normalize_untrusted_text,
+)
+from agents.summary_context import (
+    build_executive_context,
+    format_previous_coverage,
+    load_previous_summaries,
+)
 
 
 async def regenerate_summary(target_date: str, web_dir: str = './web', config_dir: str = './config'):
@@ -47,74 +59,53 @@ async def regenerate_summary(target_date: str, web_dir: str = './web', config_di
     with open(summary_path, 'r', encoding='utf-8') as f:
         summary_data = json.load(f)
     
-    # Load previous days' summaries (3 days lookback)
-    previous_summaries = []
-    target_dt = datetime.strptime(target_date, '%Y-%m-%d')
-    
-    for days_ago in range(1, 4):
-        check_date = target_dt - timedelta(days=days_ago)
-        date_str = check_date.strftime('%Y-%m-%d')
-        prev_summary_path = os.path.join(web_dir, 'data', date_str, 'summary.json')
-        
-        if not os.path.exists(prev_summary_path):
-            continue
-        
-        try:
-            with open(prev_summary_path, 'r', encoding='utf-8') as f:
-                prev_data = json.load(f)
-            exec_summary = prev_data.get('executive_summary', '')
-            if exec_summary:
-                previous_summaries.append(f"=== {date_str} ===\n{exec_summary}")
-                print(f"  Loaded previous summary from {date_str}")
-        except Exception as e:
-            print(f"  Warning: Failed to load {date_str}: {e}")
-            continue
-    
-    previous_coverage = ""
-    if previous_summaries:
-        previous_coverage = "PREVIOUS DAYS' COVERAGE (do NOT repeat these as new/breaking news):\n\n" + "\n\n".join(previous_summaries)
-    
-    # Build context from categories
-    context_parts = [f"Date: {target_date}", ""]
-    
-    # Add previous coverage first
-    if previous_coverage:
-        context_parts.append(previous_coverage)
-        context_parts.append("")
-    
-    # Add top topics
-    context_parts.append("TOP TOPICS:")
-    top_topics = summary_data.get('top_topics', [])
-    for i, topic in enumerate(top_topics[:6], 1):
-        name = topic.get('name', 'Unknown')
-        desc = topic.get('description', '')
-        context_parts.append(f"{i}. {name}: {desc}")
-    context_parts.append("")
-    
-    # Add category summaries
-    categories = summary_data.get('categories', {})
-    for category, cat_data in categories.items():
-        context_parts.append(f"--- {category.upper()} ---")
-        context_parts.append(f"Summary: {cat_data.get('category_summary', 'N/A')}")
+    # Load previous days' summaries (3 days lookback), same scaffolding as the
+    # live pipeline (agents/orchestrator.py) via agents/summary_context.py
+    pairs = load_previous_summaries(web_dir, target_date, lookback_days=3)
+    for date_str, _ in pairs:
+        print(f"  Loaded previous summary from {date_str}")
+    previous_coverage = format_previous_coverage(pairs)
+
+    # Build context from the published summary.json
+    topics = [
+        (topic.get('name', 'Unknown'), topic.get('description', ''))
+        for topic in summary_data.get('top_topics', [])[:6]
+    ]
+    categories = []
+    for category, cat_data in summary_data.get('categories', {}).items():
         top_items = cat_data.get('top_items', [])
-        if top_items:
-            context_parts.append("Top story: " + top_items[0].get('title', 'Unknown'))
-        context_parts.append("")
-    
-    context = "\n".join(context_parts)
-    
-    # Get prompt
-    prompt = prompt_accessor.get_orchestration_prompt('executive_summary', {'context': context})
-    
+        top_story = (
+            normalize_untrusted_text(top_items[0].get('title', 'Unknown'))[:300]
+            if top_items else None
+        )
+        categories.append((category, cat_data.get('category_summary', 'N/A'), top_story))
+
+    context = build_executive_context(target_date, previous_coverage, topics, categories)
+
+    # CWE-1427: instructions travel in the system prompt; the aggregated
+    # context travels in the user message inside a nonce fence, matching the
+    # live pipeline path.
+    nonce = new_fence_nonce()
+    instructions = prompt_accessor.get_orchestration_prompt(
+        'executive_summary', {'context': DATA_POINTER}
+    )
+    system_prompt = build_hardened_system(instructions, nonce)
+    user_message = build_fenced_user_message(
+        context, nonce,
+        task_line="Write the executive summary from the fenced context below according to your system instructions.",
+    )
+
     print(f"  Context length: {len(context)} chars")
     print(f"  Previous coverage: {len(previous_coverage)} chars")
     print("  Calling LLM...")
-    
+
     try:
         response = await async_client.call_with_thinking(
-            messages=[{"role": "user", "content": prompt}],
-            budget_tokens=ThinkingLevel.DEEP,
-            caller="regenerate_summary"
+            messages=[{"role": "user", "content": user_message}],
+            system=system_prompt,
+            profile=ThinkingLevel.DEEP,
+            caller="regenerate_summary",
+            full_output_budget=True,
         )
         
         new_summary = response.content
