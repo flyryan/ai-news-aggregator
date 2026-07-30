@@ -64,6 +64,24 @@ def _today_et() -> str:
     return (datetime.now(timezone.utc) - timedelta(hours=5)).strftime("%Y-%m-%d")
 
 
+def _already_alerted_sources(readings, report_date: str) -> set[str]:
+    """Sources that were already anomalous on the previous published date.
+
+    Dedup without state: the committed history IS the state. Re-running the
+    detector for the previous report date is deterministic, so "was this
+    source already red yesterday?" needs no database -- which matters because
+    this runs on a GitHub runner and the admin host's SQLite is unreachable
+    from here. A three-week outage notifies on its first day and then goes
+    quiet; a weekday-keyed source like arXiv-on-Mondays notifies once per
+    incident weekday, not 21 times.
+    """
+    prior_dates = sorted({r.date for r in readings if r.date < report_date})
+    if not prior_dates:
+        return set()
+    previous = prior_dates[-1]
+    return {a.source for a in detect_for_date(readings, previous)}
+
+
 def _post_alert(anomalies, report_date: str, run_url: str) -> None:
     """Best-effort POST to the shared alert ingress. Never raises."""
     token = os.environ.get("PIPELINE_ALERT_TOKEN", "").strip()
@@ -168,7 +186,18 @@ def main() -> int:
         print(f"OK: all sources within their same-weekday baselines on {report_date}")
 
     if anomalies and args.alert:
-        _post_alert(anomalies, report_date, os.environ.get("RUN_URL", ""))
+        # Notify once per incident, not once per day it persists. The exit
+        # code and the printed report deliberately still cover everything --
+        # only the POST is deduplicated.
+        ongoing = _already_alerted_sources(readings, report_date)
+        fresh = [a for a in anomalies if a.source not in ongoing]
+        if fresh:
+            _post_alert(fresh, report_date, os.environ.get("RUN_URL", ""))
+        else:
+            print(
+                f"All {len(anomalies)} anomalies were already anomalous on the "
+                "previous published date; not re-alerting."
+            )
 
     return 1 if anomalies else 0
 
