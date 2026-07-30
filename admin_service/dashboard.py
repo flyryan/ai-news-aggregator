@@ -28,18 +28,31 @@ _SOCIAL_PLATFORMS = {"twitter", "bluesky", "mastodon"}
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def _load_detector():
+def _load_detector(web_dir: Path | None = None):
     """Load the detector by path, bypassing the `agents` package __init__.
 
     `agents/__init__.py` imports llm_client -> httpx -> the whole pipeline
     dependency tree. The admin service should not inherit that just to compute
     a median; the detector itself is stdlib-only by design.
+
+    Two candidate locations because the service does NOT run from the
+    checkout: /opt/aatf-admin holds a copy of admin_service/ only, so the
+    module-relative path fails there and the detector must come from the
+    checkout that web_dir points into (web_dir == <repo>/web).
     """
     if "source_anomaly" in sys.modules:
         return sys.modules["source_anomaly"]
-    spec = importlib.util.spec_from_file_location(
-        "source_anomaly", _REPO_ROOT / "agents" / "source_anomaly.py"
-    )
+
+    candidates = [_REPO_ROOT / "agents" / "source_anomaly.py"]
+    if web_dir is not None:
+        candidates.append(Path(web_dir).resolve().parent / "agents" / "source_anomaly.py")
+    path = next((c for c in candidates if c.is_file()), None)
+    if path is None:
+        raise FileNotFoundError(
+            f"source_anomaly.py not found in any of: {[str(c) for c in candidates]}"
+        )
+
+    spec = importlib.util.spec_from_file_location("source_anomaly", path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module  # @dataclass needs this before exec
     spec.loader.exec_module(module)
@@ -55,8 +68,8 @@ def _published_dates(web_dir: Path) -> list[str]:
 
 def health_series(web_dir: Path, days: int = 90) -> dict[str, Any]:
     """Per-source item counts over a trailing window, with anomaly flags."""
-    detector = _load_detector()
     web_dir = Path(web_dir)
+    detector = _load_detector(web_dir)
     readings = detector.load_history(web_dir)
     if not readings:
         return {"sources": [], "dates": [], "series": {}, "anomalies": []}
@@ -193,7 +206,7 @@ def source_day_detail(web_dir: Path, source: str, date: str) -> dict[str, Any]:
                 break
 
     # --- same-weekday baseline and anomaly verdict ------------------------
-    detector = _load_detector()
+    detector = _load_detector(web_dir)
     readings = detector.load_history(web_dir)
     same = [
         r.count
