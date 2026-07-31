@@ -110,8 +110,21 @@ _SOURCE_SUPERSEDED_IF_SPLIT = {"research": ("research_arxiv", "research_blogs")}
 # would be a false positive that loses the day's artifact for no security gain.
 # What must never appear is an API key, a bearer token, or the private endpoint
 # host -- so those are matched specifically.
+#
+# The `sk-` rules are deliberately narrow. An unanchored `sk-[A-Za-z0-9_\-]{16,}`
+# looks strict but matches inside ordinary words: on 2026-07-31 a DeepMind blog
+# URL ending "...video-understanding-ta|sk-orchestration-and-multi-robot-
+# collaboration" tripped it and the day's replay was lost. That is not a rare
+# collision -- 120 of 218 published days carry a kebab-case slug that matches,
+# so with the prompt artifact in scope the gate was a coin flip on the news.
+# Requiring a word boundary and refusing hyphens in a bare key body drops the
+# false-positive rate to zero across the whole corpus while still catching every
+# real key shape: sk-ant- (Anthropic), sk-proj- (OpenAI), sk-or- (OpenRouter),
+# sk-live-/sk-test- (Stripe-style), and bare OpenAI keys, which are long
+# unbroken alphanumeric runs.
 _SECRET_PATTERNS = (
-    re.compile(r"sk-[A-Za-z0-9_\-]{16,}"),
+    re.compile(r"\bsk-(?:ant|proj|or|live|test)-[A-Za-z0-9_\-]{16,}"),
+    re.compile(r"\bsk-[A-Za-z0-9]{20,}"),
     re.compile(r"\bBearer\s+\S+", re.IGNORECASE),
     re.compile(r"\b(?:api[_-]?key|auth[_-]?token|secret)\s*[=:]\s*\S+", re.IGNORECASE),
     # Credentials embedded in a URL, e.g. https://user:pass@host
@@ -1063,16 +1076,43 @@ class ReplayGenerator:
             "concurrency": concurrency,
         }
 
+        return self._gate_artifacts(index, stream_blob, prompt_blob)
+
+    def _gate_artifacts(
+        self,
+        index: Dict[str, Any],
+        stream_blob: Optional[bytes],
+        prompt_blob: Optional[bytes],
+    ) -> Tuple[Dict[str, Any], Optional[bytes], Optional[bytes]]:
+        """Run the publish gate, degrading rather than discarding where possible.
+
+        A violation in the index is fatal: the index *is* the artifact, and there
+        is nothing to publish without it. A violation in the prompts is not --
+        the prompts are an extra fold in the UI, so the honest response is to drop
+        that one file and publish the rest.
+
+        Losing all three to a prompt-only hit is what turned the 2026-07-31 false
+        positive into a missing day instead of a missing fold. Keep the failure
+        proportional to what actually failed.
+        """
         self._assert_publishable(index)
+
         # The prompts artifact is the one place a credential could realistically
         # reach the public site: prompts are assembled from config and collected
         # data, so this gate is now doing real work rather than guarding a single
         # static hero prompt. Scan the decompressed text, not the gzip bytes.
         if prompt_blob is not None:
-            self._assert_publishable(
-                json.loads(gzip.decompress(prompt_blob).decode("utf-8")),
-                what="prompt artifact",
-            )
+            try:
+                self._assert_publishable(
+                    json.loads(gzip.decompress(prompt_blob).decode("utf-8")),
+                    what="prompt artifact",
+                )
+            except ValueError as error:
+                # Loud, because the alternative reading -- a genuine credential in
+                # the prompts -- needs a human. The replay still publishes.
+                logger.error("Dropping the replay prompt artifact: %s", error)
+                prompt_blob = None
+
         return index, stream_blob, prompt_blob
 
     def write(

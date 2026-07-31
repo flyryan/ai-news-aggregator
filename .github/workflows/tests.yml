@@ -46,6 +46,8 @@ jobs:
         run: python3 -m unittest tests.preview_base_test -v
       - name: Preview job ids, unit paths, and allowlists stay in lockstep
         run: python3 -m unittest tests.preview_wiring_test -v
+      - name: Replay publish gate catches keys, not kebab-case (2026-07-31)
+        run: python3 -m unittest tests.replay_secret_guard_test -v
 
   hero-retry:
     name: Hero image retry-window guard
