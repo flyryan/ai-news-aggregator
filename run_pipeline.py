@@ -142,13 +142,23 @@ async def run_pipeline(config_dir: str, data_dir: str, web_dir: str, target_date
         logger.info("PHASE 6.2: LLM REPLAY GENERATION")
         logger.info("=" * 60)
 
-        generate_replay(
+        replay_path = generate_replay(
             date=result.date,
             web_dir=web_dir,
             cost_report=get_tracker().get_json_report(),
             orchestrator_result=result.to_dict(),
             recorder_snapshot=get_recorder().snapshot(),
         )
+        if replay_path is None:
+            # generate_replay already logged the cause at WARNING with a traceback.
+            # Say it again at ERROR, in one greppable line: this phase runs after
+            # the orchestrator has printed its phase summary, so a silent failure
+            # here leaves no trace in the end-of-run status block. On 2026-07-31 the
+            # replay was lost this way and the run still reported success.
+            logger.error(
+                f"PHASE 6.2 FAILED: no replay artifacts written for {result.date} "
+                f"(the report itself is unaffected)"
+            )
 
         # Generate RSS/Atom feeds
         logger.info("=" * 60)

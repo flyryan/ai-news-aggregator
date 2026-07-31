@@ -439,6 +439,14 @@ jobs:
             config/ecosystem_context.yaml
           if-no-files-found: error
 
+      # orchestrator_result is here so a lost replay stays rebuildable. All of
+      # data/ is gitignored and dies with the runner, and the replay blobs are
+      # assembled in memory and never touch disk if the publish gate rejects
+      # them -- which is how 2026-07-31's replay became unrecoverable. Offline
+      # regeneration needs exactly cost_report + orchestrator_result, so keeping
+      # both means the index can be rebuilt later (minus the stream and prompts,
+      # which are genuinely memory-only). Roughly 3-6 MB; the glob matches only
+      # the current run's file on a fresh checkout.
       - name: Upload pipeline diagnostics
         if: always() && steps.schedule_gate.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4
@@ -447,6 +455,7 @@ jobs:
           path: |
             data/llm_metrics.jsonl
             data/processed/cost_report_*.json
+            data/processed/orchestrator_result_*.json
           if-no-files-found: ignore
 
       - name: Push generated commit
@@ -512,6 +521,32 @@ jobs:
           # job failure.
           python3 scripts/check_source_anomalies.py \
             --web-dir ./web --date "$report_date" --alert || true
+
+      # Replay presence check (2026-07-31). Phase 6.2 swallows its own failures by
+      # design -- a broken replay must never cost us the report -- which makes it the
+      # only phase that can fail without turning the job red. Phases 6, 6.5 and 7 all
+      # raise and exit 1; 6.2 just logs and continues. That is exactly how the 07-31
+      # replay was lost: a false positive in the publish gate discarded the artifact,
+      # the run stayed green, and the gap was only noticed from the empty page.
+      # Annotates, never fails: the report is live and correct without the replay.
+      - name: Check the replay artifact was published
+        if: success() && steps.schedule_gate.outputs.should_run == 'true'
+        continue-on-error: true
+        shell: bash
+        env:
+          TARGET_DATE_INPUT: ${{ inputs.target_date }}
+        run: |
+          set -uo pipefail
+          report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
+          if [[ -f "web/data/${report_date}/replay-index.json" ]]; then
+            echo "Verified: replay-index.json present for ${report_date}."
+          else
+            echo "::warning title=Replay artifact missing::Phase 6.2 produced no \
+          replay-index.json for ${report_date}. The report itself is unaffected. Grep \
+          this log for 'PHASE 6.2 FAILED' for the cause. The pipeline-diagnostics \
+          artifact carries cost_report + orchestrator_result, which is what \
+          generators/replay_generator.py needs to rebuild the index offline."
+          fi
 
       # Proactive failure alert (2026-06-21). Fires on ANY failure of a run that
       # was supposed to publish (RED synthesis, publish-gate revert, or the
