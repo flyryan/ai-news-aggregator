@@ -41,6 +41,33 @@ export default {
 			boxShadow: {
 				'card': '0 2px 8px rgba(0, 0, 0, 0.08)',
 				'card-hover': '0 4px 12px rgba(0, 0, 0, 0.12)'
+			},
+			typography: {
+				DEFAULT: {
+					css: {
+						// The plugin draws literal backticks around inline code with
+						// ::before/::after and sets font-weight 600, so a <code> span
+						// renders as **`like this`** — bold, with the markers we just
+						// converted away put back. Style it as a chip instead.
+						'code::before': { content: 'none' },
+						'code::after': { content: 'none' },
+						code: {
+							fontWeight: '400',
+							backgroundColor: 'rgb(0 0 0 / 0.06)',
+							padding: '0.1em 0.35em',
+							borderRadius: '0.25rem',
+							fontSize: '0.9em'
+						}
+					}
+				},
+				invert: {
+					css: {
+						code: {
+							backgroundColor: 'rgb(255 255 255 / 0.1)',
+							color: 'inherit'
+						}
+					}
+				}
 			}
 		}
 	},

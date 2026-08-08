@@ -7,6 +7,21 @@
 
 import { sanitizeHtml } from './sanitize';
 
+// Keep these in step with _BOLD_RE / _CODE_RE in generators/json_generator.py.
+//
+// Bold, but only where the delimiters look deliberate: `\*\*(.+?)\*\*` treats
+// any two asterisk pairs on a line as bold, so a significance marker like
+// "(***)" in a stats writeup renders as "(<strong>*)".
+const BOLD_RE = /(?<!\*)\*\*(?!\s)([^*]|[^*].*?[^*\s])\*\*(?!\*)/g;
+
+// Italic. Same deliberateness rule on a single asterisk: the marker must hug
+// its content and not be part of a longer run (bold, or a footnote marker).
+const ITALIC_RE = /(?<![\*\w])\*(?!\s)([^*\n]*[^*\s])\*(?![\*\w])/g;
+
+// Inline code. Gatherers preserve source <code> spans as backticks; without
+// this they render as literal backticks in prose.
+const CODE_RE = /`([^`\n]+)`/g;
+
 /**
  * Convert markdown formatting to HTML.
  * Handles:
@@ -41,7 +56,10 @@ export function markdownToHtml(text: string): string {
 				}
 			});
 
-			return line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+			// Bold before italic: ** must be consumed before a lone * is considered.
+			line = line.replace(BOLD_RE, '<strong>$1</strong>');
+			line = line.replace(ITALIC_RE, '<em>$1</em>');
+			return line.replace(CODE_RE, '<code>$1</code>');
 		})
 		.join('\n');
 
@@ -118,6 +136,9 @@ export function stripMarkdown(text: string): string {
 
 	// Remove **bold** -> bold
 	text = text.replace(/\*\*([^*]+)\*\*/g, '$1');
+
+	// Remove `code` -> code
+	text = text.replace(/`([^`\n]+)`/g, '$1');
 
 	// Remove #### headers -> text
 	text = text.replace(/^#{1,6}\s+/gm, '');

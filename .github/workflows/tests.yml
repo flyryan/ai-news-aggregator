@@ -49,6 +49,26 @@ jobs:
       - name: Replay publish gate catches keys, not kebab-case (2026-07-31)
         run: python3 -m unittest tests.replay_secret_guard_test -v
 
+  content-rendering:
+    name: Content rendering guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # 2026-08-08: a LessWrong card rendered as an unreadable wall of text —
+    # `re.sub(r'<[^>]+>', '', html)` deleted block tags without replacing them,
+    # welding "TL;DR" onto the next paragraph, and the bold regex ate the
+    # significance marker in "(***)" as formatting. Also pins the bold/code
+    # patterns equal across json_generator.py and markdown.ts, which
+    # re-implements them for the client-side fallback path.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps for html_text and json_generator imports
+        run: python3 -m pip install --no-input "beautifulsoup4>=4.12" "nh3>=0.2"
+      - name: Block structure, asterisk markers, and backend/frontend lockstep
+        run: python3 -m unittest tests.content_rendering_test -v
+
   hero-retry:
     name: Hero image retry-window guard
     runs-on: ubuntu-latest

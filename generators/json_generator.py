@@ -22,13 +22,43 @@ import nh3
 logger = logging.getLogger(__name__)
 
 # HTML sanitization allowlist for XSS prevention
-ALLOWED_TAGS = {'a', 'strong', 'em', 'p', 'ul', 'li', 'h2', 'h3', 'h4', 'br'}
+ALLOWED_TAGS = {'a', 'strong', 'em', 'p', 'ul', 'li', 'h2', 'h3', 'h4', 'br', 'code'}
 ALLOWED_ATTRIBUTES = {
     'a': {'href', 'class', 'target'},  # 'rel' handled by nh3's link_rel parameter
 }
 
 # URL scheme allowlist for published item links
 _SAFE_URL_SCHEMES = ("http://", "https://", "mailto:")
+
+
+# Bold, but only where the delimiters look deliberate.
+#
+# `\*\*(.+?)\*\*` treats any two asterisk pairs on a line as bold, so a
+# significance marker like "(***)" in a stats writeup renders as "(<strong>*)".
+# Requiring the run to be exactly two asterisks, and the content to start and
+# end with a non-asterisk non-space, leaves such markers alone.
+_BOLD_RE = re.compile(r'(?<!\*)\*\*(?!\s)([^*]|[^*].*?[^*\s])\*\*(?!\*)')
+
+# Italic. Same deliberateness rule as bold, on a single asterisk: the marker
+# must hug its content, and must not be part of a longer asterisk run (which is
+# either bold or a footnote/significance marker).
+_ITALIC_RE = re.compile(r'(?<![\*\w])\*(?!\s)([^*\n]*[^*\s])\*(?![\*\w])')
+
+# Inline code. Source HTML carries <code> spans that the gatherers preserve as
+# backticks; without this they render as literal backticks in prose.
+_CODE_RE = re.compile(r'`([^`\n]+)`')
+
+
+def _apply_bold(line: str) -> str:
+    return _BOLD_RE.sub(r'<strong>\1</strong>', line)
+
+
+def _apply_italic(line: str) -> str:
+    return _ITALIC_RE.sub(r'<em>\1</em>', line)
+
+
+def _apply_code(line: str) -> str:
+    return _CODE_RE.sub(r'<code>\1</code>', line)
 
 
 def _safe_url(url):
@@ -503,7 +533,10 @@ class JSONGenerator:
             # remain visible to the bold parser without letting unmatched markers
             # bleed into later lines.
             line = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', link_replacer, line)
-            return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', line)
+            # Bold before italic: ** must be consumed before a lone * is considered.
+            line = _apply_bold(line)
+            line = _apply_italic(line)
+            return _apply_code(line)
 
         text = '\n'.join(convert_inline(line) for line in text.split('\n'))
 

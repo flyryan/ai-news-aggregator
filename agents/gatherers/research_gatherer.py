@@ -27,6 +27,7 @@ import feedparser
 import requests
 
 from ..base import BaseGatherer, CollectedItem
+from ..html_text import html_to_text
 from .arxiv_oai import ArxivOAIHarvester
 
 SCRIPTS_DIR = Path(__file__).resolve().parents[2] / 'scripts'
@@ -456,10 +457,9 @@ class ResearchGatherer(BaseGatherer):
                     elif hasattr(entry, 'description'):
                         content = entry.description
 
-                    # Strip HTML tags from content
-                    content_text = re.sub(r'<[^>]+>', '', content)
-                    # Normalize whitespace
-                    content_text = ' '.join(content_text.split())
+                    # Keep block structure: collapsing to one line welds the end
+                    # of each paragraph onto the start of the next.
+                    content_text = html_to_text(content)
 
                     title = entry.get('title', 'No Title')
                     url = entry.get('link', '')
@@ -603,12 +603,8 @@ class ResearchGatherer(BaseGatherer):
                     if contents and isinstance(contents, dict):
                         content_html = contents.get('html', '')
 
-                    # Strip HTML tags from content
-                    content_text = re.sub(r'<[^>]+>', '', content_html)
-                    content_text = ' '.join(content_text.split())
-                    # Truncate for storage
-                    if len(content_text) > 2000:
-                        content_text = content_text[:2000] + '...'
+                    # Keep block structure and truncate on a word boundary.
+                    content_text = html_to_text(content_html, max_length=2000)
 
                     # Extract author
                     user = post_data.get('user', {})
