@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
 	import { goto, afterNavigate } from '$app/navigation';
 	import { tick } from 'svelte';
 	import { currentDate, isLoading as storeLoading, resolveLatestDate } from '$lib/stores/dateStore';
@@ -72,33 +73,65 @@
 	// Get category config for category view
 	$: config = categoryParam ? CATEGORY_CONFIG[categoryParam] : null;
 
-	// Scroll to hash anchor after navigation
-	afterNavigate(async () => {
-		if (typeof window === 'undefined') return;
-		const hash = window.location.hash;
-		if (!hash) return;
+	// Scroll to the hash target once it exists. The target card isn't in the DOM
+	// until the route's data fetch resolves and the list renders, so a fixed delay
+	// can't work — retry per frame (bounded) until the element appears, then jump
+	// instantly: a smooth animation over a 300+ card page gets cancelled by
+	// Firefox when late content reflows mid-scroll.
+	let scrollAttemptToken = 0; // bumping cancels any in-flight retry loop
+	let userScrolledDuringNav = false; // once the user scrolls, stop chasing the anchor until the next navigation
 
-		await tick();
-		setTimeout(() => {
-			const element = document.getElementById(hash.slice(1));
-			if (element) {
-				element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	function scrollToHashTarget(hash: string): void {
+		if (!browser || !hash || userScrolledDuringNav) return;
+		const id = decodeURIComponent(hash.slice(1));
+		const token = ++scrollAttemptToken;
+		let framesLeft = 120; // ~2s at 60fps
+
+		const cancel = () => {
+			if (token === scrollAttemptToken) scrollAttemptToken++;
+			userScrolledDuringNav = true;
+			cleanup();
+		};
+		const cleanup = () => {
+			window.removeEventListener('wheel', cancel);
+			window.removeEventListener('touchstart', cancel);
+		};
+		window.addEventListener('wheel', cancel, { passive: true });
+		window.addEventListener('touchstart', cancel, { passive: true });
+
+		const attempt = () => {
+			if (token !== scrollAttemptToken) {
+				cleanup();
+				return;
 			}
-		}, 150);
-	});
-
-	// Also handle scrolling after data loads
-	$: if (!loading && (summary || categoryData) && typeof window !== 'undefined') {
-		const hash = window.location.hash;
-		if (hash) {
-			setTimeout(() => {
-				const element = document.getElementById(hash.slice(1));
-				if (element) {
-					element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-				}
-			}, 150);
-		}
+			const el = document.getElementById(id);
+			if (el) {
+				requestAnimationFrame(() => {
+					cleanup();
+					if (token !== scrollAttemptToken) return;
+					el.scrollIntoView({ behavior: 'instant', block: 'start' });
+				});
+				return;
+			}
+			if (--framesLeft > 0) requestAnimationFrame(attempt);
+			else cleanup();
+		};
+		requestAnimationFrame(attempt);
 	}
+
+	afterNavigate((nav) => {
+		if (nav.type === 'popstate') return; // let SvelteKit restore scroll on back/forward
+		userScrolledDuringNav = false;
+		const to = nav.to?.url;
+		if (!to?.hash) {
+			scrollAttemptToken++;
+			return;
+		}
+		if (nav.from && nav.from.url.pathname === to.pathname && nav.from.url.search === to.search) {
+			return; // hash-only navigation: the browser-native path already scrolls
+		}
+		scrollToHashTarget(to.hash);
+	});
 
 	async function handleRouteChange(rawDate: string | null, rawCategory: string | null) {
 		if (rawCategory && !validCategories.includes(rawCategory as Category)) {
@@ -172,6 +205,10 @@
 		} finally {
 			if (loadId === activeLoadId) {
 				dataLoading = false;
+				if (!error) {
+					await tick();
+					scrollToHashTarget($page.url.hash);
+				}
 			}
 		}
 	}
