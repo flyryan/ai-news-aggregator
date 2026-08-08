@@ -27,13 +27,33 @@ correct if the true positives survive, so they are asserted explicitly.
 """
 
 import gzip
+import importlib
 import json
 import sys
+import types
 import unittest
 from pathlib import Path
 from unittest import mock
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
+
+# replay_generator needs agents.cost_tracker and agents.replay_taxonomy, both
+# stdlib-only. Importing them the normal way first executes agents/__init__.py,
+# which eagerly pulls in llm_client -> httpx -> anthropic, none of which are
+# present in the dependency-light CI guard job -- so this test ImportError'd
+# there and the whole Signature-lockstep job went red on 2026-07-31 and stayed
+# red, taking every other guard in that job down with it.
+#
+# Standing in a namespace-package shell for `agents` lets the two real submodules
+# load without running the package __init__. Same intent as the path-loading in
+# source_anomaly_test and content_rendering_test.
+if "agents" not in sys.modules:
+    _pkg = types.ModuleType("agents")
+    _pkg.__path__ = [str(REPO_ROOT / "agents")]
+    sys.modules["agents"] = _pkg
+    importlib.import_module("agents.cost_tracker")
+    importlib.import_module("agents.replay_taxonomy")
 
 from generators.replay_generator import ReplayGenerator
 
