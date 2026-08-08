@@ -264,7 +264,18 @@ class LessWrongClient:
         if parsed.port:
             host = f"{host}:{parsed.port}"
 
-        proxy_config = {"server": urlunsplit((parsed.scheme, host, "", "", ""))}
+        # Chromium rejects socks5h:// with ERR_NO_SUPPORTED_PROXIES. The trailing
+        # `h` (resolve DNS at the proxy) is a curl/requests spelling; Chromium
+        # accepts only socks5://, and already resolves DNS remotely for SOCKS5.
+        #
+        # The CI Mullvad tunnel exports PIPELINE_PROXY_URL=socks5h://..., which is
+        # correct for every other caller, so passing the scheme through verbatim
+        # killed the browser warm-up. That left the unauthenticated GraphQL
+        # fallback, which LessWrong answered with 429 -- 0 posts on 2026-08-08,
+        # against 21-22 on the two Saturdays before it.
+        scheme = "socks5" if parsed.scheme == "socks5h" else parsed.scheme
+
+        proxy_config = {"server": urlunsplit((scheme, host, "", "", ""))}
         if parsed.username:
             proxy_config["username"] = unquote(parsed.username)
         if parsed.password:

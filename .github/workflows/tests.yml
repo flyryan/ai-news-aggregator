@@ -48,6 +48,8 @@ jobs:
         run: python3 -m unittest tests.preview_wiring_test -v
       - name: Replay publish gate catches keys, not kebab-case (2026-07-31)
         run: python3 -m unittest tests.replay_secret_guard_test -v
+      - name: LessWrong browser proxy scheme is Chromium-legal (2026-08-05..08 outage)
+        run: python3 -m unittest tests.lesswrong_proxy_scheme_test -v
 
   content-rendering:
     name: Content rendering guards
