@@ -62,13 +62,16 @@ detect_for_date = _mod.detect_for_date
 load_history = _mod.load_history
 report_weekday = _mod.report_weekday
 
-# The five anomalies the detector must find in the real committed history, and
-# nothing else. Three are the arXiv outage. The other two are one incident seen
-# at two granularities: the 2026-04-10 social collapse (172 against a 593
-# same-weekday median) and the Twitter platform that caused it (165 against
-# 580). Both are kept deliberately -- the category row says something is wrong,
-# the platform row says which one, and suppressing the narrower signal to make
-# the count prettier would throw away the more actionable half.
+# Anomalies the detector MUST still find in the real committed history. This is
+# a floor, not the full expected set -- see
+# test_detections_outside_the_known_set_are_real_collapses.
+#
+# Three are the arXiv outage. The other two are one incident seen at two
+# granularities: the 2026-04-10 social collapse (172 against a 593 same-weekday
+# median) and the Twitter platform that caused it (165 against 580). Both are
+# kept deliberately -- the category row says something is wrong, the platform
+# row says which one, and suppressing the narrower signal to make the count
+# prettier would throw away the more actionable half.
 KNOWN_INCIDENTS = {
     ("2026-04-10", "social"),
     ("2026-04-10", "twitter"),
@@ -180,9 +183,16 @@ class DetectTest(unittest.TestCase):
 class RealHistoryRegressionTest(unittest.TestCase):
     """Pin the detector against the actual committed history.
 
-    This is the test that matters. It asserts the detector finds the five known
-    real anomaly rows and invents nothing beyond them -- i.e. that the
-    signal-to-noise measured during design survives any future tuning.
+    This is the test that matters: it asserts the signal-to-noise measured
+    during design survives future tuning. Two halves — it still finds every
+    known real incident, and everything it reports beyond them is a genuine
+    collapse rather than a mild dip.
+
+    It does not freeze the exact result set. History grows daily and outages
+    recur, so a frozen set turns every real incident into a red build whose
+    only fix is to bless the row — which is indistinguishable from deleting the
+    alert. (2026-08-08 research, 3 items against a Saturday norm of 12-26, was
+    the first to hit this.)
     """
 
     @classmethod
@@ -196,7 +206,7 @@ class RealHistoryRegressionTest(unittest.TestCase):
             "if this is near zero, load_history is not finding web/data/*/summary.json",
         )
 
-    def test_finds_exactly_the_known_incidents(self):
+    def test_finds_the_known_incidents(self):
         found = {(a.date, a.source) for a in detect(self.readings)}
 
         missed = KNOWN_INCIDENTS - found
@@ -207,12 +217,27 @@ class RealHistoryRegressionTest(unittest.TestCase):
             "hindsight will not catch the next one.",
         )
 
-        spurious = found - KNOWN_INCIDENTS
-        self.assertEqual(
-            set(), spurious,
-            f"detector invented {len(spurious)} anomalies not in the known set: "
-            f"{sorted(spurious)}. False positives train the operator to ignore it.",
-        )
+    def test_detections_outside_the_known_set_are_real_collapses(self):
+        """New rows are expected — history grows and outages recur.
+
+        This deliberately does NOT pin the exact set. An earlier version did, so
+        every genuine new incident failed CI as a "false positive" and the only
+        way to green the build was to bless the row, which is the same gesture as
+        deleting the alert. Instead, hold the property that matters: anything the
+        detector reports must be a real collapse against its own weekday
+        baseline, not a mild dip. Noise volume is covered by
+        test_alert_volume_stays_low.
+        """
+        extra = [a for a in detect(self.readings) if (a.date, a.source) not in KNOWN_INCIDENTS]
+
+        for a in extra:
+            with self.subTest(date=a.date, source=a.source):
+                self.assertLess(
+                    a.ratio, 0.5,
+                    f"{a.describe()} — reported at {a.ratio:.0%} of its {a.weekday} "
+                    "baseline. Anything that mild is noise, and noise trains the "
+                    "operator to ignore the detector.",
+                )
 
     def test_alert_volume_stays_low(self):
         found = detect(self.readings)
