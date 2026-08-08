@@ -94,11 +94,26 @@ lock. Host provisioning is `sudo deploy/setup_admin_service.sh` (idempotent; ins
 the wrapper, sudoers, units, ACLs, and env placeholders).
 
 ### Web-Only Host Deployment
+
+**After merging a frontend/source change to main, trigger the host rebuild with ONE command — no SSH:**
+
 ```bash
-git fetch origin
-git reset --hard origin/main
-docker compose -f docker-compose.web.yml up -d --build
+scripts/trigger_rebuild.sh
 ```
+
+This is the canonical rebuild path. It POSTs an HMAC-signed request to the `rebuild-web`
+hook on `webhook.aatf.ai`, which runs `aatf-rebuild-web.service` on the host: git sync
+(signed-commit gate) → build the web image → swap only on build success → verify
+`/data/index.json` serves → refresh the admin bundle, all under the shared privileged
+lock. Secret comes from `AATF_REBUILD_WEBHOOK_SECRET` or
+`~/.config/aatf/rebuild-webhook-secret`. Verify afterwards by checking the site serves a
+new `_app/immutable/entry/start.*.js` hash.
+
+Do NOT hand-run SSH rebuilds (`ssh … verified_sync.sh --rebuild` or raw
+`docker compose up --build`) — they bypass the service wrapper and its verify/refresh
+steps. `scripts/post_pipeline_verify.sh` is for pipeline *data* verification: it exits
+early ("AWS is current") when today's data is live and will NOT rebuild the web image in
+that case, so it is the wrong tool after a frontend change.
 
 The production web host serves a web-only Docker image. `web/_app/` is intentionally ignored and built on the host, so do not commit rebuilt Svelte bundle files just to update the site. Data-only updates can be picked up by a git sync of `web/data`; frontend/source changes need the web-only image rebuild above.
 
