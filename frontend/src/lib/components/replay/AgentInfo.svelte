@@ -13,6 +13,7 @@
 	 */
 	import { onMount, tick } from 'svelte';
 	import type { AgentDoc } from '$lib/services/agentDocs';
+	import { portal } from '$lib/actions/portal';
 
 	export let label: string;
 	export let doc: AgentDoc;
@@ -23,26 +24,9 @@
 
 	let panel: HTMLDivElement | null = null;
 
-	/**
-	 * Move an element to `document.body`.
-	 *
-	 * `position: fixed` is only viewport-relative if no ancestor establishes a
-	 * containing block — and a live station carries `transform: translateY(-1px)`
-	 * for its lift, which does exactly that. Coordinates measured against the
-	 * viewport were then applied relative to the card, putting panels for the lower
-	 * stations hundreds of pixels below the fold.
-	 *
-	 * Reparenting to the body is the reliable fix: it cannot be broken by a future
-	 * transform, filter, or `will-change` added anywhere in the stage.
-	 */
-	function portal(node: HTMLElement) {
-		document.body.appendChild(node);
-		return {
-			destroy() {
-				node.remove();
-			}
-		};
-	}
+	// Portaled to the body: a live station carries `transform: translateY(-1px)`
+	// for its lift, which would otherwise make `fixed` relative to the card and
+	// put panels for the lower stations hundreds of pixels below the fold.
 
 	// Positioned with `fixed` and measured coordinates rather than `absolute`
 	// inside the station.

@@ -11,6 +11,13 @@
 	export let category: Category;
 	export let date: string;
 	export let showCategory: boolean = false;
+	// The `item-{id}` anchor must exist exactly once per page: it is what
+	// scrollToHashTarget() in +page.svelte resolves with getElementById. A preview
+	// copy of a card already on the page would shadow the real one, so it opts out.
+	export let anchor: boolean = true;
+	// The link preview pins its own read/share actions outside the scroll area, so
+	// the card's footer would be a second copy the reader has to scroll to reach.
+	export let showActions: boolean = true;
 
 	let expanded = false;
 	let copied = false;
@@ -44,7 +51,11 @@
 					: 'card-importance-low';
 </script>
 
-<article id="item-{item.id}" class="card {importanceTierClass}" style="scroll-margin-top: 5rem;">
+<article
+	id={anchor ? `item-${item.id}` : undefined}
+	class="card {importanceTierClass}"
+	style="scroll-margin-top: 5rem;"
+>
 	<div class="flex items-start justify-between gap-4 mb-3">
 		<div class="flex-1 min-w-0">
 			{#if showCategory}
@@ -146,20 +157,28 @@
 	{/if}
 
 	<!-- Actions -->
-	<div class="flex items-center justify-between pt-3 border-t border-trend-gray-100 dark:border-trend-gray-700">
-		<a
-			href={safeUrl}
-			target="_blank"
-			rel="noopener noreferrer"
-			class="text-sm font-medium text-trend-red hover:text-guardian-red transition-colors"
+	{#if showActions}
+		<div
+			class="flex items-center justify-between pt-3 border-t border-trend-gray-100 dark:border-trend-gray-700"
 		>
-			{category === 'research' ? 'View Research' : category === 'reddit' ? 'View Discussion' : 'Read More'} &rarr;
-		</a>
-		<button
-			on:click={copyShareLink}
-			class="text-sm font-medium text-trend-red hover:text-guardian-red transition-colors"
-		>
-			{copied ? 'Copied!' : 'Share'}
-		</button>
-	</div>
+			<a
+				href={safeUrl}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="text-sm font-medium text-trend-red hover:text-guardian-red transition-colors"
+			>
+				{category === 'research'
+					? 'View Research'
+					: category === 'reddit'
+						? 'View Discussion'
+						: 'Read More'} &rarr;
+			</a>
+			<button
+				on:click={copyShareLink}
+				class="text-sm font-medium text-trend-red hover:text-guardian-red transition-colors"
+			>
+				{copied ? 'Copied!' : 'Share'}
+			</button>
+		</div>
+	{/if}
 </article>

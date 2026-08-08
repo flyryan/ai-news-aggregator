@@ -12,6 +12,8 @@
 	import HeroSection from '$lib/components/layout/HeroSection.svelte';
 	import TopicCard from '$lib/components/news/TopicCard.svelte';
 	import NewsList from '$lib/components/news/NewsList.svelte';
+	import LinkPreview from '$lib/components/news/LinkPreview.svelte';
+	import { registerItems } from '$lib/services/itemIndex';
 	import LoadingSpinner from '$lib/components/common/LoadingSpinner.svelte';
 	import ErrorMessage from '$lib/components/common/ErrorMessage.svelte';
 	import EmptyState from '$lib/components/common/EmptyState.svelte';
@@ -166,6 +168,16 @@
 		await loadRouteData(resolvedDate, resolvedCategory, loadId);
 	}
 
+	// Feed the link-preview index from data we already hold. Every category's
+	// top_items ships inside summary.json, which covers most of the internal links
+	// the enricher writes — those previews then need no fetch of their own.
+	function indexItems(date: string, day: DaySummary, cat: CategoryData | null) {
+		for (const entry of Object.values(day.categories ?? {})) {
+			registerItems(date, entry?.top_items);
+		}
+		if (cat) registerItems(date, cat.items);
+	}
+
 	async function loadRouteData(date: string, category: Category | null, loadId: number) {
 		dataLoading = true;
 		error = null;
@@ -185,6 +197,7 @@
 
 				summary = summaryData;
 				categoryData = catData;
+				indexItems(date, summaryData, catData);
 			} else {
 				const summaryData = await loadDaySummary(date);
 				if (loadId !== activeLoadId) {
@@ -192,6 +205,7 @@
 				}
 
 				summary = summaryData;
+				indexItems(date, summaryData, null);
 				preloadAdjacentDates(date);
 			}
 		} catch (e) {
@@ -236,6 +250,10 @@
 		<title>AATF AI News Aggregator</title>
 	{/if}
 </svelte:head>
+
+<!-- Previews for the enricher's internal links. Listens at the document level,
+     so mounting it here scopes it to this route. -->
+<LinkPreview fallbackDate={effectiveDate} />
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 	{#if categoryParam && config}
