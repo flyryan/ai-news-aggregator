@@ -272,6 +272,20 @@ jobs:
           print(f"Configured llm.model={model} (was {previous_model})")
           PY
 
+      # LessWrong's Vercel edge blocks by exit-IP reputation. us-atl-wg-001's
+      # shared exit went bad on 2026-08-05 and LessWrong published 0 posts for
+      # four straight days ("success" every time). The relay list is sorted, so
+      # without state every run re-picks the same first relay. Cache the last
+      # relay that passed the LessWrong probe and try it first next run.
+      - name: Restore known-good Mullvad relay
+        if: steps.schedule_gate.outputs.should_run == 'true' && env.MULLVAD_ACCOUNT != '' && env.PIPELINE_PROXY_URL == '' && env.REDDIT_PROXY_URL == ''
+        uses: actions/cache@v4
+        with:
+          path: .mullvad-state
+          key: mullvad-known-good-${{ github.run_id }}
+          restore-keys: |
+            mullvad-known-good-
+
       - name: Start Mullvad tunnel for hosted egress
         if: steps.schedule_gate.outputs.should_run == 'true' && env.MULLVAD_ACCOUNT != '' && env.PIPELINE_PROXY_URL == '' && env.REDDIT_PROXY_URL == ''
         shell: bash
@@ -303,26 +317,89 @@ jobs:
             --output-dir "$tmp_dir/wg"
 
           mapfile -t wg_confs < <(find "$tmp_dir/wg" -name '*.conf' | sort)
-          wg_conf="${wg_confs[0]:-}"
-          if [[ -z "$wg_conf" ]]; then
+          if [[ "${#wg_confs[@]}" -eq 0 ]]; then
             echo "No Mullvad WireGuard config generated." >&2
             exit 1
           fi
 
-          sudo sed -i '/^dns[[:space:]]*=/Id' "$wg_conf"
-          sudo sed -i 's#^allowedips[[:space:]]*=.*#allowedips = 10.64.0.1/32#I' "$wg_conf"
-          sudo wg-quick up "$wg_conf"
+          # Try the relay that passed the probe last run first; the rest keep
+          # their sorted order behind it.
+          known_good=""
+          if [[ -f .mullvad-state/known_good_relay ]]; then
+            known_good="$(cat .mullvad-state/known_good_relay)"
+            echo "Known-good relay from a previous run: $known_good"
+          fi
+          ordered=()
+          rest=()
+          for conf in "${wg_confs[@]}"; do
+            if [[ "$(basename "$conf" .conf)" == "$known_good" ]]; then
+              ordered+=("$conf")
+            else
+              rest+=("$conf")
+            fi
+          done
+          ordered+=("${rest[@]}")
+
+          proxy_url="socks5h://10.64.0.1:1080"
+          max_attempts="${MULLVAD_MAX_RELAY_ATTEMPTS:-6}"
+          selected=""
+          up_conf=""
+          attempt=0
+          for conf in "${ordered[@]}"; do
+            (( attempt += 1 ))
+            if (( attempt > max_attempts )); then
+              break
+            fi
+            relay="$(basename "$conf" .conf)"
+            sudo sed -i '/^dns[[:space:]]*=/Id' "$conf"
+            sudo sed -i 's#^allowedips[[:space:]]*=.*#allowedips = 10.64.0.1/32#I' "$conf"
+
+            if ! sudo wg-quick up "$conf"; then
+              echo "Relay $relay: wg-quick up failed, trying next." >&2
+              continue
+            fi
+            up_conf="$conf"
+
+            proxy_ip="$(curl -fsSL --max-time 20 --proxy "$proxy_url" https://am.i.mullvad.net/ip || true)"
+            if [[ -z "$proxy_ip" ]]; then
+              echo "Relay $relay: SOCKS proxy gave no external IP, trying next." >&2
+              sudo wg-quick down "$conf" || true
+              up_conf=""
+              continue
+            fi
+
+            # A blocked exit fails only at LessWrong, so probe LessWrong itself
+            # (same request fingerprint as the gatherer's first-try direct path).
+            if python3 scripts/probe_lesswrong.py "$proxy_url"; then
+              selected="$relay"
+              echo "Relay $relay ($proxy_ip): LessWrong reachable, keeping it."
+              break
+            fi
+            echo "Relay $relay ($proxy_ip): LessWrong-blocked exit, rotating." >&2
+            sudo wg-quick down "$conf" || true
+            up_conf=""
+          done
+
+          if [[ -n "$selected" ]]; then
+            mkdir -p .mullvad-state
+            printf '%s\n' "$selected" > .mullvad-state/known_good_relay
+          else
+            # Every probed relay is LessWrong-blocked. The tunnel still serves
+            # the rest of the pipeline's egress, so bring one up rather than
+            # running naked — but say so loudly, and keep the cached relay
+            # unchanged so a recovered exit is retried next run.
+            echo "::warning::No Mullvad relay passed the LessWrong probe within ${max_attempts} attempts; LessWrong will likely collect 0 posts this run."
+            if [[ -z "$up_conf" ]]; then
+              sudo wg-quick up "${ordered[0]}"
+              up_conf="${ordered[0]}"
+            fi
+            echo "Proceeding with relay $(basename "$up_conf" .conf) for general egress."
+          fi
 
           {
-            echo "PIPELINE_PROXY_URL=socks5h://10.64.0.1:1080"
-            echo "REDDIT_PROXY_URL=socks5h://10.64.0.1:1080"
+            echo "PIPELINE_PROXY_URL=$proxy_url"
+            echo "REDDIT_PROXY_URL=$proxy_url"
           } >> "$GITHUB_ENV"
-          proxy_ip="$(curl -fsSL --proxy socks5h://10.64.0.1:1080 https://am.i.mullvad.net/ip || true)"
-          if [[ -n "$proxy_ip" ]]; then
-            echo "Mullvad SOCKS proxy is reachable."
-          else
-            echo "Mullvad SOCKS proxy did not return an external IP smoke-test response." >&2
-          fi
 
           # Reddit no longer hits reddit.com directly: the gatherer collects via the
           # ScrapeCreators API (server-side unblocking, direct egress), so no .json probe

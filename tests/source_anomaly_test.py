@@ -137,6 +137,33 @@ class DetectTest(unittest.TestCase):
 
         self.assertEqual([], detect(readings))
 
+    def test_flags_zero_from_a_small_but_alive_source(self):
+        # Sunday research runs 8-20 items (all LessWrong) -- below min_baseline
+        # by design, so ratio dips there are noise. But a literal ZERO from a
+        # source that reliably produces something is an outage: research=0 on
+        # 2026-08-09 (Sun, median 8.5) passed the old checker while the whole
+        # category was dark behind a blocked Mullvad exit.
+        sundays = ["2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19",
+                   "2026-07-26", "2026-08-02"]
+        readings = _steady("research", sundays, 12)
+        readings.append(SourceReading("2026-08-09", "research", 0))
+
+        found = detect(readings)
+
+        self.assertEqual(1, len(found), f"expected the zero to flag, got {found}")
+        self.assertEqual(0, found[0].count)
+        self.assertEqual("2026-08-09", found[0].date)
+
+    def test_zero_floor_spares_the_tiniest_sources(self):
+        # Bluesky's same-weekday medians sit at 6-7.5 and it zeroes ~monthly;
+        # alerting on those would train the operator to ignore the detector.
+        dates = ["2026-05-04", "2026-05-11", "2026-05-18", "2026-05-25",
+                 "2026-06-01", "2026-06-08"]
+        readings = _steady("bluesky", dates, 6)
+        readings.append(SourceReading("2026-06-15", "bluesky", 0))
+
+        self.assertEqual([], detect(readings))
+
     def test_needs_enough_history_before_judging(self):
         # With only two prior samples there is no trustworthy baseline yet.
         readings = [

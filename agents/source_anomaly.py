@@ -40,6 +40,7 @@ __all__ = [
     "DEFAULT_WINDOW",
     "DEFAULT_MIN_BASELINE",
     "DEFAULT_RATIO",
+    "DEFAULT_ZERO_FLOOR",
 ]
 
 # How many prior same-weekday samples form the baseline. Six is about six weeks
@@ -55,6 +56,20 @@ DEFAULT_MIN_BASELINE = 25
 # against the real history: it catches every known incident while admitting
 # no false positives.
 DEFAULT_RATIO = 0.35
+
+# A literal zero is a different signal than a ratio dip: a source that
+# reliably produces SOMETHING producing NOTHING is an outage regardless of how
+# small its normal volume is. Sunday research runs 8-20 items (all LessWrong),
+# which the min_baseline floor above deliberately ignores -- so research=0 on
+# 2026-08-09 sailed through the checker while the whole category was dark.
+# Flag zero whenever the same-weekday median shows the source is alive.
+#
+# 8, measured against the full history: catches the 2026-08-09 collapse
+# (median 8.5) and every equivalent historical research-dark day, while
+# ignoring Bluesky's habit of zeroing on days whose median is 6-7.5 -- those
+# recur ~monthly and would train the operator to ignore the alert. Total
+# volume with this floor is 1.72 alerts/month against the 2.0 budget.
+DEFAULT_ZERO_FLOOR = 8
 
 _WEEKDAY_NAMES = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
@@ -157,13 +172,22 @@ def detect(
     window: int = DEFAULT_WINDOW,
     min_baseline: int = DEFAULT_MIN_BASELINE,
     ratio_threshold: float = DEFAULT_RATIO,
+    zero_floor: int = DEFAULT_ZERO_FLOOR,
 ) -> list[Anomaly]:
     """Find every reading that collapsed against its same-weekday baseline.
 
     A reading is anomalous when it has at least four prior same-weekday
-    samples, their median is at least `min_baseline`, and the reading is below
-    `ratio_threshold` of that median. The four-sample floor keeps a new source
-    from alarming before it has a history.
+    samples and either:
+
+    * their median is at least `min_baseline` and the reading is below
+      `ratio_threshold` of it (a partial collapse of a high-volume source), or
+    * the reading is exactly zero and the median is at least `zero_floor`
+      (total silence from a source that is normally alive -- low-volume days
+      like Sunday research sit below `min_baseline` on purpose, but zero from
+      them is still an outage).
+
+    The four-sample floor keeps a new source from alarming before it has a
+    history.
     """
     grouped = _baselines(list(readings))
     anomalies: list[Anomaly] = []
@@ -175,10 +199,9 @@ def detect(
                 continue
 
             baseline = statistics.median(prior)
-            if baseline < min_baseline:
-                continue
-
-            if count < baseline * ratio_threshold:
+            ratio_hit = baseline >= min_baseline and count < baseline * ratio_threshold
+            zero_hit = count == 0 and baseline >= zero_floor
+            if ratio_hit or zero_hit:
                 anomalies.append(
                     Anomaly(
                         date=date_str,
