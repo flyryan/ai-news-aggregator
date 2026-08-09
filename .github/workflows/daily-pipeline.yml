@@ -322,23 +322,36 @@ jobs:
             exit 1
           fi
 
-          # Try the relay that passed the probe last run first; the rest keep
-          # their sorted order behind it.
-          known_good=""
+          # Preference order: last run's cached winner, then the committed
+          # known-good pool (config/mullvad_good_relays.txt, from
+          # scripts/sweep_mullvad_relays.py — 131 of 206 US exits passed the
+          # LessWrong probe on 2026-08-09), then everything else. The probe
+          # loop below still verifies whatever is picked, so a stale pool
+          # degrades to more rotation, not to a blocked run.
+          declare -A rank=()
+          next_rank=1
           if [[ -f .mullvad-state/known_good_relay ]]; then
-            known_good="$(cat .mullvad-state/known_good_relay)"
-            echo "Known-good relay from a previous run: $known_good"
+            cached="$(cat .mullvad-state/known_good_relay)"
+            echo "Known-good relay from a previous run: $cached"
+            rank["$cached"]=$(( next_rank )); (( next_rank += 1 ))
+          fi
+          if [[ -f config/mullvad_good_relays.txt ]]; then
+            while IFS= read -r line; do
+              [[ "$line" =~ ^[a-z]{2}-[a-z]{3}-wg-[0-9]+$ ]] || continue
+              if [[ -z "${rank[$line]:-}" ]]; then
+                rank["$line"]=$(( next_rank )); (( next_rank += 1 ))
+              fi
+            done < config/mullvad_good_relays.txt
           fi
           ordered=()
-          rest=()
-          for conf in "${wg_confs[@]}"; do
-            if [[ "$(basename "$conf" .conf)" == "$known_good" ]]; then
-              ordered+=("$conf")
-            else
-              rest+=("$conf")
-            fi
-          done
-          ordered+=("${rest[@]}")
+          while IFS= read -r conf; do
+            ordered+=("${conf#*|}")
+          done < <(
+            for conf in "${wg_confs[@]}"; do
+              relay="$(basename "$conf" .conf)"
+              printf '%08d|%s\n' "${rank[$relay]:-99999999}" "$conf"
+            done | sort
+          )
 
           proxy_url="socks5h://10.64.0.1:1080"
           max_attempts="${MULLVAD_MAX_RELAY_ATTEMPTS:-6}"
