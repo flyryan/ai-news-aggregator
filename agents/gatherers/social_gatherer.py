@@ -84,9 +84,17 @@ class SocialGatherer(BaseGatherer):
 
             # Each platform times itself, so the replay can draw three real bars
             # instead of one slab: they run concurrently but finish minutes apart.
-            def timed(key, fn):
+            #
+            # The key MUST be the `social_`-prefixed one. The orchestrator publishes
+            # these rows as `social_twitter` etc. (see `_gather_all`), and
+            # `_attach_source_timing` joins timing to collection_status by exact key.
+            # Timing the bare platform name instead created three orphan rows the
+            # replay generator did not recognise and dropped, while the real rows got
+            # no span at all and fell back to the whole gathering phase -- which is
+            # why every social bar rendered identically until 2026-08-17.
+            def timed(platform, fn):
                 def run():
-                    with self.time_source(key):
+                    with self.time_source(f'social_{platform}'):
                         return fn()
                 return run
 
@@ -236,54 +244,67 @@ class SocialGatherer(BaseGatherer):
             cursor = ""
             page = 0
             max_pages = 10
+            before = len(all_tweets)
 
-            while page < max_pages:
-                try:
-                    params = {"query": query, "queryType": "Latest"}
-                    if cursor:
-                        params["cursor"] = cursor
+            # One replay step per chunk. Chunks are the real unit of work here --
+            # the 167 configured accounts are collapsed into ~7 search queries, so
+            # timing accounts individually would report spans no request ever had.
+            # The inter-chunk sleep below stays outside the step: it is throttling,
+            # not fetching, and folding it in would inflate every bar but the last.
+            with self.time_step('social_twitter', f'chunk {chunk_idx + 1}/{len(chunks)}') as step:
+                while page < max_pages:
+                    try:
+                        params = {"query": query, "queryType": "Latest"}
+                        if cursor:
+                            params["cursor"] = cursor
 
-                    response = requests.get(
-                        f"{TWITTERAPI_IO_BASE}/twitter/tweet/advanced_search",
-                        params=params,
-                        headers=headers,
-                        timeout=30
-                    )
-                    response.raise_for_status()
-                    self._twitter_calls += 1
-                    data = response.json()
+                        response = requests.get(
+                            f"{TWITTERAPI_IO_BASE}/twitter/tweet/advanced_search",
+                            params=params,
+                            headers=headers,
+                            timeout=30
+                        )
+                        response.raise_for_status()
+                        self._twitter_calls += 1
+                        data = response.json()
 
-                    tweets_data = data.get('tweets', [])
-                    if not tweets_data:
-                        tweets_data = data.get('data', {}).get('tweets', [])
+                        tweets_data = data.get('tweets', [])
+                        if not tweets_data:
+                            tweets_data = data.get('data', {}).get('tweets', [])
 
-                    if not tweets_data:
+                        if not tweets_data:
+                            break
+
+                        # TwitterAPI.io bills per tweet returned.
+                        self._twitter_tweets_billed += len(tweets_data)
+
+                        for tweet_data in tweets_data:
+                            try:
+                                item = self._parse_twitter_tweet(tweet_data)
+                                if item and self.is_in_date_range(datetime.fromisoformat(item.published)):
+                                    all_tweets.append(item)
+                            except Exception as e:
+                                logger.error(f"Error parsing tweet: {e}")
+
+                        # Pagination
+                        if not data.get('has_next_page', False) or not data.get('next_cursor', ''):
+                            break
+
+                        cursor = data['next_cursor']
+                        page += 1
+                        time.sleep(0.3)
+
+                    except Exception as e:
+                        logger.error(f"Error in Twitter search: {e}")
+                        chunk_error = str(e)
+                        failed_chunks += 1
                         break
 
-                    # TwitterAPI.io bills per tweet returned.
-                    self._twitter_tweets_billed += len(tweets_data)
-
-                    for tweet_data in tweets_data:
-                        try:
-                            item = self._parse_twitter_tweet(tweet_data)
-                            if item and self.is_in_date_range(datetime.fromisoformat(item.published)):
-                                all_tweets.append(item)
-                        except Exception as e:
-                            logger.error(f"Error parsing tweet: {e}")
-
-                    # Pagination
-                    if not data.get('has_next_page', False) or not data.get('next_cursor', ''):
-                        break
-
-                    cursor = data['next_cursor']
-                    page += 1
-                    time.sleep(0.3)
-
-                except Exception as e:
-                    logger.error(f"Error in Twitter search: {e}")
-                    chunk_error = str(e)
-                    failed_chunks += 1
-                    break
+                step.items = len(all_tweets) - before
+                # The chunk caught its own error and did not re-raise, so `time_step`
+                # cannot infer failure from an exception -- say so explicitly.
+                if chunk_error:
+                    step.status = 'failed'
 
             if chunk_idx < len(chunks) - 1:
                 time.sleep(0.5)
@@ -349,9 +370,16 @@ class SocialGatherer(BaseGatherer):
         all_posts = []
         failed_handles = 0
 
+        def fetch_timed(handle: str) -> List[CollectedItem]:
+            """One handle, timed as its own replay step (inside the worker)."""
+            with self.time_step('social_bluesky', handle) as step:
+                posts = self._fetch_bluesky_user(handle)
+                step.items = len(posts)
+                return posts
+
         with ThreadPoolExecutor(max_workers=5) as executor:
             future_to_handle = {
-                executor.submit(self._fetch_bluesky_user, handle): handle
+                executor.submit(fetch_timed, handle): handle
                 for handle in self.bluesky_handles
             }
 
@@ -450,7 +478,20 @@ class SocialGatherer(BaseGatherer):
                     logger.error(f"Error processing Bluesky post: {e}")
 
         except Exception as e:
+            # Re-raised, not swallowed. `_collect_bluesky` already counts failed
+            # handles off `future.result()`, but this handler used to absorb every
+            # transport error, so that counter could never fire and the platform
+            # reported a clean `success` no matter how many handles were dead.
+            # It also left the replay drawing a green bar over a failed unit --
+            # a step marked `failed` inside a row marked `success` contradicts
+            # itself on screen.
+            #
+            # Nothing is lost by raising: this is a single unpaginated request, so
+            # `posts` is necessarily empty on this path. The inner per-post handler
+            # above still swallows, because one unparseable post should not
+            # discard the handle's other 29.
             logger.error(f"Error fetching Bluesky @{handle}: {e}")
+            raise
 
         return posts
 
@@ -461,9 +502,16 @@ class SocialGatherer(BaseGatherer):
         all_posts = []
         failed_accounts = 0
 
+        def fetch_timed(account: str) -> List[CollectedItem]:
+            """One account, timed as its own replay step (inside the worker)."""
+            with self.time_step('social_mastodon', account) as step:
+                posts = self._fetch_mastodon_user(account)
+                step.items = len(posts)
+                return posts
+
         with ThreadPoolExecutor(max_workers=5) as executor:
             future_to_account = {
-                executor.submit(self._fetch_mastodon_user, account): account
+                executor.submit(fetch_timed, account): account
                 for account in self.mastodon_accounts
             }
 
@@ -580,7 +628,13 @@ class SocialGatherer(BaseGatherer):
                     logger.error(f"Error processing Mastodon status: {e}")
 
         except Exception as e:
+            # Re-raised for the same reason as the Bluesky handler above: this
+            # absorbed every transport error, so `failed_accounts` never fired and
+            # a dead instance still reported `success`. Both requests here (account
+            # lookup, then the timeline) precede the post loop, so `posts` is empty
+            # on this path and raising discards nothing.
             logger.error(f"Error fetching Mastodon @{account_spec}: {e}")
+            raise
 
         return posts
 
