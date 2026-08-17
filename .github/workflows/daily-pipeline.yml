@@ -610,7 +610,35 @@ jobs:
           # Exits 1 by design when it finds something; that is a finding, not a
           # job failure.
           python3 scripts/check_source_anomalies.py \
-            --web-dir ./web --date "$report_date" --alert || true
+            --web-dir ./web --date "$report_date" --alert 2>&1 | tee /tmp/anomaly_check.txt
+          check_rc="${PIPESTATUS[0]}"
+
+          # GitHub-native surfacing, added 2026-08-17. The webhook POST is the
+          # primary channel but it is best-effort and swallows its own errors: on
+          # 2026-08-17 the arXiv outage was detected correctly, the alert fired,
+          # and delivery returned HTTP 403 -- so the finding reached nobody. An
+          # annotation plus a job-summary entry cannot 403; they ride the run
+          # itself and reach whoever already watches the workflow.
+          if [ "$check_rc" = "1" ]; then
+            {
+              echo "### :rotating_light: Degraded sources on ${report_date}"
+              echo
+              echo '```'
+              cat /tmp/anomaly_check.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            while IFS= read -r line; do
+              echo "::error title=Degraded source::${line#  - }"
+            done < <(grep '^  - ' /tmp/anomaly_check.txt || true)
+          fi
+
+          # A failed alert delivery is itself a fault worth seeing: it means the
+          # next real outage is invisible on the primary channel too.
+          if grep -q 'Alert POST -> HTTP [45]' /tmp/anomaly_check.txt; then
+            echo "::error title=Alert delivery failed::check_source_anomalies could not deliver to the alert ingress (see log). The degradation channel is down; rotate PIPELINE_ALERT_TOKEN or check PIPELINE_ALERT_URL."
+            echo "> :warning: Alert POST to the ingress failed — the degradation channel is down." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       # Replay presence check (2026-07-31). Phase 6.2 swallows its own failures by
       # design -- a broken replay must never cost us the report -- which makes it the

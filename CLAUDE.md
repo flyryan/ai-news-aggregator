@@ -326,6 +326,10 @@ PIPELINE_PROXY_URL    # HTTP(S) or SOCKS proxy for the whole pipeline (optional)
 NEWS_USER_AGENT       # User-Agent sent to RSS/feed sources, incl. research blog feeds (optional)
 LINK_FOLLOWER_MAX_URLS # Max distinct URLs the link follower fetches per run; gate errors fail closed (default: 50)
 RESEARCH_FEED_TIMEOUT # Network timeout (seconds) for research blog feed fetches (default: 20)
+ARXIV_OAI_TIMEOUT     # Per-request read timeout for oaipmh.arxiv.org (default: 180)
+ARXIV_OAI_MAX_ATTEMPTS # Attempts per OAI-PMH request, including the first (default: 3)
+ARXIV_OAI_BACKOFF_SECONDS # Base for exponential backoff between OAI attempts (default: 5)
+ARXIV_OAI_DEADLINE_SECONDS # Wall-clock ceiling for a whole OAI harvest (default: 600)
 LLM_TRUST_ENV_PROXY   # Let LLM clients use HTTP(S)/ALL_PROXY env vars (default: false)
 LLM_TIMEOUT_SECONDS   # Override provider-config LLM request timeout (Actions default: 240)
 LLM_MAX_CONCURRENT_REQUESTS # Async LLM request cap per provider route; 0 disables it (default: 8)
@@ -510,7 +514,8 @@ the fact, and phase boundaries are reconstructed. Live runs measure all of it.
 
 ## Important Notes
 
-- **arXiv**: Uses arXiv RSS feeds for today's collection (no rate limits, more reliable) with automatic API fallback. For historical dates, uses API directly since RSS only contains current announcements. Only collects papers with `announce_type` of "new" or "cross" (skips replacements). arXiv only publishes papers on weekdays (Mon-Fri). Weekend dates will return 0 papers.
+- **arXiv**: Uses arXiv RSS feeds for today's collection (no rate limits, more reliable) with automatic OAI-PMH fallback, on **every** report weekday including Monday. For historical dates, uses OAI-PMH directly since RSS only contains current announcements. Only collects papers with `announce_type` of "new" or "cross" (skips replacements). arXiv only publishes papers on weekdays (Mon-Fri). Weekend *report* dates skip arXiv entirely.
+- **arXiv Monday catch-up**: Monday additionally sweeps Sat-Sun over OAI-PMH for stragglers, but only *after* RSS has supplied Monday's papers, and the sweep is best-effort — it can never discard what RSS returned. Measured 2026-08-17: a Sat→Mon OAI query returned 842 `cs` records, **all** datestamped Monday, so the weekend leg is normally empty by construction (arXiv makes no Fri/Sat-night announcements). Before 2026-08-17 Monday was OAI-*only*; when that endpoint stalled, the day published with zero arXiv papers and a green status. OAI-PMH is now retried (`ARXIV_OAI_MAX_ATTEMPTS`) with a bounded deadline, and an incomplete harvest marks the research source `partial` instead of `success`.
 - **LessWrong**: Uses GraphQL for date-range collection because RSS only exposes the newest posts. The helper tries direct GraphQL, cached cookies, and a Playwright browser warm-up. `LESSWRONG_PROXY_URL` can target only this source; otherwise `PIPELINE_PROXY_URL` is reused.
 - **Reddit (ScrapeCreators)**: The free Reddit `.json` endpoint and OAuth are dead, so Reddit collects via the ScrapeCreators API (`x-api-key`). Listings page `sort=new` newest→oldest and stop once the coverage window is passed (credit-cheap, complete; `REDDIT_MAX_PAGES` safety cap). The top `REDDIT_BODY_TOP_N` posts/sub are enriched via one `post/comments` call: self posts get their `selftext`; high-discussion link posts get a digest of top community comments (analyzer `content`). A hard `REDDIT_CREDIT_BUDGET` aborts calls gracefully if exceeded. Egress is direct (`trust_env=False`), bypassing the pipeline proxy/Mullvad. `sort=new` backfill of dates >2 days old is depth-limited and logs a warning.
 - **External API Usage**: Non-LLM paid APIs report per-run usage and live balance into the end-of-run cost summary (and `cost_report_{date}.json` under `external_apis`): ScrapeCreators shows calls/credits-consumed/remaining-balance, and TwitterAPI.io shows calls/tweets/`recharge_credits` balance ($1 = 100,000 credits). Balance probes are free.

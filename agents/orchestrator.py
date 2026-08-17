@@ -307,8 +307,11 @@ class MainOrchestrator:
                 logger.info("Phase 1: Gathering from all sources...")
                 gathered_items, collection_status = await self._gather_all()
                 total_items = sum(len(items) for items in gathered_items.values())
-                has_failures = any(s.get('status') == 'failed' for s in collection_status.values())
-                status = 'partial' if has_failures else 'success'
+                degraded = any(
+                    s.get('status') in ('failed', 'partial')
+                    for s in collection_status.values()
+                )
+                status = 'partial' if degraded else 'success'
                 phases.end_phase(status, details=f"{total_items} items")
                 self._save_checkpoint('gathering', {
                     'collection_status': collection_status,
@@ -767,7 +770,7 @@ class MainOrchestrator:
             if error:
                 collection_status[name] = {'status': 'failed', 'count': 0, 'error': error}
             else:
-                collection_status[name] = {'status': 'success', 'count': len(items), 'error': None}
+                collection_status[name] = self._status_for(name, items)
 
         # Capture social sub-platform status from SocialGatherer
         social_gatherer = self.gatherers.get('social')
@@ -785,7 +788,7 @@ class MainOrchestrator:
             news_items = await news_gatherer.gather(social_posts=social_posts)
             logger.info(f"    news gatherer collected {len(news_items)} items")
             results['news'] = news_items
-            collection_status['news'] = {'status': 'success', 'count': len(news_items), 'error': None}
+            collection_status['news'] = self._status_for('news', news_items)
         except Exception as e:
             logger.error(f"    news gatherer failed: {e}")
             results['news'] = []
@@ -794,6 +797,24 @@ class MainOrchestrator:
         self._attach_source_timing(collection_status)
 
         return results, collection_status
+
+    def _status_for(self, name: str, items: list) -> Dict[str, Any]:
+        """Build one source's status row, honouring self-reported degradation.
+
+        A gatherer that returns normally is only 'success' if it also has nothing
+        to confess. Before this, status was binary on whether gather() raised, so
+        a source that caught its own transport errors and returned a short list
+        reported clean -- which is how three weeks of missing arXiv, and again
+        2026-08-17, published as green runs.
+        """
+        gatherer = self.gatherers.get(name)
+        degradation = gatherer.get_degradation() if hasattr(gatherer, 'get_degradation') else None
+
+        if degradation:
+            logger.warning(f"    {name} gatherer degraded: {degradation}")
+            return {'status': 'partial', 'count': len(items), 'error': degradation}
+
+        return {'status': 'success', 'count': len(items), 'error': None}
 
     def _attach_source_timing(self, collection_status: Dict[str, Dict[str, Any]]) -> None:
         """Fold each gatherer's per-source spans into the status dict.

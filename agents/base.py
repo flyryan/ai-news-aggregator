@@ -367,6 +367,17 @@ class BaseGatherer(ABC):
         # covers several independently-timed streams (research = arXiv + blogs).
         self.source_counts: Dict[str, int] = {}
 
+        # Reasons this gatherer's output is incomplete even though gather() returned
+        # normally. The orchestrator downgrades such a source from 'success' to
+        # 'partial' in collection_status.
+        #
+        # Existed because status was effectively binary: a gatherer reported success
+        # unless gather() raised, so a source that swallowed its own transport errors
+        # and returned a short list was indistinguishable from a genuinely quiet day.
+        # That is how the 2026-08-17 arXiv outage published as `research: success`
+        # with 12 items against a Monday median of 334.
+        self.degradation_reasons: List[str] = []
+
         # A window of <= 0 hours collects nothing, and would do so silently: every
         # source would report success with zero items. Refuse it rather than publish
         # an empty report.
@@ -417,6 +428,21 @@ class BaseGatherer(ABC):
             f"{self.__class__.__name__} initialized: report={self.report_date}, "
             f"coverage={self.coverage_date} ({self.start_time} to {self.end_time}){span_note}"
         )
+
+    def note_degradation(self, reason: str) -> None:
+        """Record that this gatherer's output is incomplete.
+
+        Idempotent per distinct reason, so a retry loop that reports the same
+        problem twice does not inflate the status message.
+        """
+        if reason and reason not in self.degradation_reasons:
+            self.degradation_reasons.append(reason)
+
+    def get_degradation(self) -> Optional[str]:
+        """One human-readable summary of why this source is short, or None."""
+        if not self.degradation_reasons:
+            return None
+        return "; ".join(self.degradation_reasons)
 
     @contextmanager
     def time_source(self, key: str):

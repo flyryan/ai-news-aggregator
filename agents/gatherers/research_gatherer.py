@@ -115,6 +115,10 @@ class ResearchGatherer(BaseGatherer):
         self.direct_session = requests.Session()
         self.direct_session.trust_env = False
 
+        # Reasons this run's arXiv leg is not trustworthy, collected during
+        # _collect_arxiv and promoted to gatherer-level degradation at the end.
+        self._arxiv_problems: List[str] = []
+
     @property
     def category(self) -> str:
         return 'research'
@@ -133,12 +137,13 @@ class ResearchGatherer(BaseGatherer):
         arXiv publishing schedule:
         - No announcements Friday or Saturday night
         - Saturday/Sunday reports: skip arXiv (no new papers)
-        - Monday: catch-up query for Sat-Mon to catch any anomalies
+        - Monday: RSS for Monday, plus a Sat-Sun sweep to catch any anomalies
 
         Returns:
             Tuple of (mode, from_date) where mode is:
             - 'skip': Saturday/Sunday - don't collect arXiv papers
-            - 'catchup': Monday - 3-day range (Sat through Mon)
+            - 'catchup': Monday - from_date is the Saturday; the sweep runs
+              Sat->Sun on top of RSS, and Sat->Mon only if RSS came back empty
             - 'normal': Tue-Fri - single day query
         """
         from datetime import timedelta
@@ -194,17 +199,20 @@ class ResearchGatherer(BaseGatherer):
     async def _collect_arxiv(self) -> List[CollectedItem]:
         """Collect papers from arXiv using RSS feeds (primary) with OAI-PMH fallback.
 
-        RSS is preferred when available (faster, no pagination). When RSS is empty
-        or unavailable (historical dates), falls back to OAI-PMH which can query
-        any date range by datestamp (announcement date).
+        RSS is preferred whenever it can hold the data (faster, no pagination, and
+        empirically far more reliable: it succeeded on every weekday run in the
+        month before 2026-08-17 and never once needed its fallback). OAI-PMH backs
+        it up and serves historical dates, which RSS cannot.
 
         Weekend handling:
-        - Saturday/Sunday: Skip arXiv collection entirely (no new papers)
-        - Monday: 3-day catchup query (Sat-Mon) to catch any anomalies
+        - Saturday/Sunday report: skip arXiv entirely (no announcements to collect)
+        - Monday report: RSS for Monday's batch, then a best-effort OAI sweep of
+          Sat-Sun for stragglers. That sweep is normally empty -- arXiv makes no
+          Fri/Sat-night announcements -- and must never cost us the RSS papers.
 
         Uses report_date for queries to match RSS behavior:
         - RSS on day X contains papers with datestamp X
-        - OAI-PMH queries datestamp = report_date (or range for Monday)
+        - OAI-PMH queries datestamp = report_date (or a range for Monday/historical)
         """
         # Check weekend/Monday mode first
         mode, from_date = self._get_arxiv_collection_mode()
@@ -215,47 +223,43 @@ class ResearchGatherer(BaseGatherer):
 
         logger.info(f"Collecting from arXiv ({len(self.categories)} categories)")
 
-        loop = asyncio.get_event_loop()
+        self._arxiv_problems: List[str] = []
 
-        # Check if RSS is applicable (only has today's papers)
-        use_rss = self._is_current_collection() and mode != 'catchup'
+        # RSS carries the current day's announcements for every report weekday,
+        # Monday included. Monday used to be excluded here, which made OAI-PMH the
+        # *only* arXiv transport one day a week -- and on 2026-08-17 that endpoint
+        # stalled, both archives timed out, and the day published with zero papers
+        # while RSS was up and serving them in ~1s. RSS is now primary whenever it
+        # can possibly have the data, exactly as Tue-Fri already did.
+        use_rss = self._is_current_collection()
 
         if use_rss:
-            # RSS collection - parallel, no rate limits
-            logger.info("Using RSS feeds (current day collection, no rate limits)...")
-
-            rss_tasks = [
-                loop.run_in_executor(None, self._fetch_category_rss, cat)
-                for cat in self.categories
-            ]
-            rss_results = await asyncio.gather(*rss_tasks, return_exceptions=True)
-
-            # Check total RSS results
-            rss_papers = []
-            rss_errors = 0
-            for cat, rss_result in zip(self.categories, rss_results):
-                if isinstance(rss_result, Exception):
-                    logger.warning(f"RSS failed for {cat}: {rss_result}")
-                    rss_errors += 1
-                elif rss_result:
-                    rss_papers.extend(rss_result)
+            rss_papers = await self._fetch_all_rss()
 
             if rss_papers:
-                # RSS returned papers - use them
                 logger.info(f"Collected {len(rss_papers)} papers via RSS")
                 all_papers = rss_papers
+
+                if mode == 'catchup':
+                    # RSS covered Monday itself; sweep Sat-Sun for stragglers.
+                    # arXiv makes no Fri/Sat-night announcements, so this is
+                    # normally empty -- it exists to catch the anomaly, and must
+                    # never cost us the papers RSS already returned.
+                    all_papers = all_papers + await self._fetch_weekend_tail(from_date)
             else:
-                # RSS empty (all failed) - fall back to OAI-PMH
-                logger.info(f"RSS returned 0 papers, falling back to OAI-PMH for {self.report_date}")
-                all_papers = await self._fetch_via_oai(self.report_date)
-        elif mode == 'catchup':
-            # Monday: 3-day catchup query for Sat-Mon
-            logger.info(f"Monday catchup: fetching arXiv papers from {from_date} to {self.report_date}")
-            all_papers = await self._fetch_via_oai(from_date, self.report_date)
+                # Every RSS category failed or was empty - fall back to OAI-PMH
+                # over the full range for this mode.
+                oai_from = from_date if mode == 'catchup' else self.report_date
+                logger.warning(
+                    f"RSS returned 0 papers, falling back to OAI-PMH for "
+                    f"{oai_from} to {self.report_date}"
+                )
+                all_papers = await self._fetch_via_oai(oai_from, self.report_date)
         else:
-            # Historical collection - use OAI-PMH directly (RSS doesn't have past data)
+            # Historical collection - RSS only ever holds today's announcements
+            oai_from = from_date if mode == 'catchup' else self.report_date
             logger.info(f"Using OAI-PMH (historical collection for {self.report_date})")
-            all_papers = await self._fetch_via_oai(self.report_date)
+            all_papers = await self._fetch_via_oai(oai_from, self.report_date)
 
         # Deduplicate by arXiv ID
         seen_arxiv_ids = set()
@@ -268,14 +272,92 @@ class ResearchGatherer(BaseGatherer):
                 unique_papers.append(paper)
 
         logger.info(f"Collected {len(unique_papers)} unique papers from arXiv")
+
+        # arXiv going quiet on a day it should have papers is the failure mode that
+        # published green on 2026-08-17. Say so, so the orchestrator can mark the
+        # source degraded instead of reporting success with an empty shelf.
+        if not unique_papers:
+            self._arxiv_problems.append(
+                f"arXiv returned 0 papers on a {mode} day ({self.report_date}); "
+                "this weekday normally has papers"
+            )
+        for problem in self._arxiv_problems:
+            self.note_degradation(problem)
+
         return unique_papers
 
-    async def _fetch_via_oai(self, from_date: str, until_date: Optional[str] = None) -> List[CollectedItem]:
+    async def _fetch_all_rss(self) -> List[CollectedItem]:
+        """Fetch every configured arXiv category over RSS, in parallel.
+
+        Per-category failures are tolerated: RSS is a fan-out over independent
+        feeds and one bad category should not discard the other six.
+        """
+        logger.info("Using RSS feeds (current day collection, no rate limits)...")
+        loop = asyncio.get_event_loop()
+
+        rss_results = await asyncio.gather(
+            *[
+                loop.run_in_executor(None, self._fetch_category_rss, cat)
+                for cat in self.categories
+            ],
+            return_exceptions=True,
+        )
+
+        rss_papers: List[CollectedItem] = []
+        failed = []
+        for cat, rss_result in zip(self.categories, rss_results):
+            if isinstance(rss_result, Exception):
+                logger.warning(f"RSS failed for {cat}: {rss_result}")
+                failed.append(cat)
+            elif rss_result:
+                rss_papers.extend(rss_result)
+
+        if failed and rss_papers:
+            # Partial RSS still publishes, but not silently.
+            self._arxiv_problems.append(
+                f"arXiv RSS failed for {len(failed)}/{len(self.categories)} "
+                f"categories ({', '.join(failed)})"
+            )
+
+        return rss_papers
+
+    async def _fetch_weekend_tail(self, from_date: str) -> List[CollectedItem]:
+        """Sweep Sat-Sun for announcements RSS could not have carried.
+
+        Best-effort by construction: RSS has already supplied Monday's papers, so
+        a failure here is worth a log line and nothing more. Never raises.
+        """
+        from datetime import timedelta
+
+        report_dt = datetime.strptime(self.report_date, '%Y-%m-%d')
+        tail_until = (report_dt - timedelta(days=1)).strftime('%Y-%m-%d')
+
+        logger.info(f"Monday catchup: sweeping arXiv {from_date} to {tail_until} for weekend stragglers")
+        try:
+            tail = await self._fetch_via_oai(from_date, tail_until, best_effort=True)
+        except Exception as e:
+            logger.warning(f"Weekend catchup sweep failed ({type(e).__name__}: {e}); "
+                           "keeping the papers RSS already returned")
+            return []
+
+        if tail:
+            logger.info(f"Weekend catchup sweep found {len(tail)} extra papers")
+        return tail
+
+    async def _fetch_via_oai(
+        self,
+        from_date: str,
+        until_date: Optional[str] = None,
+        best_effort: bool = False,
+    ) -> List[CollectedItem]:
         """Fetch papers via OAI-PMH for a date or date range.
 
         Args:
             from_date: Start date in YYYY-MM-DD format
             until_date: End date in YYYY-MM-DD format. If None, uses from_date (single day).
+            best_effort: When True this is a supplementary sweep whose failure does
+                not degrade the day (RSS already supplied the primary set), so an
+                incomplete harvest is logged but not recorded as a problem.
 
         Returns:
             List of CollectedItem for new papers announced in the date range
@@ -288,6 +370,20 @@ class ResearchGatherer(BaseGatherer):
 
         date_desc = from_date if not until_date or from_date == until_date else f"{from_date} to {until_date}"
         logger.info(f"OAI-PMH returned {len(papers)} new papers for {date_desc}")
+
+        # An incomplete harvest returns a floor, not an answer. On the primary
+        # path that has to reach collection_status; on a best-effort sweep it does
+        # not, because the day's real data came from RSS.
+        if not harvester.last_harvest_complete:
+            detail = (
+                f"arXiv OAI-PMH harvest incomplete for {date_desc} "
+                f"(gave up on: {', '.join(harvester.incomplete_archives)})"
+            )
+            if best_effort:
+                logger.warning(f"{detail}; ignoring, RSS supplied the primary set")
+            else:
+                logger.error(detail)
+                self._arxiv_problems.append(detail)
 
         # Convert to CollectedItem format
         items = []
