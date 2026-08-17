@@ -99,6 +99,26 @@ export interface ReplaySource {
 	status: ReplaySourceStatus;
 	start_ms: number;
 	end_ms: number;
+	/**
+	 * Per-unit spans inside this source: one per subreddit, RSS feed, arXiv
+	 * category, Twitter chunk, handle. Absent on days published before 2026-08-17
+	 * and on sources that are not instrumented — those keep the interpolated bar.
+	 *
+	 * Sorted by `end_ms`, and overlapping: most gatherers fan out across thread
+	 * pools, so this is not a left-to-right sequence.
+	 */
+	steps?: ReplayStep[];
+	/** Units discarded by the capture cap or unresolvable offsets, when any. */
+	steps_dropped?: number;
+}
+
+export interface ReplayStep {
+	/** Short label — host, handle, `r/sub`. Never a full URL. */
+	name: string;
+	start_ms: number;
+	end_ms: number;
+	items: number;
+	status: ReplaySourceStatus;
 }
 
 export interface ReplayCall {

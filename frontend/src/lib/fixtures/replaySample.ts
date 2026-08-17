@@ -550,15 +550,107 @@ for (const [id, label, kind, blurb, phase_ids] of DESK) {
 	});
 }
 
+/**
+ * Synthetic per-unit steps for the demo fixture.
+ *
+ * Units are spread across the row and finish out of dispatch order, because the
+ * real gatherers fan out across thread pools — a tidy left-to-right sequence would
+ * misrepresent how collection actually behaves. Sorted by `end_ms`, matching what
+ * the generator emits, so the engine's forward scan works unchanged.
+ */
+function demoSteps(
+	names: string[],
+	start: number,
+	end: number,
+	opts: { failAt?: number } = {}
+): NonNullable<ReplayIndex['sources'][number]['steps']> {
+	const span = end - start;
+	return names
+		.map((name, i) => {
+			// Deterministic pseudo-jitter: no Math.random, so the demo is identical
+			// on every load and screenshots stay comparable.
+			const wobble = ((i * 37) % 11) / 10;
+			const dispatch = start + Math.round((span * 0.05 * (i % 4)) / 4);
+			const duration = Math.round((span * (0.25 + wobble * 0.7)) / 1.2);
+			return {
+				name,
+				start_ms: dispatch,
+				end_ms: Math.min(end, dispatch + duration),
+				items: 4 + ((i * 13) % 37),
+				status: (opts.failAt === i ? 'failed' : 'success') as 'failed' | 'success'
+			};
+		})
+		.sort((a, b) => a.end_ms - b.end_ms);
+}
+
 const sources: ReplayIndex['sources'] = [
-	{ agent_id: 'news_gatherer', name: 'RSS feeds', items: 246, status: 'success', start_ms: 1400, end_ms: 121_000 },
+	{
+		agent_id: 'news_gatherer',
+		name: 'RSS feeds',
+		items: 246,
+		status: 'success',
+		start_ms: 1400,
+		end_ms: 121_000,
+		steps: demoSteps(
+			[
+				'techcrunch.com', 'theverge.com', 'arstechnica.com', 'openai.com',
+				'deepmind.google', 'anthropic.com', 'venturebeat.com', 'wired.com',
+				'technologyreview.com', 'semianalysis.com', 'huggingface.co', 'nvidia.com'
+			],
+			1400,
+			121_000
+		)
+	},
 	{ agent_id: 'news_gatherer', name: 'Followed links', items: 72, status: 'partial', start_ms: 121_000, end_ms: 238_000 },
-	{ agent_id: 'research_gatherer', name: 'arXiv', items: 441, status: 'success', start_ms: 1600, end_ms: 176_000 },
+	{
+		agent_id: 'research_gatherer',
+		name: 'arXiv',
+		items: 441,
+		status: 'success',
+		start_ms: 1600,
+		end_ms: 176_000,
+		steps: demoSteps(
+			['cs.AI', 'cs.LG', 'cs.CL', 'cs.CV', 'cs.NE', 'cs.RO', 'stat.ML', 'OAI-PMH'],
+			1600,
+			176_000
+		)
+	},
 	{ agent_id: 'research_gatherer', name: 'LessWrong', items: 53, status: 'success', start_ms: 176_000, end_ms: 229_000 },
-	{ agent_id: 'social_gatherer', name: 'Twitter', items: 141, status: 'success', start_ms: 1500, end_ms: 98_000 },
+	{
+		agent_id: 'social_gatherer',
+		name: 'Twitter',
+		items: 141,
+		status: 'success',
+		start_ms: 1500,
+		end_ms: 98_000,
+		steps: demoSteps(
+			['chunk 1/7', 'chunk 2/7', 'chunk 3/7', 'chunk 4/7', 'chunk 5/7', 'chunk 6/7', 'chunk 7/7'],
+			1500,
+			98_000
+		)
+	},
 	{ agent_id: 'social_gatherer', name: 'Bluesky', items: 62, status: 'success', start_ms: 98_000, end_ms: 141_000 },
 	{ agent_id: 'social_gatherer', name: 'Mastodon', items: 23, status: 'partial', start_ms: 141_000, end_ms: 187_000 },
-	{ agent_id: 'reddit_gatherer', name: 'ScrapeCreators', items: 148, status: 'success', start_ms: 2100, end_ms: 214_000 }
+	{
+		agent_id: 'reddit_gatherer',
+		name: 'ScrapeCreators',
+		items: 148,
+		status: 'success',
+		start_ms: 2100,
+		end_ms: 214_000,
+		// One failed unit, so the demo shows that a subreddit which 403'd is drawn
+		// rather than quietly folded into a clean-looking bar.
+		steps: demoSteps(
+			[
+				'r/LocalLLaMA', 'r/MachineLearning', 'r/singularity', 'r/OpenAI',
+				'r/artificial', 'r/agi', 'r/ClaudeAI', 'r/StableDiffusion',
+				'r/LLMDevs', 'r/deeplearning'
+			],
+			2100,
+			214_000,
+			{ failAt: 5 }
+		)
+	}
 ];
 
 const phases: ReplayIndex['phases'] = [

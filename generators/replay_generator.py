@@ -649,18 +649,76 @@ class ReplayGenerator:
                 continue
             agent_id, label = mapping
             start_ms, end_ms, measured = offsets(value)
-            sources.append(
+            row = {
+                "agent_id": agent_id,
+                "name": label,
+                "items": int(value.get("count") or 0),
+                "status": value.get("status") or "success",
+                "start_ms": start_ms,
+                "end_ms": end_ms,
+                "timing_measured": measured,
+            }
+            steps = ReplayGenerator._build_steps(value.get("steps"), t0)
+            if steps:
+                row["steps"] = steps
+                dropped = value.get("steps_dropped")
+                # Capture-side overflow plus anything this pass discarded. Reported
+                # so a short bar reads as truncated rather than as complete.
+                unresolved = len(value.get("steps") or []) - len(steps)
+                total_dropped = int(dropped or 0) + max(0, unresolved)
+                if total_dropped:
+                    row["steps_dropped"] = total_dropped
+            sources.append(row)
+        return sources
+
+    @staticmethod
+    def _build_steps(
+        raw_steps: Any, t0: Optional[float]
+    ) -> List[Dict[str, Any]]:
+        """Convert one source's per-unit spans into ms offsets.
+
+        A step whose epochs do not resolve against this run's ``t0`` is **dropped,
+        not clamped** -- the same rule the parent row follows. A resumed run replays
+        gathering from a checkpoint written under an earlier ``t0``, so its steps
+        predate this run's origin; clamping them to 0 would invent a measurement.
+
+        Unlike the parent row there is no phase-span fallback: a step exists to say
+        "this unit came back at this moment", and a step without that says nothing
+        worth drawing.
+        """
+        if not isinstance(raw_steps, list) or t0 is None:
+            return []
+
+        steps: List[Dict[str, Any]] = []
+        for entry in raw_steps:
+            if not isinstance(entry, dict):
+                continue
+            started = entry.get("started_at")
+            ended = entry.get("ended_at")
+            if not isinstance(started, (int, float)) or not isinstance(ended, (int, float)):
+                continue
+            start_ms = int(round((float(started) - t0) * 1000))
+            end_ms = int(round((float(ended) - t0) * 1000))
+            if start_ms < 0 or end_ms < start_ms:
+                continue
+            name = str(entry.get("name") or "").strip()
+            if not name:
+                continue
+            steps.append(
                 {
-                    "agent_id": agent_id,
-                    "name": label,
-                    "items": int(value.get("count") or 0),
-                    "status": value.get("status") or "success",
+                    "name": name[:64],
                     "start_ms": start_ms,
                     "end_ms": end_ms,
-                    "timing_measured": measured,
+                    "items": int(entry.get("items") or 0),
+                    "status": entry.get("status") or "success",
                 }
             )
-        return sources
+
+        # Completion order is what the frontend counts against, and a thread pool
+        # finishes out of dispatch order. Sorting by end keeps the step function
+        # monotonic without the frontend having to re-sort on every frame.
+        steps.sort(key=lambda s: (s["end_ms"], s["start_ms"]))
+        return steps
 
     @staticmethod
     def _hero_call(

@@ -10,6 +10,7 @@ import json
 import time
 import logging
 import hashlib
+import threading
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass, field, asdict
@@ -329,6 +330,53 @@ class BatchResult:
     thinking: Optional[str] = None       # Extended thinking content
 
 
+# Ceiling on units recorded per source key. Well above every real configuration
+# (26 RSS feeds is the largest today) and low enough that a runaway loop cannot
+# inflate replay-index.json past its documented 15-60 KB budget.
+MAX_STEPS_PER_SOURCE = 250
+
+
+def step_label_for_url(url: str) -> str:
+    """Short, publishable label for a feed URL: its host, minus `www.`.
+
+    Step names land in `replay-index.json`, which is committed publicly and screened
+    by `replay_generator._assert_publishable`. Full URLs are unsafe there for two
+    reasons: a path slug can trip the secret guard -- on 2026-07-31 a DeepMind URL
+    ending `...ta|sk-orchestration...` matched the bare-key pattern and destroyed that
+    day's replay -- and a URL can carry `user:pass@` credentials, which the guard
+    treats as a hard leak. A host has neither a path nor a userinfo section.
+
+    Falls back to the raw string only when it contains no `://`, i.e. it was already a
+    plain label rather than a URL.
+    """
+    raw = (url or '').strip()
+    if '://' not in raw:
+        return raw[:64]
+    try:
+        host = (urlparse(raw).hostname or '').lower()
+    except ValueError:
+        host = ''
+    if not host:
+        return 'unknown source'
+    return host[4:] if host.startswith('www.') else host
+
+
+class _SourceStep:
+    """Mutable handle yielded by `BaseGatherer.time_step`.
+
+    Exists so the caller can report how many items its unit produced -- the context
+    manager wraps the block and cannot observe what the block returned.
+    """
+
+    __slots__ = ('items', 'status')
+
+    def __init__(self) -> None:
+        self.items: int = 0
+        # Callers may downgrade a unit that returned but returned short, the same way
+        # `note_degradation` downgrades a whole source.
+        self.status: Optional[str] = None
+
+
 class BaseGatherer(ABC):
     """
     Base class for all gatherers.
@@ -366,6 +414,14 @@ class BaseGatherer(ABC):
         # Optional per-source item counts, for gatherers whose single category row
         # covers several independently-timed streams (research = arXiv + blogs).
         self.source_counts: Dict[str, int] = {}
+
+        # Per-unit spans *within* a source, filled in by `time_step`: one entry per
+        # subreddit, RSS feed, Twitter chunk, handle. Keyed by the same source key as
+        # `source_timing`, so the replay can nest them under the right bar. Guarded by
+        # a lock because most gatherers fan their units out across a thread pool.
+        self.source_steps: Dict[str, List[Dict[str, Any]]] = {}
+        self._source_steps_lock = threading.Lock()
+        self._source_steps_dropped: Dict[str, int] = {}
 
         # Reasons this gatherer's output is incomplete even though gather() returned
         # normally. The orchestrator downgrades such a source from 'success' to
@@ -472,6 +528,76 @@ class BaseGatherer(ABC):
                 'started_at': started,
                 'ended_at': time.time(),
             }
+
+    @contextmanager
+    def time_step(self, source_key: str, name: str):
+        """Record wall-clock start/end for one unit of work inside a source.
+
+        A source row in the replay covers many independent fetches -- 15 subreddits,
+        26 RSS feeds, 7 Twitter chunks. `time_source` measures the whole row, which
+        left the fill between its ends as linear interpolation: an animation, not a
+        measurement. This records each unit so the bar can advance in real jumps as
+        requests actually come back.
+
+        Yields a small mutable handle so the caller can attach the item count, which
+        the context manager cannot see from outside the block::
+
+            with self.time_step('reddit', f'r/{sub}') as step:
+                posts = self._fetch_subreddit(sub)
+                step.items = len(posts)
+
+        `name` must be a short label -- a host, a handle, `r/foo` -- and never a full
+        URL. Step names are published inside `replay-index.json`, and the generator's
+        secret guard once cost this project an entire day's replay over a kebab-case
+        slug in a URL path. Hostnames carry no path segments.
+
+        Always records an end, including on the exception path, marked `failed` and
+        re-raised: a feed that died at 4s is a fact worth drawing, and leaving the step
+        open would make the bar read as a hang.
+
+        Recording can never fail a run. The bookkeeping is guarded so a bug here cannot
+        mask the caller's real exception -- the same rule `replay_recorder` holds.
+        """
+        started = time.time()
+        step = _SourceStep()
+        failed = False
+        try:
+            yield step
+        except BaseException:
+            failed = True
+            raise
+        finally:
+            try:
+                self._record_step(source_key, name, started, step, failed)
+            except Exception as exc:  # pragma: no cover - defensive
+                logger.debug(f"time_step bookkeeping failed for {source_key}/{name}: {exc}")
+
+    def _record_step(
+        self,
+        source_key: str,
+        name: str,
+        started: float,
+        step: '_SourceStep',
+        failed: bool,
+    ) -> None:
+        """Append one finished step, respecting the per-source cap."""
+        entry = {
+            'name': str(name),
+            'started_at': started,
+            'ended_at': time.time(),
+            'items': int(step.items or 0),
+            'status': 'failed' if failed else (step.status or 'success'),
+        }
+        with self._source_steps_lock:
+            bucket = self.source_steps.setdefault(source_key, [])
+            if len(bucket) >= MAX_STEPS_PER_SOURCE:
+                # Bounded, and never silently: the generator surfaces the drop count
+                # so a truncated bar is legible as truncated rather than as complete.
+                self._source_steps_dropped[source_key] = (
+                    self._source_steps_dropped.get(source_key, 0) + 1
+                )
+                return
+            bucket.append(entry)
 
     @property
     @abstractmethod

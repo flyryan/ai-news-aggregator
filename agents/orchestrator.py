@@ -827,13 +827,18 @@ class MainOrchestrator:
         rows — that is how `research_arxiv` / `research_blogs` become two bars from
         one gatherer. Timing is purely additive: a gatherer that records nothing
         leaves its row untouched and the replay falls back to the phase span.
+
+        Per-unit steps (`BaseGatherer.time_step`) ride along the same way. They let
+        the replay advance a bar in real jumps as individual subreddits and feeds
+        come back, instead of interpolating between the row's two ends.
         """
         for gatherer in self.gatherers.values():
             timing = getattr(gatherer, 'source_timing', None)
-            if not timing:
+            steps = getattr(gatherer, 'source_steps', None) or {}
+            if not timing and not steps:
                 continue
             counts = getattr(gatherer, 'source_counts', None) or {}
-            for key, span in timing.items():
+            for key, span in (timing or {}).items():
                 row = collection_status.setdefault(
                     key, {'status': 'success', 'count': 0, 'error': None}
                 )
@@ -841,6 +846,17 @@ class MainOrchestrator:
                     row['count'] = counts[key]
                 row['started_at'] = span.get('started_at')
                 row['ended_at'] = span.get('ended_at')
+
+            dropped = getattr(gatherer, '_source_steps_dropped', None) or {}
+            for key, entries in steps.items():
+                if not entries:
+                    continue
+                row = collection_status.setdefault(
+                    key, {'status': 'success', 'count': 0, 'error': None}
+                )
+                row['steps'] = entries
+                if dropped.get(key):
+                    row['steps_dropped'] = dropped[key]
 
     async def _analyze_all(
         self,

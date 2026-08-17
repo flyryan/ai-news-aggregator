@@ -15,7 +15,7 @@ import feedparser
 import requests
 from dateutil import parser as date_parser
 
-from ..base import BaseGatherer, CollectedItem, deduplicate_items
+from ..base import BaseGatherer, CollectedItem, deduplicate_items, step_label_for_url
 from ..llm_client import AnthropicClient
 from .link_follower import LinkFollower
 
@@ -132,9 +132,19 @@ class NewsGatherer(BaseGatherer):
         """Collect articles from RSS feeds."""
         loop = asyncio.get_event_loop()
 
+        def fetch_timed(spec):
+            """One feed, timed as its own replay step.
+
+            Labelled by host, never by URL -- see `step_label_for_url`.
+            """
+            with self.time_step('news', step_label_for_url(getattr(spec, 'url', spec))) as step:
+                articles = self._fetch_feed(spec)
+                step.items = len(articles)
+                return articles
+
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             tasks = [
-                loop.run_in_executor(executor, self._fetch_feed, spec)
+                loop.run_in_executor(executor, fetch_timed, spec)
                 for spec in self.feed_specs
             ]
             results = await asyncio.gather(*tasks)

@@ -109,7 +109,41 @@ This needs **no nginx change** and works with the dev Vite middleware
       // every pre-existing day genuinely lacks the data, so absent means unmeasured.
       // Per-source, not per-run -- one resumed or un-instrumented source does not
       // make the others unmeasured.
-      "timing_measured": true
+      "timing_measured": true,
+
+      // OPTIONAL. Per-unit spans inside this source: one entry per subreddit, RSS
+      // feed, arXiv category, Twitter chunk, handle. Recorded by
+      // `BaseGatherer.time_step`. ABSENT on every day published before 2026-08-17
+      // and on any source not yet instrumented -- the frontend must render those
+      // exactly as it does today.
+      //
+      // These exist so a bar can advance as a STEP FUNCTION over real completions
+      // instead of interpolating between the row's two ends. Progress is
+      // `completed / total`; a unit that is out but has not returned contributes
+      // nothing and is named as in-flight. No partial credit.
+      //
+      // Steps overlap: RSS, Reddit, Bluesky and Mastodon all fan out across thread
+      // pools, so these are NOT a left-to-right sequence. Twitter chunks are the
+      // one sequential case. Sorted by `end_ms` so counting completions is a
+      // forward scan.
+      //
+      // A step whose epochs do not resolve against this run's `t0` (a resumed run
+      // replaying gathering from a checkpoint written under an earlier origin) is
+      // dropped, not clamped -- there is no phase-span fallback here, because a
+      // step exists precisely to say when one unit came back.
+      "steps": [
+        {
+          "name": "r/LocalLLaMA",   // short label: host, handle, r/sub. NEVER a URL.
+          "start_ms": 142,
+          "end_ms": 21033,
+          "items": 83,
+          "status": "success"       // success | partial | failed
+        }
+      ],
+      // Present only when steps were discarded: capture-side overflow past
+      // MAX_STEPS_PER_SOURCE, or unresolvable offsets. A short bar must read as
+      // truncated rather than as complete.
+      "steps_dropped": 0
     }
   ],
 
@@ -205,6 +239,17 @@ open matters more than it being complete.
 
 **`worker`** — parsed from `batch_{n}`; `3a`/`3b` splits become worker `3` with a
 `split` suffix in `task`. Null for non-batch calls.
+
+**Step names must never be full URLs.** They are the only free-text field a gatherer
+contributes to the index, and `_assert_publishable` screens the whole artifact. A URL
+path can trip the secret guard — on 2026-07-31 a DeepMind slug ending
+`...ta|sk-orchestration...` matched the bare-key pattern and destroyed that day's
+replay — and a URL can carry `user:pass@` userinfo, which the guard treats as a hard
+leak. `base.step_label_for_url` reduces a feed URL to its host for exactly this reason.
+
+**Steps cannot be backfilled.** `data/processed/` holds no per-unit spans, so offline
+regeneration of a past date produces a source row without `steps`, never a
+reconstructed one. Same honesty rule as `run.timings_measured`.
 
 **`phase_id`** — resolved by wall-clock containment against `PhaseTracker` absolute
 timestamps. `PhaseTracker.to_dict()` currently drops absolute times; the generator reads

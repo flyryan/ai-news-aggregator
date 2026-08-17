@@ -82,6 +82,20 @@ export interface SourceFrameState {
 	progress: number;
 	active: boolean;
 	done: boolean;
+	/** Units finished by now, when this source recorded per-unit steps. */
+	completed?: number;
+	/** Total units, when this source recorded per-unit steps. */
+	total?: number;
+	/** Names of units dispatched but not yet returned. */
+	inflight?: string[];
+	/** Units that returned failed or partial by now. */
+	failed?: number;
+	/**
+	 * False when `progress` is interpolated across the row rather than counted
+	 * from real completions — i.e. this source has no steps. The UI must not
+	 * present an interpolated bar as a measurement.
+	 */
+	measured?: boolean;
 }
 
 export interface ReplayFrame {
@@ -265,8 +279,6 @@ function deriveFrame(p: Prepared, t: number): ReplayFrame {
 
 	// Gatherers do non-LLM work; they get their own liveness from `sources`.
 	const sources: SourceFrameState[] = (index.sources ?? []).map((s) => {
-		const span = Math.max(1, s.end_ms - s.start_ms);
-		const progress = Math.min(1, Math.max(0, (t - s.start_ms) / span));
 		const active = t >= s.start_ms && t < s.end_ms;
 		const done = t >= s.end_ms;
 		if (active || done) {
@@ -275,7 +287,55 @@ function deriveFrame(p: Prepared, t: number): ReplayFrame {
 				agentState.status = active ? 'active' : 'done';
 			}
 		}
-		return { agent_id: s.agent_id, name: s.name, items: s.items, status: s.status, progress, active, done };
+
+		const steps = s.steps;
+		if (steps && steps.length > 0) {
+			// Step function over real completions. A unit that is out but has not
+			// returned contributes nothing — no partial credit, no interpolation.
+			// Steps arrive sorted by end_ms, so completions are a forward scan.
+			let completed = 0;
+			while (completed < steps.length && steps[completed].end_ms <= t) completed++;
+
+			let failed = 0;
+			for (let i = 0; i < completed; i++) {
+				if (steps[i].status !== 'success') failed++;
+			}
+
+			const inflight: string[] = [];
+			for (const step of steps) {
+				if (step.start_ms <= t && step.end_ms > t) inflight.push(step.name);
+			}
+
+			return {
+				agent_id: s.agent_id,
+				name: s.name,
+				items: s.items,
+				status: s.status,
+				progress: completed / steps.length,
+				active,
+				done,
+				completed,
+				total: steps.length,
+				inflight,
+				failed,
+				measured: true
+			};
+		}
+
+		// No steps: pre-2026-08-17 day, or an un-instrumented source. Fall back to
+		// the interpolated bar, flagged so the UI does not pass it off as measured.
+		const span = Math.max(1, s.end_ms - s.start_ms);
+		const progress = Math.min(1, Math.max(0, (t - s.start_ms) / span));
+		return {
+			agent_id: s.agent_id,
+			name: s.name,
+			items: s.items,
+			status: s.status,
+			progress,
+			active,
+			done,
+			measured: false
+		};
 	});
 
 	let phase: ReplayPhase | null = null;

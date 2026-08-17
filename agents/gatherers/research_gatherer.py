@@ -26,7 +26,7 @@ from typing import List, Optional
 import feedparser
 import requests
 
-from ..base import BaseGatherer, CollectedItem
+from ..base import BaseGatherer, CollectedItem, step_label_for_url
 from ..html_text import html_to_text
 from .arxiv_oai import ArxivOAIHarvester
 
@@ -295,9 +295,16 @@ class ResearchGatherer(BaseGatherer):
         logger.info("Using RSS feeds (current day collection, no rate limits)...")
         loop = asyncio.get_event_loop()
 
+        def fetch_timed(cat: str) -> List[CollectedItem]:
+            """One arXiv category feed, timed as its own replay step."""
+            with self.time_step('research_arxiv', cat) as step:
+                papers = self._fetch_category_rss(cat)
+                step.items = len(papers)
+                return papers
+
         rss_results = await asyncio.gather(
             *[
-                loop.run_in_executor(None, self._fetch_category_rss, cat)
+                loop.run_in_executor(None, fetch_timed, cat)
                 for cat in self.categories
             ],
             return_exceptions=True,
@@ -365,8 +372,19 @@ class ResearchGatherer(BaseGatherer):
         loop = asyncio.get_event_loop()
         harvester = ArxivOAIHarvester(list(self.CATEGORIES.keys()))
 
-        # Run harvester in executor (blocking I/O)
-        papers = await loop.run_in_executor(None, harvester.harvest_date, from_date, until_date)
+        # Run harvester in executor (blocking I/O).
+        #
+        # Timed as its own step so it is separable from the category RSS legs. On
+        # 2026-08-17 the whole `research_arxiv` row spanned 131 -> 120,775 ms and
+        # returned zero papers; one flat bar could not show that OAI alone burned
+        # those two minutes while every RSS leg had finished in under a second.
+        step_label = 'OAI-PMH (catch-up)' if best_effort else 'OAI-PMH'
+        with self.time_step('research_arxiv', step_label) as step:
+            papers = await loop.run_in_executor(None, harvester.harvest_date, from_date, until_date)
+            step.items = len(papers)
+            # A floor, not an answer -- draw the bar as partial rather than clean.
+            if not harvester.last_harvest_complete:
+                step.status = 'partial'
 
         date_desc = from_date if not until_date or from_date == until_date else f"{from_date} to {until_date}"
         logger.info(f"OAI-PMH returned {len(papers)} new papers for {date_desc}")
@@ -449,7 +467,12 @@ class ResearchGatherer(BaseGatherer):
         if lesswrong_feeds:
             logger.info("Using GraphQL API for LessWrong (RSS doesn't support date-range queries)")
             try:
-                lesswrong_posts = await loop.run_in_executor(None, self._fetch_lesswrong_graphql)
+                # Its own step: LessWrong is one GraphQL call with a browser
+                # warm-up fallback, so it fails and stalls independently of the
+                # plain RSS feeds beside it.
+                with self.time_step('research_blogs', 'LessWrong') as step:
+                    lesswrong_posts = await loop.run_in_executor(None, self._fetch_lesswrong_graphql)
+                    step.items = len(lesswrong_posts)
                 for post in lesswrong_posts:
                     if post.url not in seen_urls:
                         seen_urls.add(post.url)
@@ -459,8 +482,16 @@ class ResearchGatherer(BaseGatherer):
 
         # Fetch other feeds via RSS (existing behavior)
         if other_feeds:
+
+            def fetch_timed(spec):
+                """One research feed, timed as its own replay step."""
+                with self.time_step('research_blogs', step_label_for_url(spec.url)) as step:
+                    posts = self._fetch_research_feed(spec)
+                    step.items = len(posts)
+                    return posts
+
             tasks = [
-                loop.run_in_executor(None, self._fetch_research_feed, spec)
+                loop.run_in_executor(None, fetch_timed, spec)
                 for spec in other_feeds
             ]
             results = await asyncio.gather(*tasks, return_exceptions=True)

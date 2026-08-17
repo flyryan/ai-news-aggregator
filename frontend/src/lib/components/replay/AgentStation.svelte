@@ -14,7 +14,19 @@
 
 	export let agent: ReplayAgent;
 	export let state: AgentFrameState | undefined = undefined;
-	export let sources: { name: string; items: number; progress: number; active: boolean; done: boolean; status: string }[] = [];
+	export let sources: {
+		name: string;
+		items: number;
+		progress: number;
+		active: boolean;
+		done: boolean;
+		status: string;
+		completed?: number;
+		total?: number;
+		inflight?: string[];
+		failed?: number;
+		measured?: boolean;
+	}[] = [];
 	export let reduced = false;
 	export let onSelectCall: (callId: string) => void = () => {};
 
@@ -137,12 +149,21 @@
 		<ul class="sources">
 			{#each sources as src (src.name)}
 				<li class="source" class:src-active={src.active} class:src-done={src.done}>
-					<span class="source-bar" style="width: {Math.round(src.progress * 100)}%"></span>
+					<!-- Stepped bars jump on real completions; the transition is
+					     dropped for them so the honest jump is not smeared back into
+					     decorative motion. Interpolated bars keep the easing. -->
+					<span
+						class="source-bar"
+						class:stepped={src.measured}
+						style="width: {Math.round(src.progress * 100)}%"
+					></span>
 					<span class="source-name">{src.name}</span>
 					<span class="source-count">
 						{#if src.done}
 							{src.items.toLocaleString()}
 							{#if src.status === 'partial'}<span class="warn" title="Partial collection">!</span>{/if}
+						{:else if src.active && src.total}
+							<span class="working">{src.completed}/{src.total}</span>
 						{:else if src.active}
 							<span class="working">pulling…</span>
 						{:else}
@@ -150,6 +171,18 @@
 						{/if}
 					</span>
 				</li>
+				{#if src.active && src.inflight && src.inflight.length > 0}
+					<li class="source-inflight" title="Dispatched, not yet returned">
+						{src.inflight.slice(0, 3).join(' · ')}{#if src.inflight.length > 3}
+							&nbsp;+{src.inflight.length - 3}
+						{/if}
+					</li>
+				{/if}
+				{#if src.failed}
+					<li class="source-failed">
+						{src.failed} failed
+					</li>
+				{/if}
 			{/each}
 		</ul>
 	{/if}
@@ -585,6 +618,30 @@
 		bottom: 0;
 		background: color-mix(in srgb, var(--accent) 20%, transparent);
 		transition: width 120ms linear;
+	}
+	/* A stepped bar advances only when a unit actually returned. Easing between
+	   those jumps would draw motion during moments nothing completed, which is
+	   exactly the interpolation this replaces. */
+	.source-bar.stepped {
+		transition: none;
+	}
+	.source-inflight,
+	.source-failed {
+		position: relative;
+		padding: 0 0.4rem 2px 0.4rem;
+		font-size: 0.62rem;
+		line-height: 1.25;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.source-inflight {
+		color: var(--accent);
+		opacity: 0.75;
+	}
+	.source-failed {
+		color: #f59e0b;
+		font-weight: 600;
 	}
 	.source-name,
 	.source-count {

@@ -164,8 +164,29 @@ class RedditGatherer(BaseGatherer):
             logger.info(f"ScrapeCreators credit balance at start: {start_balance}")
 
         all_posts: List[CollectedItem] = []
+
+        def fetch_timed(sub: str) -> List[CollectedItem]:
+            """One subreddit, timed as its own replay step.
+
+            Timed inside the worker so the span is the fetch itself, not the wait for
+            a pool slot -- with `fetch_workers` below the subreddit count, queued subs
+            would otherwise all appear to start at once.
+            """
+            with self.time_step('reddit', f'r/{sub}') as step:
+                posts = self._fetch_subreddit(sub)
+                step.items = len(posts)
+                # `_fetch_subreddit` catches everything -- a fatal ScrapeCreators
+                # error or a blown credit budget returns a short list rather than
+                # raising, so `time_step` cannot infer failure from an exception.
+                # Without this, an aborted run draws 15 clean green bars.
+                with self._lock:
+                    stopped = self._stop_calls
+                if stopped:
+                    step.status = 'partial'
+                return posts
+
         with ThreadPoolExecutor(max_workers=self.fetch_workers, thread_name_prefix='reddit-sub') as ex:
-            future_to_sub = {ex.submit(self._fetch_subreddit, sub): sub for sub in self.subreddits}
+            future_to_sub = {ex.submit(fetch_timed, sub): sub for sub in self.subreddits}
             for future in as_completed(future_to_sub):
                 sub = future_to_sub[future]
                 try:
