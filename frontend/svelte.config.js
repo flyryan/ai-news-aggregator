@@ -33,7 +33,7 @@ const config = {
 			mode: 'hash',
 			directives: {
 				'default-src': ['self'],
-				'script-src': ['self'],
+				'script-src': ['self', 'https://static.cloudflareinsights.com/beacon.min.js'],
 				'style-src': ['self', 'unsafe-inline'],
 				'img-src': ['self', 'data:'],
 				'font-src': ['self'],
