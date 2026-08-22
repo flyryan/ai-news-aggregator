@@ -165,5 +165,45 @@ class RawControlCharacterTest(unittest.TestCase):
         self.assertEqual(parsed["top_10"], ["a", "b"])
 
 
+class EmbeddedQuoteTest(unittest.TestCase):
+    """Unescaped ASCII quotes inside string values must be repaired.
+
+    The 2026-08-22 reddit reduce response contained **"be concise"** --
+    literal 0x22 quotes mid-value. The parser ends the string there and the
+    rest is garbage ("Expecting ',' delimiter"); no control-char fix can
+    help. A string-close quote in valid JSON is ALWAYS followed by
+    structural text (,: } ]), so any in-string quote that isn't is embedded
+    and gets escaped. The transform is a no-op on already-valid JSON.
+    """
+
+    def setUp(self):
+        from agents.base import extract_json_str
+
+        self.extract = extract_json_str
+
+    def test_reddit_reduce_shape_with_inner_quotes_parses(self):
+        raw = (
+            '```json\n{"top_10": ["a", "b"], "category_summary": '
+            '"savings from **\\"be concise\\"** prompts and \\"quoted\\" words"}\n```'
+        ).replace('\\"', '"')  # make the inner quotes REAL unescaped 0x22s
+        parsed = json.loads(self.extract(raw))
+        self.assertEqual(
+            parsed["category_summary"],
+            'savings from **"be concise"** prompts and "quoted" words',
+        )
+        self.assertEqual(parsed["top_10"], ["a", "b"])
+
+    def test_valid_json_is_untouched(self):
+        raw = '{"a": "ends with comma, then", "b": {"k": "v"}, "c": [1, 2]}'
+        self.assertEqual(json.loads(self.extract(raw)), json.loads(raw))
+
+    def test_escaped_quotes_still_work(self):
+        # Python '\\\\"' would be TWO backslashes; a properly escaped JSON
+        # quote is one backslash + quote ('\\\\"' at source -> \\" here).
+        raw = '{"quote": "he said \\\"hi\\\" loudly"}'
+        parsed = json.loads(self.extract(raw))
+        self.assertEqual(parsed["quote"], 'he said "hi" loudly')
+
+
 if __name__ == "__main__":
     unittest.main()

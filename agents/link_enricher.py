@@ -351,15 +351,11 @@ Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not ent
                 content = content[:-3]
             content = content.strip()
 
-            # Try to extract JSON object if there's extra text
-            if not content.startswith("{"):
-                start = content.find("{")
-                if start != -1:
-                    content = content[start:]
-            if not content.endswith("}"):
-                end = content.rfind("}")
-                if end != -1:
-                    content = content[:end + 1]
+            # Shared extractor: trims fences/preamble and repairs the two
+            # ox-alpha failure modes (raw control chars, unescaped inner
+            # quotes) that used to dump every enrichment to regex fallback.
+            from agents.base import extract_json_str
+            content = extract_json_str(content)
 
             result = json.loads(content)
 

@@ -133,12 +133,58 @@ def extract_json_str(content: str) -> str:
             out.append(char)
         return ''.join(out)
 
+    def _escape_embedded_quotes(text: str) -> str:
+        """Escape unescaped ASCII quotes that sit INSIDE string values.
+
+        The reddit reduce response on 2026-08-22 contained **"be concise"**
+        with literal 0x22 quotes mid-value; the parser ends the string there
+        and everything after is garbage ("Expecting ',' delimiter"). In valid
+        JSON a string-closing quote is ALWAYS followed by structural text --
+        ``,`` ``}`` ``]`` or ``:`` -- so any in-string quote whose next
+        non-whitespace character is something else must be an embedded quote.
+        Escaping it is a no-op on already-valid JSON.
+        """
+        out: List[str] = []
+        in_string = False
+        escape_next = False
+        n = len(text)
+        for i, char in enumerate(text):
+            if escape_next:
+                out.append(char)
+                escape_next = False
+                continue
+            if char == '\\' and in_string:
+                out.append(char)
+                escape_next = True
+                continue
+            if char == '"':
+                if not in_string:
+                    in_string = True
+                    out.append(char)
+                    continue
+                # Candidate close: structural only if next non-ws is , } ] :
+                j = i + 1
+                while j < n and text[j] in ' \t\r\n':
+                    j += 1
+                if j >= n or text[j] in ',}]:':
+                    in_string = False
+                    out.append(char)
+                else:
+                    out.append('\\"')
+                continue
+            out.append(char)
+        return ''.join(out)
+
     content = (content or "").strip()
 
     # Prefer JSON inside a markdown code block when present.
     code_block_match = re.search(r'```(?:json)?\s*\n?([\s\S]*?)\n?```', content)
     if code_block_match:
         content = code_block_match.group(1).strip()
+
+    # Repair unescaped inner quotes BEFORE the depth walk: one stray quote
+    # mid-value derails string tracking for the rest of the document.
+    content = _escape_embedded_quotes(content)
 
     # Skip any leading prose before the first { or [.
     if not content.startswith(('{', '[')):
@@ -1526,6 +1572,13 @@ class BaseAnalyzer(ABC):
         - JSON with text before it
         """
         content = content.strip()
+
+        # Delegate to the shared extractor FIRST: it trims fences/preamble
+        # and neutralizes the two ox-alpha failure modes (raw control chars
+        # and unescaped inner quotes) that this method's own walk cannot
+        # recover from. Everything below (truncation detection, repair,
+        # recovery) then operates on sanitized text.
+        content = extract_json_str(content)
 
         # Try to extract JSON from markdown code block first
         code_block_match = re.search(r'```(?:json)?\s*\n?([\s\S]*?)\n?```', content)
