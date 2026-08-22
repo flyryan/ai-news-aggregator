@@ -79,11 +79,13 @@ llm:
 # Generates a daily hero image featuring the AATF skunk mascot.
 # Comment out this entire section to skip hero image generation.
 #
-# Supports two modes:
+# Supports three modes:
 # - native: Google Gemini API via google-genai SDK (recommended)
 # - openai-compatible: OpenAI-compatible image endpoint (for LiteLLM proxies)
+# - openrouter: OpenRouter's /api/v1/images endpoint (aspect_ratio,
+#     resolution tiers, and input_references supported natively)
 image:
-  # API mode: "native" or "openai-compatible"
+  # API mode: "native", "openai-compatible", or "openrouter"
   #
   # native (default):
   #   - Uses google-genai SDK directly
@@ -97,20 +99,28 @@ image:
   #   - Requires endpoint URL
   #   - Model name depends on your proxy (e.g., gemini-3-pro-image)
   #
+  # openrouter:
+  #   - Uses POST {endpoint}/images on OpenRouter
+  #   - Endpoint optional; defaults to https://openrouter.ai/api/v1
+  #   - Model is an OpenRouter slug (e.g., google/gemini-3-pro-image)
+  #   - Optional quality field: auto/low/medium/high
+  #
   mode: "native"
 
   # API key for image generation
   # For native mode: Google AI API key
-  # For openai-compatible mode: your proxy's API key
+  # For openai-compatible/openrouter mode: your proxy's/OpenRouter API key
   api_key: "${GOOGLE_API_KEY}"
 
   # Endpoint URL (required for openai-compatible mode only)
   # Not used in native mode (SDK determines endpoint automatically)
+  # Optional in openrouter mode (defaults to https://openrouter.ai/api/v1)
   # endpoint: "https://your-proxy.example.com/v1"
 
   # Model name
   # - native: gemini-3-pro-image-preview
   # - openai-compatible: depends on your proxy (e.g., gemini-3-pro-image)
+  # - openrouter: OpenRouter slug (default google/gemini-3-pro-image)
   model: "gemini-3-pro-image-preview"
 
 # -----------------------------------------------------------------------------
@@ -159,3 +169,34 @@ pipeline:
 # pipeline:
 #   base_url: "https://news.your-domain.com"
 #   lookback_hours: 24
+
+# =============================================================================
+# Example: OpenRouter configuration
+# =============================================================================
+# OpenRouter (https://openrouter.ai) serves BOTH wire formats this pipeline
+# speaks, so no code changes are needed -- only config. Requires
+# OPENROUTER_API_KEY in your environment or .env.
+#
+# LLM: OpenRouter serves the Anthropic Messages format at /api/v1/messages,
+# so mode stays "openai-compatible" (Bearer auth) and base_url points at the
+# /api root. The schema forbids a /v1 suffix; the SDK appends /v1/messages.
+# Models are OpenRouter slugs (e.g., stealth/ox-alpha, anthropic/claude-opus-5).
+#
+# llm:
+#   mode: "openai-compatible"
+#   api_key: "${OPENROUTER_API_KEY}"
+#   base_url: "https://openrouter.ai/api"
+#   model: "stealth/ox-alpha"
+#   timeout: 600
+#   routes:
+#     - id: openrouter
+#       model: "stealth/ox-alpha"
+#
+# Image: uses OpenRouter's dedicated images endpoint, which natively supports
+# 21:9 aspect ratios, resolution tiers, and reference images (the skunk mascot).
+#
+# image:
+#   mode: "openrouter"
+#   api_key: "${OPENROUTER_API_KEY}"
+#   model: "google/gemini-3-pro-image"
+#   quality: high
