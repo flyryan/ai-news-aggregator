@@ -91,9 +91,48 @@ def extract_json_str(content: str) -> str:
     Mirrors the robust extraction used by BaseAnalyzer._parse_json_response so
     callers outside that class hierarchy (e.g. the orchestrator's topic
     detection) can survive models that wrap JSON in ```json fences or emit a
-    prose preamble before the object. Returns the best-effort JSON substring;
-    json.loads is left to the caller.
+    prose preamble before the object. Raw control characters inside string
+    values are escaped so the result is parseable as-is; json.loads is left
+    to the caller. Kept fully self-contained (no module-level helpers): the
+    regression suite lifts this exact function out via ast and runs it
+    standalone.
     """
+
+    def _escape_control_chars_in_strings(text: str) -> str:
+        """Escape raw ASCII control characters inside JSON string literals.
+
+        Some models emit literal newlines/tabs inside string values (ox-alpha
+        did throughout the 2026-08-22 run); json.loads rejects those with
+        "Invalid control character" even when the content is otherwise
+        perfect, which stubbed two category summaries and sent link
+        enrichment to its regex fallback. Characters outside strings are left
+        untouched (whitespace between tokens is legal JSON).
+        """
+        if not text:
+            return text
+        out: List[str] = []
+        replacements = {'\n': '\\n', '\r': '\\r', '\t': '\\t'}
+        in_string = False
+        escape_next = False
+        for char in text:
+            if escape_next:
+                out.append(char)
+                escape_next = False
+                continue
+            if char == '\\' and in_string:
+                out.append(char)
+                escape_next = True
+                continue
+            if char == '"':
+                in_string = not in_string
+                out.append(char)
+                continue
+            if in_string and ord(char) < 0x20:
+                out.append(replacements.get(char, f'\\u{ord(char):04x}'))
+                continue
+            out.append(char)
+        return ''.join(out)
+
     content = (content or "").strip()
 
     # Prefer JSON inside a markdown code block when present.
@@ -106,7 +145,7 @@ def extract_json_str(content: str) -> str:
         obj_start = content.find('{')
         arr_start = content.find('[')
         if obj_start == -1 and arr_start == -1:
-            return content
+            return _escape_control_chars_in_strings(content)
         start = min(s for s in [obj_start, arr_start] if s != -1)
         content = content[start:]
 
@@ -116,6 +155,7 @@ def extract_json_str(content: str) -> str:
     depth = 0
     in_string = False
     escape_next = False
+    end = None
     for i, char in enumerate(content):
         if escape_next:
             escape_next = False
@@ -131,8 +171,12 @@ def extract_json_str(content: str) -> str:
             elif char == close_char:
                 depth -= 1
                 if depth == 0:
-                    return content[:i + 1]
-    return content
+                    end = i + 1
+                    break
+    if end is None:
+        end = len(content)
+
+    return _escape_control_chars_in_strings(content[:end])
 
 
 @dataclass

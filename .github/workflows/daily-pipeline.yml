@@ -71,14 +71,14 @@ jobs:
       PIPELINE_IMAGE_MODEL: ${{ vars.PIPELINE_IMAGE_MODEL || 'gemini-3-pro-image' }}
       LLM_TRUST_ENV_PROXY: ${{ vars.LLM_TRUST_ENV_PROXY || 'false' }}
       LLM_TIMEOUT_SECONDS: ${{ vars.LLM_TIMEOUT_SECONDS || '240' }}
-      LLM_MAX_CONCURRENT_REQUESTS: ${{ vars.LLM_MAX_CONCURRENT_REQUESTS || '8' }}
+      LLM_MAX_CONCURRENT_REQUESTS: ${{ vars.LLM_MAX_CONCURRENT_REQUESTS || '16' }}
       LLM_ADAPTIVE_MAX_TOKENS: ${{ vars.LLM_ADAPTIVE_MAX_TOKENS || '65536' }}
       LLM_MAX_RETRIES: ${{ vars.LLM_MAX_RETRIES || '2' }}
       LLM_LOG_REQUESTS: ${{ vars.LLM_LOG_REQUESTS || 'true' }}
       LLM_HEARTBEAT_SECONDS: ${{ vars.LLM_HEARTBEAT_SECONDS || '60' }}
       LLM_METRICS_PATH: ${{ vars.LLM_METRICS_PATH || 'data/llm_metrics.jsonl' }}
       ANALYZER_BATCH_SIZE: ${{ vars.ANALYZER_BATCH_SIZE || '75' }}
-      ANALYZER_MAX_CONCURRENT_BATCHES: ${{ vars.ANALYZER_MAX_CONCURRENT_BATCHES || '3' }}
+      ANALYZER_MAX_CONCURRENT_BATCHES: ${{ vars.ANALYZER_MAX_CONCURRENT_BATCHES || '6' }}
       TARGET_DATE_INPUT: ${{ inputs.target_date || '' }}
       RESUME_FROM_INPUT: ${{ inputs.resume_from || '' }}
       COMMIT_OUTPUTS: ${{ github.event_name != 'workflow_dispatch' || inputs.commit_outputs }}

@@ -110,5 +110,60 @@ class ExtractJsonStrTest(unittest.TestCase):
         )
 
 
+class RawControlCharacterTest(unittest.TestCase):
+    """ox-alpha emits literal newlines/tabs inside JSON string values.
+
+    json.loads rejects raw control characters in strings ("Invalid control
+    character"), which on 2026-08-22 stubbed two category summaries and sent
+    link enrichment to its regex fallback -- all on responses whose content
+    was otherwise fine. Extraction must escape raw control chars inside
+    string bodies so the downstream parse succeeds.
+    """
+
+    def setUp(self):
+        from agents.base import extract_json_str
+
+        self.extract = extract_json_str
+
+    def test_raw_newline_inside_string_is_escaped(self):
+        raw = '{"summary": "first' + chr(10) + 'second line", "n": 1}'
+        parsed = json.loads(self.extract(raw))
+        self.assertEqual(parsed["summary"], "first\nsecond line")
+        self.assertEqual(parsed["n"], 1)
+
+    def test_raw_tab_and_cr_inside_strings_are_escaped(self):
+        raw = (
+            '{"a": "col1' + chr(9) + 'col2", "b": "x' + chr(13) + chr(10) + 'y"}'
+        )
+        parsed = json.loads(self.extract(raw))
+        self.assertEqual(parsed["a"], "col1\tcol2")
+        self.assertEqual(parsed["b"], "x\r\ny")
+
+    def test_control_chars_outside_strings_still_fine(self):
+        raw = '{\n\t"a": 1,\r\n"b": [1, 2]\n}'
+        parsed = json.loads(self.extract(raw))
+        self.assertEqual(parsed, {"a": 1, "b": [1, 2]})
+
+    def test_control_chars_survive_wrapped_in_prose_and_fence(self):
+        raw = (
+            "Here is the result:\n```json\n"
+            '{"summary": "bullet' + chr(10) + '- one", "top_10": ["a"]}\n'
+            "```\nDone."
+        )
+        parsed = json.loads(self.extract(raw))
+        self.assertEqual(parsed["summary"], "bullet\n- one")
+
+    def test_reddit_reduce_failure_shape_parses(self):
+        # Minimized shape of the 2026-08-22 social/reddit reduce failure:
+        # markdown bullets with newlines inside the summary value.
+        raw = (
+            '{"category_summary": "Big themes:\\n\\n- **OpenAI** cut prices '
+            '-- 2.6M views\\n- **NVIDIA** ramping", "top_10": ["a", "b"]}'
+        ).replace("\\n", chr(10))
+        parsed = json.loads(self.extract(raw))
+        self.assertIn("OpenAI", parsed["category_summary"])
+        self.assertEqual(parsed["top_10"], ["a", "b"])
+
+
 if __name__ == "__main__":
     unittest.main()

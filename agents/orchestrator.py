@@ -267,8 +267,12 @@ class MainOrchestrator:
             logger.info(f"Resuming from phase {resume_from} (loading earlier phases from checkpoint)")
         start_time = datetime.now()
 
-        # Initialize cost tracking
-        cost_tracker = reset_tracker()
+        # Initialize cost tracking with the ACTUAL model, so reports and the
+        # replay price against the right schedule instead of the tracker's
+        # Opus default (the 2026-08-22 run billed free ox-alpha at $11.63).
+        cost_model = (self.provider_config.llm.model
+                      if self.provider_config else None) or "claude-5-opus-aws"
+        cost_tracker = reset_tracker(model=cost_model)
         cost_tracker.start()
 
         # Arm replay capture on the same origin as the cost tracker, so every

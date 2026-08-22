@@ -108,9 +108,15 @@ class ImageCost:
     input_cost: float = 0.0
     image_cost: float = 0.0
     text_cost: float = 0.0
+    # Authoritative total reported by the provider itself (OpenRouter's image
+    # endpoint includes ``usage.cost``). When present it wins over any local
+    # token-class arithmetic -- the provider knows its own bill.
+    provider_reported_cost: Optional[float] = None
 
     @property
     def total_cost(self) -> float:
+        if self.provider_reported_cost is not None:
+            return self.provider_reported_cost
         return self.input_cost + self.image_cost + self.text_cost
 
     @property
@@ -148,6 +154,18 @@ def price_image_usage(usage: Optional[Dict[str, Any]]) -> Optional[ImageCost]:
     if not image_tokens and not text_tokens:
         image_tokens = completion_total
 
+    # Provider-reported totals are authoritative (OpenRouter includes
+    # usage.cost); token-class rates are only our own estimate of a bill the
+    # provider already itemized for us.
+    reported_cost = usage.get("cost")
+    if isinstance(reported_cost, (int, float)):
+        return ImageCost(
+            input_tokens=input_tokens,
+            image_tokens=image_tokens,
+            text_tokens=text_tokens,
+            provider_reported_cost=float(reported_cost),
+        )
+
     mtok = 1_000_000
     return ImageCost(
         input_tokens=input_tokens,
@@ -180,8 +198,21 @@ class CostTracker:
         # balance, balance_usd, est_cost_usd, items, note).
         self.external_apis: Dict[str, Dict] = {}
 
+        # Whether the rates below are a real schedule (False) or an
+        # unknown-model fallback standing in for one (True). Surfaced in the
+        # run summary so an estimate can never masquerade as a measurement.
+        self.pricing_is_estimate = False
+
         # Determine pricing based on model
-        if "opus" in model.lower():
+        if "ox-alpha" in model.lower():
+            # stealth/ox-alpha is $0/$0 on OpenRouter (verified live against
+            # /api/v1/models/stealth/ox-alpha/endpoints on 2026-08-22).
+            # Update here when the promo ends.
+            self.input_price = 0.0
+            self.output_price = 0.0
+            self.cache_write_price = 0.0
+            self.cache_hit_price = 0.0
+        elif "opus" in model.lower():
             self.input_price = ModelPricing.OPUS_4_6_INPUT.value
             self.output_price = ModelPricing.OPUS_4_6_OUTPUT.value
             self.cache_write_price = ModelPricing.OPUS_4_6_CACHE_WRITE_5MIN.value
@@ -197,7 +228,14 @@ class CostTracker:
             self.cache_write_price = self.input_price * 1.25
             self.cache_hit_price = self.input_price * 0.1
         else:
-            # Default to Opus pricing
+            # Unknown model: fall back to Opus rates as a worst-case estimate,
+            # but say so loudly -- the 2026-08-22 run silently priced free
+            # ox-alpha traffic at $11.63 this way.
+            self.pricing_is_estimate = True
+            logger.warning(
+                "No pricing entry for model '%s' - cost report uses Opus 5 "
+                "rates as a worst-case ESTIMATE, not a measurement", model,
+            )
             self.input_price = ModelPricing.OPUS_4_6_INPUT.value
             self.output_price = ModelPricing.OPUS_4_6_OUTPUT.value
             self.cache_write_price = ModelPricing.OPUS_4_6_CACHE_WRITE_5MIN.value
