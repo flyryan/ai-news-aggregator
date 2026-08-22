@@ -333,6 +333,7 @@ class PrivacyTests(unittest.TestCase):
         call_id = recorder.start_call(1, {"caller": "orchestrator.summary"})
 
         client = llm_client.AsyncAnthropicClient.__new__(llm_client.AsyncAnthropicClient)
+        client.mode = "anthropic"
         client._client = mock.Mock()
         client._client.messages.stream = mock.Mock(return_value=FakeStream(events))
 
@@ -372,6 +373,7 @@ class StreamWiringTests(unittest.TestCase):
                 return FakeResponse()
 
         client = llm_client.AsyncAnthropicClient.__new__(llm_client.AsyncAnthropicClient)
+        client.mode = "anthropic"
         client._client = mock.Mock()
         client._client.messages.stream = mock.Mock(return_value=SlowStream())
         client.log_requests = log_requests

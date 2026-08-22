@@ -15,6 +15,7 @@ import logging
 import time
 import asyncio
 from contextlib import suppress
+from types import SimpleNamespace
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -97,6 +98,89 @@ def _stream_timeout(total_timeout: float) -> httpx.Timeout:
     """
     stall = _env_float("LLM_STREAM_STALL_SECONDS", 120.0, minimum=5.0)
     return httpx.Timeout(total_timeout, connect=10.0, read=stall, write=30.0, pool=total_timeout)
+
+
+def _build_openai_chat_body(
+    model: str,
+    system: Optional[str],
+    messages: List[Dict[str, Any]],
+    max_tokens: int,
+    effort: Optional[str],
+) -> Dict[str, Any]:
+    """Build an OpenRouter chat/completions body from this pipeline's call shape.
+
+    This is the documented control surface for OpenAI-style models like
+    stealth/ox-alpha, whose endpoint declares reasoning/reasoning_effort but
+    nothing Anthropic-shaped. Effort rides the `reasoning` object; system
+    prompts become a leading system-role message; usage is requested on the
+    final chunk so billing parity holds in streaming mode.
+    """
+    msgs = list(messages)
+    if system:
+        msgs = [{"role": "system", "content": system}, *msgs]
+    body: Dict[str, Any] = {
+        "model": model,
+        "max_tokens": int(max_tokens),
+        "messages": msgs,
+        "stream": True,
+        "stream_options": {"include_usage": True},
+    }
+    if effort:
+        body["reasoning"] = {"effort": effort}
+    return body
+
+
+def _openai_chat_new_state() -> Dict[str, Any]:
+    """Fresh accumulator for one chat-completions stream."""
+    return {"thinking": [], "text": [], "usage": {}, "stop_reason": None}
+
+
+_OPENAI_FINISH_TO_STOP = {
+    "stop": "end_turn",
+    "length": "max_tokens",
+    "content_filter": "refusal",
+}
+
+
+def _openai_chat_apply_chunk(chunk: Any, state: Dict[str, Any]) -> None:
+    """Fold one chat-completions SSE payload into the accumulator.
+
+    Provider error chunks raise RuntimeError so the router's retry classifier
+    treats them like any other failed attempt.
+    """
+    if not isinstance(chunk, dict):
+        return
+    if chunk.get("error"):
+        err = chunk["error"]
+        msg = err.get("message", str(err)) if isinstance(err, dict) else str(err)
+        code = err.get("code") if isinstance(err, dict) else None
+        raise RuntimeError(f"OpenRouter stream error (code={code}): {msg}")
+
+    for choice in chunk.get("choices") or []:
+        delta = choice.get("delta") or {}
+        reasoning = delta.get("reasoning")
+        if reasoning:
+            state["thinking"].append(reasoning)
+        content = delta.get("content")
+        if content:
+            state["text"].append(content)
+        finish = choice.get("finish_reason")
+        if finish:
+            state["stop_reason"] = _OPENAI_FINISH_TO_STOP.get(finish, finish)
+
+    usage = chunk.get("usage")
+    if isinstance(usage, dict):
+        mapped = state["usage"]
+        if usage.get("prompt_tokens"):
+            mapped["input_tokens"] = usage["prompt_tokens"]
+        if usage.get("completion_tokens"):
+            mapped["output_tokens"] = usage["completion_tokens"]
+        details = usage.get("prompt_tokens_details") or {}
+        cached = usage.get("cache_read_input_tokens") or details.get("cached_tokens")
+        if cached:
+            mapped["cache_read_input_tokens"] = cached
+        if usage.get("cache_creation_input_tokens"):
+            mapped["cache_creation_input_tokens"] = usage["cache_creation_input_tokens"]
 
 
 class ThinkingLevel(IntEnum):
@@ -321,10 +405,13 @@ class AnthropicClient:
         # Select auth based on mode
         if self.mode == "anthropic":
             auth = ApiKeyAuth(self.api_key)
-        elif self.mode == "openai-compatible":
+        elif self.mode in ("openai-compatible", "openai-chat"):
+            # openai-chat speaks OpenRouter's documented chat/completions +
+            # reasoning surface for OpenAI-style models (e.g. stealth/ox-alpha).
             auth = BearerAuth(self.api_key)
         else:
-            raise ValueError(f"Unknown mode: {self.mode}. Expected 'anthropic' or 'openai-compatible'.")
+            raise ValueError(f"Unknown mode: {self.mode}. Expected 'anthropic', "
+                             "'openai-compatible', or 'openai-chat'.")
 
         # Create httpx client with mode-appropriate auth.
         # On the streaming path `read` is the max gap BETWEEN chunks, not the
@@ -538,6 +625,46 @@ class AnthropicClient:
 
         # Stream: see _stream_message() on the async client for why a
         # non-streaming call dies on long generations.
+        if self.mode == "openai-chat":
+            # Sync callers (link follower) only run QUICK-effort short tasks,
+            # so a plain non-streaming chat completion suffices here.
+            effort = None
+            extra_body = kwargs.get("extra_body") or {}
+            if isinstance(extra_body, dict):
+                effort = (extra_body.get("output_config") or {}).get("effort")
+            body = _build_openai_chat_body(
+                model=kwargs.get("model", self.model),
+                system=kwargs.get("system"),
+                messages=kwargs.get("messages") or [],
+                max_tokens=kwargs.get("max_tokens", 4096),
+                effort=effort,
+            )
+            body["stream"] = False
+            body.pop("stream_options", None)
+            url = f"{self.base_url.rstrip('/')}/v1/chat/completions"
+            resp = self._http_client.post(url, json=body)
+            resp.raise_for_status()
+            payload = resp.json()
+            message = (payload.get("choices") or [{}])[0].get("message") or {}
+            usage = payload.get("usage") or {}
+            finish = (payload.get("choices") or [{}])[0].get("finish_reason")
+            return LLMResponse(
+                content=message.get("content") or "",
+                thinking=message.get("reasoning") or None,
+                usage={
+                    "input_tokens": usage.get("prompt_tokens", 0),
+                    "output_tokens": usage.get("completion_tokens", 0),
+                    "cache_creation_input_tokens": usage.get("cache_creation_input_tokens") or 0,
+                    "cache_read_input_tokens": usage.get("cache_read_input_tokens") or 0,
+                },
+                model=payload.get("model") or self.model,
+                stop_reason=_OPENAI_FINISH_TO_STOP.get(finish, "end_turn"),
+                thinking_type="adaptive" if use_adaptive else None,
+                adaptive_effort=effort,
+                analysis_profile=profile_name,
+                thinking_block_count=1 if message.get("reasoning") else 0,
+            )
+
         with self._client.messages.stream(**kwargs) as stream:
             response = stream.get_final_message()
 
@@ -735,10 +862,13 @@ class AsyncAnthropicClient:
         # Select auth based on mode
         if self.mode == "anthropic":
             auth = ApiKeyAuth(self.api_key)
-        elif self.mode == "openai-compatible":
+        elif self.mode in ("openai-compatible", "openai-chat"):
+            # openai-chat speaks OpenRouter's documented chat/completions +
+            # reasoning surface for OpenAI-style models (e.g. stealth/ox-alpha).
             auth = BearerAuth(self.api_key)
         else:
-            raise ValueError(f"Unknown mode: {self.mode}. Expected 'anthropic' or 'openai-compatible'.")
+            raise ValueError(f"Unknown mode: {self.mode}. Expected 'anthropic', "
+                             "'openai-compatible', or 'openai-chat'.")
 
         # Create async httpx client with mode-appropriate auth.
         # `read` is the inter-chunk gap on the streaming path, not the total
@@ -1035,6 +1165,8 @@ class AsyncAnthropicClient:
         `replay_call_id`, which is how the replay recorder attaches to this loop
         without adding another parameter to the call chain.
         """
+        if self.mode == "openai-chat":
+            return await self._stream_message_openai_chat(progress, **kwargs)
         async with self._client.messages.stream(**kwargs) as stream:
             if progress is None:
                 return await stream.get_final_message()
@@ -1101,6 +1233,108 @@ class AsyncAnthropicClient:
                 progress["events"] = progress.get("events", 0) + 1
 
             return await stream.get_final_message()
+
+    async def _stream_message_openai_chat(self, progress: Optional[Dict[str, Any]] = None, **kwargs):
+        """One request over OpenRouter's chat/completions SSE (mode: openai-chat).
+
+        The documented transport for OpenAI-style models like stealth/ox-alpha
+        (its endpoint lists reasoning/reasoning_effort and nothing
+        Anthropic-shaped). Emits the same progress/recorder signals as the
+        Anthropic path -- thinking/text char counts, last_chunk_at for the
+        stall clock, usage fields for partial-spend billing, and replay
+        deltas -- so heartbeat, cost parity, and the replay artifact work
+        unchanged. Returns a message-shaped object with .content blocks,
+        .usage attributes, .stop_reason, and .model.
+        """
+        effort = None
+        extra_body = kwargs.get("extra_body") or {}
+        if isinstance(extra_body, dict):
+            effort = (extra_body.get("output_config") or {}).get("effort")
+        body = _build_openai_chat_body(
+            model=kwargs.get("model", self.model),
+            system=kwargs.get("system"),
+            messages=kwargs.get("messages") or [],
+            max_tokens=kwargs.get("max_tokens", 4096),
+            effort=effort,
+        )
+        url = f"{self.base_url.rstrip('/')}/v1/chat/completions"
+
+        state = _openai_chat_new_state()
+        recorder = get_recorder()
+        replay_call_id = progress.get("replay_call_id") if progress else None
+
+        request = httpx.Request("POST", url)
+        async with self._http_client.stream("POST", url, json=body) as response:
+            if response.status_code != 200:
+                error_body = (await response.aread()).decode("utf-8", errors="replace")
+                synthetic = httpx.Response(
+                    response.status_code,
+                    request=request,
+                    text=error_body[:2000],
+                )
+                raise httpx.HTTPStatusError(
+                    f"OpenRouter chat/completions returned {response.status_code}: {error_body[:500]}",
+                    request=request,
+                    response=synthetic,
+                )
+
+            async for line in response.aiter_lines():
+                if not line.startswith("data:"):
+                    continue  # SSE comments / keep-alives / padding
+                payload = line[len("data:"):].strip()
+                if not payload or payload == "[DONE]":
+                    continue
+                try:
+                    chunk = json.loads(payload)
+                except json.JSONDecodeError:
+                    logger.debug(f"Unparseable SSE line ignored: {payload[:120]}")
+                    continue
+
+                pre_thinking = sum(len(t) for t in state["thinking"])
+                pre_text = sum(len(t) for t in state["text"])
+                _openai_chat_apply_chunk(chunk, state)
+                post_thinking = sum(len(t) for t in state["thinking"])
+                post_text = sum(len(t) for t in state["text"])
+
+                if progress is not None:
+                    if post_thinking > pre_thinking:
+                        fresh = "".join(state["thinking"][-1:])
+                        progress["thinking_chars"] = progress.get("thinking_chars", 0) + len(fresh)
+                        progress["phase"] = "thinking"
+                        if replay_call_id:
+                            recorder.record_delta(replay_call_id, DELTA_THINKING, fresh)
+                    if post_text > pre_text:
+                        fresh = "".join(state["text"][-1:])
+                        progress["text_chars"] = progress.get("text_chars", 0) + len(fresh)
+                        progress["phase"] = "text"
+                        if replay_call_id:
+                            recorder.record_delta(replay_call_id, DELTA_TEXT, fresh)
+                    # Same billing-parity fields the Anthropic path sets.
+                    usage = state["usage"]
+                    for field in ("input_tokens", "output_tokens",
+                                  "cache_creation_input_tokens", "cache_read_input_tokens"):
+                        if usage.get(field):
+                            progress[field] = usage[field]
+                    progress["last_chunk_at"] = time.time()
+                    progress["events"] = progress.get("events", 0) + 1
+
+        blocks = []
+        for piece in state["thinking"]:
+            blocks.append(SimpleNamespace(type="thinking", thinking=piece))
+        for piece in state["text"]:
+            blocks.append(SimpleNamespace(type="text", text=piece))
+        usage_ns = SimpleNamespace(
+            input_tokens=state["usage"].get("input_tokens", 0),
+            output_tokens=state["usage"].get("output_tokens", 0),
+            cache_creation_input_tokens=state["usage"].get("cache_creation_input_tokens", 0),
+            cache_read_input_tokens=state["usage"].get("cache_read_input_tokens", 0),
+        )
+        return SimpleNamespace(
+            content=blocks,
+            usage=usage_ns,
+            stop_reason=state["stop_reason"],
+            model=self.model,
+        )
 
     async def _create_message(self, request_context: Optional[Dict[str, Any]] = None, **kwargs):
         """Create a message under the optional global async LLM concurrency cap."""
@@ -1655,6 +1889,7 @@ class AsyncLLMRouter:
         retryable_types = (
             httpx.TimeoutException,
             httpx.TransportError,
+            AssertionError,  # bare assert from httpcore/h11 when a connection dies mid-connect
             anthropic.APITimeoutError,
             anthropic.APIConnectionError,
         )

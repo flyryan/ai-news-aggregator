@@ -50,6 +50,12 @@ llm:
   # single-provider fallback.
   model: "claude-5-opus-aws"
 
+  # mode: "openai-chat" speaks OpenRouter's DOCUMENTED surface for
+  # OpenAI-style models (stealth/ox-alpha lists reasoning/reasoning_effort
+  # and nothing Anthropic-shaped): chat/completions with the `reasoning`
+  # object carrying the effort level. base_url stays at the /api root; the
+  # client appends /v1/chat/completions.
+
   # Human-facing name shown on the site (header, footer, about page, RSS
   # subtitle) and stamped into each day's summary.json. Defaults to the raw
   # model id when omitted. Update this whenever you switch models -- past

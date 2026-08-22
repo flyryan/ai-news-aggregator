@@ -7,9 +7,10 @@ class LLMRouteConfig(BaseModel):
     """Optional per-route override for multi-provider LLM routing."""
 
     id: str = Field(..., min_length=1, description="Stable route/provider identifier")
-    mode: Optional[Literal["anthropic", "openai-compatible"]] = Field(
+    mode: Optional[Literal["anthropic", "openai-compatible", "openai-chat"]] = Field(
         default=None,
-        description="Override API mode for this route"
+        description="Override API mode for this route ('openai-chat' = OpenRouter "
+                    "chat/completions + reasoning for OpenAI-style models)"
     )
     api_key: Optional[str] = Field(default=None, description="Override API key for this route")
     base_url: Optional[str] = Field(default=None, description="Override API base URL for this route")
@@ -75,9 +76,10 @@ class LLMProviderConfig(BaseModel):
         model: Model identifier
         timeout: Request timeout in seconds (1-600)
     """
-    mode: Literal["anthropic", "openai-compatible"] = Field(
+    mode: Literal["anthropic", "openai-compatible", "openai-chat"] = Field(
         default="anthropic",
-        description="API mode: 'anthropic' for direct API, 'openai-compatible' for proxies"
+        description="API mode: 'anthropic' for direct API, 'openai-compatible' for proxies, "
+                    "'openai-chat' for OpenRouter chat/completions + reasoning"
     )
     api_key: str = Field(..., description="API key for authentication")
     base_url: str = Field(
@@ -177,7 +179,7 @@ class ResolvedLLMRouteConfig(BaseModel):
     """Concrete LLM provider route after inheritance from root llm config."""
 
     id: str
-    mode: Literal["anthropic", "openai-compatible"]
+    mode: Literal["anthropic", "openai-compatible", "openai-chat"]
     api_key: str
     base_url: str
     model: str

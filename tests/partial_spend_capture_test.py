@@ -104,6 +104,7 @@ class PartialSpendCaptureTest(unittest.TestCase):
         client.model = model
         client.log_requests = False
         client._request_semaphore = None
+        client.mode = "anthropic"
         return client
 
     def test_mid_stream_failure_is_billed_for_what_it_streamed(self):
