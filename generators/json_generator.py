@@ -139,7 +139,9 @@ class JSONGenerator:
     """Generates JSON data files for the SPA frontend."""
 
     def __init__(self, output_dir: str, llm_model: Optional[str] = None,
-                 llm_model_display: Optional[str] = None):
+                 llm_model_display: Optional[str] = None,
+                 image_model: Optional[str] = None,
+                 image_model_display: Optional[str] = None):
         """
         Initialize JSON generator.
 
@@ -148,11 +150,15 @@ class JSONGenerator:
             llm_model: Raw model id that produced this run's analysis; stamped
                 into summary.json so each day self-describes its engine
             llm_model_display: Human-facing model name for the same purpose
+            image_model: Raw hero-image model id (same stamping contract)
+            image_model_display: Human-facing name of the image model
         """
         self.output_dir = output_dir
         self.data_dir = os.path.join(output_dir, 'data')
         self.llm_model = llm_model
         self.llm_model_display = llm_model_display
+        self.image_model = image_model
+        self.image_model_display = image_model_display
 
         os.makedirs(self.data_dir, exist_ok=True)
 
@@ -224,11 +230,16 @@ class JSONGenerator:
 
         # Per-day model attribution. Only stamped when the caller knows the
         # engine (live pipeline runs); offline regens of old days stay clean
-        # rather than claiming a model they cannot verify.
+        # rather than claiming a model they cannot verify. Content and hero
+        # image are attributed separately -- they are different models.
         if self.llm_model:
             summary['llm_model'] = self.llm_model
         if self.llm_model_display:
             summary['llm_model_display'] = self.llm_model_display
+        if self.image_model:
+            summary['image_model'] = self.image_model
+        if self.image_model_display:
+            summary['image_model_display'] = self.image_model_display
 
         output_path = os.path.join(date_dir, 'summary.json')
         self._write_json(output_path, summary)

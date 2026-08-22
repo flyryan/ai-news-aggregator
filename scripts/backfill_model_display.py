@@ -39,6 +39,14 @@ ERAS = [
 ]
 
 
+def display_name_for_image(model_id: str) -> str:
+    """Human-facing name for the hero-image model ids seen in this pipeline."""
+    mid = model_id.lower()
+    if "gemini" in mid:
+        return "Gemini 3 Pro Image"
+    return model_id
+
+
 def display_name_for(model_id: str) -> str:
     """Human-facing name for any model id seen in this pipeline's history."""
     mid = model_id.lower()
@@ -91,7 +99,7 @@ def main() -> int:
                         help="report what would change without writing")
     args = parser.parse_args()
 
-    stamped = era_stamped = skipped = already = 0
+    stamped = era_stamped = skipped = already = image_stamped = 0
 
     for date_dir in sorted(DATA_DIR.iterdir()):
         if not date_dir.is_dir() or len(date_dir.name) != 10:
@@ -100,39 +108,57 @@ def main() -> int:
         if not summary_path.exists():
             continue
         summary = json.loads(summary_path.read_text(encoding="utf-8"))
-        if summary.get("llm_model"):
-            already += 1
-            continue
-
+        changed = False
         date = date_dir.name
-        model_id = model_from_replay(date_dir)
-        source = "replay"
-        if model_id is None:
-            era = model_from_eras(date)
-            if era is None:
-                skipped += 1
-                print(f"  ? {date}: no evidence, leaving unstamped")
-                continue
-            model_id, display = era
-            source = "era"
-        else:
-            display = display_name_for(model_id)
 
-        if source == "replay":
-            stamped += 1
+        # Image attribution: hero_image_usage.model is recorded on every day
+        # that generated a hero with usage reporting.
+        if not summary.get("image_model"):
+            hero_model = ((summary.get("hero_image_usage") or {}).get("model"))
+            if hero_model:
+                print(f"  {date}: image {hero_model} "
+                      f"({display_name_for_image(hero_model)})")
+                summary["image_model"] = hero_model
+                summary["image_model_display"] = display_name_for_image(hero_model)
+                changed = True
+                image_stamped += 1
+
+        # LLM attribution: replay evidence first, then era table.
+        if not summary.get("llm_model"):
+            model_id = model_from_replay(date_dir)
+            source = "replay"
+            if model_id is None:
+                era = model_from_eras(date)
+                if era is None:
+                    skipped += 1
+                    print(f"  ? {date}: no LLM evidence, leaving unstamped")
+                else:
+                    model_id, display = era
+                    source = "era"
+            else:
+                display = display_name_for(model_id)
+
+            if model_id is not None:
+                if source == "replay":
+                    stamped += 1
+                else:
+                    era_stamped += 1
+                print(f"  {date}: {model_id} ({display}) [{source}]")
+                summary["llm_model"] = model_id
+                summary["llm_model_display"] = display
+                changed = True
         else:
-            era_stamped += 1
-        print(f"  {date}: {model_id} ({display}) [{source}]")
-        if not args.dry_run:
-            summary["llm_model"] = model_id
-            summary["llm_model_display"] = display
+            already += 1
+
+        if changed and not args.dry_run:
             summary_path.write_text(
                 json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
             )
 
     print(f"\nDone: {stamped} from replay evidence, {era_stamped} from eras, "
-          f"{already} already stamped, {skipped} skipped")
+          f"{already} already stamped, {skipped} skipped, "
+          f"{image_stamped} image-attributed")
     return 0
 
 

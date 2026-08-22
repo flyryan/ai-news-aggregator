@@ -375,6 +375,8 @@
 				heroImageUrl={summary.hero_image_url ? dataUrl(summary.hero_image_url) : null}
 				collectionStatus={summary.collection_status?.overall || 'success'}
 				modelDisplayName={summary.llm_model_display || summary.llm_model || null}
+				imageModelDisplayName={summary.image_model_display || summary.image_model
+					|| summary.hero_image_usage?.model || null}
 				{replayUrl}
 			/>
 		</section>

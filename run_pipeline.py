@@ -134,10 +134,13 @@ async def run_pipeline(config_dir: str, data_dir: str, web_dir: str, target_date
         logger.info("=" * 60)
 
         llm_cfg = provider_config.llm if provider_config else None
+        img_cfg = provider_config.image if provider_config else None
         json_generator = JSONGenerator(
             web_dir,
             llm_model=llm_cfg.model if llm_cfg else None,
             llm_model_display=(llm_cfg.display_name or llm_cfg.model) if llm_cfg else None,
+            image_model=img_cfg.model if img_cfg else None,
+            image_model_display=(img_cfg.display_name or img_cfg.model) if img_cfg else None,
         )
         json_generator.generate_from_orchestrator_result(result.to_dict())
 

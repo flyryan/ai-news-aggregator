@@ -83,11 +83,17 @@ export interface DaySummary {
 	categories: Record<Category, CategorySummary>;
 	hero_image_url?: string;
 	hero_image_prompt?: string;
+	/** Usage/cost block reported by the image provider; `model` names it. */
+	hero_image_usage?: { model?: string } & Record<string, unknown>;
 	collection_status?: CollectionStatus;
 	/** Raw model id that produced this day's analysis (absent on old reports). */
 	llm_model?: string;
 	/** Human-facing name of that model (e.g. "Claude Opus 5", "Ox Alpha"). */
 	llm_model_display?: string;
+	/** Raw hero-image model id for this day (same attribution contract). */
+	image_model?: string;
+	/** Human-facing name of the hero-image model. */
+	image_model_display?: string;
 }
 
 export interface CategoryNotice {

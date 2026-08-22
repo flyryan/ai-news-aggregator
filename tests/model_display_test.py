@@ -98,6 +98,27 @@ class SummaryStampingTest(unittest.TestCase):
             self.assertEqual(summary["llm_model"], "stealth/ox-alpha")
             self.assertEqual(summary["llm_model_display"], "Ox Alpha")
 
+    def test_stamps_image_model_fields_when_configured(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            gen = JSONGenerator(tmp, llm_model="stealth/ox-alpha",
+                                llm_model_display="Ox Alpha",
+                                image_model="google/gemini-3-pro-image",
+                                image_model_display="Gemini 3 Pro Image")
+            date_dir = os.path.join(gen.data_dir, "2026-08-22")
+            os.makedirs(date_dir)
+            gen._generate_summary_json(date_dir, _minimal_result())
+
+            summary = _load_json(os.path.join(date_dir, "summary.json"))
+            self.assertEqual(summary["image_model"], "google/gemini-3-pro-image")
+            self.assertEqual(summary["image_model_display"], "Gemini 3 Pro Image")
+
+    def test_image_schema_accepts_display_name(self):
+        from agents.config.schema import ImageProviderConfig
+
+        cfg = ImageProviderConfig(mode="openrouter", api_key="k",
+                                  display_name="Gemini 3 Pro Image")
+        self.assertEqual(cfg.display_name, "Gemini 3 Pro Image")
+
     def test_omits_model_fields_when_not_configured(self):
         with tempfile.TemporaryDirectory() as tmp:
             gen = JSONGenerator(tmp)
@@ -108,6 +129,8 @@ class SummaryStampingTest(unittest.TestCase):
             summary = _load_json(os.path.join(date_dir, "summary.json"))
             self.assertNotIn("llm_model", summary)
             self.assertNotIn("llm_model_display", summary)
+            self.assertNotIn("image_model", summary)
+            self.assertNotIn("image_model_display", summary)
 
 
 class IndexCurrentModelTest(unittest.TestCase):
