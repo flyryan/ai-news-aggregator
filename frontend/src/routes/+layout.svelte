@@ -4,7 +4,8 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { initializeTheme } from '$lib/stores/themeStore';
-	import { initializeDateStore } from '$lib/stores/dateStore';
+	import { initializeDateStore, currentModel } from '$lib/stores/dateStore';
+	import { get } from 'svelte/store';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Navigation from '$lib/components/layout/Navigation.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
@@ -42,7 +43,25 @@
 	onMount(async () => {
 		initializeTheme();
 		await initializeDateStore();
+		updateModelMeta();
 	});
+
+	// Keep the static social/description meta tags (app.html) in step with the
+	// current model. Prerendered pages bake a neutral fallback; once index.json
+	// loads we rewrite the three tags client-side so they always name whatever
+	// model powers today's reports.
+	function updateModelMeta() {
+		const model = get(currentModel);
+		if (!model?.display_name) return;
+		const text = `Your daily digest of AI developments powered by the AATF and ${model.display_name}`;
+		for (const sel of [
+			'meta[name="description"]',
+			'meta[property="og:description"]',
+			'meta[name="twitter:description"]'
+		]) {
+			document.querySelector(sel)?.setAttribute('content', text);
+		}
+	}
 
 	// Redirect legacy path-based URLs to query param format
 	// e.g., /2026-01-05 -> /?date=2026-01-05

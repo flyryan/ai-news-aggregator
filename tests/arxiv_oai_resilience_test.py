@@ -45,6 +45,7 @@ class _ReadTimeout(_RequestException):
     pass
 
 
+_installed_requests_stub = False
 if "requests" not in sys.modules:
     _exceptions = types.ModuleType("requests.exceptions")
     _exceptions.RequestException = _RequestException
@@ -57,6 +58,7 @@ if "requests" not in sys.modules:
 
     sys.modules["requests"] = _requests
     sys.modules["requests.exceptions"] = _exceptions
+    _installed_requests_stub = True
 
 requests = sys.modules["requests"]
 
@@ -68,6 +70,17 @@ sys.modules[_spec.name] = _mod
 _spec.loader.exec_module(_mod)
 
 ArxivOAIHarvester = _mod.ArxivOAIHarvester
+
+# Drop our stubs from sys.modules now that the harvester has loaded: it bound
+# the module object at import time, and every test below reaches it through
+# the `requests` alias above. Leaving them installed poisoned a full local
+# discovery run -- modules loading after us alphabetically (e.g.
+# staleness_checker_ssrf_test) bound the stub and died in setUp with
+# "module 'requests' has no attribute 'Session'" (14 errors, found 2026-08-21).
+# CI is unaffected either way: each module runs in its own process.
+if _installed_requests_stub:
+    del sys.modules["requests"]
+    del sys.modules["requests.exceptions"]
 
 OAI_NS = "http://www.openarchives.org/OAI/2.0/"
 RAW_NS = "http://arxiv.org/OAI/arXivRaw/"

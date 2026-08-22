@@ -374,6 +374,7 @@
 				totalItems={summary.total_items_analyzed}
 				heroImageUrl={summary.hero_image_url ? dataUrl(summary.hero_image_url) : null}
 				collectionStatus={summary.collection_status?.overall || 'success'}
+				modelDisplayName={summary.llm_model_display || summary.llm_model || null}
 				{replayUrl}
 			/>
 		</section>

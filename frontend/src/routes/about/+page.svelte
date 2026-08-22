@@ -1,3 +1,11 @@
+<script lang="ts">
+	import { currentModel } from '$lib/stores/dateStore';
+
+	// The model currently powering the pipeline. Falls back to a neutral
+	// phrase when index.json predates per-day model attribution.
+	$: modelName = $currentModel?.display_name ?? '';
+</script>
+
 <svelte:head>
 	<title>About | AI News Daily</title>
 </svelte:head>
@@ -23,7 +31,7 @@
 				news outlets, and social media.
 			</p>
 			<p>
-				The aggregator uses a multi-agent pipeline powered by Claude Opus 5 with adaptive thinking
+				The aggregator uses a multi-agent pipeline{#if modelName}&nbsp;powered by {modelName}{/if} with adaptive thinking
 				to gather, analyze, and synthesize content from diverse sources into coherent daily reports.
 			</p>
 			<p>
@@ -91,13 +99,13 @@
 				<div class="prose dark:prose-invert max-w-none text-trend-gray-600 dark:text-trend-gray-400">
 					<p>
 						<strong>All summaries and analysis on this site are AI-generated</strong> using
-						Claude Opus 5 from Anthropic. The content is produced entirely by automated processes
+						the pipeline's current model{#if modelName}: {modelName}{/if}. The content is produced entirely by automated processes
 						without human editorial review.
 					</p>
 					<p>
-						The pipeline uses Claude Opus 5 <strong>adaptive thinking</strong> for complex
-						analysis tasks like cross-category topic detection and executive summaries. On Opus 5,
-						this is guided by effort settings rather than fixed manual token budgets.
+						The pipeline uses <strong>adaptive thinking</strong> for complex
+						analysis tasks like cross-category topic detection and executive summaries.
+						It is guided by effort settings rather than fixed manual token budgets.
 					</p>
 					<p>
 						<strong>While we strive for accuracy, AI can and does make errors.</strong> These may include:

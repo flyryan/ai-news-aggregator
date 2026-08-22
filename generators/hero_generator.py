@@ -139,6 +139,14 @@ class HeroGenerator:
                     f"- Ensure google-genai SDK is installed: pip install google-genai\n"
                     f"- Check that your API key has access to image generation models"
                 ) from e
+            elif config.mode == "openrouter":
+                raise ValueError(
+                    f"{e}\n\n"
+                    f"Troubleshooting (openrouter mode):\n"
+                    f"- Verify your OPENROUTER_API_KEY is valid and has credit\n"
+                    f"- Check that '{config.model}' supports image output on OpenRouter\n"
+                    f"- Endpoint defaults to https://openrouter.ai/api/v1 if unset"
+                ) from e
             else:
                 raise ValueError(
                     f"{e}\n\n"

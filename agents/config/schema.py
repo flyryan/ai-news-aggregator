@@ -85,6 +85,11 @@ class LLMProviderConfig(BaseModel):
         description="API base URL (no /v1 suffix)"
     )
     model: str = Field(default="claude-5-opus-aws", description="Model identifier")
+    display_name: Optional[str] = Field(
+        default=None,
+        description="Human-facing name of the current model (site header, about "
+                    "page, feeds). Defaults to the raw model id when unset."
+    )
     max_output_tokens: int = Field(
         default=128000,
         ge=1024,
@@ -184,19 +189,25 @@ class ResolvedLLMRouteConfig(BaseModel):
 class ImageProviderConfig(BaseModel):
     """Configuration for image generation provider (optional).
 
-    Supports two modes:
+    Supports three modes:
     - native: Uses google-genai SDK directly (recommended for Google API keys)
     - openai-compatible: Uses REST chat/completions format (for LiteLLM proxies)
+    - openrouter: Uses OpenRouter's /api/v1/images endpoint (aspect_ratio +
+      resolution + input_references supported natively)
 
     Attributes:
-        mode: API mode - 'native' for google-genai SDK, 'openai-compatible' for REST
+        mode: API mode - 'native' for google-genai SDK, 'openai-compatible'
+              or 'openrouter' for REST
         api_key: API key for image generation service
-        endpoint: API endpoint URL (required for openai-compatible mode only)
+        endpoint: API endpoint URL (required for openai-compatible mode only;
+                  optional for openrouter, defaults to https://openrouter.ai/api/v1)
         model: Model name for image generation
+        quality: Optional rendering quality (auto/low/medium/high; openrouter mode)
     """
-    mode: Literal["native", "openai-compatible"] = Field(
+    mode: Literal["native", "openai-compatible", "openrouter"] = Field(
         default="native",
-        description="API mode: 'native' for google-genai SDK, 'openai-compatible' for REST"
+        description="API mode: 'native' for google-genai SDK, "
+                    "'openai-compatible'/'openrouter' for REST"
     )
     api_key: str = Field(..., description="API key for image generation")
     endpoint: Optional[str] = Field(
@@ -206,6 +217,10 @@ class ImageProviderConfig(BaseModel):
     model: str = Field(
         default="gemini-3-pro-image-preview",
         description="Model name for image generation"
+    )
+    quality: Optional[str] = Field(
+        default=None,
+        description="Optional rendering quality (auto/low/medium/high); used by openrouter mode"
     )
 
     @field_validator('api_key')

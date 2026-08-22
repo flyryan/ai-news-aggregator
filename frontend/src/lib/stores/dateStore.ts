@@ -6,10 +6,19 @@
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
-import { getAvailableDates, getLatestDate } from '$lib/services/dataLoader';
+import { getAvailableDates, getLatestDate, loadIndex } from '$lib/services/dataLoader';
+import type { CurrentModel } from '$lib/types';
 
 // Current selected date (YYYY-MM-DD format)
 export const currentDate = writable<string>('');
+
+/**
+ * The LLM currently powering the pipeline (from index.json's current_model).
+ * Drives the header/footer "Powered by X", the about page, the social meta
+ * description, and the 4-day NEW badge after a model switch. Null on data
+ * published before per-day model attribution existed.
+ */
+export const currentModel = writable<CurrentModel | null>(null);
 
 // Available dates with data
 export const availableDates = writable<string[]>([]);
@@ -44,6 +53,13 @@ export async function initializeDateStore(): Promise<void> {
 
 	isLoading.set(true);
 	try {
+		// loadIndex is cached, so this piggybacks on the fetch
+		// syncAvailableDates is about to make rather than adding a request.
+		try {
+			currentModel.set((await loadIndex()).current_model ?? null);
+		} catch {
+			currentModel.set(null);
+		}
 		const dates = await syncAvailableDates();
 		const latest = dates[0] || (await getLatestDate());
 		currentDate.update((current) => current || latest || '');

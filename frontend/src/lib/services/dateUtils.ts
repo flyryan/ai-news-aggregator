@@ -134,3 +134,25 @@ export function formatDayOfWeek(date: Date | string): string {
 	if (!d) return '';
 	return format(d, 'EEEE');
 }
+
+/**
+ * How many calendar days a "NEW" badge stays visible after a model switch.
+ * The switch day itself counts as day one, so the badge shows on the switch
+ * day plus the three following days.
+ */
+const MODEL_NEW_BADGE_DAYS = 4;
+
+/**
+ * True while the current model's `since` date is inside the NEW-badge window.
+ * Uses local midnights so the window matches whole calendar days for the
+ * viewer; an unparseable or future date never shows the badge.
+ */
+export function isNewModelBadge(since: string | null | undefined): boolean {
+	if (!since) return false;
+	const sinceMs = Date.parse(`${since}T00:00:00`);
+	if (Number.isNaN(sinceMs)) return false;
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const diffDays = Math.round((today.getTime() - sinceMs) / 86400000);
+	return diffDays >= 0 && diffDays < MODEL_NEW_BADGE_DAYS;
+}

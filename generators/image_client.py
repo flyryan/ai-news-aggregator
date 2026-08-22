@@ -4,6 +4,8 @@ Unified Image Client Abstraction
 Provides mode-based image generation:
 - native: Uses google-genai SDK directly for Google Gemini API
 - openai-compatible: Uses REST chat/completions format for LiteLLM proxies
+- openrouter: Uses OpenRouter's dedicated /api/v1/images endpoint (supports
+  aspect_ratio, resolution tiers, and input_references for image-to-image)
 
 Follows the same factory pattern as agents/llm_client.py for consistency.
 """
@@ -51,6 +53,94 @@ DEFAULT_RETRY_MAX_DELAY = 60.0  # seconds; cap per-retry backoff so it stays bou
 def _is_retryable_status(status_code: int) -> bool:
     """True for transient HTTP statuses worth retrying (429 + any 5xx)."""
     return status_code == 429 or status_code >= 500
+
+
+def _backoff_delay(attempt: int, base_delay: float, max_delay: float) -> float:
+    """Exponential backoff with jitter for retry attempt N (1-indexed), capped."""
+    base = base_delay * (2 ** (attempt - 1))
+    base = min(base, max_delay)
+    return base + random.uniform(0, base_delay / 2)
+
+
+async def _post_json_with_retries(
+    url: str,
+    headers: Dict[str, str],
+    body: Dict[str, Any],
+    timeout: float,
+    max_attempts: int = DEFAULT_MAX_ATTEMPTS,
+    retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
+    retry_max_delay: float = DEFAULT_RETRY_MAX_DELAY,
+    troubleshooting: str = "",
+) -> Dict[str, Any]:
+    """POST a JSON body and return the parsed response, retrying transient failures.
+
+    Shared by every REST image client so they inherit one retry policy: retries
+    on connection drops, timeouts, 429s, and 5xx with capped exponential backoff
+    (see the window rationale above); non-transient 4xx fails fast on the first
+    attempt. ``troubleshooting`` is appended to the raised RuntimeError so each
+    caller can give mode-specific guidance.
+    """
+    data = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                response = await client.post(
+                    url,
+                    headers=headers,
+                    json=body
+                )
+                response.raise_for_status()
+                data = response.json()
+            break  # success
+
+        except httpx.TimeoutException as e:
+            if attempt < max_attempts:
+                delay = _backoff_delay(attempt, retry_base_delay, retry_max_delay)
+                logger.warning(
+                    f"Image generation timed out after {timeout}s "
+                    f"(attempt {attempt}/{max_attempts}); retrying in {delay:.1f}s"
+                )
+                await asyncio.sleep(delay)
+                continue
+            error_msg = f"Image generation timed out after {timeout}s ({max_attempts} attempts)"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg) from e
+        except httpx.HTTPStatusError as e:
+            status = e.response.status_code
+            if _is_retryable_status(status) and attempt < max_attempts:
+                delay = _backoff_delay(attempt, retry_base_delay, retry_max_delay)
+                logger.warning(
+                    f"Image generation API returned status {status} "
+                    f"(attempt {attempt}/{max_attempts}); retrying in {delay:.1f}s"
+                )
+                await asyncio.sleep(delay)
+                continue
+            error_msg = (
+                f"Image generation API error (status={status}): "
+                f"{e.response.text[:500]}"
+            )
+            if troubleshooting:
+                error_msg += f"\n\n{troubleshooting}"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg) from e
+        except httpx.RequestError as e:
+            # Connection drops / DNS / read errors (e.g. "Server disconnected
+            # without sending a response") -- treat as transient.
+            if attempt < max_attempts:
+                delay = _backoff_delay(attempt, retry_base_delay, retry_max_delay)
+                logger.warning(
+                    f"Image generation request failed: {e} "
+                    f"(attempt {attempt}/{max_attempts}); retrying in {delay:.1f}s"
+                )
+                await asyncio.sleep(delay)
+                continue
+            error_msg = f"Image generation request failed: {e}"
+            if troubleshooting:
+                error_msg += f"\n\n{troubleshooting}"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg) from e
+
+    return data
 
 
 @dataclass
@@ -260,9 +350,17 @@ class OpenAICompatibleClient(BaseImageClient):
 
     def _backoff_delay(self, attempt: int) -> float:
         """Exponential backoff with jitter for retry attempt N (1-indexed), capped."""
-        base = self.retry_base_delay * (2 ** (attempt - 1))
-        base = min(base, self.retry_max_delay)
-        return base + random.uniform(0, self.retry_base_delay / 2)
+        return _backoff_delay(attempt, self.retry_base_delay, self.retry_max_delay)
+
+    @staticmethod
+    def _troubleshooting(endpoint: str, model: str) -> str:
+        return (
+            f"Troubleshooting (openai-compatible mode):\n"
+            f"- Verify your proxy endpoint supports image generation\n"
+            f"- Check that the model name '{model}' is correct for your proxy\n"
+            f"- Verify the endpoint URL is correct: {endpoint}\n"
+            f"- Ensure the API key has proper permissions"
+        )
 
     async def generate(
         self,
@@ -294,76 +392,21 @@ class OpenAICompatibleClient(BaseImageClient):
             }
         }
 
-        # Retry transient failures (connection drops, timeouts, 429, 5xx) with
-        # exponential backoff. Non-transient errors (4xx auth/validation) fail
-        # fast on the first attempt.
-        data = None
-        for attempt in range(1, self.max_attempts + 1):
-            try:
-                async with httpx.AsyncClient(timeout=self.timeout) as client:
-                    response = await client.post(
-                        self.endpoint,
-                        headers={
-                            "Authorization": f"Bearer {self.api_key}",
-                            "Content-Type": "application/json"
-                        },
-                        json=request_body
-                    )
-                    response.raise_for_status()
-                    data = response.json()
-                break  # success
-
-            except httpx.TimeoutException as e:
-                if attempt < self.max_attempts:
-                    delay = self._backoff_delay(attempt)
-                    logger.warning(
-                        f"Image generation timed out after {self.timeout}s "
-                        f"(attempt {attempt}/{self.max_attempts}); retrying in {delay:.1f}s"
-                    )
-                    await asyncio.sleep(delay)
-                    continue
-                error_msg = f"Image generation timed out after {self.timeout}s ({self.max_attempts} attempts)"
-                logger.error(error_msg)
-                raise RuntimeError(error_msg) from e
-            except httpx.HTTPStatusError as e:
-                status = e.response.status_code
-                if _is_retryable_status(status) and attempt < self.max_attempts:
-                    delay = self._backoff_delay(attempt)
-                    logger.warning(
-                        f"Image generation API returned status {status} "
-                        f"(attempt {attempt}/{self.max_attempts}); retrying in {delay:.1f}s"
-                    )
-                    await asyncio.sleep(delay)
-                    continue
-                error_msg = (
-                    f"Image generation API error (status={status}): "
-                    f"{e.response.text[:500]}\n\n"
-                    f"Troubleshooting (openai-compatible mode):\n"
-                    f"- Verify your proxy endpoint supports image generation\n"
-                    f"- Check that the model name '{self.model}' is correct for your proxy\n"
-                    f"- Ensure the API key has proper permissions"
-                )
-                logger.error(error_msg)
-                raise RuntimeError(error_msg) from e
-            except httpx.RequestError as e:
-                # Connection drops / DNS / read errors (e.g. "Server disconnected
-                # without sending a response") -- treat as transient.
-                if attempt < self.max_attempts:
-                    delay = self._backoff_delay(attempt)
-                    logger.warning(
-                        f"Image generation request failed: {e} "
-                        f"(attempt {attempt}/{self.max_attempts}); retrying in {delay:.1f}s"
-                    )
-                    await asyncio.sleep(delay)
-                    continue
-                error_msg = (
-                    f"Image generation request failed: {e}\n\n"
-                    f"Troubleshooting (openai-compatible mode):\n"
-                    f"- Verify the endpoint URL is correct: {self.endpoint}\n"
-                    f"- Check network connectivity to your proxy"
-                )
-                logger.error(error_msg)
-                raise RuntimeError(error_msg) from e
+        # Transient failures (connection drops, timeouts, 429, 5xx) retry with
+        # capped exponential backoff via the shared helper; 4xx fails fast.
+        data = await _post_json_with_retries(
+            self.endpoint,
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            },
+            body=request_body,
+            timeout=self.timeout,
+            max_attempts=self.max_attempts,
+            retry_base_delay=self.retry_base_delay,
+            retry_max_delay=self.retry_max_delay,
+            troubleshooting=self._troubleshooting(self.endpoint, self.model),
+        )
 
         # Extract image from response
         message = data.get("choices", [{}])[0].get("message", {})
@@ -398,6 +441,128 @@ class OpenAICompatibleClient(BaseImageClient):
         )
 
 
+class OpenRouterImageClient(BaseImageClient):
+    """
+    Image client using OpenRouter's dedicated /api/v1/images endpoint.
+
+    Chosen over OpenRouter's chat/completions image path because /images
+    natively supports what the daily hero needs:
+    - aspect_ratio ("21:9" hero banners; chat/completions would ignore it)
+    - resolution tiers ("2K")
+    - input_references for image-to-image (the skunk mascot reference)
+
+    Response shape per OpenRouter docs: data[0].b64_json + media_type, plus a
+    usage block with prompt/completion token counts.
+    """
+
+    DEFAULT_ENDPOINT = "https://openrouter.ai/api/v1"
+    DEFAULT_MODEL = "google/gemini-3-pro-image"
+
+    def __init__(
+        self,
+        api_key: str,
+        endpoint: Optional[str] = None,
+        model: Optional[str] = None,
+        quality: Optional[str] = None,
+        timeout: float = 180.0,
+        max_attempts: int = DEFAULT_MAX_ATTEMPTS,
+        retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
+        retry_max_delay: float = DEFAULT_RETRY_MAX_DELAY
+    ):
+        """
+        Initialize OpenRouter image client.
+
+        Args:
+            api_key: OpenRouter API key for Bearer authentication
+            endpoint: API base URL ending at the version segment
+                (default https://openrouter.ai/api/v1); /images is appended
+            model: OpenRouter model slug (default google/gemini-3-pro-image)
+            quality: Optional rendering quality (auto/low/medium/high)
+            timeout: Request timeout in seconds
+            max_attempts/retry_*: Shared transient-failure retry policy
+        """
+        self.api_key = api_key
+        self.model = model or self.DEFAULT_MODEL
+        self.quality = quality or None
+        self.timeout = timeout
+        self.max_attempts = max(1, max_attempts)
+        self.retry_base_delay = max(0.0, retry_base_delay)
+        self.retry_max_delay = max(0.0, retry_max_delay)
+        # Normalize once so generate() can just append the resource path.
+        self.endpoint = (endpoint or self.DEFAULT_ENDPOINT).rstrip('/')
+
+        logger.info(
+            f"OpenRouterImageClient initialized with endpoint={self.endpoint}/images, "
+            f"model={self.model}, quality={self.quality or 'default'}"
+        )
+
+    async def generate(
+        self,
+        prompt: str,
+        reference_image: Optional[bytes] = None,
+        aspect_ratio: str = "21:9",
+        image_size: str = "2K"
+    ) -> ImageResponse:
+        """Generate image via POST {endpoint}/images."""
+        body: Dict[str, Any] = {
+            "model": self.model,
+            "prompt": prompt,
+            "aspect_ratio": aspect_ratio,
+            "resolution": image_size,
+        }
+        if self.quality:
+            body["quality"] = self.quality
+        if reference_image:
+            body["input_references"] = [{
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/png;base64,{base64.b64encode(reference_image).decode()}"
+                }
+            }]
+
+        data = await _post_json_with_retries(
+            f"{self.endpoint}/images",
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            },
+            body=body,
+            timeout=self.timeout,
+            max_attempts=self.max_attempts,
+            retry_base_delay=self.retry_base_delay,
+            retry_max_delay=self.retry_max_delay,
+            troubleshooting=(
+                f"Troubleshooting (openrouter mode):\n"
+                f"- Check that '{self.model}' supports image output on OpenRouter\n"
+                f"- Verify the API key has credit available\n"
+                f"- Verify the endpoint URL is correct: {self.endpoint}/images"
+            ),
+        )
+
+        images = data.get("data") if isinstance(data, dict) else None
+        if not images:
+            error_content = data.get("error", "Unknown error - no images returned") if isinstance(data, dict) else str(data)[:500]
+            raise RuntimeError(f"No image returned from OpenRouter API: {error_content}")
+
+        first = images[0]
+        b64 = first.get("b64_json", "")
+        if not b64:
+            raise RuntimeError("No b64_json in OpenRouter image response")
+
+        usage = data.get("usage")
+        if usage:
+            logger.info(f"Image usage reported: {usage}")
+        else:
+            logger.info("Image response carried no usage block; cost will show as n/a")
+
+        return ImageResponse(
+            image_data=base64.b64decode(b64),
+            mime_type=first.get("media_type") or "image/png",
+            usage=usage if isinstance(usage, dict) else None,
+            model=data.get("model") or self.model,
+        )
+
+
 class ImageClient:
     """
     Factory class for creating image clients based on configuration.
@@ -418,6 +583,7 @@ class ImageClient:
         Returns:
             NativeGeminiClient for native mode
             OpenAICompatibleClient for openai-compatible mode
+            OpenRouterImageClient for openrouter mode
 
         Raises:
             ValueError: If mode is unknown
@@ -433,8 +599,15 @@ class ImageClient:
                 endpoint=config.endpoint,  # Already validated by schema
                 model=config.model
             )
+        elif config.mode == "openrouter":
+            return OpenRouterImageClient(
+                api_key=config.api_key,
+                endpoint=config.endpoint,  # Optional; defaults to openrouter.ai/api/v1
+                model=config.model,
+                quality=getattr(config, 'quality', None)
+            )
         else:
             raise ValueError(
                 f"Unknown image mode: {config.mode}. "
-                f"Expected 'native' or 'openai-compatible'."
+                f"Expected 'native', 'openai-compatible', or 'openrouter'."
             )

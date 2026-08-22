@@ -138,15 +138,21 @@ def get_news_notice(report_date: str) -> Optional[Dict[str, str]]:
 class JSONGenerator:
     """Generates JSON data files for the SPA frontend."""
 
-    def __init__(self, output_dir: str):
+    def __init__(self, output_dir: str, llm_model: Optional[str] = None,
+                 llm_model_display: Optional[str] = None):
         """
         Initialize JSON generator.
 
         Args:
             output_dir: Base output directory (typically web/)
+            llm_model: Raw model id that produced this run's analysis; stamped
+                into summary.json so each day self-describes its engine
+            llm_model_display: Human-facing model name for the same purpose
         """
         self.output_dir = output_dir
         self.data_dir = os.path.join(output_dir, 'data')
+        self.llm_model = llm_model
+        self.llm_model_display = llm_model_display
 
         os.makedirs(self.data_dir, exist_ok=True)
 
@@ -215,6 +221,14 @@ class JSONGenerator:
             'generated_at': result.get('generated_at', datetime.now().isoformat()),
             'categories': categories
         }
+
+        # Per-day model attribution. Only stamped when the caller knows the
+        # engine (live pipeline runs); offline regens of old days stay clean
+        # rather than claiming a model they cannot verify.
+        if self.llm_model:
+            summary['llm_model'] = self.llm_model
+        if self.llm_model_display:
+            summary['llm_model_display'] = self.llm_model_display
 
         output_path = os.path.join(date_dir, 'summary.json')
         self._write_json(output_path, summary)
@@ -305,6 +319,25 @@ class JSONGenerator:
         index['latestDate'] = index['dates'][0]['date'] if index['dates'] else None
         index['generatedAt'] = datetime.now().isoformat()
         index['totalDates'] = len(index['dates'])
+
+        # Current-model attribution for the SPA (header/footer/about/meta).
+        # `since` is the report date on which the model first ran: a same-model
+        # rerun keeps the original date, a switch rolls it forward. The report
+        # date is used instead of wall-clock so offline regens of old days can
+        # never move the switch point.
+        if self.llm_model:
+            existing = index.get('current_model')
+            if existing and existing.get('id') == self.llm_model:
+                current = dict(existing)
+                if self.llm_model_display:
+                    current['display_name'] = self.llm_model_display
+            else:
+                current = {
+                    'id': self.llm_model,
+                    'display_name': self.llm_model_display or self.llm_model,
+                    'since': date,
+                }
+            index['current_model'] = current
 
         self._write_json(index_path, index)
         logger.info(f"Updated index.json with {len(index['dates'])} dates")

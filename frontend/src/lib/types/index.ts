@@ -84,6 +84,10 @@ export interface DaySummary {
 	hero_image_url?: string;
 	hero_image_prompt?: string;
 	collection_status?: CollectionStatus;
+	/** Raw model id that produced this day's analysis (absent on old reports). */
+	llm_model?: string;
+	/** Human-facing name of that model (e.g. "Claude Opus 5", "Ox Alpha"). */
+	llm_model_display?: string;
 }
 
 export interface CategoryNotice {
@@ -109,12 +113,23 @@ export interface DateEntry {
 	categories: Record<Category, { count: number; file_size: number }>;
 }
 
+/** The LLM currently powering the pipeline, as published in index.json. */
+export interface CurrentModel {
+	/** Raw provider model id (e.g. stealth/ox-alpha). */
+	id: string;
+	/** Human-facing name shown on the site (e.g. "Ox Alpha"). */
+	display_name: string;
+	/** Report date (YYYY-MM-DD) this model first ran; drives the NEW badge. */
+	since: string;
+}
+
 export interface DataIndex {
 	version: string;
 	dates: DateEntry[];
 	latestDate: string | null;
 	generatedAt: string;
 	totalDates: number;
+	current_model?: CurrentModel;
 }
 
 export interface SearchDocument {
