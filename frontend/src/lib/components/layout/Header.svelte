@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { currentDate } from '$lib/stores/dateStore';
-	import { formatDate } from '$lib/services/dateUtils';
+	import { currentDate, currentModel } from '$lib/stores/dateStore';
+	import { formatDate, isNewModelBadge } from '$lib/services/dateUtils';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import SearchBar from '$lib/components/search/SearchBar.svelte';
 
 	$: dateDisplay = $currentDate ? formatDate($currentDate) : '';
+	$: modelName = $currentModel?.display_name ?? '';
+	$: showNewBadge = isNewModelBadge($currentModel?.since);
 
 	let showSearch = false;
 </script>
@@ -33,8 +35,14 @@
 							AATF AI News Aggregator
 						</h1>
 						<p class="text-xs sm:text-sm text-white/80 leading-snug">
-							Powered by Claude Opus 5
-							<span class="new-badge">NEW</span>
+							{#if modelName}
+								Powered by {modelName}
+							{:else}
+								Daily AI/ML news from the AATF
+							{/if}
+							{#if showNewBadge}
+								<span class="new-badge">NEW</span>
+							{/if}
 						</p>
 					</div>
 				</a>

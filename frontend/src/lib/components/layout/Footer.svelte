@@ -1,5 +1,9 @@
 <script lang="ts">
+	import { currentModel } from '$lib/stores/dateStore';
+
 	const currentYear = new Date().getFullYear();
+
+	$: modelName = $currentModel?.display_name ?? '';
 </script>
 
 <footer class="bg-trend-dark text-white mt-auto">
@@ -14,7 +18,11 @@
 				<div>
 					<p class="font-medium">AATF AI News Aggregator</p>
 					<p class="text-sm text-trend-gray-400">
-						Powered by Claude Opus 5
+						{#if modelName}
+							Powered by {modelName}
+						{:else}
+							Daily AI/ML news from the AATF
+						{/if}
 					</p>
 				</div>
 			</div>

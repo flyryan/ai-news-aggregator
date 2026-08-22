@@ -94,6 +94,37 @@ def make_urls_absolute(html: str, base_url: str) -> str:
     return html
 
 
+def resolve_llm_display_name(config_dir: str = "./config") -> Optional[str]:
+    """Best-effort human-facing LLM name from providers.yaml, or None.
+
+    Deliberately lenient: feed regeneration must never hard-fail on provider
+    config (it runs standalone and offline). Preference order is
+    llm.display_name -> llm.model; any value that still contains an unresolved
+    ``${VAR}`` placeholder is skipped so missing env vars degrade to the
+    neutral fallback instead of leaking template syntax into feeds.
+    """
+    path = os.path.join(config_dir, "providers.yaml")
+    try:
+        import yaml
+
+        with open(path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f) or {}
+        llm = config.get("llm") or {}
+        for value in (llm.get("display_name"), llm.get("model")):
+            if value and "${" not in str(value):
+                return str(value)
+    except Exception:
+        pass
+    return None
+
+
+def build_feed_subtitle(display_name: Optional[str]) -> Optional[str]:
+    """Feed subtitle for a display name; None means 'no model known'."""
+    if not display_name:
+        return None
+    return f"Daily AI/ML news powered by {display_name}"
+
+
 class FeedGenerator:
     """Generates Atom feeds from JSON data files."""
 
@@ -121,7 +152,8 @@ class FeedGenerator:
                 return url
         return None
 
-    def __init__(self, output_dir: str, rolling_window_days: int = 7, base_url: str = None):
+    def __init__(self, output_dir: str, rolling_window_days: int = 7, base_url: str = None,
+                 subtitle: str = None):
         """
         Initialize feed generator.
 
@@ -129,15 +161,23 @@ class FeedGenerator:
             output_dir: Base output directory (typically web/)
             rolling_window_days: Number of days to include in feeds
             base_url: Base URL for feed links (defaults to https://news.aatf.ai)
+            subtitle: Feed subtitle override; when omitted the current model is
+                resolved leniently from config/providers.yaml, falling back to
+                the legacy hard-coded subtitle if nothing resolvable is found
         """
         self.output_dir = output_dir
         self.data_dir = os.path.join(output_dir, 'data')
         self.feeds_dir = os.path.join(self.data_dir, 'feeds')
         self.rolling_window_days = rolling_window_days
         self.base_url = (base_url or "https://news.aatf.ai").rstrip('/')
+        self.feed_subtitle = (
+            subtitle
+            or build_feed_subtitle(resolve_llm_display_name())
+            or self.FEED_SUBTITLE
+        )
 
         os.makedirs(self.feeds_dir, exist_ok=True)
-        logger.info(f"FeedGenerator initialized with {rolling_window_days}-day window, base_url={self.base_url}")
+        logger.info(f"FeedGenerator initialized with {rolling_window_days}-day window, base_url={self.base_url}, subtitle=\"{self.feed_subtitle}\"")
 
     def generate_feeds(self) -> None:
         """Generate all feed files."""
@@ -278,7 +318,7 @@ class FeedGenerator:
             items=all_entries,
             feed_id="urn:ainews:main",
             title=self.FEED_TITLE,
-            subtitle=self.FEED_SUBTITLE,
+            subtitle=self.feed_subtitle,
             feed_url=f"{self.base_url}/data/feeds/main.xml",
             site_url=self.base_url
         )

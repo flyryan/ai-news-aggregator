@@ -85,6 +85,11 @@ class LLMProviderConfig(BaseModel):
         description="API base URL (no /v1 suffix)"
     )
     model: str = Field(default="claude-5-opus-aws", description="Model identifier")
+    display_name: Optional[str] = Field(
+        default=None,
+        description="Human-facing name of the current model (site header, about "
+                    "page, feeds). Defaults to the raw model id when unset."
+    )
     max_output_tokens: int = Field(
         default=128000,
         ge=1024,
