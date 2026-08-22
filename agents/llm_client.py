@@ -135,6 +135,28 @@ def _openai_chat_new_state() -> Dict[str, Any]:
     return {"thinking": [], "text": [], "usage": {}, "stop_reason": None}
 
 
+def _openai_chat_blocks(state: Dict[str, Any]) -> List[SimpleNamespace]:
+    """Consolidate accumulated deltas into Anthropic-shaped content blocks.
+
+    Anthropic responses carry one thinking block and one text block, and
+    consumers rely on that shape -- notably call_with_thinking assembles
+    LLMResponse with "\n".join(text_blocks) / "\n\n".join(thinking_blocks),
+    a no-op under that shape. Emitting one block per streamed delta instead
+    injected a separator after every ~5-char fragment of an ox-alpha answer
+    (2026-08-22 run: a filter answer arrived as 145 "text blocks" and parsed
+    to zero IDs; analyzer maps dropped dozens of entries with shredded ids).
+    One block per stream, concatenated without separators, restores the
+    invariant for every consumer downstream.
+    """
+    blocks: List[SimpleNamespace] = []
+    if any(state["thinking"]):
+        blocks.append(SimpleNamespace(
+            type="thinking", thinking="".join(state["thinking"])))
+    if any(state["text"]):
+        blocks.append(SimpleNamespace(type="text", text="".join(state["text"])))
+    return blocks
+
+
 _OPENAI_FINISH_TO_STOP = {
     "stop": "end_turn",
     "length": "max_tokens",
@@ -1318,11 +1340,9 @@ class AsyncAnthropicClient:
                     progress["last_chunk_at"] = time.time()
                     progress["events"] = progress.get("events", 0) + 1
 
-        blocks = []
-        for piece in state["thinking"]:
-            blocks.append(SimpleNamespace(type="thinking", thinking=piece))
-        for piece in state["text"]:
-            blocks.append(SimpleNamespace(type="text", text=piece))
+        # One consolidated block per stream, never one per delta -- see
+        # _openai_chat_blocks for why block-per-delta corrupted responses.
+        blocks = _openai_chat_blocks(state)
         usage_ns = SimpleNamespace(
             input_tokens=state["usage"].get("input_tokens", 0),
             output_tokens=state["usage"].get("output_tokens", 0),
