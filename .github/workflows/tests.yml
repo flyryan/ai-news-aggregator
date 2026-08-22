@@ -113,3 +113,25 @@ jobs:
         run: python3 -m pip install --no-input "PyJWT[crypto]>=2.9" "fastapi>=0.115"
       - name: Access-JWT verification rejects forged, expired, and mis-scoped tokens
         run: python3 -m unittest tests.admin_auth_test -v
+
+  pipeline-contracts:
+    name: Lookback window + partial-spend billing guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # LOOKBACK_HOURS must bound the collection window (it once threaded through
+    # every gatherer and was never read), and calls that fail mid-stream must
+    # still be billed for the tokens they already emitted (2026-07-28: five
+    # batches died after ~140k chars and none of it reached the cost report).
+    # Both tests are stdlib unittest but import agents.base / agents.llm_client,
+    # which need httpx, anthropic, and pydantic at module load.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install minimal deps for agents.base / llm_client imports
+        run: python3 -m pip install --no-input "httpx>=0.27.0" "anthropic>=0.75,<1.0" "pydantic>=2.0"
+      - name: LOOKBACK_HOURS actually bounds the collection window
+        run: python3 -m unittest tests.lookback_hours_test -v
+      - name: Mid-stream failures are billed for what they streamed
+        run: python3 -m unittest tests.partial_spend_capture_test -v
