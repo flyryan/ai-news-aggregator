@@ -117,6 +117,61 @@ class ResumedRunTimelineTest(unittest.TestCase):
         self.assertEqual(phases[0]["start_ms"], 0)
         self.assertEqual(phases[1]["start_ms"], 60_270)
 
+    def test_pre_run_source_steps_rebase_into_gathering(self):
+        # Same resumed run; collection_status carries real per-unit spans from
+        # the original process (subreddits, twitter chunks). They must land
+        # INSIDE the restored gathering window, staggered in their original
+        # relative order, flagged measured -- not dropped.
+        records = [
+            {"name": "Phase 1: Gathering", "status": "success",
+             "start_time": 400.0, "end_time": 1060.0, "duration": 660.0},
+            {"name": "Phase 2: Analysis", "status": "success",
+             "start_time": 1000.27, "end_time": 1300.27, "duration": 300.0},
+        ]
+        result = _result(records)
+        result["collection_status"] = {
+            "reddit": {
+                "status": "success", "count": 36,
+                "started_at": 400.5, "ended_at": 500.0,
+                "steps": [
+                    {"name": "r/artificial", "started_at": 400.6,
+                     "ended_at": 420.0, "items": 24, "status": "success"},
+                    {"name": "r/MachineLearning", "started_at": 400.7,
+                     "ended_at": 460.0, "items": 12, "status": "success"},
+                ],
+            },
+            "social_twitter": {
+                "status": "success", "count": 33,
+                "started_at": 401.0, "ended_at": 430.0,
+                "steps": [
+                    {"name": "chunk 1/2", "started_at": 401.0,
+                     "ended_at": 415.0, "items": 33, "status": "success"},
+                ],
+            },
+        }
+        index, _, _ = self.gen.build(
+            date="2026-08-22",
+            cost_report=_cost_report(1000.0, 300),
+            orchestrator_result=result,
+        )
+
+        phase1 = next(p for p in index["phases"] if p["id"] == "phase-1")
+        reddit = next(s for s in index["sources"] if s["name"] == "Reddit")
+        twitter = next(s for s in index["sources"] if s["name"] == "Twitter")
+
+        self.assertTrue(reddit["timing_measured"])
+        self.assertGreaterEqual(reddit["start_ms"], phase1["start_ms"])
+        self.assertLessEqual(reddit["end_ms"], phase1["end_ms"])
+        self.assertEqual(len(reddit["steps"]), 2)
+        # Relative stagger preserved: r/artificial completes before ML.
+        self.assertLess(reddit["steps"][0]["end_ms"], reddit["steps"][1]["end_ms"])
+        for step in reddit["steps"]:
+            self.assertGreaterEqual(step["start_ms"], phase1["start_ms"])
+            self.assertLessEqual(step["end_ms"], phase1["end_ms"])
+        # Twitter ran concurrently with reddit but finished earlier.
+        self.assertTrue(twitter["steps"])
+        self.assertLess(twitter["end_ms"], reddit["end_ms"])
+
     def test_legacy_skipped_stays_zero_width(self):
         records = [
             {"name": "Phase 1: Gathering", "status": "skipped",

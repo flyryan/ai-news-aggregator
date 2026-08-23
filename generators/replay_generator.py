@@ -612,6 +612,7 @@ class ReplayGenerator:
         collection_status: Dict[str, Any],
         phases: Sequence[Dict[str, Any]],
         t0: Optional[float] = None,
+        rebase: Optional[Tuple[float, int]] = None,
     ) -> List[Dict[str, Any]]:
         """Turn per-source collection results into stage props.
 
@@ -647,10 +648,21 @@ class ReplayGenerator:
             start_ms = int(round((float(started) - t0) * 1000))
             end_ms = int(round((float(ended) - t0) * 1000))
             # A resumed run replays gathering from a checkpoint written under an
-            # *earlier* t0, so those epochs predate this run's origin and would
-            # land at large negative offsets. Clamping them to 0 would invent a
-            # measurement; treat them as absent instead.
+            # *earlier* t0: those epochs predate this run's origin and would land
+            # at large negative offsets. They are still real measurements -- rebase
+            # them into the restored gathering window preserving relative stagger
+            # instead of discarding them (2026-08-22: dropping them stripped the
+            # per-subreddit / per-chunk detail from every resumed day).
             if start_ms < 0 or end_ms < start_ms:
+                if rebase is not None:
+                    anchor, base_ms = rebase
+                    shifted = int(round((float(started) - anchor) * 1000))
+                    span = max(0, int(round((float(ended) - float(started)) * 1000)))
+                    return (
+                        base_ms + max(0, shifted),
+                        base_ms + max(0, shifted) + span,
+                        True,
+                    )
                 return fallback_start, fallback_end, False
             return start_ms, end_ms, True
 
@@ -674,7 +686,7 @@ class ReplayGenerator:
                 "end_ms": end_ms,
                 "timing_measured": measured,
             }
-            steps = ReplayGenerator._build_steps(value.get("steps"), t0)
+            steps = ReplayGenerator._build_steps(value.get("steps"), t0, rebase)
             if steps:
                 row["steps"] = steps
                 dropped = value.get("steps_dropped")
@@ -689,14 +701,17 @@ class ReplayGenerator:
 
     @staticmethod
     def _build_steps(
-        raw_steps: Any, t0: Optional[float]
+        raw_steps: Any,
+        t0: Optional[float],
+        rebase: Optional[Tuple[float, int]] = None,
     ) -> List[Dict[str, Any]]:
         """Convert one source's per-unit spans into ms offsets.
 
-        A step whose epochs do not resolve against this run's ``t0`` is **dropped,
-        not clamped** -- the same rule the parent row follows. A resumed run replays
-        gathering from a checkpoint written under an earlier ``t0``, so its steps
-        predate this run's origin; clamping them to 0 would invent a measurement.
+        A step whose epochs do not resolve against this run's ``t0`` is normally
+        **dropped, not clamped** -- the same rule the parent row follows. With a
+        ``rebase`` anchor (resumed runs), pre-t0 steps are real measurements from
+        the original process: they are shifted into the restored gathering window
+        preserving relative stagger rather than discarded.
 
         Unlike the parent row there is no phase-span fallback: a step exists to say
         "this unit came back at this moment", and a step without that says nothing
@@ -715,7 +730,12 @@ class ReplayGenerator:
                 continue
             start_ms = int(round((float(started) - t0) * 1000))
             end_ms = int(round((float(ended) - t0) * 1000))
-            if start_ms < 0 or end_ms < start_ms:
+            if (start_ms < 0 or end_ms < start_ms) and rebase is not None:
+                anchor, base_ms = rebase
+                shifted = max(0, int(round((float(started) - anchor) * 1000)))
+                span = max(0, int(round((float(ended) - float(started)) * 1000)))
+                start_ms, end_ms = base_ms + shifted, base_ms + shifted + span
+            elif start_ms < 0 or end_ms < start_ms:
                 continue
             name = str(entry.get("name") or "").strip()
             if not name:
@@ -1113,6 +1133,31 @@ class ReplayGenerator:
         phases = self._build_phases(records, t0_epoch, provisional_end, pre_flags)
         calls = self._build_calls(cost_report, recorder, tracker, run_origin, phases)
 
+        # Pre-run gatherer measurements (resumed run): rebase them into the
+        # restored gathering window. Anchor = earliest epoch the gatherers
+        # recorded, base = where that window now sits on the merged timeline.
+        rebase: Optional[Tuple[float, int]] = None
+        if restored_s > 0:
+            status_now = orchestrator_result.get("collection_status") or {}
+            epochs = []
+            for value in status_now.values():
+                if not isinstance(value, dict):
+                    continue
+                for key in ("started_at", "ended_at"):
+                    if isinstance(value.get(key), (int, float)):
+                        epochs.append(float(value[key]))
+                for entry in value.get("steps") or []:
+                    if isinstance(entry, dict):
+                        for key in ("started_at", "ended_at"):
+                            if isinstance(entry.get(key), (int, float)):
+                                epochs.append(float(entry[key]))
+            if epochs and cost_start is not None and min(epochs) < cost_start - tolerance_s:
+                gathering_phase = next(
+                    (ph for ph in phases if ph["ordinal"] == "1"), None
+                )
+                if gathering_phase is not None:
+                    rebase = (min(epochs), gathering_phase["start_ms"])
+
         # The Illustrator has no cost row of its own; fold it in so the hero
         # phase has a visible actor and its result is reachable from the replay.
         hero = self._hero_call(orchestrator_result, phases)
@@ -1130,7 +1175,10 @@ class ReplayGenerator:
             phases[-1]["end_ms"] = duration_ms
 
         sources = self._build_sources(
-            orchestrator_result.get("collection_status") or {}, phases, run_origin
+            orchestrator_result.get("collection_status") or {},
+            phases,
+            run_origin,
+            rebase=rebase,
         )
         agents = self._build_agents(calls, sources)
         concurrency, peak = self._concurrency(calls, duration_ms, CONCURRENCY_INTERVAL_MS)
