@@ -57,6 +57,39 @@ class PhaseTracker:
             details=reason
         ))
 
+    def export_timings(self) -> Dict[str, Dict[str, Any]]:
+        """Snapshot completed-phase windows for checkpoint persistence.
+
+        A resumed run re-registers checkpoint-loaded phases through
+        restore_phase(), so the replay (and the end-of-run summary) show the
+        original measured durations instead of zero-width skips.
+        """
+        return {
+            p.name: {
+                'start_time': p.start_time,
+                'end_time': p.end_time,
+                'status': p.status,
+            }
+            for p in self.phases
+            if p.start_time and p.end_time
+        }
+
+    def restore_phase(self, name: str, timing: Dict[str, Any],
+                      details: Optional[str] = None):
+        """Re-register a checkpoint-loaded phase with its original window.
+
+        The phase is not 'skipped' -- it ran successfully in an earlier run;
+        only this process loaded its result from disk. Preserving the real
+        start/end keeps replay pacing honest.
+        """
+        self.phases.append(PhaseRecord(
+            name=name,
+            status=timing.get('status') or 'success',
+            start_time=float(timing.get('start_time') or 0.0),
+            end_time=float(timing.get('end_time') or 0.0),
+            details=details,
+        ))
+
     def get_summary(self) -> str:
         """Format a terminal-friendly phase summary table."""
         lines = []

@@ -253,37 +253,53 @@ class ReplayGenerator:
         phase_records: Sequence[Dict[str, Any]],
         t0: float,
         run_end_ms: int,
+        pre_flags: Optional[Sequence[bool]] = None,
     ) -> List[Dict[str, Any]]:
         """Shape phases, reconstructing boundaries when absolute times are gone.
 
-        ``PhaseTracker.to_dict()`` drops absolute start/end, keeping only
-        duration, so a run reloaded from ``orchestrator_result_*.json`` has to
-        have its timeline rebuilt by cumulative summation. That assumes phases
-        ran back-to-back with no gaps, which is close but not exact -- phase
-        containment for calls near a boundary can be off by the elapsed
-        non-phase work between them.
+        ``PhaseTracker.to_dict()`` keeps absolute start/end alongside duration,
+        but a resumed run restores checkpoint-loaded phases with windows from
+        BEFORE this process's t0. Records flagged pre-run are placed
+        sequentially at their ordinal position using their real durations, and
+        every in-run record is shifted by the accumulated pre-run span so the
+        single timeline stays monotonic and call containment stays exact.
         """
+        if pre_flags is None:
+            pre_flags = [False] * len(phase_records)
         phases: List[Dict[str, Any]] = []
         cursor_ms = 0
-        for record in phase_records:
+        # Inserted pre-run duration so far -- NOT cursor_ms, which also grows
+        # with live phases; live records must shift by restored spans only.
+        pre_span_ms = 0
+        for record, is_pre in zip(phase_records, pre_flags):
             ordinal, label = _split_phase_name(record.get("name", ""))
             duration = float(record.get("duration") or 0.0)
 
-            if record.get("start_time"):
-                start_ms = int(round((float(record["start_time"]) - t0) * 1000))
+            if is_pre:
+                # Ran in an earlier process: sequence it after whatever came
+                # before on the merged timeline.
+                start_ms = cursor_ms
+                end_ms = start_ms + int(round(duration * 1000))
+                cursor_ms = end_ms
+                pre_span_ms += int(round(duration * 1000))
+            elif record.get("start_time"):
+                start_ms = (
+                    int(round((float(record["start_time"]) - t0) * 1000))
+                    + pre_span_ms
+                )
                 end_source = record.get("end_time")
                 end_ms = (
-                    int(round((float(end_source) - t0) * 1000))
+                    int(round((float(end_source) - t0) * 1000)) + pre_span_ms
                     if end_source
                     else start_ms + int(round(duration * 1000))
                 )
+                start_ms = max(0, start_ms)
+                end_ms = max(start_ms, end_ms)
+                cursor_ms = max(cursor_ms, end_ms)
             else:
                 start_ms = cursor_ms
                 end_ms = start_ms + int(round(duration * 1000))
-
-            start_ms = max(0, start_ms)
-            end_ms = max(start_ms, end_ms)
-            cursor_ms = end_ms
+                cursor_ms = max(cursor_ms, end_ms)
 
             phases.append(
                 {
@@ -1060,14 +1076,42 @@ class ReplayGenerator:
         recorder = recorder_snapshot if (recorder_snapshot or {}).get("calls") else None
         records = list(phase_records or orchestrator_result.get("phase_status") or [])
 
-        t0_epoch, measured = self._resolve_t0(recorder, cost_report, records)
+        # A resumed run restores checkpoint-loaded phases whose absolute
+        # windows predate this process. Split them out: they get sequenced
+        # onto the front of the timeline, and everything measured in THIS
+        # process shifts by their total span (see _build_phases).
+        cost_start = _epoch(_parse_iso(cost_report.get("start_time")))
+        tolerance_s = 1.0
+        pre_flags = [
+            bool(
+                record.get("start_time")
+                and cost_start is not None
+                and float(record["start_time"]) < cost_start - tolerance_s
+            )
+            for record in records
+        ]
+        restored_s = sum(
+            float(record.get("duration") or 0.0)
+            for record, is_pre in zip(records, pre_flags)
+            if is_pre
+        )
+        live_records = [
+            record for record, is_pre in zip(records, pre_flags) if not is_pre
+        ]
+
+        t0_epoch, measured = self._resolve_t0(recorder, cost_report, live_records)
         tracker = CostTracker(model=cost_report.get("model") or "claude-5-opus-aws")
+
+        # Origin for in-run coordinates, shifted past the restored span.
+        run_origin = t0_epoch - restored_s
 
         # Phases first (calls need them for containment), with a provisional end
         # that the calls may later extend.
-        provisional_end = int(round(float(cost_report.get("duration_seconds") or 0.0) * 1000))
-        phases = self._build_phases(records, t0_epoch, provisional_end)
-        calls = self._build_calls(cost_report, recorder, tracker, t0_epoch, phases)
+        provisional_end = int(round(
+            (float(cost_report.get("duration_seconds") or 0.0) + restored_s) * 1000
+        ))
+        phases = self._build_phases(records, t0_epoch, provisional_end, pre_flags)
+        calls = self._build_calls(cost_report, recorder, tracker, run_origin, phases)
 
         # The Illustrator has no cost row of its own; fold it in so the hero
         # phase has a visible actor and its result is reachable from the replay.
@@ -1086,7 +1130,7 @@ class ReplayGenerator:
             phases[-1]["end_ms"] = duration_ms
 
         sources = self._build_sources(
-            orchestrator_result.get("collection_status") or {}, phases, t0_epoch
+            orchestrator_result.get("collection_status") or {}, phases, run_origin
         )
         agents = self._build_agents(calls, sources)
         concurrency, peak = self._concurrency(calls, duration_ms, CONCURRENCY_INTERVAL_MS)

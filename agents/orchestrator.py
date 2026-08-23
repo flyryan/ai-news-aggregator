@@ -281,6 +281,9 @@ class MainOrchestrator:
 
         # Initialize phase tracker
         phases = PhaseTracker()
+        # Reachable from _save_checkpoint so every checkpoint automatically
+        # carries the completed-phase windows for faithful resume replays.
+        self._phases = phases
 
         # Phase 0: Ecosystem Context (always runs fresh - fast and stateless)
         phases.start_phase("Phase 0: Ecosystem Context")
@@ -304,7 +307,7 @@ class MainOrchestrator:
             gathered_items = self._restore_gathered_items(checkpoint)
             collection_status = checkpoint.get('collection_status', {})
             total_items = sum(len(items) for items in gathered_items.values())
-            phases.skip_phase("Phase 1: Gathering", f"loaded from checkpoint ({total_items} items)")
+            self._restore_or_skip_phase(phases, "Phase 1: Gathering", checkpoint, f"loaded from checkpoint ({total_items} items)")
         else:
             phases.start_phase("Phase 1: Gathering")
             try:
@@ -341,8 +344,8 @@ class MainOrchestrator:
             except Exception as e:
                 logger.warning(f"Resume freshness repair failed (non-fatal): {e}")
             total_analyzed = sum(len(r.all_items) for r in category_reports.values())
-            phases.skip_phase("Phase 2: Analysis", f"loaded from checkpoint ({total_analyzed} items)")
-            phases.skip_phase("Phase 2.5: Continuity Detection", "loaded from checkpoint")
+            self._restore_or_skip_phase(phases, "Phase 2: Analysis", checkpoint, f"loaded from checkpoint ({total_analyzed} items)")
+            self._restore_or_skip_phase(phases, "Phase 2.5: Continuity Detection", checkpoint, "loaded from checkpoint")
         else:
             phases.start_phase("Phase 2: Analysis")
             try:
@@ -398,7 +401,7 @@ class MainOrchestrator:
                 raise RuntimeError("Cannot resume: no checkpoint for Phase 3 (topics)")
             top_topics = self._restore_top_topics(checkpoint)
             topic_thinking = checkpoint.get('thinking', '')
-            phases.skip_phase("Phase 3: Topic Detection", f"loaded from checkpoint ({len(top_topics)} topics)")
+            self._restore_or_skip_phase(phases, "Phase 3: Topic Detection", checkpoint, f"loaded from checkpoint ({len(top_topics)} topics)")
         else:
             phases.start_phase("Phase 3: Topic Detection")
             try:
@@ -435,8 +438,8 @@ class MainOrchestrator:
             enriched_topics = checkpoint.get('enriched_topics', [])
             if enriched_topics:
                 top_topics = self._restore_top_topics({'top_topics': enriched_topics})
-            phases.skip_phase("Phase 4: Executive Summary", "loaded from checkpoint")
-            phases.skip_phase("Phase 4.5: Link Enrichment", "loaded from checkpoint")
+            self._restore_or_skip_phase(phases, "Phase 4: Executive Summary", checkpoint, "loaded from checkpoint")
+            self._restore_or_skip_phase(phases, "Phase 4.5: Link Enrichment", checkpoint, "loaded from checkpoint")
         else:
             phases.start_phase("Phase 4: Executive Summary")
             try:
@@ -500,7 +503,7 @@ class MainOrchestrator:
             else:
                 phases.skip_phase("Phase 4.6: Ecosystem Enrichment", "no news data or manager unavailable")
         else:
-            phases.skip_phase("Phase 4.6: Ecosystem Enrichment", "loaded from checkpoint")
+            self._restore_or_skip_phase(phases, "Phase 4.6: Ecosystem Enrichment", checkpoint, "loaded from checkpoint")
 
         # Phase 4.7: Hero Image Generation
         hero_image_url = None
@@ -554,7 +557,7 @@ class MainOrchestrator:
                 elif not hero_topics:
                     phases.skip_phase("Phase 4.7: Hero Image", "no topics")
         else:
-            phases.skip_phase("Phase 4.7: Hero Image", "loaded from checkpoint")
+            self._restore_or_skip_phase(phases, "Phase 4.7: Hero Image", checkpoint, "loaded from checkpoint")
 
         # Phase 5: Assemble Result
         phases.start_phase("Phase 5: Assembly")
@@ -660,8 +663,20 @@ class MainOrchestrator:
         os.makedirs(path, exist_ok=True)
         return path
 
-    def _save_checkpoint(self, phase: str, data: dict):
-        """Save checkpoint data for a phase."""
+    def _save_checkpoint(self, phase: str, data: dict, phase_timings=None):
+        """Save checkpoint data for a phase.
+
+        ``phase_timings`` (PhaseTracker.export_timings()) rides along so a
+        resumed run can replay the loaded phases with their original measured
+        windows -- see _restore_or_skip_phase. When omitted, the run()'s live
+        tracker (self._phases) is used.
+        """
+        if phase_timings is None:
+            tracker = getattr(self, '_phases', None)
+            if tracker is not None:
+                phase_timings = tracker.export_timings()
+        if phase_timings:
+            data['_phase_timings'] = phase_timings
         filepath = os.path.join(self._checkpoint_dir(), f"{phase}.json")
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
@@ -683,6 +698,19 @@ class MainOrchestrator:
         except Exception as e:
             logger.warning(f"  Failed to load checkpoint for {phase}: {e}")
             return None
+
+    def _restore_or_skip_phase(self, phases, name: str,
+                               checkpoint: dict, details: str):
+        """Register a checkpoint-loaded phase, keeping its real timing.
+
+        Legacy checkpoints predate _phase_timings; they fall back to the
+        old zero-width skip record.
+        """
+        timing = (checkpoint.get('_phase_timings') or {}).get(name)
+        if timing and timing.get('start_time'):
+            phases.restore_phase(name, timing, details=details)
+        else:
+            phases.skip_phase(name, details)
 
     def _restore_gathered_items(self, checkpoint: dict) -> Dict[str, List[CollectedItem]]:
         """Restore gathered items from checkpoint data."""
