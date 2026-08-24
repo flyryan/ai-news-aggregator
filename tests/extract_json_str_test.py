@@ -121,9 +121,14 @@ class RawControlCharacterTest(unittest.TestCase):
     """
 
     def setUp(self):
-        from agents.base import extract_json_str
-
-        self.extract = extract_json_str
+        # Use the AST-compiled copy, not `from agents.base import ...`. This
+        # module is deliberately stdlib-only (see the header) so it cannot be
+        # defeated by an import-time failure -- and the real import is not
+        # stdlib-only: `agents/__init__.py` eagerly imports the whole pipeline,
+        # so it pulls httpx. In the dependency-light guard job that raised
+        # ModuleNotFoundError, failing this step and skipping the nine guards
+        # queued behind it, unnoticed from 2026-08-15.
+        self.extract = _load_extract_json_str()
 
     def test_raw_newline_inside_string_is_escaped(self):
         raw = '{"summary": "first' + chr(10) + 'second line", "n": 1}'
@@ -177,9 +182,14 @@ class EmbeddedQuoteTest(unittest.TestCase):
     """
 
     def setUp(self):
-        from agents.base import extract_json_str
-
-        self.extract = extract_json_str
+        # Use the AST-compiled copy, not `from agents.base import ...`. This
+        # module is deliberately stdlib-only (see the header) so it cannot be
+        # defeated by an import-time failure -- and the real import is not
+        # stdlib-only: `agents/__init__.py` eagerly imports the whole pipeline,
+        # so it pulls httpx. In the dependency-light guard job that raised
+        # ModuleNotFoundError, failing this step and skipping the nine guards
+        # queued behind it, unnoticed from 2026-08-15.
+        self.extract = _load_extract_json_str()
 
     def test_reddit_reduce_shape_with_inner_quotes_parses(self):
         raw = (
