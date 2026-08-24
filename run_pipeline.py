@@ -188,6 +188,10 @@ async def run_pipeline(config_dir: str, data_dir: str, web_dir: str, target_date
             cost_report=get_tracker().get_json_report(),
             orchestrator_result=result.to_dict(),
             recorder_snapshot=get_recorder().snapshot(),
+            # On a resumed run this carries the calls made by the process that
+            # wrote the checkpoint, so checkpoint-loaded phases keep their cast
+            # instead of replaying as empty windows.
+            restored_replay=orchestrator.restored_replay,
         )
         if replay_path is None:
             # generate_replay already logged the cause at WARNING with a traceback.

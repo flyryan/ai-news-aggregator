@@ -213,6 +213,34 @@ This needs **no nginx change** and works with the dev Vite middleware
 }
 ```
 
+### Restored calls (resumed runs)
+
+A `--resume-from N` run loads earlier phases from a checkpoint, so those phases'
+LLM calls happened in a *previous process* whose recorder and cost tracker are
+gone. Before 2026-08-24 the consequence was a replay whose Analysis phase had a
+correct, real window and **no agents inside it** — the four analyzers and
+`continuity` simply vanished from the cast.
+
+Checkpoints therefore carry a `_replay` bundle: the recorder spans and cost rows
+accumulated up to that checkpoint, plus the originating process's `t0_epoch`.
+On resume the generator merges them back in.
+
+* Restored calls carry `restored: true`. Everything else about them is a real
+  measurement from the original process — the same justification that lets
+  pre-run gatherer spans be rebased rather than dropped. They are **not**
+  reconstructed or estimated, so `run.timings_measured` stays `true`.
+* Placement is exact, not sequenced: a restored call's absolute epoch is mapped
+  into its restored phase's merged-timeline window via
+  `phase.start_ms + (call_epoch - phase.start_time) * 1000`. Containment is
+  therefore preserved by construction.
+* A checkpoint written before this existed has no `_replay` key; such a resume
+  degrades to the old behaviour (phases present, cast absent) rather than
+  failing.
+* Restored spend is **excluded** from `run.total_cost_usd` and the end-of-run
+  cost report, which describe what *this* process spent. `run.restored_calls`
+  reports how many calls were merged back in so the difference is visible
+  rather than silent.
+
 ### Derivation rules
 
 **`agent_id` / `task` / `role` from `caller`** — deterministic table, one place

@@ -161,6 +161,9 @@ class MainOrchestrator:
         self.prompt_accessor = prompt_accessor
         # Non-fatal failures accumulated across phases; see OrchestratorResult.
         self.degradations: List[str] = []
+        # Replay bundle recovered from a checkpoint on a resumed run, merged
+        # back into the replay so checkpoint-loaded phases keep their cast.
+        self._restored_replay: Optional[Dict[str, Any]] = None
 
         # Initialize LLM clients from config
         if provider_config:
@@ -310,6 +313,7 @@ class MainOrchestrator:
         # Phase 1: Parallel Gathering
         if resume_from is not None and resume_from > 1:
             checkpoint = self._load_checkpoint('gathering')
+            self._absorb_replay_bundle(checkpoint)
             if not checkpoint:
                 raise RuntimeError("Cannot resume: no checkpoint for Phase 1 (gathering)")
             gathered_items = self._restore_gathered_items(checkpoint)
@@ -339,6 +343,7 @@ class MainOrchestrator:
         # Phase 2: Parallel Analysis (with grounding context)
         if resume_from is not None and resume_from > 2:
             checkpoint = self._load_checkpoint('analysis')
+            self._absorb_replay_bundle(checkpoint)
             if not checkpoint:
                 raise RuntimeError("Cannot resume: no checkpoint for Phase 2 (analysis)")
             category_reports = self._restore_category_reports(checkpoint)
@@ -424,6 +429,7 @@ class MainOrchestrator:
         # Phase 3: Cross-Category Topic Detection
         if resume_from is not None and resume_from > 3:
             checkpoint = self._load_checkpoint('topics')
+            self._absorb_replay_bundle(checkpoint)
             if not checkpoint:
                 raise RuntimeError("Cannot resume: no checkpoint for Phase 3 (topics)")
             top_topics = self._restore_top_topics(checkpoint)
@@ -452,6 +458,7 @@ class MainOrchestrator:
         # Phase 4: Generate Executive Summary
         if resume_from is not None and resume_from > 4.5:
             checkpoint = self._load_checkpoint('summary')
+            self._absorb_replay_bundle(checkpoint)
             if not checkpoint:
                 raise RuntimeError("Cannot resume: no checkpoint for Phase 4 (summary)")
             executive_summary = checkpoint.get('executive_summary', '')
@@ -721,6 +728,19 @@ class MainOrchestrator:
                 phase_timings = tracker.export_timings()
         if phase_timings:
             data['_phase_timings'] = phase_timings
+
+        # Replay bundle: the LLM calls made so far, so a resumed run can put the
+        # agents that ran in THIS process back on stage. Without it a
+        # --resume-from run replays checkpoint-loaded phases as correctly-sized
+        # but empty windows -- the recorder is memory-only and dies with the
+        # process, so on 2026-08-24 a resume from phase 3 published a replay with
+        # no analyzers and no continuity agent at all. Best-effort: a replay
+        # bundle must never cost us a checkpoint.
+        try:
+            data['_replay'] = self._export_replay_bundle()
+        except Exception as e:  # noqa: BLE001
+            logger.debug(f"  Could not attach replay bundle to {phase} checkpoint: {e}")
+
         filepath = os.path.join(self._checkpoint_dir(), f"{phase}.json")
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
@@ -728,6 +748,53 @@ class MainOrchestrator:
             logger.info(f"  Checkpoint saved: {phase}")
         except Exception as e:
             logger.warning(f"  Failed to save checkpoint for {phase}: {e}")
+
+    @property
+    def restored_replay(self) -> Optional[Dict[str, Any]]:
+        """Replay bundle recovered from a checkpoint, or None for a fresh run.
+
+        Deliberately not on OrchestratorResult: it carries spans and prompt text
+        and would bloat every orchestrator_result_*.json for data nothing but
+        the replay generator reads.
+        """
+        return self._restored_replay
+
+    def _export_replay_bundle(self) -> Dict[str, Any]:
+        """Recorder spans + cost rows so far, for a resuming run to merge back.
+
+        Absolute anchors travel with them (`t0_epoch` for the spans, each cost
+        row's ISO `timestamp`) because the merged timeline a resumed run builds
+        has a different origin -- the generator rebases against the restored
+        phase windows rather than assuming either process's clock.
+        """
+        snapshot = get_recorder().snapshot()
+        return {
+            't0_epoch': snapshot.get('t0_epoch'),
+            'spans': snapshot.get('calls') or [],
+            'cost_calls': (get_tracker().get_json_report() or {}).get('calls') or [],
+        }
+
+    def _absorb_replay_bundle(self, checkpoint: Optional[dict]) -> None:
+        """Keep the replay bundle from a checkpoint we are resuming from.
+
+        Bundles are cumulative -- each checkpoint snapshots everything recorded
+        up to it -- so the newest one loaded is the complete set and simply
+        replaces any earlier one.
+        """
+        if not isinstance(checkpoint, dict):
+            return
+        bundle = checkpoint.get('_replay')
+        if not isinstance(bundle, dict):
+            return
+        spans = bundle.get('spans') or []
+        rows = bundle.get('cost_calls') or []
+        if not spans and not rows:
+            return
+        self._restored_replay = bundle
+        logger.info(
+            f"  Replay: restored {len(rows)} call(s) from checkpoint "
+            f"so resumed phases keep their agents"
+        )
 
     def _load_checkpoint(self, phase: str) -> Optional[dict]:
         """Load checkpoint data for a phase. Returns None if missing or corrupt."""

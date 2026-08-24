@@ -162,6 +162,15 @@ def _parse_iso(value: Optional[str]) -> Optional[datetime]:
         return None
 
 
+def _iso(epoch: float) -> str:
+    """Epoch seconds -> naive-local ISO, the form cost-report rows already use.
+
+    Round-trips with ``_parse_iso``/``_epoch`` so a rewritten timestamp is read
+    back exactly as it was written.
+    """
+    return datetime.fromtimestamp(epoch).isoformat()
+
+
 def _epoch(value: Optional[datetime]) -> Optional[float]:
     if value is None:
         return None
@@ -332,6 +341,107 @@ class ReplayGenerator:
         return phases[0]["id"] if phases else None
 
     # -- calls -----------------------------------------------------------
+
+    def _merge_restored_calls(
+        self,
+        restored: Optional[Dict[str, Any]],
+        cost_report: Dict[str, Any],
+        recorder: Optional[Dict[str, Any]],
+        records: Sequence[Dict[str, Any]],
+        pre_flags: Sequence[bool],
+        phases: Sequence[Dict[str, Any]],
+        run_origin: float,
+    ) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]], int]:
+        """Fold a checkpoint's calls into this run's cost rows and spans.
+
+        Returns ``(cost_report, recorder, restored_count)`` -- copies, never the
+        caller's objects, so a merge cannot leak into the cost report the run
+        prints.
+
+        Placement is exact rather than sequenced. Each restored phase record
+        keeps its ORIGINAL absolute window (`start_time` from `_phase_timings`)
+        while `_build_phases` has just placed it somewhere on the merged
+        timeline, so a call at absolute epoch E inside phase P lands at
+        ``P.start_ms + (E - P.start_time) * 1000``. Containment holds by
+        construction, and every value is a real measurement from the original
+        process -- the same reasoning that lets pre-run gatherer spans be
+        rebased instead of dropped.
+
+        Never raises: a replay is a bonus, and a malformed bundle must degrade
+        to "no restored calls" rather than lose the whole artifact.
+        """
+        rows = list((restored or {}).get("cost_calls") or [])
+        spans = list((restored or {}).get("spans") or [])
+        if not rows and not spans:
+            return cost_report, recorder, 0
+
+        try:
+            # Absolute window of each restored phase -> its merged placement.
+            windows: List[Tuple[float, float, int]] = []
+            for record, is_pre, phase in zip(records, pre_flags, phases):
+                if not is_pre or not record.get("start_time"):
+                    continue
+                origin = float(record["start_time"])
+                duration = float(record.get("duration") or 0.0)
+                windows.append((origin, origin + duration, int(phase.get("start_ms") or 0)))
+            if not windows:
+                return cost_report, recorder, 0
+
+            first_origin, _, first_base = windows[0]
+
+            def to_merged_ms(epoch: Optional[float]) -> Optional[int]:
+                if epoch is None:
+                    return None
+                for origin, end, base in windows:
+                    if origin <= epoch <= end:
+                        return max(0, base + int(round((epoch - origin) * 1000)))
+                # Outside every restored window (clock skew, a call straddling a
+                # boundary): anchor to the first restored phase rather than
+                # inventing a position elsewhere on the timeline.
+                return max(0, first_base + int(round((epoch - first_origin) * 1000)))
+
+            # Cost rows carry absolute ISO timestamps. _build_calls positions a
+            # row by its timestamp relative to run_origin, so rewrite each one to
+            # the epoch that lands it where the merged timeline wants it.
+            merged_rows: List[Dict[str, Any]] = []
+            for row in rows:
+                row = dict(row)
+                epoch = _epoch(_parse_iso(row.get("timestamp")))
+                placed = to_merged_ms(epoch)
+                if placed is not None:
+                    row["timestamp"] = _iso(run_origin + placed / 1000.0)
+                row["restored"] = True
+                merged_rows.append(row)
+
+            span_t0 = (restored or {}).get("t0_epoch")
+            merged_spans: List[Dict[str, Any]] = []
+            for span in spans:
+                span = dict(span)
+                if span_t0:
+                    for field in ("queued_ms", "start_ms", "end_ms", "first_token_ms"):
+                        value = span.get(field)
+                        if value is None:
+                            continue
+                        placed = to_merged_ms(float(span_t0) + float(value) / 1000.0)
+                        if placed is not None:
+                            span[field] = placed
+                span["restored"] = True
+                merged_spans.append(span)
+
+            cost_report = dict(cost_report)
+            cost_report["calls"] = merged_rows + list(cost_report.get("calls") or [])
+
+            base_recorder = dict(recorder or {})
+            base_recorder["calls"] = merged_spans + list(base_recorder.get("calls") or [])
+            recorder = base_recorder
+
+            return cost_report, recorder, len(merged_rows)
+        except Exception as error:  # noqa: BLE001 -- never lose the replay over this
+            logger.warning(
+                f"Could not merge restored replay calls "
+                f"({type(error).__name__}: {error}); resumed phases will be empty"
+            )
+            return cost_report, recorder, 0
 
     def _build_calls(
         self,
@@ -1091,6 +1201,7 @@ class ReplayGenerator:
         orchestrator_result: Dict[str, Any],
         recorder_snapshot: Optional[Dict[str, Any]] = None,
         phase_records: Optional[Sequence[Dict[str, Any]]] = None,
+        restored_replay: Optional[Dict[str, Any]] = None,
     ) -> Tuple[Dict[str, Any], Optional[bytes]]:
         """Shape a run into ``(index, stream_gzip_or_None)``."""
         recorder = recorder_snapshot if (recorder_snapshot or {}).get("calls") else None
@@ -1131,6 +1242,17 @@ class ReplayGenerator:
             (float(cost_report.get("duration_seconds") or 0.0) + restored_s) * 1000
         ))
         phases = self._build_phases(records, t0_epoch, provisional_end, pre_flags)
+
+        # Merge calls made by the process that wrote the checkpoint, rebased
+        # into the restored phase windows built just above. Without this a
+        # resumed run replays those phases as correctly-sized but EMPTY windows
+        # -- on 2026-08-24 a --resume-from 3 published a replay with no
+        # analyzers and no continuity agent, because the recorder is memory-only
+        # and died with the earlier process.
+        cost_report, recorder, restored_count = self._merge_restored_calls(
+            restored_replay, cost_report, recorder, records, pre_flags, phases, run_origin
+        )
+
         calls = self._build_calls(cost_report, recorder, tracker, run_origin, phases)
 
         # Pre-run gatherer measurements (resumed run): rebase them into the
@@ -1218,6 +1340,11 @@ class ReplayGenerator:
                 # call spans from completion timestamps; surfaced so the UI can
                 # say so rather than implying per-event precision it lacks.
                 "timings_measured": measured,
+                # Calls merged back from a checkpoint on a resumed run. Their
+                # spend is excluded from the totals above, which describe what
+                # THIS process spent -- so a non-zero value here explains why
+                # the call count and the cost do not line up.
+                "restored_calls": restored_count,
             },
             "phases": phases,
             "agents": agents,
@@ -1359,6 +1486,7 @@ def generate_replay(
     orchestrator_result: Dict[str, Any],
     recorder_snapshot: Optional[Dict[str, Any]] = None,
     phase_records: Optional[Sequence[Dict[str, Any]]] = None,
+    restored_replay: Optional[Dict[str, Any]] = None,
 ) -> Optional[str]:
     """Generate the replay artifacts, swallowing any failure.
 
@@ -1373,6 +1501,7 @@ def generate_replay(
             orchestrator_result=orchestrator_result,
             recorder_snapshot=recorder_snapshot,
             phase_records=phase_records,
+            restored_replay=restored_replay,
         )
         return generator.write(date, index, stream_blob, prompt_blob)
     except Exception as error:  # noqa: BLE001 -- deliberate: never fail the run

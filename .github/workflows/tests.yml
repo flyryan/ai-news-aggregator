@@ -54,6 +54,11 @@ jobs:
         run: python3 -m unittest tests.arxiv_oai_resilience_test -v
       - name: Replay source steps are measured, keyed right, never invented (2026-08-17)
         run: python3 -m unittest tests.replay_steps_test -v
+      # A --resume-from run replayed checkpoint-loaded phases as correctly-sized
+      # but EMPTY windows: the recorder is memory-only, so the analyzers that
+      # ran in the checkpointed process vanished from the cast (2026-08-24).
+      - name: Resumed runs keep the agents that ran in the checkpointed process
+        run: python3 -m unittest tests.replay_restored_calls_test -v
 
   content-rendering:
     name: Content rendering guards
