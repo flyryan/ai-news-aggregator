@@ -375,6 +375,17 @@ class CategoryReport:
     total_collected: int
     analysis_timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     thinking: Optional[str] = None  # Extended thinking from analysis
+    # Non-fatal analysis failures that degraded this report (e.g. "reduce_rank
+    # failed: http_429", "2/6 map batches failed"). Empty means the report is
+    # whole. Added 2026-08-24: a provider brownout silently replaced every
+    # category summary with a placeholder while the run reported success, so
+    # degradation now has to travel with the data instead of only reaching a
+    # log line. `degraded` is what the publish gate reads.
+    degradations: List[str] = field(default_factory=list)
+
+    @property
+    def degraded(self) -> bool:
+        return bool(self.degradations)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -387,7 +398,8 @@ class CategoryReport:
             'cross_signals': self.cross_signals,
             'total_collected': self.total_collected,
             'analysis_timestamp': self.analysis_timestamp,
-            'thinking': self.thinking
+            'thinking': self.thinking,
+            'degradations': list(self.degradations)
         }
 
     @classmethod
@@ -406,7 +418,8 @@ class CategoryReport:
             cross_signals=data.get('cross_signals', []),
             total_collected=data.get('total_collected', 0),
             analysis_timestamp=data.get('analysis_timestamp', ''),
-            thinking=data.get('thinking')
+            thinking=data.get('thinking'),
+            degradations=list(data.get('degradations') or [])
         )
 
 
@@ -418,6 +431,7 @@ class BatchResult:
     batch_themes: List[Dict[str, Any]]   # Themes detected in this batch
     cross_signals: List[str]             # Cross-category signals
     thinking: Optional[str] = None       # Extended thinking content
+    failed: bool = False                 # True when the batch yielded nothing due to an error
 
 
 # Ceiling on units recorded per source key. Well above every real configuration
@@ -1020,7 +1034,8 @@ class BaseAnalyzer(ABC):
                     item_analyses=[],
                     batch_themes=[],
                     cross_signals=[],
-                    thinking=f"Error: {e}, Retry error: {retry_e}"
+                    thinking=f"Error: {e}, Retry error: {retry_e}",
+                    failed=True
                 )
 
     async def _handle_truncated_batch(
@@ -1254,12 +1269,26 @@ class BaseAnalyzer(ABC):
         """
         raise NotImplementedError("Subclasses must implement _get_ranking_prompt")
 
+    @staticmethod
+    def _map_degradations(batch_results: List[BatchResult]) -> List[str]:
+        """Describe map batches that produced nothing, for the report's degradations.
+
+        A lost batch means those items were never analyzed -- they are missing
+        from themes and ranking entirely. That is invisible in the output (the
+        page still renders, just with less on it), so it has to be stated.
+        """
+        lost = [b for b in batch_results if getattr(b, 'failed', False)]
+        if not lost:
+            return []
+        return [f"{len(lost)}/{len(batch_results)} analysis batches failed after retry"]
+
     async def _reduce_phase(
         self,
         analyzed_items: List[AnalyzedItem],
         themes: List[CategoryTheme],
         cross_signals: List[str],
-        batch_thinking: str
+        batch_thinking: str,
+        map_degradations: Optional[List[str]] = None
     ) -> CategoryReport:
         """
         REDUCE phase: Final ranking and summary generation.
@@ -1268,6 +1297,8 @@ class BaseAnalyzer(ABC):
         """
         if not analyzed_items:
             return self._empty_report()
+
+        reduce_degradations: List[str] = list(map_degradations or [])
 
         try:
             from .staleness_checker import StalenessChecker
@@ -1305,7 +1336,8 @@ class BaseAnalyzer(ABC):
                 themes=themes[:10],
                 cross_signals=cross_signals,
                 total_collected=len(analyzed_items),
-                thinking=f"Batch Analysis:\n{batch_thinking}\n\nRanking:\nNo eligible items"
+                thinking=f"Batch Analysis:\n{batch_thinking}\n\nRanking:\nNo eligible items",
+                degradations=reduce_degradations
             )
 
         top_candidates = eligible_items[:50]
@@ -1368,7 +1400,16 @@ class BaseAnalyzer(ABC):
             ranking_thinking = response.thinking
 
         except Exception as e:
+            # The transport layer already retried this with backoff, so reaching
+            # here means the provider stayed down for the whole retry window.
+            # Fall back to score-ordering so the page still has items, but record
+            # the degradation: this placeholder is not a summary, and publishing
+            # it as though it were is what made 2026-08-24 look healthy.
             logger.error(f"Reduce phase ranking failed: {e}")
+            reduce_degradations.append(
+                f"reduce_rank failed ({type(e).__name__}): category_summary and "
+                f"themes are placeholders"
+            )
             ranking_result = {
                 'top_10': [item.item.id for item in top_candidates[:10]],
                 'category_summary': f"Analysis complete. Top items selected by score."
@@ -1408,7 +1449,8 @@ class BaseAnalyzer(ABC):
             themes=themes[:10],  # Top 10 themes
             cross_signals=cross_signals,
             total_collected=len(analyzed_items),
-            thinking=f"Batch Analysis:\n{batch_thinking}\n\nRanking:\n{ranking_thinking}"
+            thinking=f"Batch Analysis:\n{batch_thinking}\n\nRanking:\n{ranking_thinking}",
+            degradations=reduce_degradations
         )
 
     def _sanitize_truncated_summary(self, summary: str) -> str:

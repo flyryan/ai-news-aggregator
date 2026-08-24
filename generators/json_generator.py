@@ -221,6 +221,11 @@ class JSONGenerator:
             'total_items_collected': result.get('total_items_collected', 0),
             'total_items_analyzed': result.get('total_items_analyzed', 0),
             'collection_status': self._format_collection_status(collection_status),
+            # Non-fatal failures that left this report thinner than intended
+            # (lost analysis batches, unenriched summaries). Published so the
+            # validator, the watchdog and the site can all see that a day was
+            # degraded rather than having to infer it. Empty on a clean run.
+            'degradations': [str(note) for note in (result.get('degradations') or [])],
             'hero_image_url': result.get('hero_image_url'),
             'hero_image_prompt': result.get('hero_image_prompt'),
             'hero_image_usage': result.get('hero_image_usage'),

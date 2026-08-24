@@ -334,7 +334,14 @@ LLM_TRUST_ENV_PROXY   # Let LLM clients use HTTP(S)/ALL_PROXY env vars (default:
 LLM_TIMEOUT_SECONDS   # Override provider-config LLM request timeout (Actions default: 240)
 LLM_MAX_CONCURRENT_REQUESTS # Async LLM request cap per provider route; 0 disables it (default: 8)
 LLM_ADAPTIVE_MAX_TOKENS # Response output ceiling for adaptive calls; not a thinking budget (default: 65536)
-LLM_MAX_RETRIES       # Anthropic SDK retry count for transient request failures (default: 2)
+LLM_MAX_RETRIES       # Anthropic SDK retry count; ONLY affects mode: anthropic/openai-compatible via the SDK, NOT the openai-chat path (default: 2)
+LLM_MAX_REQUESTS_PER_MINUTE # Per-route request RATE cap; 0 disables. A concurrency cap alone does not bound rate when a provider fast-fails (default: 0)
+LLM_RATE_LIMIT_BURST  # Tokens the rate limiter may hold, i.e. how many requests can launch back-to-back (default: 1 = evenly paced)
+LLM_RETRY_MAX_ATTEMPTS # Transport retry attempts per LLM call on 429/5xx/timeouts; applies to every mode (default: 6)
+LLM_RETRY_BASE_DELAY  # Base seconds for exponential retry backoff with jitter (default: 5.0)
+LLM_RETRY_MAX_DELAY   # Cap for a single retry backoff, also clamps a provider Retry-After (default: 90.0)
+LLM_ROUTE_RETRY_CYCLES # Multi-route only: passes over all routes before giving up, with backoff between passes (default: 3)
+PUBLISH_GATE          # strict (default) fails the run when critical content is missing; lenient publishes anyway with loud logs; off disables the gate
 LLM_LOG_REQUESTS      # Log LLM queue/start/done metadata without raw prompt content (default: true)
 LLM_HEARTBEAT_SECONDS # Seconds between in-flight LLM progress logs; 0 disables it (default: 60)
 LLM_STREAM_STALL_SECONDS # Max gap between SSE chunks before a stream is considered dead (default: 120)
@@ -374,6 +381,10 @@ The pipeline uses internal AATF analysis profiles that map to Claude Opus 5 adap
 ## Multi-Provider LLM Routing
 
 `config/providers.yaml` can define `llm.routes` for async LLM calls. Routes inherit root `llm` settings unless overridden, and new async calls rotate across routes. `LLM_MAX_CONCURRENT_REQUESTS` is applied per route, so three routes at the default cap of 8 allow up to 24 active LLM requests while analyzer/category concurrency remains controlled by `ANALYZER_MAX_CONCURRENT_BATCHES`.
+
+**Concurrency is not a rate limit.** `max_concurrent_requests` bounds requests *in flight*; the two are equivalent only while requests are slow. On 2026-08-24 OpenRouter's shared free-tier pool started rejecting `stealth/ox-alpha` with 429 in ~0.4s, so every rejection immediately freed its slot and relaunched — 16 slots produced bursts far above the provider's published 20/min, and 40 of 57 calls died. Set `max_requests_per_minute` on the route (or `LLM_MAX_REQUESTS_PER_MINUTE`) to bound the rate directly; the limiter paces requests evenly rather than letting a fan-out launch at once.
+
+**Retry lives in the transport, not the SDK.** `LLM_MAX_RETRIES` is passed to `anthropic.AsyncAnthropic`, which is *not* in the call path for `mode: openai-chat` (that path drives raw httpx), so it does nothing there. Retries for every mode come from `LLM_RETRY_MAX_ATTEMPTS` with exponential backoff + jitter, honouring a provider `Retry-After` when sent. 429/5xx/timeouts/connection drops retry; other 4xx fail fast. Each attempt is a fresh call — its own replay span, cost row, semaphore slot and rate token — which is what the replay's "each attempt is an independent call" contract requires. In multi-route mode per-client transport retry is disabled (attempts=1) so failover to a sibling route happens promptly; backoff then happens at the router between full passes (`LLM_ROUTE_RETRY_CYCLES`).
 
 Retryable transport failures, timeouts, 429s, and 5xx responses retry on a different route. Prompt/schema/client errors and JSON parse failures do not cross-provider retry. Hosted diagnostics include provider IDs, provider model IDs, route attempts, fallback source, retry reason, `thinking_type`, `analysis_profile`, `adaptive_effort`, `response_max_tokens`, queue/active counts, and content block counts; they must stay secret-safe and prompt-free.
 

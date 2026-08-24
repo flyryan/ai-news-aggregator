@@ -12,6 +12,7 @@ import os
 import re
 import json
 import logging
+import random
 import time
 import asyncio
 from contextlib import suppress
@@ -98,6 +99,164 @@ def _stream_timeout(total_timeout: float) -> httpx.Timeout:
     """
     stall = _env_float("LLM_STREAM_STALL_SECONDS", 120.0, minimum=5.0)
     return httpx.Timeout(total_timeout, connect=10.0, read=stall, write=30.0, pool=total_timeout)
+
+
+# Transport-level retry policy for transient LLM failures (429s, 5xx, timeouts,
+# connection drops).
+#
+# Before 2026-08-24 there was effectively none on the `openai-chat` path:
+# `LLM_MAX_RETRIES` is handed to `anthropic.AsyncAnthropic`, but that SDK client
+# is not in the call path for `openai-chat` (see `_stream_message_openai_chat`,
+# which drives raw httpx). The only 429-aware retry lived in
+# `AsyncLLMRouter._call_with_failover`, and the router is not even constructed
+# when a single route is configured -- so a 429 was a hard, immediate failure.
+#
+# On 2026-08-24 that cost the daily report: OpenRouter's shared free-tier pool
+# for `stealth/ox-alpha` browned out and 40 of 57 calls died in ~0.4s each. Map
+# batches survived on the analyzer's own retry (agents/base.py); the reduce pass
+# and every link enrichment had none, so all four category summaries fell back
+# to a placeholder and the run still reported success.
+#
+# Backoff schedule (base 5.0, cap 90): ~5, 10, 20, 40, 80, 90 s => a 6-attempt
+# window spans roughly 4 minutes of pure backoff. That is deliberate: these
+# failures fast-fail, so a shallow window burns every attempt inside a few
+# seconds of the same outage (the mistake image_client made and corrected on
+# 2026-06-27). The window must outlast a provider blip, not merely survive it.
+DEFAULT_LLM_RETRY_MAX_ATTEMPTS = 6
+DEFAULT_LLM_RETRY_BASE_DELAY = 5.0   # seconds; exponential: ~5s, 10s, 20s, 40s ...
+DEFAULT_LLM_RETRY_MAX_DELAY = 90.0   # seconds; cap per-retry backoff
+
+
+def _llm_backoff_delay(attempt: int, base_delay: float, max_delay: float) -> float:
+    """Exponential backoff with jitter for retry attempt N (1-indexed), capped.
+
+    Jitter matters more here than it does for the hero image: analyzer batches
+    fan out and fail *together* against a shared pool, so a purely exponential
+    schedule would resynchronise them into the same thundering herd on every
+    retry round.
+    """
+    base = min(base_delay * (2 ** (attempt - 1)), max_delay)
+    return base + random.uniform(0, base_delay / 2)
+
+
+def _retry_after_seconds(error: Exception, max_delay: float) -> Optional[float]:
+    """Honour a provider's `Retry-After` header when it sends one.
+
+    Returns None when absent or unparseable, so the caller falls back to
+    exponential backoff. Clamped to `max_delay` so a hostile or mistaken header
+    cannot stall the run.
+    """
+    response = getattr(error, "response", None)
+    headers = getattr(response, "headers", None)
+    if not headers:
+        return None
+    raw = headers.get("retry-after") or headers.get("Retry-After")
+    if not raw:
+        return None
+    try:
+        seconds = float(str(raw).strip())
+    except (TypeError, ValueError):
+        # The HTTP-date form is legal but providers rarely use it; exponential
+        # backoff is a fine substitute rather than a parsing project.
+        return None
+    if seconds < 0:
+        return None
+    return min(seconds, max_delay)
+
+
+def _transient_retry_reason(error: Exception) -> Optional[str]:
+    """Return a short retry reason for transient provider failures, else None.
+
+    Shared by the transport retry loop and the router's cross-provider failover
+    so both agree on exactly what counts as transient. Prompt/schema/client
+    errors (4xx other than 429) deliberately return None: retrying them just
+    burns the rate budget on a request that cannot succeed.
+    """
+    retryable_types = (
+        httpx.TimeoutException,
+        httpx.TransportError,
+        AssertionError,  # bare assert from httpcore/h11 when a connection dies mid-connect
+        anthropic.APITimeoutError,
+        anthropic.APIConnectionError,
+    )
+    if isinstance(error, retryable_types):
+        return type(error).__name__
+
+    status_code = getattr(error, "status_code", None)
+    response = getattr(error, "response", None)
+    if status_code is None and response is not None:
+        status_code = getattr(response, "status_code", None)
+
+    if status_code == 429:
+        return "http_429"
+    if isinstance(status_code, int) and status_code >= 500:
+        return f"http_{status_code}"
+
+    return None
+
+
+class _RateLimiter:
+    """Token-bucket request-rate governor (requests per minute).
+
+    A concurrency semaphore bounds *in-flight* requests, not request *rate*.
+    Those are the same thing only while requests are slow. When a provider
+    fast-fails -- OpenRouter returned 429 in ~0.4s on 2026-08-24 -- each
+    rejection immediately frees its slot and the next request launches, so 16
+    concurrent slots produced bursts far above the provider's published 20
+    req/min ceiling. The faster we were rate-limited, the harder we hammered.
+
+    This bounds the rate directly, independent of how fast calls complete or
+    fail. Cheap when disabled (rate <= 0) and lock-free on the fast path only
+    in the sense that the lock is uncontended when the bucket has tokens.
+    """
+
+    def __init__(self, requests_per_minute: int, burst: Optional[int] = None):
+        self.requests_per_minute = max(0, int(requests_per_minute or 0))
+        # Burst capacity is deliberately *not* a full minute's worth of tokens.
+        # A classic token bucket starts full, which would let the whole fan-out
+        # launch at once -- the precise thundering herd this exists to stop (a
+        # 15/min bucket would still admit 15 simultaneous requests on the first
+        # tick). Defaulting to 1 paces requests evenly instead: at 15/min that
+        # is one every 4s, negligible against LLM calls that run for tens of
+        # seconds, and it keeps a saturated shared pool from seeing a spike.
+        self.burst = max(1, int(burst if burst is not None else _env_int("LLM_RATE_LIMIT_BURST", 1, minimum=1)))
+        self._capacity = float(self.burst)
+        self._tokens = float(self.burst)
+        self._refill_per_second = self.requests_per_minute / 60.0
+        self._updated_at = time.monotonic()
+        self._lock = asyncio.Lock()
+
+    @property
+    def enabled(self) -> bool:
+        return self.requests_per_minute > 0
+
+    async def acquire(self) -> float:
+        """Block until a request token is available; return seconds waited."""
+        if not self.enabled:
+            return 0.0
+
+        waited = 0.0
+        while True:
+            async with self._lock:
+                now = time.monotonic()
+                elapsed = now - self._updated_at
+                if elapsed > 0:
+                    self._tokens = min(
+                        self._capacity, self._tokens + elapsed * self._refill_per_second
+                    )
+                    self._updated_at = now
+
+                if self._tokens >= 1.0:
+                    self._tokens -= 1.0
+                    return waited
+
+                deficit = 1.0 - self._tokens
+                sleep_for = deficit / self._refill_per_second
+
+            # Slept outside the lock so concurrent callers refill in parallel
+            # rather than serialising behind one another's waits.
+            await asyncio.sleep(sleep_for)
+            waited += sleep_for
 
 
 def _build_openai_chat_body(
@@ -828,6 +987,19 @@ class AsyncAnthropicClient:
     - openai-compatible: OpenAI-compatible proxies with Bearer token
     """
 
+    # Class-level defaults for the retry/rate policy. `__init__` overrides all
+    # of these; they exist because instances are also built via `__new__` with
+    # attributes assigned by hand (see tests/openai_chat_transport_test.py), and
+    # the request path must not depend on every such construction site being
+    # updated whenever a knob is added. The default limiter is the disabled one,
+    # whose `acquire()` returns immediately and touches no lock, so sharing a
+    # single instance across classes is safe.
+    retry_max_attempts: int = DEFAULT_LLM_RETRY_MAX_ATTEMPTS
+    retry_base_delay: float = DEFAULT_LLM_RETRY_BASE_DELAY
+    retry_max_delay: float = DEFAULT_LLM_RETRY_MAX_DELAY
+    max_requests_per_minute: int = 0
+    _rate_limiter: '_RateLimiter' = _RateLimiter(0)
+
     def __init__(
         self,
         api_key: Optional[str] = None,
@@ -838,7 +1010,9 @@ class AsyncAnthropicClient:
         max_output_tokens: Optional[int] = None,
         provider_id: Optional[str] = None,
         max_concurrent_requests: Optional[int] = None,
-        max_retries: Optional[int] = None
+        max_retries: Optional[int] = None,
+        max_requests_per_minute: Optional[int] = None,
+        retry_max_attempts: Optional[int] = None
     ):
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
@@ -862,6 +1036,27 @@ class AsyncAnthropicClient:
             if max_retries is not None
             else _env_int("LLM_MAX_RETRIES", 2, minimum=0)
         )
+        # Transport retry policy. Distinct from `max_retries`, which only ever
+        # reaches the Anthropic SDK and so does nothing on the `openai-chat`
+        # path -- these govern our own retry loop and apply to every mode.
+        self.retry_max_attempts = (
+            max(1, retry_max_attempts)
+            if retry_max_attempts is not None
+            else _env_int(
+                "LLM_RETRY_MAX_ATTEMPTS", DEFAULT_LLM_RETRY_MAX_ATTEMPTS, minimum=1
+            )
+        )
+        self.retry_base_delay = _env_float(
+            "LLM_RETRY_BASE_DELAY", DEFAULT_LLM_RETRY_BASE_DELAY, minimum=0.0
+        )
+        self.retry_max_delay = _env_float(
+            "LLM_RETRY_MAX_DELAY", DEFAULT_LLM_RETRY_MAX_DELAY, minimum=0.0
+        )
+        self.max_requests_per_minute = (
+            max_requests_per_minute
+            if max_requests_per_minute is not None
+            else _env_int("LLM_MAX_REQUESTS_PER_MINUTE", 0)
+        )
         self.log_requests = _env_bool("LLM_LOG_REQUESTS", True)
         self.heartbeat_seconds = _env_float("LLM_HEARTBEAT_SECONDS", 60.0, minimum=0.0)
         self.metrics_path = os.environ.get("LLM_METRICS_PATH", "").strip()
@@ -870,6 +1065,7 @@ class AsyncAnthropicClient:
             if self.max_concurrent_requests > 0
             else None
         )
+        self._rate_limiter = _RateLimiter(self.max_requests_per_minute)
         self._request_lock = asyncio.Lock()
         self._metrics_lock = asyncio.Lock()
         self._request_sequence = 0
@@ -915,6 +1111,8 @@ class AsyncAnthropicClient:
             f"timeout={self.timeout}s, sdk_max_retries={self.max_retries}, "
             f"heartbeat_seconds={self.heartbeat_seconds}, "
             f"max_concurrent_requests={self.max_concurrent_requests or 'unlimited'}, "
+            f"max_requests_per_minute={self.max_requests_per_minute or 'unlimited'}, "
+            f"retry_attempts={self.retry_max_attempts}, "
             f"trust_env_proxy={self.trust_env_proxy}, request_logging={self.log_requests}, "
             f"metrics_path={self.metrics_path or 'disabled'}"
         )
@@ -1154,6 +1352,7 @@ class AsyncAnthropicClient:
             "timeout_seconds": self.timeout,
             "sdk_max_retries": self.max_retries,
             "max_concurrent_requests": self.max_concurrent_requests or None,
+            "max_requests_per_minute": self.max_requests_per_minute or None,
             "trust_env_proxy": self.trust_env_proxy,
         }
         base_record.update(record)
@@ -1293,6 +1492,15 @@ class AsyncAnthropicClient:
                     response.status_code,
                     request=request,
                     text=error_body[:2000],
+                    # Carry `Retry-After` across so the retry loop can honour it
+                    # instead of guessing at backoff. Only that header: copying
+                    # the whole set would drag `content-length`/`content-encoding`
+                    # onto a body we just replaced with a truncated copy.
+                    headers=(
+                        {"retry-after": response.headers["retry-after"]}
+                        if "retry-after" in response.headers
+                        else None
+                    ),
                 )
                 raise httpx.HTTPStatusError(
                     f"OpenRouter chat/completions returned {response.status_code}: {error_body[:500]}",
@@ -1414,6 +1622,9 @@ class AsyncAnthropicClient:
             # capture is off, preserving the original zero-overhead path.
             progress = {"replay_call_id": replay_call_id} if replay_call_id else None
             try:
+                # Rate token before the concurrency slot: holding a slot while
+                # waiting out the rate limit would idle the pool for no reason.
+                await self._rate_limiter.acquire()
                 if self._request_semaphore is None:
                     recorder.mark_started(replay_call_id)
                     response = await self._stream_message(progress=progress, **kwargs)
@@ -1438,6 +1649,7 @@ class AsyncAnthropicClient:
         progress: Dict[str, Any] = {"replay_call_id": replay_call_id}
 
         try:
+            await self._rate_limiter.acquire()
             if self._request_semaphore is not None:
                 await self._request_semaphore.acquire()
             acquired = True
@@ -1477,6 +1689,67 @@ class AsyncAnthropicClient:
             if acquired and self._request_semaphore is not None:
                 self._request_semaphore.release()
 
+    async def _create_message_with_retries(
+        self, request_context: Optional[Dict[str, Any]] = None, **kwargs
+    ):
+        """Run `_create_message`, retrying transient provider failures.
+
+        Deliberately wraps `_create_message` from the *outside* rather than
+        retrying inside it. Each attempt therefore mints its own replay call id
+        and its own cost row, which is exactly the contract the replay expects:
+        "each attempt is an independent call and only the generator can stitch
+        them" (agents/replay_recorder.py). Retrying inside would merge several
+        attempts' deltas into one span and re-introduce the 2026-07-28 bug that
+        `tests/replay_retry_attempts_test.py` pins.
+
+        Wrapping outside also means each attempt re-acquires the semaphore and
+        spends a fresh rate-limit token, so retries are throttled like any other
+        request instead of jumping the queue.
+        """
+        attempts = max(1, self.retry_max_attempts)
+        last_error: Optional[BaseException] = None
+
+        for attempt in range(1, attempts + 1):
+            try:
+                return await self._create_message(
+                    request_context=request_context, **kwargs
+                )
+            except asyncio.CancelledError:
+                # Cancellation is not a provider failure; never retry it.
+                raise
+            except Exception as error:
+                last_error = error
+                reason = _transient_retry_reason(error)
+                if reason is None or attempt >= attempts:
+                    raise
+
+                delay = _retry_after_seconds(error, self.retry_max_delay)
+                honoured = delay is not None
+                if delay is None:
+                    delay = _llm_backoff_delay(
+                        attempt, self.retry_base_delay, self.retry_max_delay
+                    )
+
+                caller = (request_context or {}).get("caller", "unknown")
+                logger.warning(
+                    "LLM transient failure caller=%s provider=%s reason=%s "
+                    "(attempt %d/%d); retrying in %.1fs%s",
+                    caller,
+                    self.provider_id,
+                    reason,
+                    attempt,
+                    attempts,
+                    delay,
+                    " (Retry-After)" if honoured else "",
+                )
+                await asyncio.sleep(delay)
+
+        # Unreachable: the loop either returns or raises. Kept so a future edit
+        # that changes the loop bounds fails loudly instead of returning None.
+        raise last_error if last_error is not None else RuntimeError(
+            "LLM retry loop exited without a result"
+        )
+
     @classmethod
     def from_config(cls, config: 'LLMProviderConfig') -> 'AsyncAnthropicClient':
         """
@@ -1501,7 +1774,8 @@ class AsyncAnthropicClient:
     def from_route_config(
         cls,
         config: 'ResolvedLLMRouteConfig',
-        max_retries: Optional[int] = None
+        max_retries: Optional[int] = None,
+        retry_max_attempts: Optional[int] = None
     ) -> 'AsyncAnthropicClient':
         """Create a concrete async client from a resolved route config."""
         return cls(
@@ -1514,6 +1788,8 @@ class AsyncAnthropicClient:
             provider_id=config.id,
             max_concurrent_requests=config.max_concurrent_requests,
             max_retries=max_retries,
+            max_requests_per_minute=config.max_requests_per_minute,
+            retry_max_attempts=retry_max_attempts,
         )
 
     async def call_with_thinking(
@@ -1617,7 +1893,7 @@ class AsyncAnthropicClient:
         if routing_context:
             request_context.update(routing_context)
 
-        response = await self._create_message(request_context=request_context, **kwargs)
+        response = await self._create_message_with_retries(request_context=request_context, **kwargs)
         duration = time.time() - start_time
 
         # Log stop_reason for diagnostics (helps debug proxy behavior)
@@ -1758,7 +2034,7 @@ class AsyncAnthropicClient:
         if routing_context:
             request_context.update(routing_context)
 
-        response = await self._create_message(request_context=request_context, **kwargs)
+        response = await self._create_message_with_retries(request_context=request_context, **kwargs)
         duration = time.time() - start_time
 
         content = ""
@@ -1859,6 +2135,16 @@ class AsyncLLMRouter:
         self.clients = clients
         self._route_lock = asyncio.Lock()
         self._next_route_index = 0
+        # Backoff policy for the case where every route fails transiently at
+        # once. Per-client transport retry is disabled in routed mode, so this
+        # is the only backoff on the routed path.
+        self.retry_cycles = _env_int("LLM_ROUTE_RETRY_CYCLES", 3, minimum=1)
+        self.retry_base_delay = _env_float(
+            "LLM_RETRY_BASE_DELAY", DEFAULT_LLM_RETRY_BASE_DELAY, minimum=0.0
+        )
+        self.retry_max_delay = _env_float(
+            "LLM_RETRY_MAX_DELAY", DEFAULT_LLM_RETRY_MAX_DELAY, minimum=0.0
+        )
         finite_caps = [client.max_concurrent_requests for client in clients]
         self.max_total_concurrent_requests = (
             sum(finite_caps)
@@ -1883,10 +2169,17 @@ class AsyncLLMRouter:
         if len(routes) == 1:
             return AsyncAnthropicClient.from_route_config(routes[0])
 
-        # In routed mode, provider failover is the retry strategy. Disable SDK
-        # retries so a retryable provider failure moves to another route.
+        # In routed mode, moving to another provider is the *first* retry
+        # strategy: a sibling route is usually healthy when one is not, and
+        # failing over costs nothing. So disable both the SDK retries and the
+        # per-client transport retry -- leaving the latter on would make a
+        # client burn its whole multi-minute backoff window before the router
+        # ever got to try route B. Backoff still happens, but at the router
+        # level, between full passes over the routes (see _call_with_failover).
         clients = [
-            AsyncAnthropicClient.from_route_config(route, max_retries=0)
+            AsyncAnthropicClient.from_route_config(
+                route, max_retries=0, retry_max_attempts=1
+            )
             for route in routes
         ]
         return cls(clients)
@@ -1905,28 +2198,13 @@ class AsyncLLMRouter:
 
     @staticmethod
     def _retry_reason(error: Exception) -> Optional[str]:
-        """Return retry reason for transient provider failures."""
-        retryable_types = (
-            httpx.TimeoutException,
-            httpx.TransportError,
-            AssertionError,  # bare assert from httpcore/h11 when a connection dies mid-connect
-            anthropic.APITimeoutError,
-            anthropic.APIConnectionError,
-        )
-        if isinstance(error, retryable_types):
-            return type(error).__name__
+        """Return retry reason for transient provider failures.
 
-        status_code = getattr(error, "status_code", None)
-        response = getattr(error, "response", None)
-        if status_code is None and response is not None:
-            status_code = getattr(response, "status_code", None)
-
-        if status_code == 429:
-            return "http_429"
-        if isinstance(status_code, int) and status_code >= 500:
-            return f"http_{status_code}"
-
-        return None
+        Delegates to the module-level classifier so cross-provider failover and
+        the per-client transport retry can never disagree about what counts as
+        transient.
+        """
+        return _transient_retry_reason(error)
 
     async def _call_with_failover(
         self,
@@ -1937,32 +2215,55 @@ class AsyncLLMRouter:
         fallback_from = None
         retry_reason = None
         last_error = None
+        attempt = 0
 
-        for attempt, client in enumerate(self._ordered_clients(start_index), start=1):
-            routing_context = {
-                "attempt": attempt,
-                "fallback_from": fallback_from,
-                "retry_reason": retry_reason,
-            }
-            try:
-                return await getattr(client, method_name)(
-                    **call_kwargs,
-                    routing_context=routing_context,
-                )
-            except Exception as error:
-                last_error = error
-                reason = self._retry_reason(error)
-                if reason is None or attempt >= len(self.clients):
+        # One pass tries every route once. When every route is transiently down
+        # -- a shared upstream pool being rate-limited hits them all at once --
+        # a single pass is not enough, so back off and pass again. Total attempts
+        # stay bounded by cycles x routes.
+        total_attempts = self.retry_cycles * len(self.clients)
+        for cycle in range(1, self.retry_cycles + 1):
+            for client in self._ordered_clients(start_index):
+                attempt += 1
+                routing_context = {
+                    "attempt": attempt,
+                    "fallback_from": fallback_from,
+                    "retry_reason": retry_reason,
+                }
+                try:
+                    return await getattr(client, method_name)(
+                        **call_kwargs,
+                        routing_context=routing_context,
+                    )
+                except asyncio.CancelledError:
                     raise
+                except Exception as error:
+                    last_error = error
+                    reason = self._retry_reason(error)
+                    if reason is None or attempt >= total_attempts:
+                        raise
 
+                    logger.warning(
+                        "Retrying LLM call on another provider after %s failed: %s: %s",
+                        client.provider_id,
+                        type(error).__name__,
+                        error,
+                    )
+                    fallback_from = client.provider_id
+                    retry_reason = reason
+
+            if cycle < self.retry_cycles:
+                delay = _retry_after_seconds(last_error, self.retry_max_delay) if last_error else None
+                if delay is None:
+                    delay = _llm_backoff_delay(cycle, self.retry_base_delay, self.retry_max_delay)
                 logger.warning(
-                    "Retrying LLM call on another provider after %s failed: %s: %s",
-                    client.provider_id,
-                    type(error).__name__,
-                    error,
+                    "All %d LLM routes failed (cycle %d/%d); backing off %.1fs",
+                    len(self.clients),
+                    cycle,
+                    self.retry_cycles,
+                    delay,
                 )
-                fallback_from = client.provider_id
-                retry_reason = reason
+                await asyncio.sleep(delay)
 
         if last_error is not None:
             raise last_error

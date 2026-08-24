@@ -85,6 +85,11 @@ class OrchestratorResult:
     # None means unreported, which the replay renders as "n/a" -- never as $0.
     hero_image_usage: Optional[Dict[str, Any]] = None
     phase_status: List[Dict[str, Any]] = field(default_factory=list)  # Phase tracker records
+    # Non-fatal failures that left the report incomplete (lost analysis batches,
+    # a failed reduce pass, unenriched summaries). Empty means the run produced
+    # everything it was supposed to. `run_pipeline` reads this to decide whether
+    # publishing would misrepresent the day.
+    degradations: List[str] = field(default_factory=list)
     orchestrator_thinking: Optional[str] = None
     generated_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
@@ -105,6 +110,7 @@ class OrchestratorResult:
             'hero_image_prompt': self.hero_image_prompt,
             'hero_image_usage': self.hero_image_usage,
             'phase_status': self.phase_status,
+            'degradations': list(self.degradations),
             'orchestrator_thinking': self.orchestrator_thinking,
             'generated_at': self.generated_at
         }
@@ -153,6 +159,8 @@ class MainOrchestrator:
         self.target_date = target_date or self._get_today()
         self.provider_config = provider_config
         self.prompt_accessor = prompt_accessor
+        # Non-fatal failures accumulated across phases; see OrchestratorResult.
+        self.degradations: List[str] = []
 
         # Initialize LLM clients from config
         if provider_config:
@@ -352,7 +360,26 @@ class MainOrchestrator:
                 logger.info("Phase 2: Analyzing all categories...")
                 category_reports = await self._analyze_all(gathered_items)
                 total_analyzed = sum(len(r.all_items) for r in category_reports.values())
-                phases.end_phase('success', details=f"{total_analyzed} items")
+                # An analyzer that lost its reduce pass or a map batch still
+                # returns a CategoryReport, so "no exception" is not the same as
+                # "complete". Surface it as `partial` rather than `success`.
+                analysis_degradations = [
+                    f"{name}: {note}"
+                    for name, report in category_reports.items()
+                    for note in getattr(report, 'degradations', [])
+                ]
+                if analysis_degradations:
+                    self.degradations.extend(analysis_degradations)
+                    logger.error(
+                        "Phase 2 completed DEGRADED: %s", "; ".join(analysis_degradations)
+                    )
+                    phases.end_phase(
+                        'partial',
+                        error="; ".join(analysis_degradations),
+                        details=f"{total_analyzed} items",
+                    )
+                else:
+                    phases.end_phase('success', details=f"{total_analyzed} items")
             except Exception as e:
                 phases.end_phase('failed', error=str(e))
                 raise
@@ -467,10 +494,26 @@ class MainOrchestrator:
                 for category, enriched_summary in enriched_category_summaries.items():
                     if category in category_reports:
                         category_reports[category].category_summary = enriched_summary
-                phases.end_phase('success')
+                # `enrich_all` returns readable prose on every failure path, so
+                # the return value alone cannot distinguish enriched from
+                # unenriched -- ask the enricher what it lost.
+                enrichment_degradations = list(getattr(enricher, 'degradations', []))
+                if enrichment_degradations:
+                    self.degradations.extend(
+                        f"link_enrichment {note}" for note in enrichment_degradations
+                    )
+                    logger.error(
+                        "Phase 4.5 completed DEGRADED, %d summar(ies)/topic(s) unenriched: %s",
+                        len(enrichment_degradations),
+                        "; ".join(enrichment_degradations),
+                    )
+                    phases.end_phase('partial', error="; ".join(enrichment_degradations))
+                else:
+                    phases.end_phase('success')
             except Exception as e:
                 logger.warning(f"Link enrichment failed: {e}")
                 enriched_category_summaries = {}
+                self.degradations.append(f"link_enrichment failed entirely: {type(e).__name__}")
                 phases.end_phase('failed', error=str(e))
 
             # Save summary checkpoint (post-enrichment)
@@ -586,6 +629,7 @@ class MainOrchestrator:
             hero_image_prompt=hero_image_prompt,
             hero_image_usage=hero_image_usage,
             phase_status=phases.to_dict(),
+            degradations=list(self.degradations),
             orchestrator_thinking=f"Topic Detection:\n{topic_thinking}\n\nSummary:\n{summary_thinking}"
         )
 

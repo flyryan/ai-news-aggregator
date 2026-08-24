@@ -32,6 +32,17 @@ class LLMRouteConfig(BaseModel):
         ge=0,
         description="Override per-provider async request cap; 0 disables the cap"
     )
+    max_requests_per_minute: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description=(
+            "Override per-provider request *rate* cap (requests/minute); "
+            "0 disables it. Distinct from max_concurrent_requests, which only "
+            "bounds in-flight requests -- when a provider fast-fails (e.g. a "
+            "429 in 0.4s) freed slots relaunch instantly, so a concurrency cap "
+            "alone does not bound the request rate."
+        )
+    )
 
     @field_validator('api_key')
     @classmethod
@@ -157,6 +168,7 @@ class LLMProviderConfig(BaseModel):
                     max_output_tokens=self.max_output_tokens,
                     timeout=self.timeout,
                     max_concurrent_requests=None,
+                    max_requests_per_minute=None,
                 )
             ]
 
@@ -170,6 +182,7 @@ class LLMProviderConfig(BaseModel):
                 max_output_tokens=route.max_output_tokens or self.max_output_tokens,
                 timeout=route.timeout or self.timeout,
                 max_concurrent_requests=route.max_concurrent_requests,
+                max_requests_per_minute=route.max_requests_per_minute,
             )
             for route in self.routes
         ]
@@ -186,6 +199,7 @@ class ResolvedLLMRouteConfig(BaseModel):
     max_output_tokens: int
     timeout: float
     max_concurrent_requests: Optional[int] = None
+    max_requests_per_minute: Optional[int] = None
 
 
 class ImageProviderConfig(BaseModel):

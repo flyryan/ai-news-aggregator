@@ -135,3 +135,10 @@ jobs:
         run: python3 -m unittest tests.lookback_hours_test -v
       - name: Mid-stream failures are billed for what they streamed
         run: python3 -m unittest tests.partial_spend_capture_test -v
+      # 2026-08-24: a provider rate-limit brownout 429'd 40 of 57 LLM calls.
+      # The openai-chat path had no transport retry at all, a concurrency cap
+      # was standing in for a rate limit, and the publish gate never looked at
+      # category summaries -- so a report with four placeholder summaries was
+      # signed, committed and published while every phase reported [ok].
+      - name: 429s retry with backoff, are rate-limited, and cannot publish silently
+        run: python3 -m unittest tests.llm_rate_limit_resilience_test -v

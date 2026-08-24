@@ -43,7 +43,16 @@ class LinkEnricher:
 
     Uses LLM to identify phrases in summary text that reference
     specific collected items, and injects markdown links to those items.
+
+    After `enrich()`, `degradations` lists the summaries and topics that fell
+    back to unenriched text. Callers must read it: every failure path here
+    returns readable prose, so a silent failure is indistinguishable from
+    success by inspecting the return value alone.
     """
+
+    # Class-level default so a caller that inspects `degradations` before
+    # `enrich()` runs sees an empty list rather than an AttributeError.
+    degradations: List[str] = []
 
     def __init__(
         self,
@@ -85,6 +94,9 @@ class LinkEnricher:
         Returns:
             Tuple of (enriched_exec_summary, enriched_category_summaries, enriched_topics)
         """
+        # Reset per run: `degradations` describes this enrichment pass only.
+        self.degradations = []
+
         # Build complete item list from all categories
         all_items = self._build_item_list(category_reports)
 
@@ -143,6 +155,7 @@ class LinkEnricher:
         for (key_type, key_value), result in zip(task_keys, results):
             if isinstance(result, Exception):
                 logger.error(f"Link enrichment failed for {key_type}/{key_value}: {result}")
+                self.degradations.append(f"{key_type}/{key_value}: {type(result).__name__}")
                 continue
 
             if key_type == 'exec':
@@ -395,9 +408,15 @@ Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not ent
                     logger.warning(f"  {context_name}: regex extraction failed validation (brackets={open_brackets}/{close_brackets}, incomplete={has_incomplete_link}, short={is_too_short})")
 
             logger.warning(f"  {context_name}: JSON parse failed, using original unenriched text")
+            self.degradations.append(f"{context_name}: unparseable enrichment response")
             return text
         except Exception as e:
+            # Returning the original text keeps the summary readable, but it is
+            # NOT the enriched output the page promises. Before 2026-08-24 this
+            # was invisible: a provider brownout stripped every internal link
+            # from the report and the run still reported Phase 4.5 [ok].
             logger.error(f"Link enrichment failed for {context_name}: {e}")
+            self.degradations.append(f"{context_name}: {type(e).__name__}")
             return text
 
     def _markdown_links_to_html(self, text: str) -> str:

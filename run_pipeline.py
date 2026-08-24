@@ -13,6 +13,7 @@ Main entry point that orchestrates the multi-agent pipeline:
 """
 
 import asyncio
+import json
 import os
 import sys
 import logging
@@ -62,6 +63,37 @@ def parse_date(date_str: str) -> str:
         return dt.strftime('%Y-%m-%d')
 
     raise ValueError(f"Invalid date format: {date_str}. Use YYYY-MM-DD or MM-DD-YYYY")
+
+
+def _validate_generated_report(web_dir: str, date_str: str) -> dict:
+    """Run the shared report validator against the freshly generated summary.json.
+
+    `scripts/validate_report.py` is the single definition of "is this report
+    publishable", shared with the CI publish gate and the live watchdog. It is
+    loaded by path rather than imported because `scripts/` is not a package.
+
+    Never raises: a validator that cannot run must not itself break the pipeline,
+    so a load failure degrades to "no opinion" (and says so) rather than either
+    blocking a good report or silently passing a bad one.
+    """
+    import importlib.util
+    from pathlib import Path
+
+    summary_path = Path(web_dir) / "data" / date_str / "summary.json"
+    try:
+        validator_path = Path(__file__).resolve().parent / "scripts" / "validate_report.py"
+        spec = importlib.util.spec_from_file_location("validate_report", validator_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        with open(summary_path, "r", encoding="utf-8") as handle:
+            summary = json.load(handle)
+        return module.validate(summary, date_str)
+    except Exception as e:
+        logger.error(
+            f"Publish gate could not evaluate {summary_path}: {type(e).__name__}: {e}"
+        )
+        return {"valid": True, "failures": [], "warnings": [f"publish gate did not run: {e}"]}
 
 
 async def run_pipeline(config_dir: str, data_dir: str, web_dir: str, target_date: str = None, resume_from=None) -> bool:
@@ -189,12 +221,44 @@ async def run_pipeline(config_dir: str, data_dir: str, web_dir: str, target_date
         search_indexer = SearchIndexer(web_dir, rolling_window_days=30)
         search_indexer.update_index(result.to_dict())
 
+        # Publish gate. Runs against the generated summary.json -- the artifact
+        # readers actually get -- using the same rules as the CI publish gate and
+        # the live watchdog, so all three can never disagree about what counts as
+        # publishable. Before 2026-08-24 this check existed but never looked at
+        # category summaries, so a run whose every reduce pass 429'd exited 0.
+        verdict = _validate_generated_report(web_dir, result.date)
+
+        for note in verdict.get('warnings', []):
+            logger.warning(f"DEGRADED: {note}")
+
         # Complete
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
 
+        gate_mode = os.environ.get("PUBLISH_GATE", "strict").strip().lower()
+        if verdict.get('failures'):
+            logger.error("=" * 60)
+            logger.error("PIPELINE COMPLETED WITH MISSING CRITICAL CONTENT")
+            for blocker in verdict['failures']:
+                logger.error(f"  - {blocker}")
+            if gate_mode == "strict":
+                logger.error(
+                    "Failing closed: this output must not be published over a "
+                    "complete report. Re-run once the provider recovers, or set "
+                    "PUBLISH_GATE=lenient to publish it deliberately."
+                )
+                logger.error("=" * 60)
+                return False
+            logger.error(
+                f"PUBLISH_GATE={gate_mode}: publishing anyway by explicit configuration."
+            )
+            logger.error("=" * 60)
+
         logger.info("=" * 60)
-        logger.info("PIPELINE COMPLETED SUCCESSFULLY")
+        if verdict.get('warnings') or verdict.get('failures'):
+            logger.info("PIPELINE COMPLETED (DEGRADED)")
+        else:
+            logger.info("PIPELINE COMPLETED SUCCESSFULLY")
         logger.info(f"Duration: {duration:.2f} seconds")
         logger.info(f"Total items collected: {result.total_items_collected}")
         logger.info(f"Total items analyzed: {result.total_items_analyzed}")

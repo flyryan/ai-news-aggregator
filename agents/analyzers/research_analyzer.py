@@ -217,7 +217,10 @@ The summary should read like a technical briefing for researchers and practition
         )
 
         # REDUCE phase: Final ranking
-        return await self._reduce_phase(analyzed_items, themes, cross_signals, batch_thinking)
+        return await self._reduce_phase(
+            analyzed_items, themes, cross_signals, batch_thinking,
+            map_degradations=self._map_degradations(batch_results)
+        )
 
     def _build_items_context(self, items: List[CollectedItem], max_items: int = 50) -> str:
         """Build context string optimized for research items."""

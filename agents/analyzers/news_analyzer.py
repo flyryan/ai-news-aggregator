@@ -34,6 +34,10 @@ logger = logging.getLogger(__name__)
 class NewsAnalyzer(BaseAnalyzer):
     """Analyzes news articles with extended thinking and map-reduce batching."""
 
+    # Class-level default so `_filter_with_llm` can record a degradation even if
+    # it is reached by a path that did not run the per-run reset in `analyze`.
+    _filter_degradations: List[str] = []
+
     # Batch analysis prompt for map phase (used after filtering)
     BATCH_ANALYSIS_PROMPT = """You are an AI news analyst covering the frontier of artificial intelligence.
 Analyze these AI news articles (batch {batch_index} of {total_batches}).
@@ -419,7 +423,12 @@ Snippet: {self._clip_context_text(item.content, 300)}...
 
         except Exception as e:
             logger.error(f"LLM filter failed: {e}")
-            # Fall back to returning all items
+            # Fall back to returning all items. This direction is the safe one --
+            # a superset, so nothing is lost, only under-filtered -- but it still
+            # means the published set was not the one we intended, so record it.
+            self._filter_degradations.append(
+                f"relevance filter failed ({type(e).__name__}): items are keyword-filtered only"
+            )
             return items
 
     async def _analyze_small_batch(self, items: List[CollectedItem]) -> CategoryReport:
@@ -560,6 +569,7 @@ Snippet: {self._clip_context_text(item.content, 300)}...
             return self._empty_report()
 
         # Phase 0b: LLM filter for frontier AI relevance
+        self._filter_degradations = []
         filtered_items = await self._filter_with_llm(keyword_filtered)
 
         if not filtered_items:
@@ -580,7 +590,10 @@ Snippet: {self._clip_context_text(item.content, 300)}...
         )
 
         # REDUCE phase: Final ranking
-        return await self._reduce_phase(analyzed_items, themes, cross_signals, batch_thinking)
+        return await self._reduce_phase(
+            analyzed_items, themes, cross_signals, batch_thinking,
+            map_degradations=self._filter_degradations + self._map_degradations(batch_results)
+        )
 
     def _build_items_context(self, items: List[CollectedItem], max_items: int = 50) -> str:
         """Format items for LLM analysis with full IDs."""

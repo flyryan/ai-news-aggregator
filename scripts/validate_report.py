@@ -58,6 +58,19 @@ FAILURE_SENTINELS = (
 # genuinely short day.
 MIN_EXEC_SUMMARY_CHARS = 400
 
+# The reduce phase's fallback when ranking/summary generation fails. Must stay
+# byte-identical to the string in `agents/base.py` (`_reduce_phase`); a test
+# pins them equal. On 2026-08-24 a provider brownout 429'd all four reduce calls
+# and every category shipped this 47-char placeholder in place of a ~1.2k-2.9k
+# char summary -- and the report passed validation, because nothing here looked
+# at category summaries at all.
+PLACEHOLDER_CATEGORY_SUMMARY = "Analysis complete. Top items selected by score."
+
+# Floor for a per-category summary. Measured 2026-08-21..23: real category
+# summaries ran 1,288-2,839 chars. 200 sits far below that range, so it flags an
+# absent summary rather than a merely terse one.
+MIN_CATEGORY_SUMMARY_CHARS = 200
+
 
 def _load_local(web_dir: str, date_str: str) -> dict:
     import os
@@ -114,7 +127,40 @@ def validate(summary: dict, date_str: str) -> dict:
     if analyzed <= 0:
         failures.append(f"total_items_analyzed is {analyzed} (no analyzed items)")
 
-    # 5) Date sanity: published report should match the requested date.
+    # 5) Category summaries must be real analysis, not the reduce-phase
+    #    placeholder. A category that collected nothing is a quiet day, not a
+    #    failure, so only categories that actually have items are checked.
+    categories = summary.get("categories")
+    degraded_categories = []
+    if isinstance(categories, dict):
+        for name in sorted(categories):
+            cat = categories.get(name)
+            if not isinstance(cat, dict):
+                continue
+            count = cat.get("count") or 0
+            if not isinstance(count, int) or count <= 0:
+                continue
+            cat_summary = (cat.get("category_summary") or "").strip()
+            if not cat_summary:
+                degraded_categories.append(f"{name}: category_summary is empty")
+            elif cat_summary == PLACEHOLDER_CATEGORY_SUMMARY:
+                degraded_categories.append(
+                    f"{name}: category_summary is the reduce-phase placeholder"
+                )
+            elif len(cat_summary) < MIN_CATEGORY_SUMMARY_CHARS:
+                degraded_categories.append(
+                    f"{name}: category_summary too short "
+                    f"({len(cat_summary)} < {MIN_CATEGORY_SUMMARY_CHARS} chars)"
+                )
+    failures.extend(degraded_categories)
+
+    # 6) Degradations the pipeline recorded about itself (lost analysis batches,
+    #    unenriched summaries). Reported, not fatal: a thinner report is still an
+    #    honest one, whereas a missing summary is not.
+    for note in (summary.get("degradations") or []):
+        warnings.append(f"degraded: {note}")
+
+    # 7) Date sanity: published report should match the requested date.
     if report_date and report_date != date_str:
         warnings.append(f"report date {report_date!r} != requested {date_str!r}")
 
@@ -132,6 +178,7 @@ def validate(summary: dict, date_str: str) -> dict:
             "top_topics": len(top_topics) if isinstance(top_topics, list) else 0,
             "total_items_collected": collected,
             "total_items_analyzed": analyzed,
+            "degraded_categories": len(degraded_categories),
             "hero_image_url": summary.get("hero_image_url"),
         },
     }
