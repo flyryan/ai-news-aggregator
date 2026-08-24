@@ -337,7 +337,10 @@ LLM_ADAPTIVE_MAX_TOKENS # Response output ceiling for adaptive calls; not a thin
 LLM_MAX_RETRIES       # Anthropic SDK retry count; ONLY affects mode: anthropic/openai-compatible via the SDK, NOT the openai-chat path (default: 2)
 LLM_MAX_REQUESTS_PER_MINUTE # Per-route request RATE cap; 0 disables. A concurrency cap alone does not bound rate when a provider fast-fails (default: 0)
 LLM_RATE_LIMIT_BURST  # Tokens the rate limiter may hold, i.e. how many requests can launch back-to-back (default: 1 = evenly paced)
-LLM_RETRY_MAX_ATTEMPTS # Transport retry attempts per LLM call on 429/5xx/timeouts; applies to every mode (default: 6)
+LLM_RETRY_MAX_ATTEMPTS # Retry attempts spent only while the provider looks SILENT; contended 429s do not count (default: 6)
+LLM_RETRY_LIVENESS_WINDOW # Seconds since any call on this provider produced output, within which a 429 counts as contention not outage (default: 180)
+LLM_RETRY_MAX_ELAPSED_SECONDS # Per-call wall-clock ceiling on retrying; the only bound on contended retries (default: 900)
+LLM_RETRY_CONTENDED_DELAY # Flat pause between retries while the provider is proven alive (default: 10.0)
 LLM_RETRY_BASE_DELAY  # Base seconds for exponential retry backoff with jitter (default: 5.0)
 LLM_RETRY_MAX_DELAY   # Cap for a single retry backoff, also clamps a provider Retry-After (default: 90.0)
 LLM_ROUTE_RETRY_CYCLES # Multi-route only: passes over all routes before giving up, with backoff between passes (default: 3)
@@ -383,6 +386,15 @@ The pipeline uses internal AATF analysis profiles that map to Claude Opus 5 adap
 `config/providers.yaml` can define `llm.routes` for async LLM calls. Routes inherit root `llm` settings unless overridden, and new async calls rotate across routes. `LLM_MAX_CONCURRENT_REQUESTS` is applied per route, so three routes at the default cap of 8 allow up to 24 active LLM requests while analyzer/category concurrency remains controlled by `ANALYZER_MAX_CONCURRENT_BATCHES`.
 
 **Concurrency is not a rate limit.** `max_concurrent_requests` bounds requests *in flight*; the two are equivalent only while requests are slow. On 2026-08-24 OpenRouter's shared free-tier pool started rejecting `stealth/ox-alpha` with 429 in ~0.4s, so every rejection immediately freed its slot and relaunched — 16 slots produced bursts far above the provider's published 20/min, and 40 of 57 calls died. Set `max_requests_per_minute` on the route (or `LLM_MAX_REQUESTS_PER_MINUTE`) to bound the rate directly; the limiter paces requests evenly rather than letting a fan-out launch at once.
+
+**The retry budget counts evidence, not attempts.** `stealth/ox-alpha` is a popular *free* model on a shared upstream pool, so 429 is the normal background condition rather than a failure signal. Every client tracks when that provider last produced output — a streamed chunk or a completed call, from *any* concurrent caller — and retries take one of two regimes:
+
+| Regime | Condition | Behaviour |
+|--------|-----------|-----------|
+| Contended | provider produced output within `LLM_RETRY_LIVENESS_WINDOW` | short flat pause, attempt **not** charged to the budget, bounded only by `LLM_RETRY_MAX_ELAPSED_SECONDS` |
+| Silent | nothing back from this provider inside that window | attempt charged, exponential backoff, fails after `LLM_RETRY_MAX_ATTEMPTS` |
+
+This exists because a fixed budget punishes bad timing: on 2026-08-24 `social_analyzer.batch_3` reached attempt 5/6 while `reddit_analyzer.batch_4` was 60s into a healthy stream on the same provider. Retries pass through the rate limiter like any other request, so persistent retrying cannot become hammering.
 
 **Retry lives in the transport, not the SDK.** `LLM_MAX_RETRIES` is passed to `anthropic.AsyncAnthropic`, which is *not* in the call path for `mode: openai-chat` (that path drives raw httpx), so it does nothing there. Retries for every mode come from `LLM_RETRY_MAX_ATTEMPTS` with exponential backoff + jitter, honouring a provider `Retry-After` when sent. 429/5xx/timeouts/connection drops retry; other 4xx fail fast. Each attempt is a fresh call — its own replay span, cost row, semaphore slot and rate token — which is what the replay's "each attempt is an independent call" contract requires. In multi-route mode per-client transport retry is disabled (attempts=1) so failover to a sibling route happens promptly; backoff then happens at the router between full passes (`LLM_ROUTE_RETRY_CYCLES`).
 

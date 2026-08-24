@@ -253,6 +253,107 @@ class TransportRetryTest(unittest.TestCase):
         self.assertEqual(client.retry_max_attempts, 1)
 
 
+class LivenessAwareRetryTest(unittest.TestCase):
+    """A 429 while the provider is demonstrably serving must not cost budget.
+
+    2026-08-24 12:27: `social_analyzer.batch_3` hit attempt 5/6 while
+    `reddit_analyzer.batch_4` was 60s into a healthy stream on the same
+    provider, 5,575 thinking chars in. ox-alpha is a popular free model on a
+    shared pool, so 429 is the normal background condition -- counting every one
+    against a fixed budget fails healthy calls for bad timing.
+    """
+
+    def _client(self, outcomes, **kw):
+        c = _FakeClient(outcomes, retry_max_attempts=3, **kw)
+        c.retry_base_delay = 0.0
+        c.retry_max_delay = 0.0
+        c.retry_contended_delay = 0.5
+        return c
+
+    def test_contended_429s_do_not_consume_budget(self):
+        # Ten 429s -- far past the budget of 3 -- but the provider keeps proving
+        # it is alive, so the call must survive and eventually succeed.
+        client = self._client([_http_error(429)] * 10 + ["ok"])
+
+        async def scenario():
+            async def keep_alive():
+                # Stand in for a concurrent caller streaming tokens.
+                for _ in range(60):
+                    client._mark_provider_alive()
+                    await asyncio.sleep(0.05)
+            task = asyncio.create_task(keep_alive())
+            try:
+                return await client._create_message_with_retries(
+                    request_context={"caller": "social_analyzer.batch_3"}
+                )
+            finally:
+                task.cancel()
+
+        self.assertEqual(asyncio.run(scenario()), "ok")
+        self.assertEqual(client.calls, 11)
+
+    def test_silent_provider_still_gives_up_on_budget(self):
+        # Nothing ever proves the provider is alive, so the budget applies and
+        # the call fails after exactly retry_max_attempts tries.
+        client = self._client([_http_error(429)] * 10)
+        with self.assertRaises(httpx.HTTPStatusError):
+            asyncio.run(client._create_message_with_retries(request_context={"caller": "t"}))
+        self.assertEqual(client.calls, 3)
+
+    def test_stale_liveness_counts_as_silent(self):
+        # Proof of life from before the window must not excuse a failure.
+        client = self._client([_http_error(429)] * 10)
+        client.retry_liveness_window = 1.0
+        client._provider_alive_at = time.monotonic() - 600  # long expired
+        with self.assertRaises(httpx.HTTPStatusError):
+            asyncio.run(client._create_message_with_retries(request_context={"caller": "t"}))
+        self.assertEqual(client.calls, 3)
+
+    def test_wall_clock_deadline_bounds_contended_retries(self):
+        # Forgiven retries must still be bounded, or a permanently contended
+        # call would spin forever.
+        client = self._client([_http_error(429)] * 500)
+        client.retry_max_elapsed = 0.6
+        client.retry_contended_delay = 0.1
+
+        async def scenario():
+            client._mark_provider_alive()
+            async def keep_alive():
+                for _ in range(200):
+                    client._mark_provider_alive()
+                    await asyncio.sleep(0.05)
+            task = asyncio.create_task(keep_alive())
+            try:
+                await client._create_message_with_retries(request_context={"caller": "t"})
+            finally:
+                task.cancel()
+
+        with self.assertRaises(httpx.HTTPStatusError):
+            asyncio.run(scenario())
+        self.assertGreater(client.calls, 3, "must outlast the plain attempt budget")
+        self.assertLess(client.calls, 400, "deadline must stop it")
+
+    def test_success_marks_provider_alive(self):
+        client = self._client(["ok"])
+        asyncio.run(client._create_message_with_retries(request_context={"caller": "t"}))
+        self.assertTrue(client._provider_recently_alive())
+
+    def test_non_retryable_still_fails_fast_even_when_contended(self):
+        client = self._client([_http_error(400), "ok"])
+        client._mark_provider_alive()
+        with self.assertRaises(httpx.HTTPStatusError):
+            asyncio.run(client._create_message_with_retries(request_context={"caller": "t"}))
+        self.assertEqual(client.calls, 1)
+
+    def test_liveness_is_shared_across_concurrent_callers(self):
+        # The whole point: one client instance serves every analyzer, so a
+        # success on ANY caller is proof for a struggling one.
+        client = self._client(["ok"])
+        self.assertFalse(client._provider_recently_alive())
+        client._mark_provider_alive()
+        self.assertTrue(client._provider_recently_alive())
+
+
 class PublishGateTest(unittest.TestCase):
     """The check that would have caught 2026-08-24 before it published."""
 

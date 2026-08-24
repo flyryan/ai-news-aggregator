@@ -126,6 +126,32 @@ DEFAULT_LLM_RETRY_MAX_ATTEMPTS = 6
 DEFAULT_LLM_RETRY_BASE_DELAY = 5.0   # seconds; exponential: ~5s, 10s, 20s, 40s ...
 DEFAULT_LLM_RETRY_MAX_DELAY = 90.0   # seconds; cap per-retry backoff
 
+# Liveness-aware retry.
+#
+# `stealth/ox-alpha` is a popular *free* model on a shared upstream pool, so a
+# 429 is the normal background condition, not evidence of an outage. Counting
+# every 429 against a fixed attempt budget punishes a call for bad luck: on
+# 2026-08-24 12:27 `social_analyzer.batch_3` reached attempt 5/6 while
+# `reddit_analyzer.batch_4` was 60s into a healthy stream on the same provider,
+# 5,575 thinking chars in. The provider was plainly serving us; that call was
+# simply landing in the gaps between other calls' requests.
+#
+# So the budget now counts *evidence*, not attempts. Two regimes:
+#
+#   CONTENDED - the provider produced tokens or completed a call for someone
+#               recently. The 429 means "busy", so retry on a short fixed delay
+#               and do NOT consume the attempt budget. Bounded only by a
+#               wall-clock deadline, so this cannot spin forever.
+#   SILENT    - nothing has come back from this provider inside the liveness
+#               window. Now a 429 might really mean "down": consume the budget
+#               and back off exponentially, failing after MAX_ATTEMPTS.
+#
+# Retries pass through the rate limiter like any other request, so persistent
+# retrying cannot turn into hammering -- the governor still paces the provider.
+DEFAULT_LLM_RETRY_LIVENESS_WINDOW = 180.0   # seconds of "someone got through"
+DEFAULT_LLM_RETRY_MAX_ELAPSED = 900.0       # per-call wall-clock ceiling
+DEFAULT_LLM_RETRY_CONTENDED_DELAY = 10.0    # short retry pause while contended
+
 
 def _llm_backoff_delay(attempt: int, base_delay: float, max_delay: float) -> float:
     """Exponential backoff with jitter for retry attempt N (1-indexed), capped.
@@ -999,6 +1025,13 @@ class AsyncAnthropicClient:
     retry_max_delay: float = DEFAULT_LLM_RETRY_MAX_DELAY
     max_requests_per_minute: int = 0
     _rate_limiter: '_RateLimiter' = _RateLimiter(0)
+    retry_liveness_window: float = DEFAULT_LLM_RETRY_LIVENESS_WINDOW
+    retry_max_elapsed: float = DEFAULT_LLM_RETRY_MAX_ELAPSED
+    retry_contended_delay: float = DEFAULT_LLM_RETRY_CONTENDED_DELAY
+    # Monotonic timestamp of the last proof this provider was serving us: a
+    # streamed chunk or a completed call, from ANY concurrent caller. 0.0 means
+    # "no proof yet this process", which reads as silent.
+    _provider_alive_at: float = 0.0
 
     def __init__(
         self,
@@ -1052,6 +1085,16 @@ class AsyncAnthropicClient:
         self.retry_max_delay = _env_float(
             "LLM_RETRY_MAX_DELAY", DEFAULT_LLM_RETRY_MAX_DELAY, minimum=0.0
         )
+        self.retry_liveness_window = _env_float(
+            "LLM_RETRY_LIVENESS_WINDOW", DEFAULT_LLM_RETRY_LIVENESS_WINDOW, minimum=0.0
+        )
+        self.retry_max_elapsed = _env_float(
+            "LLM_RETRY_MAX_ELAPSED_SECONDS", DEFAULT_LLM_RETRY_MAX_ELAPSED, minimum=0.0
+        )
+        self.retry_contended_delay = _env_float(
+            "LLM_RETRY_CONTENDED_DELAY", DEFAULT_LLM_RETRY_CONTENDED_DELAY, minimum=0.5
+        )
+        self._provider_alive_at = 0.0
         self.max_requests_per_minute = (
             max_requests_per_minute
             if max_requests_per_minute is not None
@@ -1116,6 +1159,25 @@ class AsyncAnthropicClient:
             f"trust_env_proxy={self.trust_env_proxy}, request_logging={self.log_requests}, "
             f"metrics_path={self.metrics_path or 'disabled'}"
         )
+
+    def _mark_provider_alive(self) -> None:
+        """Record that this provider just served us something.
+
+        Called per streamed chunk and on every completed call, from any
+        concurrent caller. One attribute write, no lock: a lost race here costs
+        at most a slightly stale timestamp, and the retry loop only compares it
+        against a multi-minute window.
+        """
+        self._provider_alive_at = time.monotonic()
+
+    def _provider_recently_alive(self) -> bool:
+        """True when this provider produced output inside the liveness window.
+
+        This is what separates "the pool is busy" from "the provider is gone".
+        """
+        if not self._provider_alive_at:
+            return False
+        return (time.monotonic() - self._provider_alive_at) <= self.retry_liveness_window
 
     def _format_request_context(self, request_context: Optional[Dict[str, Any]]) -> str:
         context = request_context or {}
@@ -1422,6 +1484,7 @@ class AsyncAnthropicClient:
                     # signature_delta is deliberately not recorded: it is an
                     # opaque cryptographic blob with nothing to render.
                     progress["last_chunk_at"] = time.time()
+                    self._mark_provider_alive()
                 elif etype == "message_start":
                     # `input_tokens` is settled the moment the request is accepted,
                     # so it is available even for a call that later dies. Keeping it
@@ -1547,6 +1610,7 @@ class AsyncAnthropicClient:
                             progress[field] = usage[field]
                     progress["last_chunk_at"] = time.time()
                     progress["events"] = progress.get("events", 0) + 1
+                    self._mark_provider_alive()
 
         # One consolidated block per stream, never one per delta -- see
         # _openai_chat_blocks for why block-per-delta corrupted responses.
@@ -1706,12 +1770,17 @@ class AsyncAnthropicClient:
         spends a fresh rate-limit token, so retries are throttled like any other
         request instead of jumping the queue.
         """
-        attempts = max(1, self.retry_max_attempts)
+        budget = max(1, self.retry_max_attempts)
+        deadline = time.monotonic() + self.retry_max_elapsed
+        caller = (request_context or {}).get("caller", "unknown")
         last_error: Optional[BaseException] = None
+        attempt = 0      # every try, for logging
+        consumed = 0     # only tries made while the provider looked silent
 
-        for attempt in range(1, attempts + 1):
+        while True:
+            attempt += 1
             try:
-                return await self._create_message(
+                response = await self._create_message(
                     request_context=request_context, **kwargs
                 )
             except asyncio.CancelledError:
@@ -1720,35 +1789,72 @@ class AsyncAnthropicClient:
             except Exception as error:
                 last_error = error
                 reason = _transient_retry_reason(error)
-                if reason is None or attempt >= attempts:
+                if reason is None:
+                    raise
+
+                # Did this provider serve anyone -- us or a concurrent caller --
+                # recently? If so the 429 is contention, not an outage, and
+                # spending the attempt budget on it would fail a healthy call
+                # for bad timing.
+                contended = self._provider_recently_alive()
+                if not contended:
+                    consumed += 1
+
+                remaining_time = deadline - time.monotonic()
+                if remaining_time <= 0:
+                    logger.error(
+                        "LLM giving up caller=%s provider=%s reason=%s after %.0fs "
+                        "(%d attempts); retry deadline exhausted",
+                        caller, self.provider_id, reason,
+                        self.retry_max_elapsed, attempt,
+                    )
+                    raise
+                if consumed >= budget:
+                    logger.error(
+                        "LLM giving up caller=%s provider=%s reason=%s after %d "
+                        "attempts; no output from this provider in %.0fs",
+                        caller, self.provider_id, reason, attempt,
+                        self.retry_liveness_window,
+                    )
                     raise
 
                 delay = _retry_after_seconds(error, self.retry_max_delay)
                 honoured = delay is not None
                 if delay is None:
-                    delay = _llm_backoff_delay(
-                        attempt, self.retry_base_delay, self.retry_max_delay
-                    )
+                    if contended:
+                        # Short, flat pause: the provider is up and the rate
+                        # limiter is already pacing us, so escalating backoff
+                        # would only add latency without reducing load.
+                        # Jitter proportional to the delay, so concurrent
+                        # contended callers desynchronise without the spread
+                        # dwarfing a short configured pause.
+                        delay = self.retry_contended_delay * random.uniform(1.0, 1.3)
+                    else:
+                        delay = _llm_backoff_delay(
+                            max(1, consumed), self.retry_base_delay, self.retry_max_delay
+                        )
+                delay = min(delay, max(0.0, deadline - time.monotonic()))
 
-                caller = (request_context or {}).get("caller", "unknown")
                 logger.warning(
                     "LLM transient failure caller=%s provider=%s reason=%s "
-                    "(attempt %d/%d); retrying in %.1fs%s",
+                    "(attempt %d, budget %d/%d, %s); retrying in %.1fs%s",
                     caller,
                     self.provider_id,
                     reason,
                     attempt,
-                    attempts,
+                    consumed,
+                    budget,
+                    "provider alive - not counted" if contended else "provider silent",
                     delay,
                     " (Retry-After)" if honoured else "",
                 )
                 await asyncio.sleep(delay)
+                continue
 
-        # Unreachable: the loop either returns or raises. Kept so a future edit
-        # that changes the loop bounds fails loudly instead of returning None.
-        raise last_error if last_error is not None else RuntimeError(
-            "LLM retry loop exited without a result"
-        )
+            # A completed call is the strongest liveness proof there is, and it
+            # is what lets a *concurrent* struggling call keep its budget.
+            self._mark_provider_alive()
+            return response
 
     @classmethod
     def from_config(cls, config: 'LLMProviderConfig') -> 'AsyncAnthropicClient':

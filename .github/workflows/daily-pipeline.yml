@@ -87,7 +87,12 @@ jobs:
       # Note: only reaches the Anthropic SDK, so it does nothing on the
       # openai-chat (OpenRouter) path. Transport retries are LLM_RETRY_* below.
       LLM_MAX_RETRIES: ${{ vars.LLM_MAX_RETRIES || '2' }}
+      # Attempts are charged only while the provider looks silent; 429s that
+      # arrive while it is demonstrably serving other calls are not counted.
       LLM_RETRY_MAX_ATTEMPTS: ${{ vars.LLM_RETRY_MAX_ATTEMPTS || '6' }}
+      LLM_RETRY_LIVENESS_WINDOW: ${{ vars.LLM_RETRY_LIVENESS_WINDOW || '180' }}
+      LLM_RETRY_MAX_ELAPSED_SECONDS: ${{ vars.LLM_RETRY_MAX_ELAPSED_SECONDS || '900' }}
+      LLM_RETRY_CONTENDED_DELAY: ${{ vars.LLM_RETRY_CONTENDED_DELAY || '10' }}
       LLM_RETRY_BASE_DELAY: ${{ vars.LLM_RETRY_BASE_DELAY || '5' }}
       LLM_RETRY_MAX_DELAY: ${{ vars.LLM_RETRY_MAX_DELAY || '90' }}
       # strict = refuse to publish a report whose category summaries are
