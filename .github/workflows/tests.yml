@@ -129,8 +129,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      # `agents/__init__.py` eagerly imports the whole pipeline -- gatherers and
+      # analyzers included -- so importing even `agents.base` pulls feedparser,
+      # requests, dateutil, bs4, yaml and aiohttp with it. The old three-package
+      # list was therefore never sufficient: this job failed on its FIRST step
+      # (ModuleNotFoundError: feedparser) and silently skipped every step behind
+      # it, so its guards had not actually run since 2026-08-15.
       - name: Install minimal deps for agents.base / llm_client imports
-        run: python3 -m pip install --no-input "httpx>=0.27.0" "anthropic>=0.75,<1.0" "pydantic>=2.0"
+        run: |
+          python3 -m pip install --no-input \
+            "httpx>=0.27.0" "anthropic>=0.75,<1.0" "pydantic>=2.0" \
+            "feedparser>=6.0" "requests>=2.31" "python-dateutil>=2.8" \
+            "beautifulsoup4>=4.12" "PyYAML>=6.0" "aiohttp>=3.9"
       - name: LOOKBACK_HOURS actually bounds the collection window
         run: python3 -m unittest tests.lookback_hours_test -v
       - name: Mid-stream failures are billed for what they streamed
