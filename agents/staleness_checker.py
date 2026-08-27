@@ -234,6 +234,8 @@ class StalenessChecker:
         self.coverage_date = (target_dt - timedelta(days=1)).date()
         self.cutoff_date = self.coverage_date - timedelta(days=FRESHNESS_WINDOW_DAYS)
         self.releases = self._load_releases()
+        self._variant_patterns: Dict[str, "re.Pattern"] = {}
+        self._variant_order: Optional[List[str]] = None
         self._article_page_cache: Dict[str, Optional[str]] = {}
         self._primary_date_cache: Dict[str, Optional[date]] = {}
         self._historical_anchor_items: Optional[List[Dict[str, Any]]] = None
@@ -310,6 +312,37 @@ class StalenessChecker:
 
         return list(variants)
 
+    def _variants_by_specificity(self) -> List[str]:
+        """Release-name variants, longest first, so the most specific wins."""
+        if self._variant_order is None:
+            self._variant_order = sorted(
+                self.releases, key=lambda v: (-len(v), v)
+            )
+        return self._variant_order
+
+    def _variant_pattern(self, variant: str) -> "re.Pattern":
+        """
+        Boundary-aware matcher for one model-name variant.
+
+        A bare substring test conflates a model with its own successors:
+        "gemini 3" is a substring of "Gemini 3.5 Transcribe", so on
+        2026-08-27 a brand-new Gemini 3.5 model inherited Gemini 3's
+        2025-11-18 GA date, was capped at 40 and dropped from top stories
+        AND every summary on its launch day. 99 such shadowing pairs exist
+        in model_releases.yaml ("gpt 5" alone shadows 26 newer names).
+
+        So a variant matches only when it is not glued to a surrounding
+        word AND is not followed by a version continuation (".5", "-5"),
+        which always denotes a different, later model.
+        """
+        cached = self._variant_patterns.get(variant)
+        if cached is None:
+            cached = re.compile(
+                r"(?<![0-9a-z])" + re.escape(variant) + r"(?![0-9a-z])(?![.\-]\d)"
+            )
+            self._variant_patterns[variant] = cached
+        return cached
+
     def _find_stale_release_in_text(self, text: str) -> Optional[Tuple[str, str, str]]:
         """
         Check if text references a stale model release.
@@ -318,8 +351,12 @@ class StalenessChecker:
         """
         text_lower = text.lower()
 
-        for variant, (ga_date, provider) in self.releases.items():
-            if variant not in text_lower:
+        # Longest variant first: the most specific name wins, so text about
+        # "GPT-5.6 Sol Ultra" is judged against that release rather than the
+        # older "gpt 5.6" or "gpt 5" entry it happens to contain.
+        for variant in self._variants_by_specificity():
+            ga_date, provider = self.releases[variant]
+            if not self._variant_pattern(variant).search(text_lower):
                 continue
 
             # Check if the GA date is before our cutoff
@@ -343,8 +380,10 @@ class StalenessChecker:
         """
         title_lower = item.item.title.lower()
 
-        # Model name in the title is a strong signal
-        if model_variant not in title_lower:
+        # Model name in the title is a strong signal. Same boundary rule as
+        # the text scan -- a title reading "Gemini 3.5 Transcribe" must not
+        # count as prominence for the "gemini 3" variant.
+        if not self._variant_pattern(model_variant).search(title_lower):
             return False
 
         # Check for release-oriented language in title or summary
