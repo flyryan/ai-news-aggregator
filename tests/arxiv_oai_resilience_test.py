@@ -45,22 +45,36 @@ class _ReadTimeout(_RequestException):
     pass
 
 
-_installed_requests_stub = False
-if "requests" not in sys.modules:
-    _exceptions = types.ModuleType("requests.exceptions")
-    _exceptions.RequestException = _RequestException
-    _exceptions.HTTPError = _HTTPError
-    _exceptions.ReadTimeout = _ReadTimeout
+# Install the stub UNCONDITIONALLY, then put back whatever was there.
+#
+# This used to be guarded by `if "requests" not in sys.modules`, which made
+# the file silently order-dependent: whenever any test module imported real
+# `requests` first, the harvester bound to it, the fake transport below
+# raised this file's _ReadTimeout while the harvester caught
+# requests.exceptions.ReadTimeout, nothing matched, and the retry tests
+# failed -- reporting a retry regression that did not exist. Nothing sorted
+# before "arxiv_oai_resilience_test" until 2026-08-27, so it never showed.
+#
+# The harvester binds `requests` at import, so it keeps the stub for the
+# life of the process; restoring sys.modules afterwards leaves the real
+# module for every other test.
+_saved_requests = sys.modules.get("requests")
+_saved_exceptions = sys.modules.get("requests.exceptions")
 
-    _requests = types.ModuleType("requests")
-    _requests.exceptions = _exceptions
-    _requests.get = None  # every test installs its own
+_exceptions = types.ModuleType("requests.exceptions")
+_exceptions.RequestException = _RequestException
+_exceptions.HTTPError = _HTTPError
+_exceptions.ReadTimeout = _ReadTimeout
 
-    sys.modules["requests"] = _requests
-    sys.modules["requests.exceptions"] = _exceptions
-    _installed_requests_stub = True
+_requests = types.ModuleType("requests")
+_requests.exceptions = _exceptions
+_requests.get = None  # every test installs its own
 
-requests = sys.modules["requests"]
+sys.modules["requests"] = _requests
+sys.modules["requests.exceptions"] = _exceptions
+
+# The stub the harvester is bound to -- tests set `requests.get` on this.
+requests = _requests
 
 _spec = importlib.util.spec_from_file_location(
     "_arxiv_oai", REPO_ROOT / "agents" / "gatherers" / "arxiv_oai.py"
@@ -78,9 +92,12 @@ ArxivOAIHarvester = _mod.ArxivOAIHarvester
 # staleness_checker_ssrf_test) bound the stub and died in setUp with
 # "module 'requests' has no attribute 'Session'" (14 errors, found 2026-08-21).
 # CI is unaffected either way: each module runs in its own process.
-if _installed_requests_stub:
-    del sys.modules["requests"]
-    del sys.modules["requests.exceptions"]
+for _name, _saved in (("requests", _saved_requests),
+                      ("requests.exceptions", _saved_exceptions)):
+    if _saved is not None:
+        sys.modules[_name] = _saved
+    else:
+        sys.modules.pop(_name, None)
 
 OAI_NS = "http://www.openarchives.org/OAI/2.0/"
 RAW_NS = "http://arxiv.org/OAI/arXivRaw/"

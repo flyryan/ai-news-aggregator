@@ -331,9 +331,9 @@ ARXIV_OAI_MAX_ATTEMPTS # Attempts per OAI-PMH request, including the first (defa
 ARXIV_OAI_BACKOFF_SECONDS # Base for exponential backoff between OAI attempts (default: 5)
 ARXIV_OAI_DEADLINE_SECONDS # Wall-clock ceiling for a whole OAI harvest (default: 600)
 LLM_TRUST_ENV_PROXY   # Let LLM clients use HTTP(S)/ALL_PROXY env vars (default: false)
-LLM_TIMEOUT_SECONDS   # Override provider-config LLM request timeout (Actions default: 240)
+LLM_TIMEOUT_SECONDS   # Override provider-config LLM request timeout (workflow fallback 240, but repo var LLM_TIMEOUT_SECONDS is set to 600 and wins — 240 deterministically timed out Monday research batches)
 LLM_MAX_CONCURRENT_REQUESTS # Async LLM request cap per provider route; 0 disables it (default: 8)
-LLM_ADAPTIVE_MAX_TOKENS # Response output ceiling for adaptive calls; not a thinking budget (default: 65536)
+LLM_ADAPTIVE_MAX_TOKENS # Ceiling for adaptive calls, taken as min(this, llm.max_output_tokens) — so this, not providers.yaml, bounds a normal call. On reasoning models it is SHARED with reasoning/thinking tokens (code default 65536; Actions sets 131072, z-ai/GLM-5.3-Flash's own limit)
 LLM_MAX_RETRIES       # Anthropic SDK retry count; ONLY affects mode: anthropic/openai-compatible via the SDK, NOT the openai-chat path (default: 2)
 LLM_MAX_REQUESTS_PER_MINUTE # Per-route request RATE cap; 0 disables. A concurrency cap alone does not bound rate when a provider fast-fails (default: 0)
 LLM_RATE_LIMIT_BURST  # Tokens the rate limiter may hold, i.e. how many requests can launch back-to-back (default: 1 = evenly paced)
@@ -368,7 +368,7 @@ TZ                    # Timezone (default: America/New_York)
 
 ## Adaptive Thinking Profiles
 
-The pipeline uses internal AATF analysis profiles that map to Claude Opus 5 adaptive `output_config.effort`. QUICK/STANDARD/DEEP/ULTRATHINK are not provider thinking levels for Opus 5. `LLM_ADAPTIVE_MAX_TOKENS` controls the response output ceiling separately; `budget_tokens` is only used for older Claude models that still support manual thinking.
+The pipeline uses internal AATF analysis profiles that map to Claude Opus 5 adaptive `output_config.effort`. QUICK/STANDARD/DEEP/ULTRATHINK are not provider thinking levels for Opus 5. `LLM_ADAPTIVE_MAX_TOKENS` controls the response output ceiling separately; `budget_tokens` is only used for older Claude models that still support manual thinking. The ceiling is not output-only: on adaptive Claude it is a combined thinking+output budget, and on z-ai/GLM-5.3-Flash reasoning tokens are billed and counted as completion tokens, so a DEEP/ULTRATHINK call can spend most of the budget reasoning and clip the visible answer mid-word. It is set to the model's own limit (131072) for that reason; raising it is cost-neutral because effort, not this cap, governs how much thinking happens.
 
 | Component | Profile | Opus 5 Effort |
 |-----------|---------|-----------------|

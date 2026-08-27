@@ -83,7 +83,15 @@ jobs:
       # No route in the providers secret sets `max_requests_per_minute` yet, so
       # this env value is what actually takes effect today.
       LLM_MAX_REQUESTS_PER_MINUTE: ${{ vars.LLM_MAX_REQUESTS_PER_MINUTE || '15' }}
-      LLM_ADAPTIVE_MAX_TOKENS: ${{ vars.LLM_ADAPTIVE_MAX_TOKENS || '65536' }}
+      # Response output ceiling for adaptive calls. The client takes
+      # min(this, llm.max_output_tokens), so this -- not providers.yaml --
+      # is what actually bounds a normal call. z-ai/GLM-5.3-Flash is a
+      # reasoning model on chat/completions, where reasoning tokens count as
+      # completion tokens, so the budget is shared: at 65536 a DEEP call
+      # could reason most of it away and clip the answer mid-word. 131072 is
+      # the model's own completion limit. Cost-neutral -- it is a cap, not a
+      # target, and effort governs how much thinking actually happens.
+      LLM_ADAPTIVE_MAX_TOKENS: ${{ vars.LLM_ADAPTIVE_MAX_TOKENS || '131072' }}
       # Note: only reaches the Anthropic SDK, so it does nothing on the
       # openai-chat (OpenRouter) path. Transport retries are LLM_RETRY_* below.
       LLM_MAX_RETRIES: ${{ vars.LLM_MAX_RETRIES || '2' }}
