@@ -312,6 +312,21 @@ class StalenessChecker:
 
         return list(variants)
 
+    @staticmethod
+    def _normalize_for_match(text: str) -> str:
+        """
+        Fold a title/summary into the shape release variants are stored in.
+
+        Every variant in model_releases.yaml is space-separated ("gpt 5.6"),
+        but headlines overwhelmingly write the dashed form ("GPT-5.6"), so a
+        raw substring/regex test missed them and the freshness check simply
+        did not fire on the most common way a model is named in print.
+        Dashes, underscores and slashes become spaces; runs of whitespace
+        collapse. Version separators ("5.6") are dots and survive untouched,
+        so the version-continuation guard still applies.
+        """
+        return re.sub(r"[\s\-_/]+", " ", text.lower()).strip()
+
     def _variants_by_specificity(self) -> List[str]:
         """Release-name variants, longest first, so the most specific wins."""
         if self._variant_order is None:
@@ -349,15 +364,31 @@ class StalenessChecker:
 
         Returns (model_name_matched, ga_date, provider) or None.
         """
-        text_lower = text.lower()
+        text_lower = self._normalize_for_match(text)
 
         # Longest variant first: the most specific name wins, so text about
         # "GPT-5.6 Sol Ultra" is judged against that release rather than the
         # older "gpt 5.6" or "gpt 5" entry it happens to contain.
-        for variant in self._variants_by_specificity():
+        matched = [
+            variant for variant in self._variants_by_specificity()
+            if self._variant_pattern(variant).search(text_lower)
+        ]
+
+        # Drop ancestors: a variant wholly contained in another matched
+        # variant is not what this text is about. Without this, scanning
+        # simply continues past a FRESH specific match looking for a stale
+        # one, and finds the ancestor -- so "OpenAI launches GPT-5.6-Cyber"
+        # (new that day) fell through to the "gpt 5.6" entry and was demoted
+        # with a GA date two months older than the model in the headline.
+        # Distinct models named side by side ("GPT-5.6 vs Mythos") are not
+        # ancestors of each other and both survive this filter.
+        specific = [
+            variant for variant in matched
+            if not any(variant != other and variant in other for other in matched)
+        ]
+
+        for variant in specific:
             ga_date, provider = self.releases[variant]
-            if not self._variant_pattern(variant).search(text_lower):
-                continue
 
             # Check if the GA date is before our cutoff
             try:
@@ -378,7 +409,7 @@ class StalenessChecker:
         strong signal. Also checks if "release" / "launches" / "announces"
         language is present.
         """
-        title_lower = item.item.title.lower()
+        title_lower = self._normalize_for_match(item.item.title)
 
         # Model name in the title is a strong signal. Same boundary rule as
         # the text scan -- a title reading "Gemini 3.5 Transcribe" must not

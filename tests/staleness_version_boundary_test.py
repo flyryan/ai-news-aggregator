@@ -23,6 +23,12 @@ Locks in:
   4. The most specific variant wins, so a matched release carries its own
      GA date rather than an ancestor's.
   5. Title prominence uses the same boundary rule.
+  6. Headlines write the dashed form ("GPT-5.6"), which the variant table
+     never contains, so matching normalises separators.
+  7. A FRESH specific match is never traded down for a stale ancestor.
+     The scan used to continue past it: "OpenAI launches GPT-5.6-Cyber"
+     on launch day resolved to the "gpt 5.6" entry and was demoted with a
+     GA date two months older than the model in the headline.
 
 Stdlib-only unittest:
 
@@ -57,6 +63,9 @@ openai:
   GPT-5.6:
     ga_date: "2026-06-25"
     api_date: "2026-06-25"
+  GPT-5.6-Cyber:
+    ga_date: "2026-08-11"
+    api_date: "2026-08-11"
 """
 
 
@@ -129,6 +138,75 @@ class VersionBoundaryTest(unittest.TestCase):
         self.assertTrue(
             self.checker._is_primarily_about_release(real, "gemini 3")
         )
+
+
+class DashedFormTest(unittest.TestCase):
+    """Headlines name models with dashes; the variant table uses spaces."""
+
+    def setUp(self):
+        self.config_dir = tempfile.mkdtemp()
+        (Path(self.config_dir) / "model_releases.yaml").write_text(
+            RELEASES_YAML, encoding="utf-8"
+        )
+        self.checker = StalenessChecker(
+            config_dir=self.config_dir,
+            target_date="2026-08-27",
+            web_dir=os.path.join(self.config_dir, "web"),
+        )
+        self.addCleanup(shutil.rmtree, self.config_dir, ignore_errors=True)
+
+    def test_dashed_name_matches_spaced_variant(self):
+        match = self.checker._find_stale_release_in_text("OpenAI ships GPT-5.6")
+        self.assertIsNotNone(match, "dashed headline form must be recognised")
+        self.assertEqual(match[0], "gpt 5.6")
+
+    def test_spaced_and_dashed_agree(self):
+        self.assertEqual(
+            self.checker._find_stale_release_in_text("OpenAI ships GPT-5.6"),
+            self.checker._find_stale_release_in_text("OpenAI ships GPT 5.6"),
+        )
+
+
+class FreshSpecificMatchTest(unittest.TestCase):
+    """A fresh specific model must not be demoted via a stale ancestor."""
+
+    def setUp(self):
+        self.config_dir = tempfile.mkdtemp()
+        (Path(self.config_dir) / "model_releases.yaml").write_text(
+            RELEASES_YAML, encoding="utf-8"
+        )
+        # Coverage = 2026-08-11, the day GPT-5.6-Cyber went GA.
+        self.checker = StalenessChecker(
+            config_dir=self.config_dir,
+            target_date="2026-08-12",
+            web_dir=os.path.join(self.config_dir, "web"),
+        )
+        self.addCleanup(shutil.rmtree, self.config_dir, ignore_errors=True)
+
+    def test_launch_day_derivative_is_not_stale(self):
+        self.assertIsNone(
+            self.checker._find_stale_release_in_text(
+                "OpenAI launches GPT-5.6-Cyber to help defenders "
+                "find vulnerabilities"
+            ),
+            "GPT-5.6-Cyber is new that day; the gpt 5.6 ancestor must not "
+            "be substituted for it",
+        )
+
+    def test_the_ancestor_alone_is_still_stale(self):
+        # Same run, plain GPT-5.6 (GA 2026-06-25) remains correctly stale --
+        # proving the ancestor filter did not simply disable the check.
+        match = self.checker._find_stale_release_in_text("OpenAI ships GPT-5.6")
+        self.assertIsNotNone(match)
+        self.assertEqual(match[0], "gpt 5.6")
+
+    def test_distinct_models_side_by_side_still_match(self):
+        # Not ancestors of one another: the stale one is still found.
+        match = self.checker._find_stale_release_in_text(
+            "Benchmarking GPT-5.6 against Gemini 3"
+        )
+        self.assertIsNotNone(match)
+        self.assertIn(match[0], {"gpt 5.6", "gemini 3"})
 
 
 if __name__ == "__main__":
