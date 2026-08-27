@@ -196,17 +196,18 @@ pipeline:
 # LLM: OpenRouter serves the Anthropic Messages format at /api/v1/messages,
 # so mode stays "openai-compatible" (Bearer auth) and base_url points at the
 # /api root. The schema forbids a /v1 suffix; the SDK appends /v1/messages.
-# Models are OpenRouter slugs (e.g., stealth/ox-alpha, anthropic/claude-opus-5).
+# Models are OpenRouter slugs (e.g., z-ai/GLM-5.3-Flash, anthropic/claude-opus-5).
 #
 # llm:
 #   mode: "openai-compatible"
 #   api_key: "${OPENROUTER_API_KEY}"
 #   base_url: "https://openrouter.ai/api"
-#   model: "stealth/ox-alpha"
+#   model: "z-ai/GLM-5.3-Flash"
+#   display_name: "GLM 5.3 Flash"
 #   timeout: 600
 #   routes:
 #     - id: openrouter
-#       model: "stealth/ox-alpha"
+#       model: "z-ai/GLM-5.3-Flash"
 #
 # Image: uses OpenRouter's dedicated images endpoint, which natively supports
 # 21:9 aspect ratios, resolution tiers, and reference images (the skunk mascot).

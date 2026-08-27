@@ -36,6 +36,7 @@ ERAS = [
     ("2026-05-28", "claude-4.8-opus-aws", "Claude Opus 4.8"),
     ("2026-07-27", "claude-5-opus-aws", "Claude Opus 5"),
     ("2026-08-22", "stealth/ox-alpha", "Ox Alpha"),
+    ("2026-08-27", "z-ai/GLM-5.3-Flash", "GLM 5.3 Flash"),
 ]
 
 
@@ -50,6 +51,8 @@ def display_name_for_image(model_id: str) -> str:
 def display_name_for(model_id: str) -> str:
     """Human-facing name for any model id seen in this pipeline's history."""
     mid = model_id.lower()
+    if "glm-5.3-flash" in mid:
+        return "GLM 5.3 Flash"
     if "ox-alpha" in mid:
         return "Ox Alpha"
     if "claude-5-opus" in mid or "claude-opus-5" in mid:

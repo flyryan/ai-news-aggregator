@@ -204,10 +204,21 @@ class CostTracker:
         self.pricing_is_estimate = False
 
         # Determine pricing based on model
-        if "ox-alpha" in model.lower():
-            # stealth/ox-alpha is $0/$0 on OpenRouter (verified live against
-            # /api/v1/models/stealth/ox-alpha/endpoints on 2026-08-22).
-            # Update here when the promo ends.
+        if "glm-5.3-flash" in model.lower():
+            # z-ai/GLM-5.3-Flash -- ox-alpha's real identity after the reveal.
+            # Verified live against /api/v1/models/z-ai/glm-5.3-flash/endpoints
+            # on 2026-08-27: $0.075/MTok prompt, $0.25/MTok completion,
+            # $0.015/MTok cache read. No cache-write premium is published, so
+            # writes bill at the prompt rate.
+            self.input_price = 0.075
+            self.output_price = 0.25
+            self.cache_write_price = 0.075
+            self.cache_hit_price = 0.015
+        elif "ox-alpha" in model.lower():
+            # stealth/ox-alpha was $0/$0 on OpenRouter while listed (verified
+            # live on 2026-08-22). Delisted 2026-08-27 when revealed as
+            # GLM-5.3-Flash; kept at zero so offline regeneration of runs from
+            # the stealth period reports what they actually cost.
             self.input_price = 0.0
             self.output_price = 0.0
             self.cache_write_price = 0.0

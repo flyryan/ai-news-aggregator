@@ -8,7 +8,15 @@ zero-rate entry is exact, not an estimate. Separately, OpenRouter's image
 responses carry an authoritative ``usage.cost``; re-pricing tokens from
 our Gemini table ignored it.
 
+2026-08-27: ox-alpha was revealed as GLM-5.3-Flash and delisted; the pipeline
+now runs z-ai/GLM-5.3-Flash, which is PAID ($0.075/MTok in, $0.25/MTok out,
+$0.015/MTok cache read -- confirmed live via
+/api/v1/models/z-ai/glm-5.3-flash/endpoints). The zero-rate ox-alpha entry
+stays so offline regeneration of stealth-era runs reports true cost.
+
 Locks in:
+  0. CostTracker('z-ai/GLM-5.3-Flash') uses the real OpenRouter schedule,
+     not the zero rate and not the Opus estimate fallback.
   1. CostTracker('stealth/ox-alpha') prices everything at zero.
   2. reset_tracker(model) propagates the model so reports/replay stop
      claiming the tracker default ('claude-5-opus-aws').
@@ -33,6 +41,23 @@ from agents.cost_tracker import (  # noqa: E402
     price_image_usage,
     reset_tracker,
 )
+
+
+class GlmFlashPricingTest(unittest.TestCase):
+    def test_glm_5_3_flash_uses_real_openrouter_schedule(self):
+        tracker = CostTracker(model="z-ai/GLM-5.3-Flash")
+        self.assertEqual(tracker.input_price, 0.075)
+        self.assertEqual(tracker.output_price, 0.25)
+        self.assertEqual(tracker.cache_hit_price, 0.015)
+        self.assertFalse(tracker.pricing_is_estimate)
+
+        tracker.record_call("news_analyzer.reduce_rank", {
+            "input_tokens": 1_000_000,
+            "output_tokens": 1_000_000,
+        }, "DEEP")
+        breakdown = tracker.get_total_cost()
+        self.assertAlmostEqual(breakdown.input_cost, 0.075, places=6)
+        self.assertAlmostEqual(breakdown.output_cost, 0.25, places=6)
 
 
 class OxAlphaPricingTest(unittest.TestCase):
