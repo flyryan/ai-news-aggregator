@@ -78,6 +78,14 @@ class EcosystemContextManager:
         'ai21': 'AI21',
         'bytedance': 'ByteDance',
         'inception': 'Inception',
+        # Tier 2 (approved 2026-09-01 grounding coverage audit): frequently
+        # appearing labs. Tencent and Poolside have live OpenRouter prefixes;
+        # Reflection AI and Databricks are tracked for future releases even
+        # though neither currently has a curated model entry.
+        'tencent': 'Tencent',
+        'poolside': 'Poolside',
+        'reflection': 'Reflection AI',
+        'databricks': 'Databricks',
     }
 
     # Max models per provider to keep prompt size reasonable
