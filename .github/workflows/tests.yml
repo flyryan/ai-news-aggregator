@@ -157,3 +157,9 @@ jobs:
       # signed, committed and published while every phase reported [ok].
       - name: 429s retry with backoff, are rate-limited, and cannot publish silently
         run: python3 -m unittest tests.llm_rate_limit_resilience_test -v
+      # 2026-09-03: first run on meta/muse-spark-1.3-contributor. A model with
+      # no row in the tracker is priced at Opus rates flagged as an estimate --
+      # 50x this tier's real completion price, inverting the cost comparison
+      # the test run exists to make.
+      - name: Muse Spark tiers are priced as measurements, not estimates
+        run: python3 -m unittest tests.muse_spark_pricing_test -v

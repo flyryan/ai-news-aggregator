@@ -204,7 +204,30 @@ class CostTracker:
         self.pricing_is_estimate = False
 
         # Determine pricing based on model
-        if "glm-5.3-flash" in model.lower():
+        if "muse-spark" in model.lower() and "contributor" in model.lower():
+            # meta/muse-spark-1.3-contributor -- Meta's data-sharing
+            # ("contributor") tier of Muse Spark, listed on OpenRouter
+            # 2026-09-02. Verified live against
+            # /api/v1/models/meta/muse-spark-1.3-contributor-20260902/endpoints
+            # on 2026-09-03: $0.10/MTok prompt, $0.20/MTok completion,
+            # $0.002/MTok cache read. One Meta-served endpoint, so this single
+            # row IS the whole schedule (unlike GLM's 13 endpoints at two
+            # prices). No cache-write premium is published, so writes bill at
+            # the prompt rate. Reasoning is mandatory and billed as completion
+            # tokens.
+            self.input_price = 0.10
+            self.output_price = 0.20
+            self.cache_write_price = 0.10
+            self.cache_hit_price = 0.002
+        elif "muse-spark" in model.lower():
+            # meta/muse-spark-1.x standard tier, same endpoint shape:
+            # $1.25/MTok prompt, $4.25/MTok completion, $0.15/MTok cache read
+            # (verified 2026-09-03 for 1.3; 1.1 and 1.2 list identical rates).
+            self.input_price = 1.25
+            self.output_price = 4.25
+            self.cache_write_price = 1.25
+            self.cache_hit_price = 0.15
+        elif "glm-5.3-flash" in model.lower():
             # z-ai/GLM-5.3-Flash -- ox-alpha's real identity after the reveal.
             # Verified live against /api/v1/models/z-ai/glm-5.3-flash/endpoints
             # on 2026-08-27: $0.075/MTok prompt, $0.25/MTok completion,
