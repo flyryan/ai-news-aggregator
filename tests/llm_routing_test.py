@@ -181,6 +181,27 @@ class LLMRouteConfigTests(unittest.TestCase):
             with self.subTest(model=model):
                 self.assertTrue(_uses_adaptive_thinking(model))
 
+    def test_non_claude_versions_never_read_as_legacy_claude(self):
+        """A vendor's own low version number is not a Claude generation.
+
+        2026-09-03: meta/muse-spark-1.3-contributor parsed as "1.3" (< 4.7),
+        took the manual-thinking branch, and a whole run was sent with no
+        reasoning effort at all (provider default medium) under a 57344
+        ceiling -- silently. Non-Claude routes only have effort, so they are
+        adaptive whatever their version says.
+        """
+        for model in (
+            "meta/muse-spark-1.3-contributor",
+            "meta/muse-spark-1.3",
+            "meta/muse-spark-1.2",
+            "z-ai/GLM-5.3-Flash",
+            "deepseek/deepseek-v4-flash",
+            "openai/gpt-5.4-mini",
+            "vendor/model-2.0",
+        ):
+            with self.subTest(model=model):
+                self.assertTrue(_uses_adaptive_thinking(model))
+
 
 class AsyncLLMRouterTests(unittest.TestCase):
     def test_round_robin_rotation(self):

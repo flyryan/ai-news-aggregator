@@ -503,6 +503,17 @@ def _uses_adaptive_thinking(model: str) -> bool:
     # be misread as a version pair on names such as claude-5-opus-gcp[1m].
     normalized = re.sub(r'\[[^\]]*\]', '', normalized)
 
+    # The legacy set is Claude-only, so the version heuristic below must not
+    # run on anyone else's model id. Other vendors version the same way
+    # (meta/muse-spark-1.3, z-ai/glm-5.3-flash) and a low number reads as a
+    # pre-4.7 Claude: on 2026-09-03 muse-spark-1.3 parsed as "1.3", took the
+    # manual branch, and a whole local run went out with NO effort level
+    # (provider default: medium) under a 57344 ceiling, silently -- exactly
+    # the wrong-manual failure the docstring warns about. Effort is the only
+    # reasoning knob a non-Claude route has, so it is adaptive by definition.
+    if not any(tok in normalized for tok in ("claude", "opus", "sonnet", "haiku", "fable")):
+        return True
+
     # Legacy manual-thinking models are a closed, known set. Match major.minor
     # only where both digits are adjacent in the alias (4-6 / 4.6), and bound
     # the minor to one digit so a dated snapshot (claude-opus-4-6-20251101)
