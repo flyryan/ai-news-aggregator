@@ -944,6 +944,42 @@ class ReplayGenerator:
         }
 
     @staticmethod
+    def _unbilled_image_spend(
+        cost_report: Dict[str, Any], calls: Sequence[Dict[str, Any]]
+    ) -> float:
+        """Image spend the run's own cost report does not already contain.
+
+        Hero generation goes through the image client, which never reaches the
+        CostTracker, so ``cost["total"]`` covers LLM routes only. The replay
+        nonetheless shows the image call and its price, so a header taken
+        straight from that total can read *less* than a line item on the same
+        page: 2026-08-27 published a $0.135 run header above a $0.138 hero card.
+
+        Nothing is invented here. The figure is the one the hero call already
+        carries, which is exactly zero when the provider reported no usage
+        (``usage_measured: false``) -- and adding zero leaves unknown unknown.
+
+        If the tracker ever records image rows itself, the report already
+        carries that spend and adding it again would double-charge, so such a
+        report is left alone. (A report of that shape would additionally need
+        :meth:`_build_calls` to skip its image rows, or the hero would be drawn
+        twice -- once from the row, once synthesized from ``hero_image_usage``.)
+        """
+        cost = cost_report.get("cost") or {}
+        if "image" in cost:
+            return 0.0
+        if any(
+            isinstance(row, dict) and row.get("kind") == "image"
+            for row in cost_report.get("calls") or []
+        ):
+            return 0.0
+        return sum(
+            float(call.get("cost_usd") or 0.0)
+            for call in calls
+            if call.get("role") == ROLE_IMAGE
+        )
+
+    @staticmethod
     def _build_agents(
         calls: Sequence[Dict[str, Any]], sources: Sequence[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
@@ -1309,6 +1345,11 @@ class ReplayGenerator:
         prompt_blob = self._build_prompts(recorder, calls, date)
 
         tokens = cost_report.get("tokens") or {}
+        # The header sums the same spend the replay itemises below it, image
+        # generation included; token totals stay LLM-only, because image tokens
+        # bill in three classes at three rates and are not comparable.
+        total_cost = float((cost_report.get("cost") or {}).get("total") or 0.0)
+        total_cost += self._unbilled_image_spend(cost_report, calls)
         status = "success"
         if any(p.get("status") == "failed" for p in phases):
             status = "failed"
@@ -1325,7 +1366,7 @@ class ReplayGenerator:
             "run": {
                 "status": status,
                 "total_items_analyzed": int(orchestrator_result.get("total_items_analyzed") or 0),
-                "total_cost_usd": round(float((cost_report.get("cost") or {}).get("total") or 0.0), 6),
+                "total_cost_usd": round(total_cost, 6),
                 "total_input_tokens": int(tokens.get("input_tokens") or 0),
                 "total_output_tokens": int(tokens.get("output_tokens") or 0),
                 "llm_calls": len(calls),

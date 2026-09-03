@@ -30,7 +30,15 @@ export type ReplayOutcome = 'ok' | 'truncated' | 'refused' | 'failed' | 'retried
 export interface ReplayRun {
 	status: ReplayRunStatus;
 	total_items_analyzed: number;
+	/**
+	 * All spend for the run — LLM routes plus image generation. The pipeline's own
+	 * cost report is LLM-only (the image client never reaches the cost tracker), so
+	 * the generator folds the Illustrator's price in here; otherwise the header can
+	 * read less than the hero card inside the same replay. Zero image spend means
+	 * the provider reported no usage, never that the image was free.
+	 */
 	total_cost_usd: number;
+	/** LLM routes only. Image tokens bill in three classes at three rates. */
 	total_input_tokens: number;
 	total_output_tokens: number;
 	llm_calls: number;

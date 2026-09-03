@@ -53,8 +53,8 @@ This needs **no nginx change** and works with the dev Vite middleware
   "run": {
     "status": "success",             // success | partial | failed
     "total_items_analyzed": 1186,
-    "total_cost_usd": 11.42,
-    "total_input_tokens": 8412330,
+    "total_cost_usd": 11.42,         // ALL run spend: LLM routes + image generation
+    "total_input_tokens": 8412330,   // LLM routes only -- image tokens bill differently
     "total_output_tokens": 402118,
     "llm_calls": 47,
     "models": ["claude-5-opus-aws", "claude-5-opus-gcp", "claude-5-opus-anthropic"],
@@ -278,6 +278,21 @@ leak. `base.step_label_for_url` reduces a feed URL to its host for exactly this 
 **Steps cannot be backfilled.** `data/processed/` holds no per-unit spans, so offline
 regeneration of a past date produces a source row without `steps`, never a
 reconstructed one. Same honesty rule as `run.timings_measured`.
+
+**`run.total_cost_usd` covers image spend too.** The cost tracker only sees LLM
+routes, so the run's `cost_report_{date}.json` total is LLM-only; hero generation is
+priced by `agents/cost_tracker.price_image_usage` and reaches the replay on the
+Illustrator's call. The header adds any image spend the report does not already
+account for, so it can never read *less* than a line item on the same page — the
+2026-08-27 shape, a $0.135 run header above a $0.138 hero card. Adding it twice is
+guarded against: a report carrying `cost.image` or a `kind: "image"` call row is
+taken as already inclusive. When the provider reported no usage the hero call's cost
+is `0.0` with `usage_measured: false`, and adding zero keeps unknown unknown — the
+total never invents a price for an image nobody billed us for.
+
+`total_input_tokens` / `total_output_tokens` stay LLM-only on purpose. An image
+response bills input, image and thinking tokens at three different rates, so folding
+those counts into a token total would make cost-per-token nonsense.
 
 **`phase_id`** — resolved by wall-clock containment against `PhaseTracker` absolute
 timestamps. `PhaseTracker.to_dict()` currently drops absolute times; the generator reads
