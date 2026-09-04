@@ -42,6 +42,13 @@ Locked in:
   5. No ``_replay`` key anywhere: spans are memory-only and died with the run.
   6. ``write_checkpoints`` refuses to overwrite an existing checkpoint
      directory unless ``--force``; real checkpoints beat synthesized ones.
+  7. Every ``git checkout`` this script hands an operator -- in the module
+     docstring and in what ``main()`` prints -- is scoped to ``replay-*``.
+     ``git checkout HEAD -- web/data/<date>/`` restores the WHOLE published
+     date directory: ``summary.json``, the category files and the hero. Run
+     straight after a ``--resume-from 4.5`` repair, as the guidance tells the
+     operator to, it silently reverts the re-enriched summaries that repair
+     just paid for -- undoing the exact failure this script exists to fix.
 
 Stdlib-only unittest (no network, no LLM):
 
@@ -54,10 +61,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import contextlib  # noqa: E402
 import importlib.util  # noqa: E402
+import io  # noqa: E402
 import json  # noqa: E402
+import re  # noqa: E402
 import shutil  # noqa: E402
 import tempfile  # noqa: E402
+from unittest import mock  # noqa: E402
 
 from agents.base import AnalyzedItem, CategoryReport, CollectedItem  # noqa: E402
 
@@ -325,6 +336,69 @@ class WriteCheckpointsTest(unittest.TestCase):
             self.checkpoints, self.data_dir, "2026-09-04", force=True
         )
         self.assertEqual(len(written), 5)
+
+
+class ReplayRestoreGuidanceTest(unittest.TestCase):
+    """The replay-restore command must not revert the repair it protects.
+
+    The script's whole reason to exist is letting ``--resume-from 4.5``
+    re-enrich a day whose checkpoints died with the runner. It then tells the
+    operator to restore the replay artifacts, which the repair cannot rebuild.
+    If that instruction names the date directory instead of ``replay-*``, the
+    copy-paste immediately after the repair throws the repair away.
+    """
+
+    # Any web/data/<date>/ path the guidance names, in either the docstring's
+    # placeholder form or a real formatted date, plus whatever follows it.
+    DATE_PATH = re.compile(r"web/data/(?:<date>|\{date\}|\d{4}-\d{2}-\d{2})/(\S*)")
+
+    def setUp(self):
+        self.module = load_script()
+
+    def _assert_scoped_to_replay(self, text, label):
+        tails = self.DATE_PATH.findall(text)
+        self.assertTrue(tails, f"{label} names no web/data/<date>/ path at all")
+        for tail in tails:
+            self.assertTrue(
+                tail.startswith("replay-"),
+                f"{label} points at web/data/<date>/{tail!r}: restoring anything "
+                "wider than replay-* discards the re-enriched summaries the "
+                "repair run just produced",
+            )
+
+    def test_module_docstring_scopes_the_checkout_to_replay_files(self):
+        doc = self.module.__doc__
+        self._assert_scoped_to_replay(doc, "module docstring")
+        # Quoted so the shell hands the glob to git rather than expanding it
+        # against the working tree.
+        self.assertIn("git checkout HEAD -- 'web/data/<date>/replay-*'", doc)
+
+    def test_printed_guidance_scopes_the_checkout_to_replay_files(self):
+        guidance = self.module.replay_restore_guidance("2026-09-04")
+        self._assert_scoped_to_replay(guidance, "printed guidance")
+        self.assertIn("git checkout HEAD -- 'web/data/2026-09-04/replay-*'", guidance)
+
+    def test_main_prints_the_same_guidance_it_documents(self):
+        work_dir = Path(tempfile.mkdtemp(prefix="checkpoints-from-result-main-"))
+        self.addCleanup(shutil.rmtree, work_dir, ignore_errors=True)
+        result_path = work_dir / "orchestrator_result_2026-09-04.json"
+        with open(result_path, "w", encoding="utf-8") as handle:
+            json.dump(make_result(), handle)
+
+        argv = ["checkpoints_from_result.py", str(result_path), "--data-dir", str(work_dir / "data")]
+        stdout = io.StringIO()
+        with mock.patch.object(sys, "argv", argv):
+            with contextlib.redirect_stdout(stdout):
+                exit_code = self.module.main()
+
+        printed = stdout.getvalue()
+        self.assertEqual(exit_code, 0, printed)
+        self._assert_scoped_to_replay(printed, "main() output")
+        self.assertIn(
+            self.module.replay_restore_guidance("2026-09-04"),
+            printed,
+            "main() must print the guidance verbatim, so docstring and output cannot drift",
+        )
 
 
 if __name__ == "__main__":

@@ -21,9 +21,15 @@ What it cannot rebuild, and why:
     dies with the process; it never reaches the orchestrator result. A
     synthesized checkpoint therefore carries no `_replay` key at all, and a
     repair run started from these checkpoints will publish a replay containing
-    only the calls IT made. Restore the day's `web/data/<date>/replay-*.json*`
-    from git after the repair run (`git checkout HEAD -- web/data/<date>/`
-    for the replay files) rather than shipping a stunted one.
+    only the calls IT made. Restore just those artifacts from git after the
+    repair run, rather than shipping a stunted one:
+
+        git checkout HEAD -- 'web/data/<date>/replay-*'
+
+    Scoped to `replay-*`, and quoted so git rather than the shell expands the
+    glob. Checking out the whole date directory would drag `summary.json`, the
+    category files and the hero back to their pre-repair state -- reverting the
+    re-enriched summaries the repair run just paid for.
   * `top_items` ranking thinking, per-phase details and the wall-clock windows
     of phases that never finished. Only phases with both bounds become
     `_phase_timings`, matching PhaseTracker.export_timings().
@@ -51,6 +57,27 @@ from agents.base import CollectedItem  # noqa: E402
 # Written in resume order, which is also the order _detect_resume_point scans
 # them in reverse. `hero` is last because it is the only optional one.
 CHECKPOINT_ORDER = ('gathering', 'analysis', 'topics', 'summary', 'hero')
+
+# The only safe restore target after a repair run. Scoped to `replay-*` because
+# a checkout of the whole date directory reverts the re-enriched summaries the
+# repair just produced, and quoted so git -- not the shell -- expands the glob.
+REPLAY_RESTORE_COMMAND = "git checkout HEAD -- 'web/data/{date}/replay-*'"
+
+
+def replay_restore_guidance(date: str) -> str:
+    """The post-repair replay note, printed by main() and mirrored in the docstring.
+
+    One source of text so the two cannot drift: the docstring used to carry a
+    directory-wide `git checkout` that undid the repair it was protecting.
+    """
+    return (
+        "These checkpoints carry no replay bundle (spans are memory-only and died "
+        "with the run), so restore only the day's replay artifacts from git after "
+        "the repair run instead of publishing the stunted one it generates:\n"
+        f"  {REPLAY_RESTORE_COMMAND.format(date=date)}\n"
+        "Keep it scoped to replay-*: checking out the whole date directory would "
+        "revert the re-enriched summaries the repair just produced."
+    )
 
 
 def _phase_timings(result: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
@@ -223,11 +250,7 @@ def main() -> int:
         f'--config-dir ./config --data-dir {args.data_dir} --web-dir ./web'
     )
     print()
-    print(
-        "These checkpoints carry no replay bundle (spans are memory-only and died "
-        f"with the run), so restore web/data/{date}/replay-*.json* from git after "
-        "the repair run instead of publishing the stunted one it generates."
-    )
+    print(replay_restore_guidance(date))
     return 0
 
 
