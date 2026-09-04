@@ -349,11 +349,30 @@ _OPENAI_FINISH_TO_STOP = {
 }
 
 
+class OpenRouterStreamError(RuntimeError):
+    """An error object OpenRouter delivered inside the SSE stream.
+
+    Carries the chunk's `code` as `status_code` so `_transient_retry_reason`
+    can classify it exactly like an HTTP status: 429 and 5xx retry, other 4xx
+    fail fast. On 2026-09-04 three link-enrichment calls died to
+    `{"error": {"code": 504, "message": "Upstream idle timeout exceeded"}}`
+    after minutes of reasoning and were never retried, because the bare
+    RuntimeError raised here had nothing the classifier recognised.
+    """
+
+    def __init__(self, message: str, status_code: Optional[int] = None):
+        super().__init__(message)
+        self.status_code = status_code
+
+
 def _openai_chat_apply_chunk(chunk: Any, state: Dict[str, Any]) -> None:
     """Fold one chat-completions SSE payload into the accumulator.
 
-    Provider error chunks raise RuntimeError so the router's retry classifier
-    treats them like any other failed attempt.
+    An error object arriving inside an otherwise healthy 200 stream raises
+    OpenRouterStreamError carrying the chunk's code, so the transport retry
+    loop treats it exactly like the same status on the response itself:
+    429/5xx are retried, other 4xx fail fast, and a chunk with no usable code
+    is not retried at all.
     """
     if not isinstance(chunk, dict):
         return
@@ -361,7 +380,18 @@ def _openai_chat_apply_chunk(chunk: Any, state: Dict[str, Any]) -> None:
         err = chunk["error"]
         msg = err.get("message", str(err)) if isinstance(err, dict) else str(err)
         code = err.get("code") if isinstance(err, dict) else None
-        raise RuntimeError(f"OpenRouter stream error (code={code}): {msg}")
+        # Providers send the code both as a number and as a quoted string;
+        # anything else stays None, which reads as non-retryable.
+        if isinstance(code, int):
+            status_code: Optional[int] = code
+        elif isinstance(code, str) and code.strip().isdigit():
+            status_code = int(code)
+        else:
+            status_code = None
+        # Message text is grepped out of run logs -- keep it byte-identical.
+        raise OpenRouterStreamError(
+            f"OpenRouter stream error (code={code}): {msg}", status_code=status_code
+        )
 
     for choice in chunk.get("choices") or []:
         delta = choice.get("delta") or {}

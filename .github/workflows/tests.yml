@@ -163,3 +163,6 @@ jobs:
       # the test run exists to make.
       - name: Muse Spark tiers are priced as measurements, not estimates
         run: python3 -m unittest tests.muse_spark_pricing_test -v
+      # 2026-09-04: in-band OpenRouter 504 chunks killed 3 of 11 enrichment calls, attempt=1.
+      - name: In-band OpenRouter stream errors are retried like HTTP statuses
+        run: python3 -m unittest tests.openrouter_stream_error_retry_test -v
