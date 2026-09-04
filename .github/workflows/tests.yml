@@ -172,3 +172,6 @@ jobs:
       # 2026-09-04: a degraded Phase 4.5 could not be re-run without regenerating the summary and hero.
       - name: Link enrichment is repairable with --resume-from 4.5
         run: python3 -m unittest tests.enrichment_repair_resume_test -v
+      # 2026-09-04: a CI day's checkpoints died with the runner; nothing could be resumed.
+      - name: Checkpoints are rebuildable from an orchestrator result
+        run: python3 -m unittest tests.checkpoints_from_result_test -v

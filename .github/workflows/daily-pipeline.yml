@@ -569,6 +569,15 @@ jobs:
       # both means the index can be rebuilt later (minus the stream and prompts,
       # which are genuinely memory-only). Roughly 3-6 MB; the glob matches only
       # the current run's file on a fresh checkout.
+      #
+      # data/checkpoints is here so a published day stays REPAIRABLE. The
+      # gathering+analysis+topics+summary+hero checkpoints (2-7 MB/day measured,
+      # carrying the _replay bundles) are what --resume-from needs to re-run
+      # one late phase without paying for gathering, analysis and a second hero.
+      # Before 2026-09-04 they died with the runner, so a CI day that published
+      # with unenriched summaries could only be repaired by re-running the whole
+      # pipeline -- on the very day --resume-from 4.5 landed to avoid that.
+      # scripts/checkpoints_from_result.py covers days before this step existed.
       - name: Upload pipeline diagnostics
         if: always() && steps.schedule_gate.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4
@@ -578,6 +587,7 @@ jobs:
             data/llm_metrics.jsonl
             data/processed/cost_report_*.json
             data/processed/orchestrator_result_*.json
+            data/checkpoints/**
           if-no-files-found: ignore
 
       - name: Push generated commit
