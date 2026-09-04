@@ -48,6 +48,10 @@ class LinkEnricher:
     back to unenriched text. Callers must read it: every failure path here
     returns readable prose, so a silent failure is indistinguishable from
     success by inspecting the return value alone.
+
+    Each text gets at most `len(ENRICH_PROFILES)` LLM calls: a reply that is
+    truncated or unparseable escalates to the next profile before it is
+    allowed to degrade.
     """
 
     # Class-level default so a caller that inspects `degradations` before
@@ -248,6 +252,17 @@ class LinkEnricher:
 
         return items
 
+    # Bounded escalation for a single enrichment. 2026-09-04: on
+    # google/gemini-3.8-flash the 65536-token completion cap is SHARED between
+    # reasoning and visible output, so the reddit summary's enrichment reasoned
+    # for ~80k chars and its JSON answer was cut off at max_tokens — which the
+    # old code parsed as though the model had finished. Re-asking at a lower
+    # profile leaves more of that shared budget for the answer, the same move
+    # the analyzers make on a truncated batch (BaseAnalyzer._handle_truncated_batch).
+    # Two profiles is the entire budget: this runs once per summary and topic
+    # on the critical path, and the transport already owns transient retries.
+    ENRICH_PROFILES = (ThinkingLevel.STANDARD, ThinkingLevel.QUICK)
+
     async def _enrich_text(
         self,
         text: str,
@@ -345,16 +360,54 @@ Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not ent
             task_line="Enrich the fenced text below according to your system instructions.",
         )
 
-        try:
-            response = await self.async_client.call_with_thinking(
-                messages=[{"role": "user", "content": user_message}],
-                system=system_prompt,
-                profile=ThinkingLevel.STANDARD,
-                caller=f"link_enricher.{context_name}"
-            )
+        # Shared extractor: trims fences/preamble and repairs the two
+        # ox-alpha failure modes (raw control chars, unescaped inner
+        # quotes) that used to dump every enrichment to regex fallback.
+        from agents.base import extract_json_str
 
-            # Parse JSON response
-            content = response.content.strip()
+        # State of the LAST attempt, which is what the post-loop degradation
+        # decision is made on: exactly one of these two is true once the
+        # profiles are exhausted.
+        last_truncated = False
+        last_unparsed_content = ""
+
+        for profile in self.ENRICH_PROFILES:
+            try:
+                response = await self.async_client.call_with_thinking(
+                    messages=[{"role": "user", "content": user_message}],
+                    system=system_prompt,
+                    profile=profile,
+                    # Identical on every attempt: the replay taxonomy keys on
+                    # this tag, and each attempt is already an independent call
+                    # there.
+                    caller=f"link_enricher.{context_name}"
+                )
+            except Exception as e:
+                # Returning the original text keeps the summary readable, but it is
+                # NOT the enriched output the page promises. Before 2026-08-24 this
+                # was invisible: a provider brownout stripped every internal link
+                # from the report and the run still reported Phase 4.5 [ok].
+                # No further profile: the transport layer already exhausted its
+                # retry window (in-band OpenRouter stream errors included, as of
+                # 2026-09-04), so re-asking here only re-asks a dead provider.
+                logger.error(f"Link enrichment failed for {context_name}: {e}")
+                self.degradations.append(f"{context_name}: {type(e).__name__}")
+                return text
+
+            content = (response.content or "").strip()
+
+            if response.stop_reason == "max_tokens":
+                # Deliberately NOT parsed. A clipped object can still be
+                # well-formed JSON — on 2026-09-04 it was, and the half-written
+                # value it carried was published as the reader's link text.
+                last_truncated = True
+                logger.warning(
+                    f"  {context_name}: enrichment reply truncated at max_tokens "
+                    f"(profile={profile.name}, output_chars={len(content)}); "
+                    f"JSON is clipped, not parsing"
+                )
+                continue
+
             # Handle markdown code blocks
             if content.startswith("```json"):
                 content = content[7:]
@@ -362,15 +415,28 @@ Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not ent
                 content = content[3:]
             if content.endswith("```"):
                 content = content[:-3]
-            content = content.strip()
+            content = extract_json_str(content.strip())
 
-            # Shared extractor: trims fences/preamble and repairs the two
-            # ox-alpha failure modes (raw control chars, unescaped inner
-            # quotes) that used to dump every enrichment to regex fallback.
-            from agents.base import extract_json_str
-            content = extract_json_str(content)
-
-            result = json.loads(content)
+            try:
+                result = json.loads(content)
+                if not isinstance(result, dict):
+                    # A bare array or scalar parses cleanly and then explodes on
+                    # `.get`. That used to be swallowed by a blanket `except`;
+                    # now it must escalate like any other malformed reply rather
+                    # than escape this method, which is the only place that
+                    # guarantees the caller gets readable prose back.
+                    raise json.JSONDecodeError(
+                        "enrichment payload is not a JSON object", content or "", 0
+                    )
+            except json.JSONDecodeError as e:
+                last_truncated = False
+                last_unparsed_content = content
+                logger.error(
+                    f"Failed to parse link enrichment response for {context_name} "
+                    f"(profile={profile.name}): {e}"
+                )
+                logger.debug(f"Response content: {content[:500] if content else 'None'}")
+                continue
 
             enriched = result.get('enriched_text', text)
             links = result.get('links', [])
@@ -384,40 +450,55 @@ Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not ent
 
             return enriched
 
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse link enrichment response for {context_name}: {e}")
-            logger.debug(f"Response content: {content[:500] if content else 'None'}")
-
-            # Try regex fallback to extract enriched_text, but validate before accepting
-            match = re.search(r'"enriched_text"\s*:\s*"((?:[^"\\]|\\.)*)"', content, re.DOTALL)
-            if match:
-                enriched = match.group(1)
-                # Unescape JSON string escapes
-                enriched = enriched.replace('\\"', '"').replace('\\n', '\n').replace('\\\\', '\\')
-
-                # Validate: check for truncation (unbalanced brackets, incomplete links)
-                open_brackets = enriched.count('[')
-                close_brackets = enriched.count(']')
-                has_incomplete_link = bool(re.search(r'\[[^\]]*$', enriched))
-                is_too_short = len(enriched) < len(text) * 0.5
-
-                if open_brackets == close_brackets and not has_incomplete_link and not is_too_short:
-                    logger.info(f"  {context_name}: recovered enriched text via validated regex fallback")
-                    return enriched
-                else:
-                    logger.warning(f"  {context_name}: regex extraction failed validation (brackets={open_brackets}/{close_brackets}, incomplete={has_incomplete_link}, short={is_too_short})")
-
-            logger.warning(f"  {context_name}: JSON parse failed, using original unenriched text")
-            self.degradations.append(f"{context_name}: unparseable enrichment response")
+        if last_truncated:
+            logger.warning(
+                f"  {context_name}: truncated at max_tokens on all "
+                f"{len(self.ENRICH_PROFILES)} attempts, using original unenriched text"
+            )
+            self.degradations.append(f"{context_name}: truncated at max_tokens on every attempt")
             return text
-        except Exception as e:
-            # Returning the original text keeps the summary readable, but it is
-            # NOT the enriched output the page promises. Before 2026-08-24 this
-            # was invisible: a provider brownout stripped every internal link
-            # from the report and the run still reported Phase 4.5 [ok].
-            logger.error(f"Link enrichment failed for {context_name}: {e}")
-            self.degradations.append(f"{context_name}: {type(e).__name__}")
-            return text
+
+        recovered = self._recover_enriched_text(last_unparsed_content, text, context_name)
+        if recovered is not None:
+            return recovered
+
+        logger.warning(f"  {context_name}: JSON parse failed, using original unenriched text")
+        self.degradations.append(f"{context_name}: unparseable enrichment response")
+        return text
+
+    def _recover_enriched_text(
+        self,
+        content: str,
+        text: str,
+        context_name: str
+    ) -> Optional[str]:
+        """Last-chance regex recovery of `enriched_text` from unparseable JSON.
+
+        Returns the recovered text only when it survives validation; None means
+        the caller must fall back to the original. The validation exists because
+        an unparseable response is usually a clipped one, and half a summary
+        reads like a whole one.
+        """
+        match = re.search(r'"enriched_text"\s*:\s*"((?:[^"\\]|\\.)*)"', content, re.DOTALL)
+        if not match:
+            return None
+
+        enriched = match.group(1)
+        # Unescape JSON string escapes
+        enriched = enriched.replace('\\"', '"').replace('\\n', '\n').replace('\\\\', '\\')
+
+        # Validate: check for truncation (unbalanced brackets, incomplete links)
+        open_brackets = enriched.count('[')
+        close_brackets = enriched.count(']')
+        has_incomplete_link = bool(re.search(r'\[[^\]]*$', enriched))
+        is_too_short = len(enriched) < len(text) * 0.5
+
+        if open_brackets == close_brackets and not has_incomplete_link and not is_too_short:
+            logger.info(f"  {context_name}: recovered enriched text via validated regex fallback")
+            return enriched
+
+        logger.warning(f"  {context_name}: regex extraction failed validation (brackets={open_brackets}/{close_brackets}, incomplete={has_incomplete_link}, short={is_too_short})")
+        return None
 
     def _markdown_links_to_html(self, text: str) -> str:
         """Convert markdown links to HTML, differentiating internal vs external."""

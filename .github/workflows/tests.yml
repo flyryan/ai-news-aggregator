@@ -166,3 +166,6 @@ jobs:
       # 2026-09-04: in-band OpenRouter 504 chunks killed 3 of 11 enrichment calls, attempt=1.
       - name: In-band OpenRouter stream errors are retried like HTTP statuses
         run: python3 -m unittest tests.openrouter_stream_error_retry_test -v
+      # 2026-09-04: a 65536-cap reddit enrichment reply was parsed as if complete.
+      - name: Truncated enrichment replies escalate instead of being parsed
+        run: python3 -m unittest tests.link_enricher_truncation_test -v
