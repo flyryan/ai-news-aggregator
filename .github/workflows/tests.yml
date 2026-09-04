@@ -169,3 +169,6 @@ jobs:
       # 2026-09-04: a 65536-cap reddit enrichment reply was parsed as if complete.
       - name: Truncated enrichment replies escalate instead of being parsed
         run: python3 -m unittest tests.link_enricher_truncation_test -v
+      # 2026-09-04: a degraded Phase 4.5 could not be re-run without regenerating the summary and hero.
+      - name: Link enrichment is repairable with --resume-from 4.5
+        run: python3 -m unittest tests.enrichment_repair_resume_test -v

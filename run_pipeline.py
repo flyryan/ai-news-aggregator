@@ -463,7 +463,9 @@ def main():
     )
     parser.add_argument(
         '--resume-from', type=float, metavar='PHASE',
-        help='Resume from phase N (e.g., 3, 4.5, 4.7). Loads earlier phases from checkpoint.'
+        help=('Resume from phase N (e.g., 3, 4.5, 4.7). Loads earlier phases from checkpoint. '
+              '4.5 = repair: keep the executive summary and hero, re-run link enrichment only '
+              'for summaries/topics that still lack internal links')
     )
 
     args = parser.parse_args()

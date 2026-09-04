@@ -39,6 +39,9 @@ python3 run_pipeline.py --resume --config-dir ./config --data-dir ./data --web-d
 
 # Resume from a specific phase (loads earlier phases from checkpoint)
 python3 run_pipeline.py --resume-from 3 --config-dir ./config --data-dir ./data --web-dir ./web
+
+# Repair link enrichment only (keeps executive summary + hero; re-enriches texts with no internal links)
+TARGET_DATE="2026-09-04" python3 run_pipeline.py --resume-from 4.5 --config-dir ./config --data-dir ./data --web-dir ./web
 ```
 
 ### Frontend Development
@@ -551,7 +554,7 @@ the fact, and phase boundaries are reconstructed. Live runs measure all of it.
 - **Item IDs**: Generated as 12-character SHA256 hashes (~280 trillion unique values) for compact URLs.
 - **Ecosystem Grounding**: All analyzers receive model release dates as system context to prevent hallucinations about "new" releases that are actually weeks/months old.
 - **Phase Tracking**: Each phase is tracked with status (success/partial/failed/skipped), timing, and details. End-of-run summary prints before cost report. Phase status is included in `OrchestratorResult` JSON output.
-- **Checkpointing**: Major phases save checkpoints to `data/checkpoints/{date}/`. Use `--resume` for auto crash recovery or `--resume-from N` to re-run from a specific phase. Checkpoints persist between runs.
+- **Checkpointing**: Major phases save checkpoints to `data/checkpoints/{date}/` (`gathering`, `analysis`, `topics`, `summary`, `hero`). Use `--resume` for auto crash recovery or `--resume-from N` to re-run from a specific phase. Checkpoints persist between runs. `--resume-from 4.5` is **enrichment repair mode**: it keeps the checkpointed executive summary and reuses the `hero` checkpoint's image, and re-runs Phase 4.5 only for summaries and topic descriptions that still contain no internal link — an already-linked text is returned byte-identical and is not counted as a degradation.
 - **Hero Fallback**: When topic detection (Phase 3) fails or returns no topics, hero image generation falls back to top category themes instead of being skipped entirely.
 
 ## Adding New Sources

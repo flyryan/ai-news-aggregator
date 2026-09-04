@@ -28,6 +28,13 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# The signature of an internal link this module writes:
+# [phrase](/?date=2026-09-04&category=news#item-abc123def456). Its presence in
+# a summary or topic description is the only evidence a finished run leaves
+# that the text was enriched, which is what the `--resume-from 4.5` repair
+# mode keys on to decide what still needs asking for.
+INTERNAL_LINK_MARKER = "](/?date="
+
 
 @dataclass
 class LinkResult:
@@ -81,7 +88,8 @@ class LinkEnricher:
         self,
         executive_summary: str,
         category_reports: Dict[str, Any],
-        top_topics: List[Any]
+        top_topics: List[Any],
+        only_unlinked: bool = False
     ) -> Tuple[str, Dict[str, str], List[Any]]:
         """
         Enrich all summary text with internal links.
@@ -95,9 +103,17 @@ class LinkEnricher:
             executive_summary: The executive summary text.
             category_reports: Dict of category -> CategoryReport.
             top_topics: List of TopTopic objects.
+            only_unlinked: Repair mode (`--resume-from 4.5`). Leave every text
+                that already contains an internal link exactly as it was
+                published and re-ask only for the ones that lost theirs. A
+                skipped text is not a degradation -- it is already correct.
 
         Returns:
             Tuple of (enriched_exec_summary, enriched_category_summaries, enriched_topics)
+
+            In repair mode the returned category dict holds only the summaries
+            that were actually re-enriched, so a caller writing it back leaves
+            the skipped ones untouched.
         """
         # Reset per run: `degradations` describes this enrichment pass only.
         self.degradations = []
@@ -123,14 +139,22 @@ class LinkEnricher:
         tasks = []
         task_keys: List[Tuple[str, Any]] = []
 
+        def already_linked(text: str, context_name: str) -> bool:
+            """True when repair mode should leave this text exactly as it is."""
+            if not only_unlinked or INTERNAL_LINK_MARKER not in (text or ''):
+                return False
+            logger.info(f"  {context_name}: already linked, skipping (repair mode)")
+            return True
+
         # Executive summary task (all items available)
-        tasks.append(self._enrich_text(executive_summary, all_items, "executive summary"))
-        task_keys.append(('exec', None))
+        if not already_linked(executive_summary, "executive summary"):
+            tasks.append(self._enrich_text(executive_summary, all_items, "executive summary"))
+            task_keys.append(('exec', None))
 
         # Category summary tasks (ONLY items from that category)
         for category, report in category_reports.items():
             summary = report.category_summary if hasattr(report, 'category_summary') else report.get('category_summary', '')
-            if summary:
+            if summary and not already_linked(summary, f"{category} summary"):
                 category_items = items_by_category.get(category, [])
                 if category_items:
                     tasks.append(self._enrich_text(summary, category_items, f"{category} summary"))
@@ -144,6 +168,8 @@ class LinkEnricher:
             description = topic.description if hasattr(topic, 'description') else topic.get('description', '')
             if description:
                 topic_name = topic.name if hasattr(topic, 'name') else topic.get('name', 'unknown')
+                if already_linked(description, f"topic: {topic_name}"):
+                    continue
                 tasks.append(self._enrich_text(description, all_items, f"topic: {topic_name}"))
                 task_keys.append(('topic', i))
 

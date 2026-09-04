@@ -11,7 +11,7 @@ import os
 import json
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 
 from .llm_client import AnthropicClient, AsyncAnthropicClient, AsyncLLMRouter, ThinkingLevel, LLMResponse
 from .base import (
@@ -457,23 +457,35 @@ class MainOrchestrator:
 
         # Phase 4: Generate Executive Summary
         if resume_from is not None and resume_from > 4.5:
-            checkpoint = self._load_checkpoint('summary')
-            self._absorb_replay_bundle(checkpoint)
-            if not checkpoint:
-                raise RuntimeError("Cannot resume: no checkpoint for Phase 4 (summary)")
-            executive_summary = checkpoint.get('executive_summary', '')
-            summary_thinking = checkpoint.get('thinking', '')
-            # Restore enriched category summaries
-            enriched_summaries = checkpoint.get('enriched_category_summaries', {})
-            for category, enriched_summary in enriched_summaries.items():
-                if category in category_reports:
-                    category_reports[category].category_summary = enriched_summary
-            # Restore enriched topic descriptions
-            enriched_topics = checkpoint.get('enriched_topics', [])
-            if enriched_topics:
-                top_topics = self._restore_top_topics({'top_topics': enriched_topics})
+            checkpoint = self._load_summary_checkpoint()
+            executive_summary, summary_thinking, top_topics = self._restore_summary_checkpoint(
+                checkpoint, category_reports, top_topics
+            )
             self._restore_or_skip_phase(phases, "Phase 4: Executive Summary", checkpoint, "loaded from checkpoint")
             self._restore_or_skip_phase(phases, "Phase 4.5: Link Enrichment", checkpoint, "loaded from checkpoint")
+        elif resume_from is not None and resume_from > 4:
+            # Enrichment repair (--resume-from 4.5). 2026-09-04: the published
+            # report lost its internal links on the executive summary and three
+            # category summaries, and nothing else about the day was wrong. Yet
+            # this resume point re-generated the executive summary and the hero
+            # image -- paying to replace good content in order to fix bad. Keep
+            # everything Phase 4 produced and re-ask only for the texts that
+            # still carry no link.
+            checkpoint = self._load_summary_checkpoint()
+            executive_summary, summary_thinking, top_topics = self._restore_summary_checkpoint(
+                checkpoint, category_reports, top_topics
+            )
+            self._restore_or_skip_phase(
+                phases, "Phase 4: Executive Summary", checkpoint,
+                "loaded from checkpoint (enrichment repair)"
+            )
+            executive_summary, top_topics = await self._run_link_enrichment(
+                phases, executive_summary, category_reports, top_topics,
+                only_unlinked=True
+            )
+            self._save_summary_checkpoint(
+                executive_summary, summary_thinking, category_reports, top_topics
+            )
         else:
             phases.start_phase("Phase 4: Executive Summary")
             try:
@@ -490,46 +502,14 @@ class MainOrchestrator:
                 summary_thinking = f"Error: {e}"
                 phases.end_phase('failed', error=str(e))
 
-            # Phase 4.5: Link Enrichment
-            phases.start_phase("Phase 4.5: Link Enrichment")
-            try:
-                logger.info("Phase 4.5: Enriching summaries with internal links...")
-                enricher = LinkEnricher(self.async_client, self.target_date, prompt_accessor=self.prompt_accessor)
-                executive_summary, enriched_category_summaries, top_topics = await enricher.enrich_all(
-                    executive_summary, category_reports, top_topics
-                )
-                for category, enriched_summary in enriched_category_summaries.items():
-                    if category in category_reports:
-                        category_reports[category].category_summary = enriched_summary
-                # `enrich_all` returns readable prose on every failure path, so
-                # the return value alone cannot distinguish enriched from
-                # unenriched -- ask the enricher what it lost.
-                enrichment_degradations = list(getattr(enricher, 'degradations', []))
-                if enrichment_degradations:
-                    self.degradations.extend(
-                        f"link_enrichment {note}" for note in enrichment_degradations
-                    )
-                    logger.error(
-                        "Phase 4.5 completed DEGRADED, %d summar(ies)/topic(s) unenriched: %s",
-                        len(enrichment_degradations),
-                        "; ".join(enrichment_degradations),
-                    )
-                    phases.end_phase('partial', error="; ".join(enrichment_degradations))
-                else:
-                    phases.end_phase('success')
-            except Exception as e:
-                logger.warning(f"Link enrichment failed: {e}")
-                enriched_category_summaries = {}
-                self.degradations.append(f"link_enrichment failed entirely: {type(e).__name__}")
-                phases.end_phase('failed', error=str(e))
+            executive_summary, top_topics = await self._run_link_enrichment(
+                phases, executive_summary, category_reports, top_topics,
+                only_unlinked=False
+            )
 
-            # Save summary checkpoint (post-enrichment)
-            self._save_checkpoint('summary', {
-                'executive_summary': executive_summary,
-                'thinking': summary_thinking,
-                'enriched_category_summaries': {cat: report.category_summary for cat, report in category_reports.items()},
-                'enriched_topics': [asdict(t) for t in top_topics]
-            })
+            self._save_summary_checkpoint(
+                executive_summary, summary_thinking, category_reports, top_topics
+            )
 
         # Phase 4.6: Ecosystem Enrichment (detect new model releases from news)
         if resume_from is None or resume_from <= 4.6:
@@ -560,14 +540,26 @@ class MainOrchestrator:
         hero_image_prompt = None
         hero_image_usage = None
 
+        # Any resume past Phase 4 reuses the hero this date already published,
+        # when one was checkpointed. The enrichment repair (--resume-from 4.5)
+        # is the reason this exists: regenerating is a paid image call that
+        # replaces an image the site is already serving.
+        hero_checkpoint = self._load_hero_checkpoint(resume_from)
+
         # Build hero topics - use top_topics, or fall back to category themes
         hero_topics = top_topics
         hero_fallback_used = False
-        if not hero_topics and category_reports:
+        if not hero_checkpoint and not hero_topics and category_reports:
             hero_topics = self._build_fallback_hero_topics(category_reports)
             hero_fallback_used = bool(hero_topics)
 
-        if resume_from is None or resume_from <= 4.7:
+        if hero_checkpoint:
+            hero_image_url = hero_checkpoint.get('hero_image_url')
+            hero_image_prompt = hero_checkpoint.get('hero_image_prompt')
+            hero_image_usage = hero_checkpoint.get('hero_image_usage')
+            logger.info(f"Phase 4.7: Reusing checkpointed hero image: {hero_image_url}")
+            self._restore_or_skip_phase(phases, "Phase 4.7: Hero Image", hero_checkpoint, "loaded from checkpoint")
+        elif resume_from is None or resume_from <= 4.7:
             if self.hero_generator and hero_topics:
                 phases.start_phase("Phase 4.7: Hero Image")
                 try:
@@ -595,6 +587,13 @@ class MainOrchestrator:
                             phases.end_phase('partial', details="used category themes as fallback")
                         else:
                             phases.end_phase('success')
+                        # Saved after end_phase so the checkpoint carries this
+                        # phase's own measured window for a resumed replay.
+                        self._save_checkpoint('hero', {
+                            'hero_image_url': hero_image_url,
+                            'hero_image_prompt': hero_image_prompt,
+                            'hero_image_usage': hero_image_usage,
+                        })
                     else:
                         logger.warning("Hero image generation returned no result")
                         phases.end_phase('failed', error="no result returned")
@@ -607,6 +606,10 @@ class MainOrchestrator:
                 elif not hero_topics:
                     phases.skip_phase("Phase 4.7: Hero Image", "no topics")
         else:
+            # Legacy fallback for a run whose checkpoints predate the `hero`
+            # one: there is no image to restore, so this records the phase off
+            # the summary checkpoint and leaves hero_image_url None -- which is
+            # what --resume-from 4.8+ has always done.
             self._restore_or_skip_phase(phases, "Phase 4.7: Hero Image", checkpoint, "loaded from checkpoint")
 
         # Phase 5: Assemble Result
@@ -670,6 +673,122 @@ class MainOrchestrator:
         cost_tracker.save_report(cost_report_path)
 
         return result
+
+    async def _run_link_enrichment(
+        self,
+        phases: PhaseTracker,
+        executive_summary: str,
+        category_reports: Dict[str, CategoryReport],
+        top_topics: List[TopTopic],
+        only_unlinked: bool = False,
+    ) -> Tuple[str, List[TopTopic]]:
+        """Phase 4.5: add internal links to the summaries and topic descriptions.
+
+        Shared by the fresh run and the `--resume-from 4.5` repair, which passes
+        only_unlinked=True so a text that already carries links is left exactly
+        as published instead of being re-asked for (and re-billed).
+
+        Enriched category summaries are written back onto `category_reports` in
+        place; the executive summary and topics come back as the return value.
+        """
+        phases.start_phase("Phase 4.5: Link Enrichment")
+        try:
+            logger.info("Phase 4.5: Enriching summaries with internal links...")
+            enricher = LinkEnricher(self.async_client, self.target_date, prompt_accessor=self.prompt_accessor)
+            executive_summary, enriched_category_summaries, top_topics = await enricher.enrich_all(
+                executive_summary, category_reports, top_topics,
+                only_unlinked=only_unlinked
+            )
+            for category, enriched_summary in enriched_category_summaries.items():
+                if category in category_reports:
+                    category_reports[category].category_summary = enriched_summary
+            # `enrich_all` returns readable prose on every failure path, so
+            # the return value alone cannot distinguish enriched from
+            # unenriched -- ask the enricher what it lost.
+            enrichment_degradations = list(getattr(enricher, 'degradations', []))
+            if enrichment_degradations:
+                self.degradations.extend(
+                    f"link_enrichment {note}" for note in enrichment_degradations
+                )
+                logger.error(
+                    "Phase 4.5 completed DEGRADED, %d summar(ies)/topic(s) unenriched: %s",
+                    len(enrichment_degradations),
+                    "; ".join(enrichment_degradations),
+                )
+                phases.end_phase('partial', error="; ".join(enrichment_degradations))
+            else:
+                phases.end_phase('success')
+        except Exception as e:
+            logger.warning(f"Link enrichment failed: {e}")
+            self.degradations.append(f"link_enrichment failed entirely: {type(e).__name__}")
+            phases.end_phase('failed', error=str(e))
+
+        return executive_summary, top_topics
+
+    def _load_summary_checkpoint(self) -> dict:
+        """Load the Phase 4/4.5 checkpoint, or refuse to resume without it."""
+        checkpoint = self._load_checkpoint('summary')
+        self._absorb_replay_bundle(checkpoint)
+        if not checkpoint:
+            raise RuntimeError("Cannot resume: no checkpoint for Phase 4 (summary)")
+        return checkpoint
+
+    def _restore_summary_checkpoint(
+        self,
+        checkpoint: dict,
+        category_reports: Dict[str, CategoryReport],
+        top_topics: List[TopTopic],
+    ) -> Tuple[str, str, List[TopTopic]]:
+        """Put a saved Phase 4/4.5 result back into this run's state.
+
+        Shared by the two resume paths that start from a saved executive
+        summary: a plain resume past Phase 4.5, and the 4.5 enrichment repair,
+        which then re-enriches only what is still unlinked.
+
+        Category summaries are written back onto `category_reports` in place;
+        the executive summary, its thinking, and the topics are returned.
+        """
+        executive_summary = checkpoint.get('executive_summary', '')
+        summary_thinking = checkpoint.get('thinking', '')
+        # Restore enriched category summaries
+        enriched_summaries = checkpoint.get('enriched_category_summaries', {})
+        for category, enriched_summary in enriched_summaries.items():
+            if category in category_reports:
+                category_reports[category].category_summary = enriched_summary
+        # Restore enriched topic descriptions
+        enriched_topics = checkpoint.get('enriched_topics', [])
+        if enriched_topics:
+            top_topics = self._restore_top_topics({'top_topics': enriched_topics})
+        return executive_summary, summary_thinking, top_topics
+
+    def _save_summary_checkpoint(
+        self,
+        executive_summary: str,
+        summary_thinking: str,
+        category_reports: Dict[str, CategoryReport],
+        top_topics: List[TopTopic],
+    ) -> None:
+        """Save the post-enrichment Phase 4/4.5 state."""
+        self._save_checkpoint('summary', {
+            'executive_summary': executive_summary,
+            'thinking': summary_thinking,
+            'enriched_category_summaries': {cat: report.category_summary for cat, report in category_reports.items()},
+            'enriched_topics': [asdict(t) for t in top_topics]
+        })
+
+    def _load_hero_checkpoint(self, resume_from: Optional[float]) -> Optional[dict]:
+        """The hero this date already generated, when a resume can reuse it.
+
+        Only for a resume past Phase 4 -- a fresh run has no published hero to
+        keep -- and only when the checkpoint actually names an image; a payload
+        without one would silently publish the day with no hero.
+        """
+        if resume_from is None or resume_from <= 4:
+            return None
+        checkpoint = self._load_checkpoint('hero')
+        if not isinstance(checkpoint, dict) or not checkpoint.get('hero_image_url'):
+            return None
+        return checkpoint
 
     def _build_fallback_hero_topics(self, category_reports: Dict[str, CategoryReport]) -> List[TopTopic]:
         """Build fallback hero topics from category themes when topic detection fails."""
@@ -857,9 +976,15 @@ class MainOrchestrator:
         if not os.path.exists(checkpoint_dir):
             return None
 
-        # Check in reverse order: summary -> topics -> analysis -> gathering
+        # Check in reverse order: hero -> summary -> topics -> analysis -> gathering.
+        # A run that died between the summary and hero checkpoints must still
+        # generate its hero, so summary.json alone resumes at 4.6 rather than
+        # past Phase 4.7 (the old 5.0 published such a day with no hero at all).
+        # Re-running 4.6 costs an ecosystem enrichment pass and is idempotent:
+        # models it already tracks are excluded.
         checkpoint_phases = [
-            ('summary.json', 5.0),    # After Phase 4+4.5, resume from Phase 4.6
+            ('hero.json', 5.0),        # After Phase 4.7, resume from Phase 5
+            ('summary.json', 4.6),     # After Phase 4+4.5, resume from Phase 4.6
             ('topics.json', 4.0),      # After Phase 3, resume from Phase 4
             ('analysis.json', 3.0),    # After Phase 2+2.5, resume from Phase 3
             ('gathering.json', 2.0),   # After Phase 1, resume from Phase 2
