@@ -175,3 +175,6 @@ jobs:
       # 2026-09-04: a CI day's checkpoints died with the runner; nothing could be resumed.
       - name: Checkpoints are rebuildable from an orchestrator result
         run: python3 -m unittest tests.checkpoints_from_result_test -v
+      # 2026-09-04: Gemini 3.8 Flash had no row; the run published Opus-rate $28.31 for ≈$4.23.
+      - name: Gemini 3.8 Flash is priced as a measurement, not an estimate
+        run: python3 -m unittest tests.gemini_flash_pricing_test -v

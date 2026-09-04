@@ -246,6 +246,22 @@ class CostTracker:
             self.output_price = 0.0
             self.cache_write_price = 0.0
             self.cache_hit_price = 0.0
+        elif "gemini-3.8-flash" in model.lower():
+            # google/gemini-3.8-flash on OpenRouter (listed 2026-09-02, production
+            # model from 2026-09-04). Verified live against
+            # /api/v1/models/google/gemini-3.8-flash/endpoints on 2026-09-04:
+            # $0.75/MTok prompt, $3.75/MTok completion, $0.075/MTok cache read on
+            # every Google / Google AI Studio endpoint; internal_reasoning is billed
+            # at the completion rate and arrives folded into output_tokens. The
+            # explicit-cache write rate OpenRouter lists ($0.0417/MTok) is never
+            # triggered by this transport, so writes bill at the prompt rate like the
+            # other OpenRouter rows. The ":batch" slug is half price and is not
+            # distinguished here. The 2026-09-04 run fell through to the Opus
+            # fallback and published $28.31 for ≈$4.23 of real spend.
+            self.input_price = 0.75
+            self.output_price = 3.75
+            self.cache_write_price = 0.75
+            self.cache_hit_price = 0.075
         elif "opus" in model.lower():
             self.input_price = ModelPricing.OPUS_4_6_INPUT.value
             self.output_price = ModelPricing.OPUS_4_6_OUTPUT.value
