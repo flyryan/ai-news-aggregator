@@ -465,7 +465,8 @@ def main():
         '--resume-from', type=float, metavar='PHASE',
         help=('Resume from phase N (e.g., 3, 4.5, 4.7). Loads earlier phases from checkpoint. '
               '4.5 = repair: keep the executive summary and hero, re-run link enrichment only '
-              'for summaries/topics that still lack internal links')
+              'for summaries/topics that still lack internal links. Every resume point reuses '
+              'the checkpointed hero image except 4.7, which regenerates it')
     )
 
     args = parser.parse_args()

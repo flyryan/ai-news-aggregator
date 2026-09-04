@@ -99,8 +99,7 @@ class CheckpointEmbeddingTest(unittest.TestCase):
             "gathering", {"categories": {"news": [1]}},
             phase_timings=tracker.export_timings())
 
-        saved = json.load(open(
-            os.path.join(self.tmp, "checkpoints", "2026-08-22", "gathering.json")))
+        saved = self._saved_checkpoint()
         self.assertIn("_phase_timings", saved)
         self.assertIn("Phase 1: Gathering", saved["_phase_timings"])
         # Payload keys survive untouched for the restore paths.
@@ -108,9 +107,15 @@ class CheckpointEmbeddingTest(unittest.TestCase):
 
     def test_save_checkpoint_without_timings_stays_clean(self):
         self.orch._save_checkpoint("gathering", {"categories": {}})
-        saved = json.load(open(
-            os.path.join(self.tmp, "checkpoints", "2026-08-22", "gathering.json")))
+        saved = self._saved_checkpoint()
         self.assertNotIn("_phase_timings", saved)
+
+    def _saved_checkpoint(self):
+        """Read the checkpoint back, closing the handle (else a ResourceWarning
+        leaks into every run of this suite)."""
+        path = os.path.join(self.tmp, "checkpoints", "2026-08-22", "gathering.json")
+        with open(path, encoding="utf-8") as handle:
+            return json.load(handle)
 
 
 class RestoreOrSkipTest(unittest.TestCase):

@@ -541,9 +541,10 @@ class MainOrchestrator:
         hero_image_usage = None
 
         # Any resume past Phase 4 reuses the hero this date already published,
-        # when one was checkpointed. The enrichment repair (--resume-from 4.5)
-        # is the reason this exists: regenerating is a paid image call that
-        # replaces an image the site is already serving.
+        # when one was checkpointed -- except --resume-from 4.7, which names
+        # this phase and therefore re-runs it. The enrichment repair
+        # (--resume-from 4.5) is the reason this exists: regenerating is a paid
+        # image call that replaces an image the site is already serving.
         hero_checkpoint = self._load_hero_checkpoint(resume_from)
 
         # Build hero topics - use top_topics, or fall back to category themes
@@ -782,8 +783,14 @@ class MainOrchestrator:
         Only for a resume past Phase 4 -- a fresh run has no published hero to
         keep -- and only when the checkpoint actually names an image; a payload
         without one would silently publish the day with no hero.
+
+        `--resume-from 4.7` is the exception, and it is the deliberate one:
+        naming Phase 4.7 has always meant "run Phase 4.7", so it stays the entry
+        point for regenerating a hero. Restoring there too would have left no
+        resume point at all that regenerates once a hero.json exists, silently
+        inverting the flag's own help text (2026-09-04 review).
         """
-        if resume_from is None or resume_from <= 4:
+        if resume_from is None or resume_from <= 4 or resume_from == 4.7:
             return None
         checkpoint = self._load_checkpoint('hero')
         if not isinstance(checkpoint, dict) or not checkpoint.get('hero_image_url'):
@@ -878,27 +885,122 @@ class MainOrchestrator:
         """
         return self._restored_replay
 
+    @staticmethod
+    def _cost_row_key(row: Any) -> tuple:
+        """Identity of a cost row, for de-duplicating a merged bundle.
+
+        Cost rows carry no id at all (`APICallRecord` in agents/cost_tracker.py)
+        and the replay generator pairs them with spans by caller and order
+        rather than by key, so there is nothing authoritative to reuse. The
+        microsecond `datetime.now()` stamp plus the caller and the token counts
+        is unique in practice.
+        """
+        if not isinstance(row, dict):
+            return ('', '', None, None, None)
+        return (
+            row.get('timestamp'), row.get('caller'), row.get('model'),
+            row.get('input_tokens'), row.get('output_tokens'),
+        )
+
     def _export_replay_bundle(self) -> Dict[str, Any]:
         """Recorder spans + cost rows so far, for a resuming run to merge back.
+
+        Cumulative on purpose. A bundle absorbed from the checkpoint we resumed
+        from is folded back in, so re-saving a checkpoint can only ever widen it.
+        Without that, `--resume-from 4.5` rewrote summary.json's bundle with just
+        the two or three enrichment calls this process made, and the NEXT resume
+        of that date restored the stunted bundle and published a replay with no
+        gatherers, no analyzers and no Phase 4 agent -- the 2026-08-24 regression
+        this mechanism exists to prevent (2026-09-04 review of the repair mode).
 
         Absolute anchors travel with them (`t0_epoch` for the spans, each cost
         row's ISO `timestamp`) because the merged timeline a resumed run builds
         has a different origin -- the generator rebases against the restored
-        phase windows rather than assuming either process's clock.
+        phase windows rather than assuming either process's clock. A bundle
+        carries exactly ONE `t0_epoch` and the generator reads it to turn every
+        span offset back into an absolute epoch, so restored spans are
+        re-expressed against this process's origin (their offsets go negative;
+        the absolute instant they name is unchanged, which is all that matters).
+
+        Span ids are a per-process counter that restarts at ``c001``, so a
+        restored span can collide with a live one while being a different call
+        entirely. Dropping it by id would delete the very history this method
+        exists to keep, so a collision is re-keyed instead; only a span that is
+        genuinely the same call is dropped.
         """
         snapshot = get_recorder().snapshot()
+        t0_epoch = snapshot.get('t0_epoch')
+        spans = list(snapshot.get('calls') or [])
+        rows = list((get_tracker().get_json_report() or {}).get('calls') or [])
+
+        restored = getattr(self, '_restored_replay', None)
+        if not isinstance(restored, dict):
+            return {'t0_epoch': t0_epoch, 'spans': spans, 'cost_calls': rows}
+
+        restored_t0 = restored.get('t0_epoch')
+        if t0_epoch is None:
+            # This process recorded nothing, so it has no spans of its own and
+            # no origin to offer; keep the restored frame rather than orphan
+            # every restored offset.
+            t0_epoch = restored_t0
+            shift_ms = 0.0
+        elif restored_t0 is None:
+            shift_ms = 0.0  # unanchored bundle: no way to rebase, keep as captured
+        else:
+            shift_ms = (float(restored_t0) - float(t0_epoch)) * 1000.0
+
+        taken_ids = {s.get('id') for s in spans if isinstance(s, dict) and s.get('id')}
+        seen_spans = {
+            (s.get('id'), s.get('caller'), s.get('queued_ms'), s.get('end_ms'))
+            for s in spans if isinstance(s, dict)
+        }
+        merged_spans: List[Dict[str, Any]] = []
+        for span in (restored.get('spans') or []):
+            if not isinstance(span, dict):
+                continue
+            identity = (span.get('id'), span.get('caller'),
+                        span.get('queued_ms'), span.get('end_ms'))
+            if identity in seen_spans:
+                continue  # the same call twice -- a bundle absorbed twice
+            seen_spans.add(identity)
+            span = dict(span)
+            if shift_ms:
+                for field in ('queued_ms', 'start_ms', 'end_ms', 'first_token_ms'):
+                    value = span.get(field)
+                    if value is not None:
+                        span[field] = int(round(float(value) + shift_ms))
+            span_id = span.get('id')
+            if span_id:
+                while span_id in taken_ids:
+                    span_id = f"r{span_id}"
+                span['id'] = span_id
+                taken_ids.add(span_id)
+            merged_spans.append(span)
+
+        seen_rows = {self._cost_row_key(r) for r in rows}
+        merged_rows: List[Dict[str, Any]] = []
+        for row in (restored.get('cost_calls') or []):
+            key = self._cost_row_key(row)
+            if key in seen_rows:
+                continue
+            seen_rows.add(key)
+            merged_rows.append(row)
+
+        # Restored first: both lists are chronological, and everything restored
+        # happened before anything this process did.
         return {
-            't0_epoch': snapshot.get('t0_epoch'),
-            'spans': snapshot.get('calls') or [],
-            'cost_calls': (get_tracker().get_json_report() or {}).get('calls') or [],
+            't0_epoch': t0_epoch,
+            'spans': merged_spans + spans,
+            'cost_calls': merged_rows + rows,
         }
 
     def _absorb_replay_bundle(self, checkpoint: Optional[dict]) -> None:
         """Keep the replay bundle from a checkpoint we are resuming from.
 
         Bundles are cumulative -- each checkpoint snapshots everything recorded
-        up to it -- so the newest one loaded is the complete set and simply
-        replaces any earlier one.
+        up to it, and _export_replay_bundle folds this one back in when the
+        checkpoint is re-saved -- so the newest one loaded is the complete set
+        and simply replaces any earlier one.
         """
         if not isinstance(checkpoint, dict):
             return
