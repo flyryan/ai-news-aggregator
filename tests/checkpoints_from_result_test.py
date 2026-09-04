@@ -378,6 +378,20 @@ class ReplayRestoreGuidanceTest(unittest.TestCase):
         self._assert_scoped_to_replay(guidance, "printed guidance")
         self.assertIn("git checkout HEAD -- 'web/data/2026-09-04/replay-*'", guidance)
 
+    def test_guidance_says_to_restore_before_committing_the_repair(self):
+        """Timing is half the instruction.
+
+        `git checkout HEAD -- ...` restores from the last commit, so once the
+        repair (stunted replay included) is committed the command silently
+        no-ops and the day ships with the stunted replay anyway.
+        """
+        for label, text in (
+            ("printed guidance", self.module.replay_restore_guidance("2026-09-04")),
+            ("module docstring", self.module.__doc__),
+        ):
+            with self.subTest(label):
+                self.assertIn("before committing the repair", text)
+
     def test_main_prints_the_same_guidance_it_documents(self):
         work_dir = Path(tempfile.mkdtemp(prefix="checkpoints-from-result-main-"))
         self.addCleanup(shutil.rmtree, work_dir, ignore_errors=True)

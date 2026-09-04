@@ -150,7 +150,10 @@ This needs **no nginx change** and works with the dev Vite middleware
   // Every LLM request. This is the spine of the whole visualisation.
   "calls": [
     {
-      "id": "c017",                  // stable, matches the stream file key
+      "id": "c017",                  // matches the stream file key; stable
+                                     //   within this artifact, but a restored
+                                     //   call may have been re-keyed (see
+                                     //   "Restored calls")
       "agent_id": "research_analyzer",
       "phase_id": "phase-2",
       "caller": "research_analyzer.batch_3",   // raw, for the detail panel
@@ -222,8 +225,13 @@ correct, real window and **no agents inside it** — the four analyzers and
 `continuity` simply vanished from the cast.
 
 Checkpoints therefore carry a `_replay` bundle: the recorder spans and cost rows
-accumulated up to that checkpoint, plus the originating process's `t0_epoch`.
-On resume the generator merges them back in.
+accumulated up to that checkpoint, plus a `t0_epoch` to anchor them. On resume
+the generator merges them back in.
+
+The bundle is **cumulative across processes**. A resuming run folds the bundle it
+restored back into every checkpoint it re-saves, so re-saving can only widen the
+history, never replace it with the two or three calls this process made
+(`agents/orchestrator.py` `_export_replay_bundle`).
 
 * Restored calls carry `restored: true`. Everything else about them is a real
   measurement from the original process — the same justification that lets
@@ -233,6 +241,17 @@ On resume the generator merges them back in.
   into its restored phase's merged-timeline window via
   `phase.start_ms + (call_epoch - phase.start_time) * 1000`. Containment is
   therefore preserved by construction.
+* A bundle carries exactly ONE `t0_epoch` — the re-saving process's origin (the
+  restored one only when that process recorded nothing itself). Absorbed spans are
+  rebased onto it, so an offset from an earlier process is legitimately
+  **negative**; the absolute instant it names is unchanged, which is all placement
+  needs.
+* Span ids are a per-process counter restarting at `c001`, so a restored span can
+  collide with a live one while being a different call. Re-saving re-keys the
+  collision with an `r` prefix (`c001` → `rc001`) rather than dropping it; only a
+  span that is genuinely the same call is de-duplicated. Deltas travel with the
+  span, so the rebuilt stream file is keyed by the new id too — a call id changing
+  between one day's artifact and a later repair of it is expected.
 * A checkpoint written before this existed has no `_replay` key; such a resume
   degrades to the old behaviour (phases present, cast absent) rather than
   failing.

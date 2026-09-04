@@ -22,7 +22,9 @@ What it cannot rebuild, and why:
     synthesized checkpoint therefore carries no `_replay` key at all, and a
     repair run started from these checkpoints will publish a replay containing
     only the calls IT made. Restore just those artifacts from git after the
-    repair run, rather than shipping a stunted one:
+    repair run -- and before committing the repair, because `git checkout HEAD`
+    restores from the last commit and no-ops once HEAD carries the stunted
+    replay -- rather than shipping a stunted one:
 
         git checkout HEAD -- 'web/data/<date>/replay-*'
 
@@ -30,6 +32,13 @@ What it cannot rebuild, and why:
     glob. Checking out the whole date directory would drag `summary.json`, the
     category files and the hero back to their pre-repair state -- reverting the
     re-enriched summaries the repair run just paid for.
+  * What Phase 1 actually collected. The synthesized `gathering` checkpoint is
+    built from each report's `all_items` -- the items that SURVIVED analysis,
+    not what the gatherers returned; the discarded ones are nowhere in the
+    result. These checkpoints are therefore only safe at `--resume-from 4.5`
+    (and 4.6). Starting at 2 or 3 would re-analyze the survivors alone and
+    publish a thinner day with every phase green, and `total_items_collected`
+    on a day repaired from here is the survivor count, not the real one.
   * `top_items` ranking thinking, per-phase details and the wall-clock windows
     of phases that never finished. Only phases with both bounds become
     `_phase_timings`, matching PhaseTracker.export_timings().
@@ -73,7 +82,9 @@ def replay_restore_guidance(date: str) -> str:
     return (
         "These checkpoints carry no replay bundle (spans are memory-only and died "
         "with the run), so restore only the day's replay artifacts from git after "
-        "the repair run instead of publishing the stunted one it generates:\n"
+        "the repair run -- and before committing the repair, since once HEAD "
+        "carries the stunted replay the checkout silently no-ops -- instead of "
+        "publishing the stunted one it generates:\n"
         f"  {REPLAY_RESTORE_COMMAND.format(date=date)}\n"
         "Keep it scoped to replay-*: checking out the whole date directory would "
         "revert the re-enriched summaries the repair just produced."
@@ -243,6 +254,13 @@ def main() -> int:
     for path in written:
         print(f"  wrote {path}")
 
+    print()
+    print(
+        "Caution: `gathering` here holds the items that survived analysis, not what "
+        "Phase 1 collected, so these checkpoints are only safe at --resume-from 4.5 "
+        "(or 4.6) -- an earlier resume point would re-analyze the survivors alone and "
+        "publish a thinner day with green phases."
+    )
     print()
     print("Repair the day's link enrichment with:")
     print(

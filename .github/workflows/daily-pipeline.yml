@@ -571,13 +571,22 @@ jobs:
       # the current run's file on a fresh checkout.
       #
       # data/checkpoints is here so a published day stays REPAIRABLE. The
-      # gathering+analysis+topics+summary+hero checkpoints (2-7 MB/day measured,
-      # carrying the _replay bundles) are what --resume-from needs to re-run
-      # one late phase without paying for gathering, analysis and a second hero.
-      # Before 2026-09-04 they died with the runner, so a CI day that published
-      # with unenriched summaries could only be repaired by re-running the whole
-      # pipeline -- on the very day --resume-from 4.5 landed to avoid that.
+      # gathering+analysis+topics+summary+hero checkpoints, carrying the _replay
+      # bundles, are what --resume-from needs to re-run one late phase without
+      # paying for gathering, analysis and a second hero. Before 2026-09-04 they
+      # died with the runner, so a CI day that published with unenriched
+      # summaries could only be repaired by re-running the whole pipeline -- on
+      # the very day --resume-from 4.5 landed to avoid that.
       # scripts/checkpoints_from_result.py covers days before this step existed.
+      #
+      # Size: the 2-7 MB/day figure was measured locally on checkpoints whose
+      # _replay bundles were EMPTY. Here capture is on, so each of the five
+      # files carries a cumulative bundle -- output deltas plus per-call prompt
+      # text, budgeted at LLM_REPLAY_MAX_TOTAL_PROMPT_CHARS (8M chars) --
+      # duplicated across all five, plausibly making the artifact an order of
+      # magnitude larger. Correct this once a CI run has measured it. The prompt
+      # text is nothing the site does not already publish (replay-prompts.json.gz
+      # ships with every day, and config/prompts.yaml is tracked here).
       - name: Upload pipeline diagnostics
         if: always() && steps.schedule_gate.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4

@@ -19,8 +19,10 @@ Locks in the bounded escalation:
   2. ``stop_reason == "max_tokens"`` is NOT parsed, however well-formed the
      clipped text happens to look, and escalates to QUICK (less reasoning under
      the same shared cap, so more of it reaches the answer).
-  3. Truncation on every attempt degrades to the original text and SAYS SO in
-     ``degradations``. Silence is what made 2026-08-24 look healthy.
+  3. A truncated FINAL attempt degrades to the original text and SAYS SO in
+     ``degradations`` -- naming the final attempt, because the attempts before
+     it may have failed some other way. Silence is what made 2026-08-24 look
+     healthy.
   4. An unparseable reply is offered to the pre-existing validated regex
      fallback IMMEDIATELY, on the attempt that produced it. If it validates,
      that is the answer and there is no second call -- exactly what the
@@ -209,8 +211,10 @@ class LinkEnricherEscalationTest(unittest.TestCase):
         )
         self.assertEqual(text, ORIGINAL_TEXT)
         self.assertEqual(len(enricher.degradations), 1)
-        self.assertIn("truncated at max_tokens", enricher.degradations[0])
-        self.assertIn(CONTEXT, enricher.degradations[0])
+        self.assertEqual(
+            enricher.degradations[0],
+            f"{CONTEXT}: truncated at max_tokens on the final attempt",
+        )
 
         # Each attempt's warning has to be actionable on its own: which text,
         # which profile, and how much output the shared cap actually left us.
@@ -224,6 +228,25 @@ class LinkEnricherEscalationTest(unittest.TestCase):
         for line in per_attempt:
             self.assertIn("max_tokens", line)
             self.assertIn(str(len(TRUNCATED_BUT_PARSEABLE)), line)
+
+    def test_a_mixed_failure_sequence_is_reported_as_the_final_attempt(self):
+        """The degradation note may only claim what the last attempt did.
+
+        Only the LAST attempt's failure mode survives the loop, so a sequence
+        that was unparseable and then truncated is not "truncated on every
+        attempt" -- it says so about the final attempt and nothing more.
+        """
+        client, enricher, text = _run([
+            _response(UNPARSEABLE_PROSE),
+            _response(TRUNCATED_BUT_PARSEABLE, stop_reason="max_tokens"),
+        ])
+
+        self.assertEqual(client.calls, 2)
+        self.assertEqual(text, ORIGINAL_TEXT)
+        self.assertEqual(
+            enricher.degradations,
+            [f"{CONTEXT}: truncated at max_tokens on the final attempt"],
+        )
 
     def test_unparseable_then_clean_escalates_and_recovers(self):
         # UNPARSEABLE_PROSE is deliberately regex-UNrecoverable (no

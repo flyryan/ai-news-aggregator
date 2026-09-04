@@ -87,6 +87,22 @@ class ErrorChunkClassificationTest(unittest.TestCase):
             "a 400 inside the stream must fail fast, exactly like a 400 response",
         )
 
+    def test_a_non_ascii_digit_code_is_not_mistaken_for_a_status(self):
+        # str.isdigit() is True for superscripts like "²", and int() then
+        # raises ValueError from inside the stream loop -- turning a classifiable
+        # provider error into a crash. Only decimal digits become a status.
+        error = self._raise_error_chunk({"code": "²", "message": "odd code"})
+        self.assertIsNone(error.status_code)
+        self.assertIsNone(_transient_retry_reason(error))
+
+    def test_an_out_of_range_code_is_not_treated_as_a_5xx(self):
+        # In-band chunks carry whatever integer the provider chose. 1002 is not
+        # evidence of a transient upstream failure, so it must not retry just
+        # for being >= 500.
+        error = self._raise_error_chunk({"code": 1002, "message": "socket closed"})
+        self.assertEqual(error.status_code, 1002)
+        self.assertIsNone(_transient_retry_reason(error))
+
     def test_codeless_chunk_is_not_retried(self):
         error = self._raise_error_chunk({"message": "no code"})
         self.assertIsNone(error.status_code)

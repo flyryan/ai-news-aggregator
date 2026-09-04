@@ -488,11 +488,14 @@ Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not ent
             return enriched
 
         if last_truncated:
+            # "on the final attempt" is all the flag actually knows: earlier
+            # attempts may have been unparseable rather than truncated, and a
+            # mixed sequence used to be reported as truncation throughout.
             logger.warning(
-                f"  {context_name}: truncated at max_tokens on all "
-                f"{len(self.ENRICH_PROFILES)} attempts, using original unenriched text"
+                f"  {context_name}: truncated at max_tokens on the final attempt "
+                f"(of {len(self.ENRICH_PROFILES)}), using original unenriched text"
             )
-            self.degradations.append(f"{context_name}: truncated at max_tokens on every attempt")
+            self.degradations.append(f"{context_name}: truncated at max_tokens on the final attempt")
             return text
 
         # Every attempt was unparseable AND the fallback already declined each

@@ -215,7 +215,10 @@ def _transient_retry_reason(error: Exception) -> Optional[str]:
 
     if status_code == 429:
         return "http_429"
-    if isinstance(status_code, int) and status_code >= 500:
+    # Bounded to real server statuses: in-band stream chunks hand us whatever
+    # integer the provider put in `code`, and an arbitrary large one is not
+    # evidence of a transient upstream failure.
+    if isinstance(status_code, int) and 500 <= status_code < 600:
         return f"http_{status_code}"
 
     return None
@@ -381,11 +384,13 @@ def _openai_chat_apply_chunk(chunk: Any, state: Dict[str, Any]) -> None:
         msg = err.get("message", str(err)) if isinstance(err, dict) else str(err)
         code = err.get("code") if isinstance(err, dict) else None
         # Providers send the code both as a number and as a quoted string;
-        # anything else stays None, which reads as non-retryable.
+        # anything else stays None, which reads as non-retryable. isdecimal(),
+        # not isdigit(): the latter accepts superscripts like "²", which int()
+        # then rejects with a ValueError from inside the stream loop.
         if isinstance(code, int):
             status_code: Optional[int] = code
-        elif isinstance(code, str) and code.strip().isdigit():
-            status_code = int(code)
+        elif isinstance(code, str) and code.strip().isdecimal():
+            status_code = int(code.strip())
         else:
             status_code = None
         # Message text is grepped out of run logs -- keep it byte-identical.
