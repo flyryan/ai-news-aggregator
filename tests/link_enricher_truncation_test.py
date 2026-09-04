@@ -21,10 +21,16 @@ Locks in the bounded escalation:
      the same shared cap, so more of it reaches the answer).
   3. Truncation on every attempt degrades to the original text and SAYS SO in
      ``degradations``. Silence is what made 2026-08-24 look healthy.
-  4. Unparseable JSON escalates the same way -- including a reply that parses
-     to an array, which `.get` would otherwise throw on -- and a last
-     unparseable attempt still gets the pre-existing validated regex fallback:
-     recovered when it passes validation, degraded when it does not.
+  4. An unparseable reply is offered to the pre-existing validated regex
+     fallback IMMEDIATELY, on the attempt that produced it. If it validates,
+     that is the answer and there is no second call -- exactly what the
+     single-call code on ``main`` did, at exactly its cost. Only an unparseable
+     reply the fallback rejects escalates -- including a reply that parses to an
+     array, which `.get` would otherwise throw on. Deferring the fallback to the
+     end of the loop was strictly worse than ``main``: a recoverable first reply
+     was discarded whenever the second attempt came back truncated.
+  4b. A truncated reply is never handed to the fallback. It is clipped by
+     definition, and recovering a known-clipped text is the 2026-09-04 incident.
   5. An exception out of ``call_with_thinking`` degrades immediately with no
      second attempt: transport retries already happened underneath it
      (2026-09-04, in-band OpenRouter stream errors), so re-asking here would
@@ -100,7 +106,9 @@ UNPARSEABLE_CLIPPED = '{"enriched_text": "Two labs [shipped", "links": [{"phrase
 
 # Regex-recoverable: json.loads chokes on the trailing garbage, but the
 # extracted text is balanced and full length, so the pre-existing validated
-# fallback accepts it. Pinned so this refactor cannot quietly drop that path.
+# fallback accepts it. This is the shape `main` rescued for free with a single
+# call; pinned so the escalation can neither drop it nor bill a second call for
+# it.
 REGEX_RECOVERABLE = (
     '{"enriched_text": ' + json.dumps(ENRICHED_TEXT) + ', "links": [ , ] }'
 )
@@ -163,7 +171,7 @@ def _run(script):
 
 
 class LinkEnricherEscalationTest(unittest.TestCase):
-    """One text, six ways the model can answer."""
+    """One text, every way the model can answer."""
 
     def test_clean_first_reply_costs_exactly_one_standard_call(self):
         client, enricher, text = _run([_response(VALID_PAYLOAD)])
@@ -218,6 +226,10 @@ class LinkEnricherEscalationTest(unittest.TestCase):
             self.assertIn(str(len(TRUNCATED_BUT_PARSEABLE)), line)
 
     def test_unparseable_then_clean_escalates_and_recovers(self):
+        # UNPARSEABLE_PROSE is deliberately regex-UNrecoverable (no
+        # "enriched_text" key at all), so the fallback declines it and the
+        # escalation is genuinely reached. A recoverable first reply would --
+        # correctly -- stop after one call; that case is its own test below.
         client, enricher, text = _run([
             _response(UNPARSEABLE_PROSE),
             _response(VALID_PAYLOAD),
@@ -242,6 +254,44 @@ class LinkEnricherEscalationTest(unittest.TestCase):
         self.assertEqual(text, ENRICHED_TEXT)
         self.assertEqual(enricher.degradations, [])
 
+    def test_a_regex_recoverable_reply_costs_exactly_one_call(self):
+        """`main` rescued this shape with one call and no degradation. The
+        escalation must not turn a free recovery into a second billed attempt:
+        the fallback runs on the attempt that produced the reply, not after the
+        profiles are exhausted."""
+        with self.assertLogs("agents.link_enricher", level="INFO") as logs:
+            client, enricher, text = _run([_response(REGEX_RECOVERABLE)])
+
+        self.assertEqual(client.calls, 1)
+        self.assertEqual(client.profiles, [ThinkingLevel.STANDARD])
+        self.assertEqual(text, ENRICHED_TEXT)
+        self.assertEqual(enricher.degradations, [])
+        self.assertTrue(
+            any("validated regex fallback" in line and CONTEXT in line
+                for line in logs.output),
+            f"recovery must say so; got {logs.output}",
+        )
+
+    def test_a_recoverable_reply_is_not_lost_to_a_later_truncation(self):
+        """The regression this ordering exists to prevent.
+
+        Deferring the fallback to the end of the loop meant only the LAST
+        attempt's content ever reached it: a recoverable first reply was
+        overwritten by a second attempt that came back at max_tokens, and the
+        text was degraded away -- strictly worse than the single-call code on
+        `main`, and paid for with an extra call. The scripted second response
+        must never be requested.
+        """
+        client, enricher, text = _run([
+            _response(REGEX_RECOVERABLE),
+            _response(TRUNCATED_BUT_PARSEABLE, stop_reason="max_tokens"),
+        ])
+
+        self.assertEqual(client.calls, 1)
+        self.assertEqual(client.profiles, [ThinkingLevel.STANDARD])
+        self.assertEqual(text, ENRICHED_TEXT)
+        self.assertEqual(enricher.degradations, [])
+
     def test_unparseable_everywhere_beyond_regex_repair_degrades(self):
         client, enricher, text = _run([
             _response(UNPARSEABLE_PROSE),
@@ -258,7 +308,12 @@ class LinkEnricherEscalationTest(unittest.TestCase):
         )
 
     def test_last_attempt_still_gets_the_validated_regex_fallback(self):
-        """Pre-existing recovery path; the escalation must not shadow it."""
+        """Pre-existing recovery path; the escalation must not shadow it.
+
+        The first reply is regex-UNrecoverable on purpose, so the run really
+        reaches the final profile -- and the fallback still applies there, on
+        the attempt that produced the reply.
+        """
         client, enricher, text = _run([
             _response(UNPARSEABLE_PROSE),
             _response(REGEX_RECOVERABLE),

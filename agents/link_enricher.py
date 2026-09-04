@@ -49,9 +49,10 @@ class LinkEnricher:
     returns readable prose, so a silent failure is indistinguishable from
     success by inspecting the return value alone.
 
-    Each text gets at most `len(ENRICH_PROFILES)` LLM calls: a reply that is
-    truncated or unparseable escalates to the next profile before it is
-    allowed to degrade.
+    Each text gets at most `len(ENRICH_PROFILES)` LLM calls. A truncated reply
+    escalates to the next profile. An unparseable one is first offered to the
+    validated regex fallback, and only escalates if that declines it -- so a
+    reply the fallback can rescue still costs exactly one call.
     """
 
     # Class-level default so a caller that inspects `degradations` before
@@ -365,11 +366,11 @@ Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not ent
         # quotes) that used to dump every enrichment to regex fallback.
         from agents.base import extract_json_str
 
-        # State of the LAST attempt, which is what the post-loop degradation
-        # decision is made on: exactly one of these two is true once the
-        # profiles are exhausted.
+        # How the LAST attempt failed, which is the only thing the post-loop
+        # degradation note has left to say. An unparseable attempt is resolved
+        # in place (recovered or discarded) before the loop moves on, so this
+        # flag is the whole state that has to survive an iteration.
         last_truncated = False
-        last_unparsed_content = ""
 
         for profile in self.ENRICH_PROFILES:
             try:
@@ -430,12 +431,22 @@ Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not ent
                     )
             except json.JSONDecodeError as e:
                 last_truncated = False
-                last_unparsed_content = content
                 logger.error(
                     f"Failed to parse link enrichment response for {context_name} "
                     f"(profile={profile.name}): {e}"
                 )
                 logger.debug(f"Response content: {content[:500] if content else 'None'}")
+                # Offer it to the validated regex fallback NOW, on the attempt
+                # that produced it. Two reasons it cannot wait until the
+                # profiles are exhausted: only the last attempt's content would
+                # ever reach it, so a recoverable reply here would be thrown
+                # away by a later truncated one (worse than the single-call
+                # behaviour this escalation replaced); and a reply the fallback
+                # can rescue does not need a second call at all, which is
+                # exactly what that behaviour cost.
+                recovered = self._recover_enriched_text(content, text, context_name)
+                if recovered is not None:
+                    return recovered
                 continue
 
             enriched = result.get('enriched_text', text)
@@ -458,10 +469,8 @@ Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not ent
             self.degradations.append(f"{context_name}: truncated at max_tokens on every attempt")
             return text
 
-        recovered = self._recover_enriched_text(last_unparsed_content, text, context_name)
-        if recovered is not None:
-            return recovered
-
+        # Every attempt was unparseable AND the fallback already declined each
+        # one in the loop above, so there is nothing left to try.
         logger.warning(f"  {context_name}: JSON parse failed, using original unenriched text")
         self.degradations.append(f"{context_name}: unparseable enrichment response")
         return text
@@ -472,12 +481,19 @@ Remember: The anchor MUST be #item-ID (with item- prefix). Link actions, not ent
         text: str,
         context_name: str
     ) -> Optional[str]:
-        """Last-chance regex recovery of `enriched_text` from unparseable JSON.
+        """Regex recovery of `enriched_text` from an unparseable reply.
 
-        Returns the recovered text only when it survives validation; None means
-        the caller must fall back to the original. The validation exists because
-        an unparseable response is usually a clipped one, and half a summary
-        reads like a whole one.
+        Run on every unparseable attempt, immediately, before deciding whether
+        to escalate: a rescued reply is the answer and costs nothing further.
+        Returns None when the extraction does not survive validation, which
+        means the caller should escalate (or, out of profiles, degrade).
+
+        Only ever called on a reply the model finished writing. A `max_tokens`
+        reply is clipped by definition, and recovering a known-clipped text is
+        the 2026-09-04 incident.
+
+        The validation exists because an unparseable response is usually a
+        clipped one, and half a summary reads like a whole one.
         """
         match = re.search(r'"enriched_text"\s*:\s*"((?:[^"\\]|\\.)*)"', content, re.DOTALL)
         if not match:
