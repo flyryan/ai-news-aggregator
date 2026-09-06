@@ -72,17 +72,12 @@ jobs:
       PIPELINE_IMAGE_MODEL: ${{ vars.PIPELINE_IMAGE_MODEL || 'gemini-3-pro-image' }}
       LLM_TRUST_ENV_PROXY: ${{ vars.LLM_TRUST_ENV_PROXY || 'false' }}
       LLM_TIMEOUT_SECONDS: ${{ vars.LLM_TIMEOUT_SECONDS || '240' }}
-      # 2026-08-24: 16 in flight against OpenRouter's shared free-tier pool
-      # produced ~40 req/s once 429s started fast-failing (each rejection freed
-      # its slot in ~0.4s and relaunched), far above the published 20/min.
-      # NOTE: a `max_concurrent_requests` set on a route in the providers secret
-      # OVERRIDES this env default -- lower it there too, or this stays cosmetic.
-      LLM_MAX_CONCURRENT_REQUESTS: ${{ vars.LLM_MAX_CONCURRENT_REQUESTS || '6' }}
-      # A concurrency cap bounds in-flight requests, not request rate; the two
-      # diverge exactly when a provider fast-fails. This bounds the rate itself.
-      # No route in the providers secret sets `max_requests_per_minute` yet, so
-      # this env value is what actually takes effect today.
-      LLM_MAX_REQUESTS_PER_MINUTE: ${{ vars.LLM_MAX_REQUESTS_PER_MINUTE || '15' }}
+      # Paid-model defaults: 16 in flight, paced at 60 requests/minute.
+      # Keep pacing to prevent fast failures from producing retry bursts.
+      # Explicit route values in PIPELINE_PROVIDERS_YAML override these;
+      # keep the secret and repository variables aligned when tuning limits.
+      LLM_MAX_CONCURRENT_REQUESTS: ${{ vars.LLM_MAX_CONCURRENT_REQUESTS || '16' }}
+      LLM_MAX_REQUESTS_PER_MINUTE: ${{ vars.LLM_MAX_REQUESTS_PER_MINUTE || '60' }}
       # Response output ceiling for adaptive calls. The client takes
       # min(this, llm.max_output_tokens), so this -- not providers.yaml --
       # is what actually bounds a normal call. z-ai/GLM-5.3-Flash is a
