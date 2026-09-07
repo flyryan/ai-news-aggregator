@@ -11,6 +11,10 @@ safe default and an over-long string is truncated, so one hostile (or merely
 sloppy) field never drops a whole batch of items from the day's report --
 coverage is part of output quality. Only entries that are structurally
 unusable (not a dict, missing/blank id) are dropped, with a warning.
+
+Source association is a separate requirement: BaseAnalyzer validates exact
+batch coverage and source titles before calling this sanitizer, and retries
+invalid responses instead of accepting a clamped but misidentified analysis.
 """
 
 import logging
@@ -60,10 +64,19 @@ class AnalyzedItemModel(BaseModel):
     model_config = ConfigDict(extra='ignore')
 
     id: str
+    # Retained for source-identity validation and analysis checkpoints; not
+    # republished as article metadata by AnalyzedItem.
+    source_title: str = ""
     summary: str = ""
     importance_score: float = 50.0
     reasoning: str = ""
     themes: List[str] = Field(default_factory=list)
+
+    @field_validator('source_title', mode='before')
+    @classmethod
+    def _clamp_source_title(cls, value: Any) -> str:
+        # Source prompt titles use an 800-character clip plus an ellipsis.
+        return _coerce_str(value, 803)
 
     @field_validator('id', mode='before')
     @classmethod

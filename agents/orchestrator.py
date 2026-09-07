@@ -16,7 +16,8 @@ from typing import List, Dict, Any, Optional, Tuple
 from .llm_client import AnthropicClient, AsyncAnthropicClient, AsyncLLMRouter, ThinkingLevel, LLMResponse
 from .base import (
     BaseGatherer, BaseAnalyzer, CollectedItem, AnalyzedItem,
-    CategoryReport, CategoryTheme, deduplicate_items, extract_json_str
+    CategoryReport, CategoryTheme, deduplicate_items, extract_json_str,
+    AnalysisIntegrityError,
 )
 from .gatherers import NewsGatherer, ResearchGatherer, SocialGatherer, RedditGatherer, LinkFollower
 from .analyzers import NewsAnalyzer, ResearchAnalyzer, SocialAnalyzer, RedditAnalyzer
@@ -1296,18 +1297,14 @@ class MainOrchestrator:
                 report = await analyzer.analyze(items)
                 logger.info(f"  {name} analyzer completed. Top items: {len(report.top_items)}")
                 return name, report
+            except AnalysisIntegrityError:
+                # Never turn corrupt/incomplete source mappings into a successful
+                # empty category. Keep the previous publication and checkpoint.
+                raise
             except Exception as e:
                 logger.error(f"  {name} analyzer failed: {e}")
-                # Return empty report on failure
-                return name, CategoryReport(
-                    category=name,
-                    top_items=[],
-                    all_items=[],
-                    category_summary=f"Analysis failed: {e}",
-                    themes=[],
-                    cross_signals=[],
-                    total_collected=len(items)
-                )
+                # A missing category must not masquerade as a quiet source day.
+                raise AnalysisIntegrityError(f"{name}: analyzer failed ({type(e).__name__})") from e
 
         # Run all analyzers in parallel
         tasks = [

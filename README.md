@@ -405,6 +405,9 @@ export SCRAPECREATORS_API_KEY="your-key-here"  # For Reddit collection
 | `LLM_REPLAY_MAX_BYTES` | Hard gzipped ceiling for `replay-stream.json.gz`. Default: `600000` | No |
 | `LLM_METRICS_PATH` | Optional JSONL path for per-request LLM metrics. GitHub Actions default: `data/llm_metrics.jsonl` | No |
 | `ANALYZER_BATCH_SIZE` | Items per analyzer map batch. Default: `75` | No |
+| `ANALYZER_IDENTITY_BATCH_SIZE` | Additional batch-size cap to reduce source/summary mix-ups. Default: `25` | No |
+| `ANALYZER_RESULT_MAX_ATTEMPTS` | Retry invalid analysis results or exhausted transient requests; `0` (default) continues until valid or cancelled. A positive limit fails closed on exhaustion. | No |
+| `ANALYZER_RESULT_RETRY_SECONDS` | Initial result-retry delay. Default: `5`; exponential backoff caps at `60` seconds. | No |
 | `ANALYZER_MAX_CONCURRENT_BATCHES` | Per-category analyzer map concurrency. Default: `3` | No |
 | `MULLVAD_ACCOUNT` | Mullvad account number for CI proxy setup | No |
 | `MULLVAD_WG_PRIVATE_KEY` | Stable WireGuard private key for the CI Mullvad device | No |

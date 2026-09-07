@@ -235,6 +235,7 @@ The summary should capture the pulse of AI community discussions."""
             records.append({
                 "position": i,
                 "id": item.id,
+                "title": self._clip_context_text(item.title),
                 "platform": item.source_type,
                 "author": self._clip_context_text(item.author),
                 "content": self._clip_context_text(item.content, 1000),

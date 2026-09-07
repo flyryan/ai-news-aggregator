@@ -69,6 +69,10 @@ class MalformedJSONError(Exception):
     """
 
 
+class AnalysisIntegrityError(RuntimeError):
+    """Analysis cannot be safely attached to its collected sources."""
+
+
 def _env_int(name: str, default: int, minimum: int = 1) -> int:
     """Read a positive integer from the environment."""
     raw_value = os.environ.get(name)
@@ -915,6 +919,44 @@ class BaseAnalyzer(ABC):
             samples.append(f"{item.id}:{title}")
         return " | ".join(samples)
 
+    def _validate_batch_identity(self, result: dict, batch_items: List[CollectedItem]) -> dict:
+        """Reject omissions, invented/duplicate IDs and swapped source titles.
+
+        Validate BEFORE sanitization: coercing or dropping an identity field can
+        conceal a corrupt response. Never guess a mapping from output position.
+        """
+        records = json.loads(self._build_items_context(batch_items, max_items=len(batch_items)))
+        expected = {record['id']: record.get('title', '') for record in records}
+        if len(expected) != len(batch_items):
+            raise AnalysisIntegrityError("Duplicate IDs in collected batch")
+        rows = result.get('items') if isinstance(result, dict) else None
+        if not isinstance(rows, list) or len(rows) != len(expected):
+            raise AnalysisIntegrityError(f"Expected {len(expected)} analysis items")
+        seen = set()
+        for row in rows:
+            if not isinstance(row, dict):
+                raise AnalysisIntegrityError("Analysis entry is not an object")
+            item_id = row.get('id')
+            if not isinstance(item_id, str) or item_id not in expected or item_id in seen:
+                raise AnalysisIntegrityError("Unknown or duplicate analysis ID")
+            source_title = row.get('source_title')
+            # Some feeds retain trailing spaces in titles. Ignoring outer
+            # whitespace avoids repeatedly retrying the same correct identity.
+            if not isinstance(source_title, str) or source_title.strip() != expected[item_id].strip():
+                raise AnalysisIntegrityError(f"Source title mismatch for {item_id}")
+            if not isinstance(row.get('summary'), str) or not row['summary'].strip():
+                raise AnalysisIntegrityError(f"Missing summary for {item_id}")
+            if not isinstance(row.get('reasoning'), str) or not row['reasoning'].strip():
+                raise AnalysisIntegrityError(f"Missing reasoning for {item_id}")
+            score = row.get('importance_score')
+            if isinstance(score, bool) or not isinstance(score, (int, float)) or not 0 <= score <= 100:
+                raise AnalysisIntegrityError(f"Invalid score for {item_id}")
+            seen.add(item_id)
+        clean = sanitize_batch_result(result, where=f"{self.category} identity-checked batch")
+        if len(clean.get('items', [])) != len(expected):
+            raise AnalysisIntegrityError("Sanitization lost analysis items")
+        return clean
+
     async def _analyze_batch(
         self,
         batch_items: List[CollectedItem],
@@ -922,177 +964,95 @@ class BaseAnalyzer(ABC):
         total_batches: int,
         sub_label: str = "",
     ) -> BatchResult:
-        """
-        MAP phase: Analyze a single batch of items.
+        """Analyze only complete, source-bound results; split bad batches and retry.
 
-        Uses the STANDARD analysis profile for quality per-item analysis.
-
-        When the LLM response is truncated (``stop_reason == 'max_tokens'``
-        or the JSON was cut off mid-token), the batch is split in half and
-        each half is analyzed recursively; results are then merged. This
-        recovers transparently from dense batches that overflow the
-        response token budget instead of silently dropping them.
-
-        Args:
-            batch_items: Items to analyze.
-            batch_index: Zero-based batch index (used in prompts and logs).
-            total_batches: Total batch count for the map phase.
-            sub_label: Suffix appended to the label during recursive splits
-                (e.g. "a", "b", "ab"); purely cosmetic for logging.
+        Content/identity failures shrink the request down to single sources.
+        At singleton size, keep retrying with capped exponential backoff by
+        default. ANALYZER_RESULT_MAX_ATTEMPTS can bound a run; exhaustion raises
+        instead of publishing guessed summaries. Transport retries already
+        happen in the client, but transient exhaustion is also recoverable here.
         """
         items_context = self._build_items_context(batch_items, max_items=len(batch_items))
-        # CWE-1427: operator instructions travel in the system prompt (with
-        # ecosystem grounding and the anti-injection preamble); the untrusted
-        # item data travels in the user message inside a nonce fence.
         nonce = new_fence_nonce()
         instructions = self._get_batch_analysis_prompt(DATA_POINTER, batch_index, total_batches)
+        instructions += """
+
+MANDATORY SOURCE IDENTITY CONTRACT:
+Return exactly one items entry for EACH supplied source, with no extra entries.
+Copy its id exactly. Also include source_title, copying that source's title
+exactly as supplied (including an empty title). Keep id, source_title, summary,
+reasoning and score together; describe ONLY that source's content. Do not use
+another source's ID, infer IDs, reorder IDs independently, or omit any source.
+Every entry needs a nonempty summary and reasoning and a numeric score 0-100.
+"""
         system_prompt = build_hardened_system(instructions, nonce, grounding=self.grounding_context)
         user_message = build_fenced_user_message(items_context, nonce)
-
         label = f"{batch_index + 1}{sub_label}/{total_batches}"
-        caller_suffix = f"{batch_index}{sub_label}"
-        logger.info(
-            f"  {self.category} map {label}: sending {len(batch_items)} items "
-            f"(user_chars={len(user_message)}, system_chars={len(system_prompt)})"
-        )
-
-        try:
-            response = await self.async_client.call_with_thinking(
-                messages=[{"role": "user", "content": user_message}],
-                system=system_prompt,
-                profile=ThinkingLevel.STANDARD,  # Quality batch processing
-                caller=f"{self.category}_analyzer.batch_{caller_suffix}"
-            )
-
-            if response.stop_reason == "max_tokens":
-                return await self._handle_truncated_batch(
-                    batch_items, batch_index, total_batches, sub_label
-                )
-
+        caller = f"{self.category}_analyzer.batch_{batch_index}{sub_label}"
+        attempts = _env_int("ANALYZER_RESULT_MAX_ATTEMPTS", 0, minimum=0)
+        base_delay = _env_int("ANALYZER_RESULT_RETRY_SECONDS", 5)
+        attempt = 0
+        while True:
+            attempt += 1
             try:
-                result = self._parse_json_response(
-                    response.content, expected_items=len(batch_items)
-                )
-            except (TruncatedJSONError, MalformedJSONError) as parse_error:
-                return await self._handle_truncated_batch(
-                    batch_items, batch_index, total_batches, sub_label, str(parse_error)
-                )
-
-            result = sanitize_batch_result(result, where=f"{self.category} map {label}")
-            batch_themes = result.get('themes', result.get('category_themes', []))
-            parsed_items = result.get('items', [])
-            logger.info(f"  {self.category} map {label}: {len(parsed_items)} items, {len(batch_themes)} themes")
-
-            return BatchResult(
-                batch_index=batch_index,
-                item_analyses=parsed_items,
-                batch_themes=batch_themes,
-                cross_signals=result.get('cross_signals', []),
-                thinking=response.thinking
-            )
-        except Exception as e:
-            logger.error(f"{self.category} batch {label} analysis failed: {type(e).__name__}: {e}")
-            # Retry once with backoff for transient failures (network, 5xx, etc.)
-            try:
-                await asyncio.sleep(5)
+                logger.info("%s map %s: %d items, attempt %d", self.category, label, len(batch_items), attempt)
                 response = await self.async_client.call_with_thinking(
                     messages=[{"role": "user", "content": user_message}],
                     system=system_prompt,
                     profile=ThinkingLevel.STANDARD,
-                    caller=f"{self.category}_analyzer.batch_{caller_suffix}_retry"
+                    caller=caller,
                 )
                 if response.stop_reason == "max_tokens":
-                    return await self._handle_truncated_batch(
-                        batch_items, batch_index, total_batches, sub_label
-                    )
-                try:
-                    result = self._parse_json_response(
-                        response.content, expected_items=len(batch_items)
-                    )
-                except (TruncatedJSONError, MalformedJSONError) as parse_error:
-                    return await self._handle_truncated_batch(
-                        batch_items, batch_index, total_batches, sub_label, str(parse_error)
-                    )
-                result = sanitize_batch_result(result, where=f"{self.category} map {label} retry")
-                batch_themes = result.get('themes', result.get('category_themes', []))
-                parsed_items = result.get('items', [])
-                logger.info(f"  {self.category} map {label}: {len(parsed_items)} items, {len(batch_themes)} themes (retry)")
+                    raise TruncatedJSONError("Analysis output exhausted its token budget")
+                result = self._parse_json_response(response.content, expected_items=len(batch_items))
+                result = self._validate_batch_identity(result, batch_items)
                 return BatchResult(
                     batch_index=batch_index,
-                    item_analyses=parsed_items,
-                    batch_themes=batch_themes,
+                    item_analyses=result['items'],
+                    batch_themes=result.get('themes', result.get('category_themes', [])),
                     cross_signals=result.get('cross_signals', []),
-                    thinking=response.thinking
+                    thinking=response.thinking,
                 )
-            except Exception as retry_e:
-                logger.error(
-                    f"  {self.category} map {label}: FAILED after retry: "
-                    f"{type(retry_e).__name__}: {retry_e}"
-                )
-                return BatchResult(
-                    batch_index=batch_index,
-                    item_analyses=[],
-                    batch_themes=[],
-                    cross_signals=[],
-                    thinking=f"Error: {e}, Retry error: {retry_e}",
-                    failed=True
-                )
+            except (AnalysisIntegrityError, TruncatedJSONError, MalformedJSONError) as exc:
+                if len(batch_items) > 1:
+                    return await self._handle_truncated_batch(
+                        batch_items, batch_index, total_batches, sub_label, str(exc)
+                    )
+                reason = str(exc)
+            except Exception as exc:
+                from .llm_client import _transient_retry_reason
+                if _transient_retry_reason(exc) is None:
+                    # Bad credentials/request configuration and programming errors
+                    # need intervention; retrying them cannot fix the response.
+                    raise AnalysisIntegrityError(f"{caller}: {type(exc).__name__}") from exc
+                reason = f"transient {type(exc).__name__}"
+            if attempts and attempt >= attempts:
+                raise AnalysisIntegrityError(f"{caller}: no valid result after {attempt} attempts ({reason})")
+            delay = min(60, base_delay * 2 ** min(attempt - 1, 6))
+            logger.warning("%s: %s; retrying in %ss", caller, reason, delay)
+            await asyncio.sleep(delay)
 
     async def _handle_truncated_batch(
-        self,
-        batch_items: List[CollectedItem],
-        batch_index: int,
-        total_batches: int,
-        sub_label: str,
-        reason: str = "truncated",
+        self, batch_items: List[CollectedItem], batch_index: int,
+        total_batches: int, sub_label: str, reason: str = "truncated",
     ) -> BatchResult:
-        """Recover from an unusable LLM response by splitting the batch.
-
-        Runs each half through ``_analyze_batch`` inside the current batch
-        slot and merges the results. Keeping recovery sequential prevents a
-        malformed response from briefly exceeding the per-category analyzer
-        concurrency limit. When a single-item batch still fails there is
-        nothing further to split, so the item is dropped with a loud ERROR
-        (the same user-visible outcome as the old silent-drop path, but only
-        after exhausting recovery attempts).
-        """
-        label = f"{batch_index + 1}{sub_label}/{total_batches}"
+        """Shrink malformed or misidentified batches without dropping sources."""
         if len(batch_items) <= 1:
-            logger.error(
-                f"  {self.category} map {label}: unrecoverable response "
-                f"({reason}) with {len(batch_items)} item(s); cannot split further, dropping"
-            )
-            return BatchResult(
-                batch_index=batch_index,
-                item_analyses=[],
-                batch_themes=[],
-                cross_signals=[],
-                thinking=f"Error: unusable response ({reason}) with {len(batch_items)} item(s); cannot split further"
-            )
-
+            raise AnalysisIntegrityError(f"Cannot split singleton: {reason}")
         mid = len(batch_items) // 2
-        left_items, right_items = batch_items[:mid], batch_items[mid:]
-        logger.warning(
-            f"  {self.category} map {label}: unusable response ({reason}), splitting "
-            f"{len(batch_items)} items into {len(left_items)}+{len(right_items)} sub-batches"
-        )
-
-        left_result = await self._analyze_batch(
-            left_items, batch_index, total_batches, sub_label + "a"
-        )
-        right_result = await self._analyze_batch(
-            right_items, batch_index, total_batches, sub_label + "b"
-        )
-
-        thinkings = [t for t in (left_result.thinking, right_result.thinking) if t]
-        merged_thinking = "\n\n".join(thinkings) if thinkings else None
-
+        logger.warning("%s batch %s%s: %s; splitting %d into %d+%d",
+                       self.category, batch_index, sub_label, reason,
+                       len(batch_items), mid, len(batch_items) - mid)
+        # Stay inside the current category concurrency slot during recovery.
+        left = await self._analyze_batch(batch_items[:mid], batch_index, total_batches, sub_label + "a")
+        right = await self._analyze_batch(batch_items[mid:], batch_index, total_batches, sub_label + "b")
         return BatchResult(
             batch_index=batch_index,
-            item_analyses=left_result.item_analyses + right_result.item_analyses,
-            batch_themes=left_result.batch_themes + right_result.batch_themes,
-            cross_signals=left_result.cross_signals + right_result.cross_signals,
-            thinking=merged_thinking,
+            item_analyses=left.item_analyses + right.item_analyses,
+            batch_themes=left.batch_themes + right.batch_themes,
+            cross_signals=left.cross_signals + right.cross_signals,
+            thinking="\n\n".join(t for t in (left.thinking, right.thinking) if t),
+            failed=left.failed or right.failed,
         )
 
     def _get_batch_analysis_prompt(
@@ -1120,16 +1080,19 @@ class BaseAnalyzer(ABC):
         if not items:
             return [], items
 
-        # Split into batches
+        # Keep identity association manageable even with a large legacy batch setting.
+        batch_size = min(self.BATCH_SIZE, _env_int("ANALYZER_IDENTITY_BATCH_SIZE", 25))
+        if len({item.id for item in items}) != len(items):
+            raise AnalysisIntegrityError(f"{self.category}: duplicate collected IDs")
         batches = [
-            items[i:i + self.BATCH_SIZE]
-            for i in range(0, len(items), self.BATCH_SIZE)
+            items[i:i + batch_size]
+            for i in range(0, len(items), batch_size)
         ]
         total_batches = len(batches)
 
         logger.info(
             f"  {self.category} MAP: processing {len(items)} items in {total_batches} batches "
-            f"(batch_size={self.BATCH_SIZE}, per_category_concurrency={self.MAX_CONCURRENT_BATCHES})"
+            f"(batch_size={batch_size}, per_category_concurrency={self.MAX_CONCURRENT_BATCHES})"
         )
         for i, batch in enumerate(batches):
             logger.info(
@@ -1142,7 +1105,45 @@ class BaseAnalyzer(ABC):
 
         async def process_with_semaphore(batch, index):
             async with semaphore:
-                return await self._analyze_batch(batch, index, total_batches)
+                # Save completed units so an interrupted retry can resume without
+                # buying every successful analysis again. Input/prompt/model
+                # changes invalidate the cache; no credentials enter its key.
+                clients = getattr(self.async_client, 'clients', [self.async_client])
+                fingerprint = json.dumps({
+                    'version': 1,
+                    'items': self._build_items_context(batch, max_items=len(batch)),
+                    'prompt': self._get_batch_analysis_prompt(DATA_POINTER, index, total_batches),
+                    'grounding': self.grounding_context,
+                    'models': [getattr(client, 'model', '') for client in clients],
+                }, sort_keys=True)
+                digest = hashlib.sha256(fingerprint.encode()).hexdigest()
+                directory = os.path.join(self.data_dir, 'checkpoints', self.target_date,
+                                         'analysis_batches', self.category)
+                path = os.path.join(directory, digest + '.json')
+                try:
+                    with open(path, encoding='utf-8') as handle:
+                        saved = json.load(handle)
+                    self._validate_batch_identity({'items': saved['item_analyses']}, batch)
+                    if saved.get('failed'):
+                        raise AnalysisIntegrityError('Cached batch was marked failed')
+                    saved['batch_index'] = index
+                    logger.info('%s map %d: restored %d validated items', self.category, index + 1, len(batch))
+                    return BatchResult(**saved)
+                except FileNotFoundError:
+                    pass
+                except (OSError, ValueError, KeyError, TypeError, AnalysisIntegrityError) as exc:
+                    logger.warning('%s map %d: ignoring invalid cached batch (%s)',
+                                   self.category, index + 1, type(exc).__name__)
+                result = await self._analyze_batch(batch, index, total_batches)
+                try:
+                    os.makedirs(directory, exist_ok=True)
+                    with open(path + '.tmp', 'w', encoding='utf-8') as handle:
+                        json.dump(asdict(result), handle, ensure_ascii=False)
+                    os.replace(path + '.tmp', path)
+                except OSError as exc:
+                    logger.warning('%s map %d: validated batch could not be checkpointed (%s)',
+                                   self.category, index + 1, type(exc).__name__)
+                return result
 
         # Run all batches concurrently (up to MAX_CONCURRENT_BATCHES at a time)
         tasks = [
@@ -1175,8 +1176,9 @@ class BaseAnalyzer(ABC):
             # Merge item analyses
             for analysis in batch.item_analyses:
                 item_id = analysis.get('id')
-                if item_id:
-                    all_analyses[item_id] = analysis
+                if not item_id or item_id in all_analyses:
+                    raise AnalysisIntegrityError(f"{self.category}: duplicate or missing merged ID")
+                all_analyses[item_id] = analysis
 
             # Aggregate themes (combine counts for same theme name)
             for theme in batch.batch_themes:
@@ -1195,6 +1197,10 @@ class BaseAnalyzer(ABC):
             # Collect cross signals
             all_signals.update(batch.cross_signals)
 
+        expected_ids = {item.id for item in items}
+        if len(expected_ids) != len(items) or set(all_analyses) != expected_ids:
+            raise AnalysisIntegrityError(f"{self.category}: merged analysis does not cover exactly the collected IDs")
+
         # Build AnalyzedItem list
         analyzed_items = []
         for item in items:
@@ -1207,16 +1213,6 @@ class BaseAnalyzer(ABC):
                     reasoning=a.get('reasoning', ''),
                     themes=a.get('themes', [])
                 ))
-            else:
-                # Item wasn't analyzed (batch failure)
-                analyzed_items.append(AnalyzedItem(
-                    item=item,
-                    summary=item.content[:200] + '...' if len(item.content) > 200 else item.content,
-                    importance_score=30,  # Lower score for unanalyzed items
-                    reasoning='Not analyzed (batch processing)',
-                    themes=[]
-                ))
-
         # Sort by importance
         analyzed_items.sort(key=lambda x: x.importance_score, reverse=True)
 
