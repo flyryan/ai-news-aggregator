@@ -131,6 +131,15 @@ def validate(summary: dict, date_str: str) -> dict:
     #    placeholder. A category that collected nothing is a quiet day, not a
     #    failure, so only categories that actually have items are checked.
     categories = summary.get("categories")
+    # Reddit has daily activity; absence is an outage, not a quiet-day exemption.
+    reddit = categories.get('reddit') if isinstance(categories, dict) else None
+    reddit_count = reddit.get('count') if isinstance(reddit, dict) else None
+    if isinstance(reddit_count, bool) or not isinstance(reddit_count, int) or reddit_count <= 0:
+        failures.append('required Reddit category is missing or empty')
+    sources = (summary.get('collection_status') or {}).get('sources') or []
+    reddit_source = next((s for s in sources if s.get('name') == 'reddit'), None)
+    if reddit_source is None or reddit_source.get('status') != 'success' or not reddit_source.get('count'):
+        failures.append('required Reddit collection is missing, failed or incomplete')
     degraded_categories = []
     if isinstance(categories, dict):
         for name in sorted(categories):

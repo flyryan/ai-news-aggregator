@@ -342,6 +342,13 @@ class MainOrchestrator:
                 raise
 
         # Phase 2: Parallel Analysis (with grounding context)
+        # Preserve the gathering checkpoint, but do not buy analysis for a
+        # report that cannot be published. This also applies to resumed runs.
+        reddit_status = collection_status.get('reddit', {})
+        if not gathered_items.get('reddit') or reddit_status.get('status') != 'success':
+            raise RuntimeError('Required Reddit collection is empty or incomplete: '
+                               + (reddit_status.get('error') or 'no healthy Reddit collection'))
+
         if resume_from is not None and resume_from > 2:
             checkpoint = self._load_checkpoint('analysis')
             self._absorb_replay_bundle(checkpoint)
@@ -1183,7 +1190,7 @@ class MainOrchestrator:
 
         if degradation:
             logger.warning(f"    {name} gatherer degraded: {degradation}")
-            return {'status': 'partial', 'count': len(items), 'error': degradation}
+            return {'status': 'partial' if items else 'failed', 'count': len(items), 'error': degradation}
 
         return {'status': 'success', 'count': len(items), 'error': None}
 

@@ -72,9 +72,8 @@ def _validate_generated_report(web_dir: str, date_str: str) -> dict:
     publishable", shared with the CI publish gate and the live watchdog. It is
     loaded by path rather than imported because `scripts/` is not a package.
 
-    Never raises: a validator that cannot run must not itself break the pipeline,
-    so a load failure degrades to "no opinion" (and says so) rather than either
-    blocking a good report or silently passing a bad one.
+    Never raises; inability to validate blocks publication rather than silently
+    accepting an unknown report.
     """
     import importlib.util
     from pathlib import Path
@@ -93,7 +92,7 @@ def _validate_generated_report(web_dir: str, date_str: str) -> dict:
         logger.error(
             f"Publish gate could not evaluate {summary_path}: {type(e).__name__}: {e}"
         )
-        return {"valid": True, "failures": [], "warnings": [f"publish gate did not run: {e}"]}
+        return {"valid": False, "failures": [f"publish gate did not run: {type(e).__name__}"], "warnings": []}
 
 
 async def run_pipeline(config_dir: str, data_dir: str, web_dir: str, target_date: str = None, resume_from=None) -> bool:

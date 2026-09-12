@@ -99,7 +99,7 @@ class RedditGatherer(BaseGatherer):
 
         # Shared, thread-safe run state (gathering runs across a thread pool)
         self._lock = Lock()
-        self._calls_made = 0            # logical API calls issued this run (budget unit)
+        self._calls_made = 0            # HTTP attempts issued this run (budget unit)
         self._credits_remaining: Optional[int] = None  # latest observed balance
         self._stop_calls = False        # set when budget hit or a fatal error occurs
 
@@ -117,6 +117,10 @@ class RedditGatherer(BaseGatherer):
     def category(self) -> str:
         return 'reddit'
 
+    def note_degradation(self, reason: str) -> None:
+        with self._lock:
+            super().note_degradation(reason)
+
     # ------------------------------------------------------------------ #
     # Entry point
     # ------------------------------------------------------------------ #
@@ -124,6 +128,7 @@ class RedditGatherer(BaseGatherer):
     async def gather(self) -> List[CollectedItem]:
         """Gather posts from configured subreddits."""
         if not SCRAPECREATORS_API_KEY:
+            self.note_degradation('SCRAPECREATORS_API_KEY is missing')
             logger.error(
                 "SCRAPECREATORS_API_KEY is not set - Reddit collection is disabled. "
                 "Set the env var / GitHub secret to restore Reddit data."
@@ -150,6 +155,8 @@ class RedditGatherer(BaseGatherer):
                 all_posts = await loop.run_in_executor(driver, self._gather_sync)
 
         logger.info(f"Collected {len(all_posts)} posts from Reddit")
+        if not all_posts:
+            self.note_degradation('Reddit returned no posts for the coverage window')
         self.save_to_file(all_posts, f'reddit_{self.target_date}.json')
         return all_posts
 
@@ -162,6 +169,11 @@ class RedditGatherer(BaseGatherer):
         start_balance = self._fetch_credit_balance()
         if start_balance is not None:
             logger.info(f"ScrapeCreators credit balance at start: {start_balance}")
+            self._credits_remaining = start_balance
+            if start_balance <= 0:
+                self._stop_calls = True
+                self.note_degradation(f'ScrapeCreators credits exhausted (balance={start_balance})')
+                raise FatalScrapeError(self.get_degradation())
 
         all_posts: List[CollectedItem] = []
 
@@ -193,15 +205,24 @@ class RedditGatherer(BaseGatherer):
                     all_posts.extend(future.result())
                 except Exception as e:  # defensive: a worker should not crash the run
                     logger.error(f"r/{sub} worker failed: {e}")
+                    self.note_degradation(f'r/{sub} worker failed: {type(e).__name__}')
 
         # Belt-and-suspenders dedup across subs (per-sub dedup already applied).
         all_posts = deduplicate_items(all_posts)
+
+        # Concurrent responses can arrive out of order; use a free final probe
+        # as the authoritative end balance rather than whichever response won.
+        final_balance = self._fetch_credit_balance()
+        if final_balance is not None:
+            self._credits_remaining = final_balance
 
         with self._lock:
             calls = self._calls_made
             remaining = self._credits_remaining
             stopped = self._stop_calls
-        consumed = (start_balance - remaining) if (start_balance is not None and remaining is not None) else None
+        consumed = max(0, start_balance - remaining) if (start_balance is not None and remaining is not None) else None
+        if stopped:
+            self.note_degradation('Reddit collection stopped before completion (budget or provider failure)')
         logger.info(
             f"ScrapeCreators usage: {calls} calls this run; "
             f"credits_remaining={remaining}; credits_consumed={consumed}"
@@ -219,7 +240,7 @@ class RedditGatherer(BaseGatherer):
                 credits_consumed=consumed,
                 balance=remaining,
                 est_cost_usd=round((billed or 0) * 0.99 / 1000, 4),
-                note=("STOPPED EARLY (budget/fatal)" if stopped else None),
+                note=self.get_degradation(),
             )
         except Exception as e:  # never let reporting break collection
             logger.debug(f"Could not record ScrapeCreators usage: {e}")
@@ -253,6 +274,9 @@ class RedditGatherer(BaseGatherer):
                     break
 
                 posts = data.get("posts") or []
+                if not isinstance(data.get('posts'), list):
+                    self.note_degradation(f'r/{subreddit}: malformed listing response')
+                    break
                 if not posts:
                     break
 
@@ -297,6 +321,7 @@ class RedditGatherer(BaseGatherer):
 
             logger.info(f"r/{subreddit}: collected {len(pairs)} in-window posts across {pages + 1} page(s)")
             if pages >= self.max_pages:
+                self.note_degradation(f'r/{subreddit}: max_pages={self.max_pages} reached before coverage completed')
                 logger.warning(
                     f"r/{subreddit}: hit max_pages={self.max_pages} before exhausting the window; "
                     f"may be under-collecting."
@@ -309,8 +334,10 @@ class RedditGatherer(BaseGatherer):
             with self._lock:
                 self._stop_calls = True
             logger.error(f"Aborting Reddit collection (fatal): {e}")
+            self.note_degradation(str(e))
         except Exception as e:
             logger.error(f"Error fetching r/{subreddit}: {e}")
+            self.note_degradation(f'r/{subreddit}: {type(e).__name__}')
         finally:
             session.close()
 
@@ -463,24 +490,19 @@ class RedditGatherer(BaseGatherer):
         Returns the parsed JSON on success, or None on a soft failure / when the credit
         budget is exhausted. Raises FatalScrapeError on bad-key / out-of-credits.
         """
-        # Budget gate (one logical call == one budget unit).
-        with self._lock:
-            if self._stop_calls:
-                return None
-            if self._calls_made >= self.credit_budget:
-                if not self._stop_calls:
-                    self._stop_calls = True
-                    logger.warning(
-                        f"Reddit credit budget ({self.credit_budget} calls) reached; "
-                        f"stopping further ScrapeCreators calls."
-                    )
-                return None
-            self._calls_made += 1
-
         url = f"{SCRAPECREATORS_BASE}{path}"
         headers = {"x-api-key": SCRAPECREATORS_API_KEY}
 
         for attempt in range(3):
+            # Every HTTP attempt can consume a credit, including retries.
+            with self._lock:
+                if self._stop_calls:
+                    return None
+                if self._calls_made >= self.credit_budget:
+                    self._stop_calls = True
+                    logger.warning('Reddit credit budget (%s attempts) reached', self.credit_budget)
+                    return None
+                self._calls_made += 1
             try:
                 resp = session.get(url, params=params, headers=headers, timeout=self.timeout)
             except requests.exceptions.RequestException as e:
@@ -504,12 +526,14 @@ class RedditGatherer(BaseGatherer):
 
             if status != 200:
                 logger.warning(f"ScrapeCreators HTTP {status} for {path}; skipping")
+                self.note_degradation(f'ScrapeCreators HTTP {status} for {path}')
                 return None
 
             try:
                 data = resp.json()
             except ValueError:
                 logger.warning(f"ScrapeCreators returned non-JSON for {path}; skipping")
+                self.note_degradation(f'ScrapeCreators returned non-JSON for {path}')
                 return None
 
             if not data.get("success", False):
@@ -525,8 +549,9 @@ class RedditGatherer(BaseGatherer):
             credits = data.get("credits_remaining")
             if credits is not None:
                 with self._lock:
-                    self._credits_remaining = credits
+                    self._credits_remaining = min(self._credits_remaining, credits) if self._credits_remaining is not None else credits
             return data
 
         logger.warning(f"ScrapeCreators request to {path} failed after retries; skipping")
+        self.note_degradation(f'ScrapeCreators {path} failed after retries')
         return None

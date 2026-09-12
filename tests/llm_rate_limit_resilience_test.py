@@ -373,6 +373,9 @@ class PublishGateTest(unittest.TestCase):
             },
         }
         report.update(overrides)
+        report.setdefault('collection_status', {'sources': [
+            {'name': 'reddit', 'status': 'success', 'count': 100}]})
+        report['categories'].setdefault('reddit', {'count': 100, 'category_summary': 'R' * 1500})
         return report
 
     def test_healthy_report_passes(self):

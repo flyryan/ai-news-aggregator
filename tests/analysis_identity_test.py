@@ -92,6 +92,40 @@ class IdentityTests(unittest.IsolatedAsyncioTestCase):
                 await self.analyzer._analyze_batch(self.items[:1], 0, 1)
         self.assertEqual(self.client.call_with_thinking.await_count, 2)
 
+    def test_encoding_and_typography_are_not_identity_changes(self):
+        item = source('abc', 'An AI’s Q&amp;A:  5 models')
+        row = analysis(item)
+        row['source_title'] = "An AI's Q&A: 5 models"
+        self.analyzer._validate_batch_identity({'items': [row]}, [item])
+        row['source_title'] = "An AI's Q&A: 6 models"
+        with self.assertRaises(AnalysisIntegrityError):
+            self.analyzer._validate_batch_identity({'items': [row]}, [item])
+
+    async def test_recovery_only_requests_the_unresolved_source(self):
+        wrong = [analysis(i) for i in self.items]
+        wrong[1]['source_title'] = 'rewritten title'
+        self.client.call_with_thinking.side_effect = [response(wrong), response([wrong[1]])]
+        result = await self.analyzer._analyze_batch(self.items, 0, 1)
+        self.assertEqual(len(result.item_analyses), 2)
+        self.assertEqual(self.client.call_with_thinking.await_count, 2)
+        request = self.client.call_with_thinking.await_args_list[1].kwargs['messages'][0]['content']
+        self.assertNotIn(self.items[0].id, request)
+        self.assertIn(self.items[1].id, request)
+        self.assertEqual(result.item_analyses[1]['source_title'], self.items[1].title)
+
+    async def test_default_retry_limit_and_partial_cache_survive_failure(self):
+        valid = analysis(self.items[0])
+        self.client.call_with_thinking.side_effect = [response([valid])] + [response([])] * 3
+        with patch('agents.base.asyncio.sleep', new_callable=AsyncMock):
+            with self.assertRaises(AnalysisIntegrityError):
+                await self.analyzer._analyze_batch(self.items, 0, 1)
+        self.assertEqual(self.client.call_with_thinking.await_count, 4)
+        self.client.call_with_thinking.reset_mock()
+        self.client.call_with_thinking.side_effect = [response([analysis(self.items[1])])]
+        result = await self.analyzer._analyze_batch(self.items, 0, 1)
+        self.assertEqual(len(result.item_analyses), 2)
+        self.assertEqual(self.client.call_with_thinking.await_count, 1)
+
     async def test_cancellation_is_never_retried(self):
         self.client.call_with_thinking.side_effect = asyncio.CancelledError()
         with self.assertRaises(asyncio.CancelledError):

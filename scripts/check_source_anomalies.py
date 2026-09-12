@@ -64,69 +64,19 @@ def _today_et() -> str:
     return (datetime.now(timezone.utc) - timedelta(hours=5)).strftime("%Y-%m-%d")
 
 
-def _already_alerted_sources(readings, report_date: str) -> set[str]:
-    """Sources that were already anomalous on the previous published date.
-
-    Dedup without state: the committed history IS the state. Re-running the
-    detector for the previous report date is deterministic, so "was this
-    source already red yesterday?" needs no database -- which matters because
-    this runs on a GitHub runner and the admin host's SQLite is unreachable
-    from here. A three-week outage notifies on its first day and then goes
-    quiet; a weekday-keyed source like arXiv-on-Mondays notifies once per
-    incident weekday, not 21 times.
-    """
-    prior_dates = sorted({r.date for r in readings if r.date < report_date})
-    if not prior_dates:
-        return set()
-    previous = prior_dates[-1]
-    return {a.source for a in detect_for_date(readings, previous)}
+# Import the shared direct-egress sender when executed as a file or imported.
+sys.path.insert(0, str(REPO_ROOT))
+from scripts.pipeline_alert import post_alert
 
 
-def _post_alert(anomalies, report_date: str, run_url: str) -> None:
-    """Best-effort POST to the shared alert ingress. Never raises."""
-    token = os.environ.get("PIPELINE_ALERT_TOKEN", "").strip()
-    if not token:
-        print("PIPELINE_ALERT_TOKEN not set; skipping alert POST.")
-        return
-
-    url = os.environ.get("PIPELINE_ALERT_URL", "").strip() or DEFAULT_ALERT_URL
-    payload = {
-        "status": "degraded",
-        "report_date": report_date,
-        "reason": (
-            f"{len(anomalies)} source(s) collected far below their same-weekday "
-            "baseline; the run itself succeeded"
-        ),
-        "run_url": run_url,
-        "anomalies": [
-            {
-                "source": a.source,
-                "count": a.count,
-                "baseline": round(a.baseline),
-                "weekday": a.weekday,
-                "ratio": round(a.ratio, 3),
-                "detail": a.describe(),
-            }
-            for a in anomalies
-        ],
-    }
-
-    request = urllib.request.Request(
-        url,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=20) as response:
-            print(f"Alert POST -> HTTP {response.status}")
-    except urllib.error.HTTPError as exc:
-        print(f"Alert POST -> HTTP {exc.code} (delivery failed, not failing the run)")
-    except Exception as exc:  # noqa: BLE001 - delivery must never break the caller
-        print(f"Alert POST failed: {type(exc).__name__} (not failing the run)")
+def _post_alert(anomalies, report_date: str, run_url: str) -> bool:
+    return post_alert({
+        'status': 'degraded', 'report_date': report_date, 'run_url': run_url,
+        'reason': '; '.join(a.describe() for a in anomalies)[:280],
+        'anomalies': [dict(source=a.source, count=a.count, baseline=round(a.baseline),
+                           weekday=a.weekday, ratio=round(a.ratio, 3), detail=a.describe())
+                      for a in anomalies],
+    })
 
 
 def main() -> int:
@@ -141,6 +91,7 @@ def main() -> int:
         action="store_true",
         help="POST a degraded alert when anomalies are found",
     )
+    parser.add_argument('--state-dir', default='data/health')
     args = parser.parse_args()
 
     web_dir = Path(args.web_dir)
@@ -186,18 +137,25 @@ def main() -> int:
         print(f"OK: all sources within their same-weekday baselines on {report_date}")
 
     if anomalies and args.alert:
-        # Notify once per incident, not once per day it persists. The exit
-        # code and the printed report deliberately still cover everything --
-        # only the POST is deduplicated.
-        ongoing = _already_alerted_sources(readings, report_date)
-        fresh = [a for a in anomalies if a.source not in ongoing]
+        # Deduplicate confirmed deliveries for this report date only. Yesterday's
+        # outage is not proof anyone was notified; persistent outages re-alert daily.
+        state = Path(args.state_dir)
+        state.mkdir(parents=True, exist_ok=True)
+        receipt = state / f'source-alerts-{report_date}.json'
+        try:
+            delivered = json.loads(receipt.read_text())
+        except (OSError, ValueError):
+            delivered = {}
+        fresh = [a for a in anomalies
+                 if delivered.get(a.source) != ('empty' if a.count == 0 else 'low')]
         if fresh:
-            _post_alert(fresh, report_date, os.environ.get("RUN_URL", ""))
+            if _post_alert(fresh, report_date, os.environ.get('RUN_URL', '')):
+                delivered.update({a.source: 'empty' if a.count == 0 else 'low' for a in fresh})
+                receipt.write_text(json.dumps(delivered))
+            else:
+                print('::error::Source anomaly alert delivery failed; next run will retry')
         else:
-            print(
-                f"All {len(anomalies)} anomalies were already anomalous on the "
-                "previous published date; not re-alerting."
-            )
+            print('These source alerts were already delivered for this report date.')
 
     return 1 if anomalies else 0
 

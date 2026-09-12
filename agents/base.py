@@ -10,6 +10,7 @@ import json
 import time
 import logging
 import hashlib
+import html
 import threading
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
@@ -71,6 +72,10 @@ class MalformedJSONError(Exception):
 
 class AnalysisIntegrityError(RuntimeError):
     """Analysis cannot be safely attached to its collected sources."""
+
+
+class AnalysisRecoveryExhausted(AnalysisIntegrityError):
+    """A bounded child retry failed; parents must not restart its budget."""
 
 
 def _env_int(name: str, default: int, minimum: int = 1) -> int:
@@ -919,6 +924,13 @@ class BaseAnalyzer(ABC):
             samples.append(f"{item.id}:{title}")
         return " | ".join(samples)
 
+    @staticmethod
+    def _identity_title(value: str) -> str:
+        """Fold presentation differences, never words, numbers, IDs or URLs."""
+        text = normalize_untrusted_text(html.unescape(value))
+        text = text.translate(str.maketrans({'‘': "'", '’': "'", '“': '"', '”': '"'}))
+        return ' '.join(text.split())
+
     def _validate_batch_identity(self, result: dict, batch_items: List[CollectedItem]) -> dict:
         """Reject omissions, invented/duplicate IDs and swapped source titles.
 
@@ -942,7 +954,7 @@ class BaseAnalyzer(ABC):
             source_title = row.get('source_title')
             # Some feeds retain trailing spaces in titles. Ignoring outer
             # whitespace avoids repeatedly retrying the same correct identity.
-            if not isinstance(source_title, str) or source_title.strip() != expected[item_id].strip():
+            if not isinstance(source_title, str) or self._identity_title(source_title) != self._identity_title(expected[item_id]):
                 raise AnalysisIntegrityError(f"Source title mismatch for {item_id}")
             if not isinstance(row.get('summary'), str) or not row['summary'].strip():
                 raise AnalysisIntegrityError(f"Missing summary for {item_id}")
@@ -957,7 +969,79 @@ class BaseAnalyzer(ABC):
             raise AnalysisIntegrityError("Sanitization lost analysis items")
         return clean
 
-    async def _analyze_batch(
+    def _batch_cache_path(self, batch_items, batch_index, total_batches):
+        clients = getattr(self.async_client, 'clients', [self.async_client])
+        fingerprint = json.dumps({
+            'version': 2,
+            'items': self._build_items_context(batch_items, max_items=len(batch_items)),
+            'prompt': self._get_batch_analysis_prompt(DATA_POINTER, batch_index, total_batches),
+            'grounding': self.grounding_context,
+            'models': [getattr(client, 'model', '') for client in clients],
+        }, sort_keys=True)
+        digest = hashlib.sha256(fingerprint.encode()).hexdigest()
+        directory = os.path.join(self.data_dir, 'checkpoints', self.target_date,
+                                 'analysis_batches', self.category)
+        return os.path.join(directory, digest + '.json')
+
+    def _write_batch_cache(self, path, result):
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path + '.tmp', 'w', encoding='utf-8') as handle:
+                json.dump(asdict(result), handle, ensure_ascii=False)
+            os.replace(path + '.tmp', path)
+        except OSError as exc:
+            logger.warning('%s: could not checkpoint batch (%s)', self.category, type(exc).__name__)
+
+    async def _save_validated_rows(self, rows, items, batch_index, total_batches):
+        by_id = {item.id: item for item in items}
+        for row in rows:
+            result = BatchResult(batch_index=batch_index, item_analyses=[row],
+                                 batch_themes=[], cross_signals=[])
+            self._write_batch_cache(self._batch_cache_path([by_id[row['id']]], batch_index, total_batches), result)
+
+    async def _analyze_batch(self, batch_items, batch_index, total_batches, sub_label="") -> BatchResult:
+        """Checkpoint every completed recovery unit, not just its parent batch."""
+        path = self._batch_cache_path(batch_items, batch_index, total_batches)
+        try:
+            with open(path, encoding='utf-8') as handle:
+                saved = json.load(handle)
+            self._validate_batch_identity({'items': saved['item_analyses']}, batch_items)
+            if saved.get('failed'):
+                raise AnalysisIntegrityError('Cached batch was marked failed')
+            saved['batch_index'] = batch_index
+            logger.info('%s map %s%s: restored %d validated items',
+                        self.category, batch_index + 1, sub_label, len(batch_items))
+            return BatchResult(**saved)
+        except FileNotFoundError:
+            pass
+        except (OSError, ValueError, KeyError, TypeError, AnalysisIntegrityError) as exc:
+            logger.warning('%s: ignoring invalid batch cache (%s)', self.category, type(exc).__name__)
+        # A previously interrupted parent may already have validated source units.
+        accepted = []
+        if len(batch_items) > 1:
+            for item in batch_items:
+                try:
+                    with open(self._batch_cache_path([item], batch_index, total_batches), encoding='utf-8') as handle:
+                        saved = json.load(handle)
+                    if not saved.get('failed'):
+                        accepted.extend(self._validate_batch_identity({'items': saved['item_analyses']}, [item])['items'])
+                except (OSError, ValueError, KeyError, TypeError, AnalysisIntegrityError):
+                    pass
+        if accepted:
+            accepted_ids = {row['id'] for row in accepted}
+            missing = [item for item in batch_items if item.id not in accepted_ids]
+            recovered = (await self._analyze_batch(missing, batch_index, total_batches, sub_label + 'r')
+                         if missing else BatchResult(batch_index=batch_index, item_analyses=[], batch_themes=[], cross_signals=[]))
+            result = BatchResult(batch_index=batch_index, item_analyses=accepted + recovered.item_analyses,
+                                 batch_themes=recovered.batch_themes, cross_signals=recovered.cross_signals,
+                                 thinking=recovered.thinking)
+        else:
+            result = await self._analyze_batch_uncached(batch_items, batch_index, total_batches, sub_label)
+        self._validate_batch_identity({'items': result.item_analyses}, batch_items)
+        self._write_batch_cache(path, result)
+        return result
+
+    async def _analyze_batch_uncached(
         self,
         batch_items: List[CollectedItem],
         batch_index: int,
@@ -967,8 +1051,8 @@ class BaseAnalyzer(ABC):
         """Analyze only complete, source-bound results; split bad batches and retry.
 
         Content/identity failures shrink the request down to single sources.
-        At singleton size, keep retrying with capped exponential backoff by
-        default. ANALYZER_RESULT_MAX_ATTEMPTS can bound a run; exhaustion raises
+        At singleton size, retry at most ANALYZER_RESULT_MAX_ATTEMPTS (default 3);
+        exhaustion raises
         instead of publishing guessed summaries. Transport retries already
         happen in the client, but transient exhaustion is also recoverable here.
         """
@@ -983,13 +1067,14 @@ Copy its id exactly. Also include source_title, copying that source's title
 exactly as supplied (including an empty title). Keep id, source_title, summary,
 reasoning and score together; describe ONLY that source's content. Do not use
 another source's ID, infer IDs, reorder IDs independently, or omit any source.
+Do not expand a truncated title from the content or rewrite its wording.
 Every entry needs a nonempty summary and reasoning and a numeric score 0-100.
 """
         system_prompt = build_hardened_system(instructions, nonce, grounding=self.grounding_context)
         user_message = build_fenced_user_message(items_context, nonce)
         label = f"{batch_index + 1}{sub_label}/{total_batches}"
         caller = f"{self.category}_analyzer.batch_{batch_index}{sub_label}"
-        attempts = _env_int("ANALYZER_RESULT_MAX_ATTEMPTS", 0, minimum=0)
+        attempts = _env_int("ANALYZER_RESULT_MAX_ATTEMPTS", 3)
         base_delay = _env_int("ANALYZER_RESULT_RETRY_SECONDS", 5)
         attempt = 0
         while True:
@@ -1005,6 +1090,41 @@ Every entry needs a nonempty summary and reasoning and a numeric score 0-100.
                 if response.stop_reason == "max_tokens":
                     raise TruncatedJSONError("Analysis output exhausted its token budget")
                 result = self._parse_json_response(response.content, expected_items=len(batch_items))
+                # In a one-source request, an exact ID binds the result without
+                # asking the model to faithfully reproduce a display title.
+                # Never infer this association from array position in a batch.
+                rows = result.get('items') if isinstance(result, dict) else None
+                if (len(batch_items) == 1 and isinstance(rows, list) and len(rows) == 1
+                        and isinstance(rows[0], dict) and rows[0].get('id') == batch_items[0].id):
+                    records = json.loads(self._build_items_context(batch_items, max_items=1))
+                    rows[0]['source_title'] = records[0]['title']
+                # Keep individually validated rows; retry only unresolved sources.
+                # Unknown/duplicate IDs invalidate the batch as a whole.
+                if len(batch_items) > 1 and isinstance(rows, list):
+                    expected = {item.id: item for item in batch_items}
+                    ids = [r.get('id') if isinstance(r, dict) else None for r in rows]
+                    if (all(isinstance(i, str) and i in expected for i in ids)
+                            and len(set(ids)) == len(ids)):
+                        accepted = []
+                        for row in rows:
+                            try:
+                                clean = self._validate_batch_identity({'items': [row]}, [expected[row['id']]])
+                                accepted.extend(clean['items'])
+                            except AnalysisIntegrityError:
+                                pass
+                        if accepted and len(accepted) < len(batch_items):
+                            accepted_ids = {r['id'] for r in accepted}
+                            # Persist accepted sources before attempting recovery.
+                            await self._save_validated_rows(accepted, batch_items, batch_index, total_batches)
+                            missing = [i for i in batch_items if i.id not in accepted_ids]
+                            logger.warning('%s: keeping %d validated items; recovering %d', caller, len(accepted), len(missing))
+                            recovered = await self._analyze_batch(missing, batch_index, total_batches, sub_label + 'r')
+                            metadata = sanitize_batch_result(result, where=f'{caller} recovered batch')
+                            return BatchResult(batch_index=batch_index,
+                                item_analyses=accepted + recovered.item_analyses,
+                                batch_themes=metadata.get('themes', metadata.get('category_themes', [])) + recovered.batch_themes,
+                                cross_signals=metadata.get('cross_signals', []) + recovered.cross_signals,
+                                thinking=response.thinking + '\n' + recovered.thinking)
                 result = self._validate_batch_identity(result, batch_items)
                 return BatchResult(
                     batch_index=batch_index,
@@ -1013,6 +1133,8 @@ Every entry needs a nonempty summary and reasoning and a numeric score 0-100.
                     cross_signals=result.get('cross_signals', []),
                     thinking=response.thinking,
                 )
+            except AnalysisRecoveryExhausted:
+                raise
             except (AnalysisIntegrityError, TruncatedJSONError, MalformedJSONError) as exc:
                 if len(batch_items) > 1:
                     return await self._handle_truncated_batch(
@@ -1027,7 +1149,7 @@ Every entry needs a nonempty summary and reasoning and a numeric score 0-100.
                     raise AnalysisIntegrityError(f"{caller}: {type(exc).__name__}") from exc
                 reason = f"transient {type(exc).__name__}"
             if attempts and attempt >= attempts:
-                raise AnalysisIntegrityError(f"{caller}: no valid result after {attempt} attempts ({reason})")
+                raise AnalysisRecoveryExhausted(f"{caller}: no valid result after {attempt} attempts ({reason})")
             delay = min(60, base_delay * 2 ** min(attempt - 1, 6))
             logger.warning("%s: %s; retrying in %ss", caller, reason, delay)
             await asyncio.sleep(delay)
@@ -1105,45 +1227,7 @@ Every entry needs a nonempty summary and reasoning and a numeric score 0-100.
 
         async def process_with_semaphore(batch, index):
             async with semaphore:
-                # Save completed units so an interrupted retry can resume without
-                # buying every successful analysis again. Input/prompt/model
-                # changes invalidate the cache; no credentials enter its key.
-                clients = getattr(self.async_client, 'clients', [self.async_client])
-                fingerprint = json.dumps({
-                    'version': 1,
-                    'items': self._build_items_context(batch, max_items=len(batch)),
-                    'prompt': self._get_batch_analysis_prompt(DATA_POINTER, index, total_batches),
-                    'grounding': self.grounding_context,
-                    'models': [getattr(client, 'model', '') for client in clients],
-                }, sort_keys=True)
-                digest = hashlib.sha256(fingerprint.encode()).hexdigest()
-                directory = os.path.join(self.data_dir, 'checkpoints', self.target_date,
-                                         'analysis_batches', self.category)
-                path = os.path.join(directory, digest + '.json')
-                try:
-                    with open(path, encoding='utf-8') as handle:
-                        saved = json.load(handle)
-                    self._validate_batch_identity({'items': saved['item_analyses']}, batch)
-                    if saved.get('failed'):
-                        raise AnalysisIntegrityError('Cached batch was marked failed')
-                    saved['batch_index'] = index
-                    logger.info('%s map %d: restored %d validated items', self.category, index + 1, len(batch))
-                    return BatchResult(**saved)
-                except FileNotFoundError:
-                    pass
-                except (OSError, ValueError, KeyError, TypeError, AnalysisIntegrityError) as exc:
-                    logger.warning('%s map %d: ignoring invalid cached batch (%s)',
-                                   self.category, index + 1, type(exc).__name__)
-                result = await self._analyze_batch(batch, index, total_batches)
-                try:
-                    os.makedirs(directory, exist_ok=True)
-                    with open(path + '.tmp', 'w', encoding='utf-8') as handle:
-                        json.dump(asdict(result), handle, ensure_ascii=False)
-                    os.replace(path + '.tmp', path)
-                except OSError as exc:
-                    logger.warning('%s map %d: validated batch could not be checkpointed (%s)',
-                                   self.category, index + 1, type(exc).__name__)
-                return result
+                return await self._analyze_batch(batch, index, total_batches)
 
         # Run all batches concurrently (up to MAX_CONCURRENT_BATCHES at a time)
         tasks = [

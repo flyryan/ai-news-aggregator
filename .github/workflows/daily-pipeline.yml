@@ -106,6 +106,10 @@ jobs:
       LLM_METRICS_PATH: ${{ vars.LLM_METRICS_PATH || 'data/llm_metrics.jsonl' }}
       ANALYZER_BATCH_SIZE: ${{ vars.ANALYZER_BATCH_SIZE || '75' }}
       ANALYZER_MAX_CONCURRENT_BATCHES: ${{ vars.ANALYZER_MAX_CONCURRENT_BATCHES || '8' }}
+      ANALYZER_RESULT_MAX_ATTEMPTS: ${{ vars.ANALYZER_RESULT_MAX_ATTEMPTS || '3' }}
+      PIPELINE_ALERT_TOKEN: ${{ secrets.PIPELINE_ALERT_TOKEN }}
+      PIPELINE_ALERT_URL: ${{ vars.PIPELINE_ALERT_URL || 'https://flybotwebhook.duffplex.com/alert/pipeline' }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       TARGET_DATE_INPUT: ${{ inputs.target_date || '' }}
       RESUME_FROM_INPUT: ${{ inputs.resume_from || '' }}
       COMMIT_OUTPUTS: ${{ github.event_name != 'workflow_dispatch' || inputs.commit_outputs }}
@@ -445,6 +449,30 @@ jobs:
           # ScrapeCreators API (server-side unblocking, direct egress), so no .json probe
           # through Mullvad is needed. The Mullvad tunnel above still serves LLM/other egress.
 
+      - name: Restore source health and confirmed alert receipts
+        if: steps.schedule_gate.outputs.should_run == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: data/health
+          key: source-health-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: source-health-${{ github.ref_name }}-
+
+      - name: Verify alert receiver readiness without sending a notification
+        if: steps.schedule_gate.outputs.should_run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
+          python3 scripts/pipeline_alert.py --date "$report_date" --probe
+
+      - name: Check Reddit credit reserve before analysis
+        if: steps.schedule_gate.outputs.should_run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
+          python3 scripts/reddit_credit_health.py --date "$report_date"
+
       - name: Run pipeline
         if: steps.schedule_gate.outputs.should_run == 'true'
         shell: bash
@@ -582,12 +610,21 @@ jobs:
       # magnitude larger. Correct this once a CI run has measured it. The prompt
       # text is nothing the site does not already publish (replay-prompts.json.gz
       # ships with every day, and config/prompts.yaml is tracked here).
+      - name: Record Reddit consumption and remaining reserve
+        if: always() && steps.schedule_gate.outputs.should_run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
+          python3 scripts/reddit_credit_health.py --date "$report_date" --record
+
       - name: Upload pipeline diagnostics
         if: always() && steps.schedule_gate.outputs.should_run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: pipeline-diagnostics
           path: |
+            data/health/**
             data/llm_metrics.jsonl
             data/processed/cost_report_*.json
             data/processed/orchestrator_result_*.json
@@ -733,21 +770,12 @@ jobs:
             exit 0
           fi
           report_date="${TARGET_DATE_INPUT:-$(TZ=America/New_York date +%F)}"
-          payload="$(python3 - "$report_date" "$RUN_URL" <<'PY'
-          import json, sys
-          print(json.dumps({
-              "status": "failure",
-              "report_date": sys.argv[1],
-              "reason": "daily-pipeline.yml failed before today's report published",
-              "run_url": sys.argv[2],
-          }))
-          PY
-          )"
-          code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 \
-            -X POST "$PIPELINE_ALERT_URL" \
-            -H "Authorization: Bearer ${PIPELINE_ALERT_TOKEN}" \
-            -H 'Content-Type: application/json' \
-            -d "$payload" || true)"
-          echo "Alert POST -> HTTP ${code:-no-response}"
-          # Do not fail the job on alert delivery problems; the run is already red.
-          exit 0
+          python3 scripts/pipeline_alert.py --date "$report_date" --status failure \
+            --reason "Daily pipeline failed; the previous published report was retained. Inspect the run diagnostics."
+
+      - name: Save source health and confirmed alert receipts
+        if: always() && steps.schedule_gate.outputs.should_run == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: data/health
+          key: source-health-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}

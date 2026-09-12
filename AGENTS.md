@@ -64,6 +64,23 @@ The production web host serves a web-only Docker image. `web/_app/` is intention
 
 ## Daily Automation
 
+Reddit is a required daily source: empty or degraded collection stops before analysis,
+and the publish gate independently requires healthy Reddit collection and nonempty output.
+The hosted workflow probes credits before collection and caches actual daily consumption
+in `data/health` for a three-day reserve warning (600 credits/day until history exists).
+Every ScrapeCreators HTTP attempt, including retries, counts against the run credit cap.
+Alert HTTP requests bypass collection proxies; delivery receipts, not prior anomalies,
+control same-day suppression. Persistent outages re-alert on each report date. The
+receiver's authenticated readiness probe sends no notification; actual alerts go directly
+to the existing private Signal recipient without depending on an LLM credential.
+
+Analysis normalizes HTML entities, whitespace and quote typography for title checks,
+but preserves exact source IDs. Ambiguous rows are retried separately while validated
+rows are checkpointed. A singleton request binds its exact ID to the sole input source
+and restores the original display title. `ANALYZER_RESULT_MAX_ATTEMPTS` defaults to 3
+and must be positive; exhausted child retries propagate without restarting the budget.
+
+
 The production publishing workflow lives in `.github/workflows/daily-pipeline.yml` and is guarded to run only in the configured publishing repository. Do not enable scheduled publishing in mirrors or forks unless the workflow guard, secrets, and output ownership have been intentionally reconfigured. The schedule uses two UTC cron entries with a local-time gate so exactly the nominal 3 AM ET invocation continues, even if GitHub starts the runner late.
 
 The workflow writes ignored `config/providers.yaml` from the `PIPELINE_PROVIDERS_YAML` secret. `ANTHROPIC_MODEL` or the `anthropic_model` dispatch input only overrides legacy single-provider configs; it must not clobber `llm.routes`. The workflow runs the pipeline and commits only generated public outputs (`web/data`, `config/model_releases.yaml`, and `config/ecosystem_context.yaml`) when `commit_outputs=true`. Use `workflow_dispatch` with `commit_outputs=false` for a full hosted dry run that uploads artifacts without committing. Hosted runs also upload a `pipeline-diagnostics` artifact with LLM request metrics and cost reports when those files exist.
