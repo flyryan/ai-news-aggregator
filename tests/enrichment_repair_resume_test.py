@@ -267,15 +267,19 @@ def _write_checkpoints(data_dir: str):
     news_item = _collected(NEWS_ITEM_ID, "A lab ships an agent framework", "rss")
     research_item = _collected(RESEARCH_ITEM_ID, "Preprint disputes a benchmark", "arxiv")
 
+    reddit_item = _collected("reddit000001", "Community discusses the framework", "reddit")
+
     payloads = {
         "gathering.json": {
             "collection_status": {
                 "news": {"status": "success", "items": 1},
                 "research": {"status": "success", "items": 1},
+                "reddit": {"status": "success", "count": 1},
             },
             "categories": {
                 "news": [news_item.to_dict()],
                 "research": [research_item.to_dict()],
+                "reddit": [reddit_item.to_dict()],
             },
         },
         "analysis.json": {
