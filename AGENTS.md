@@ -282,6 +282,8 @@ The pipeline uses internal AATF analysis profiles that map to Claude Opus 5 adap
 
 Retryable transport failures, timeouts, 429s, and 5xx responses retry on a different route. Prompt/schema/client errors and JSON parse failures do not cross-provider retry. Hosted diagnostics include provider IDs, provider model IDs, route attempts, fallback source, retry reason, `thinking_type`, `analysis_profile`, `adaptive_effort`, `response_max_tokens`, queue/active counts, and content block counts; they must stay secret-safe and prompt-free.
 
+An OpenAI-compatible stream ending with `finish_reason=error`, or closing without a finish reason, is a transport failure. Preserve its partial usage and retry the same request within the client budget; never parse its partial JSON or split it into smaller analysis batches. Only contended 429s may use the elapsed-time limit without consuming attempts. Once transport retries are exhausted, analysis stops without restarting that budget. Source identity failures still recover missing rows or split genuinely corrupted batches, retaining validated checkpoints.
+
 ## Ecosystem Context
 
 The pipeline uses an ecosystem context system to ground LLM analysis with accurate model release dates. This prevents hallucinations like treating news about "GPT-5.2" as a new release when it was actually released weeks earlier.

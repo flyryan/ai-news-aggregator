@@ -1658,6 +1658,19 @@ class AsyncAnthropicClient:
                     progress["events"] = progress.get("events", 0) + 1
                     self._mark_provider_alive()
 
+                if state['stop_reason'] == 'error':
+                    # Some upstreams send a terminal error without an error
+                    # object. Keep partial usage above, but never hand partial
+                    # JSON to the analyzer's content-recovery/splitting path.
+                    raise OpenRouterStreamError(
+                        'OpenRouter stream ended with finish_reason=error', status_code=502
+                    )
+
+        if state['stop_reason'] is None:
+            raise OpenRouterStreamError(
+                'OpenRouter stream closed without a finish reason', status_code=502
+            )
+
         # One consolidated block per stream, never one per delta -- see
         # _openai_chat_blocks for why block-per-delta corrupted responses.
         blocks = _openai_chat_blocks(state)
@@ -1821,7 +1834,7 @@ class AsyncAnthropicClient:
         caller = (request_context or {}).get("caller", "unknown")
         last_error: Optional[BaseException] = None
         attempt = 0      # every try, for logging
-        consumed = 0     # only tries made while the provider looked silent
+        consumed = 0     # all failures except demonstrably contended 429s
 
         while True:
             attempt += 1
@@ -1842,7 +1855,7 @@ class AsyncAnthropicClient:
                 # recently? If so the 429 is contention, not an outage, and
                 # spending the attempt budget on it would fail a healthy call
                 # for bad timing.
-                contended = self._provider_recently_alive()
+                contended = reason == 'http_429' and self._provider_recently_alive()
                 if not contended:
                     consumed += 1
 
@@ -1858,9 +1871,8 @@ class AsyncAnthropicClient:
                 if consumed >= budget:
                     logger.error(
                         "LLM giving up caller=%s provider=%s reason=%s after %d "
-                        "attempts; no output from this provider in %.0fs",
+                        "attempts; transient retry budget exhausted",
                         caller, self.provider_id, reason, attempt,
-                        self.retry_liveness_window,
                     )
                     raise
 

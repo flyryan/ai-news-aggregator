@@ -40,7 +40,7 @@ Return your analysis as valid JSON only:
 ```json
 {{
   "items": [
-    {{"id": "item_id", "summary": "...", "importance_score": 85, "reasoning": "...", "themes": ["theme1", "theme2"]}}
+    {{"id": "item_id", "source_title": "exact supplied title", "summary": "...", "importance_score": 85, "reasoning": "...", "themes": ["theme1", "theme2"]}}
   ],
   "themes": [
     {{"name": "Theme Name", "description": "...", "item_count": 5, "importance": 80}}
@@ -48,7 +48,7 @@ Return your analysis as valid JSON only:
   "cross_signals": ["signal1", "signal2"]
 }}
 ```
-JSON validity rules: escape double quotes/backslashes/newlines inside string values; do not copy source text verbatim; avoid quotation marks inside summaries/reasoning unless escaped.
+JSON validity rules: escape double quotes/backslashes/newlines inside string values; copy id and source_title exactly; paraphrase source text in summary/reasoning; avoid quotation marks inside summaries/reasoning unless escaped.
 
 Prioritize: technical depth, project showcases, educational content, high-engagement quality discussions.
 Deprioritize: simple questions, memes, repetitive beginner questions."""

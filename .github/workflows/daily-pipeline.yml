@@ -90,8 +90,8 @@ jobs:
       # Note: only reaches the Anthropic SDK, so it does nothing on the
       # openai-chat (OpenRouter) path. Transport retries are LLM_RETRY_* below.
       LLM_MAX_RETRIES: ${{ vars.LLM_MAX_RETRIES || '2' }}
-      # Attempts are charged only while the provider looks silent; 429s that
-      # arrive while it is demonstrably serving other calls are not counted.
+      # Transport/server failures always consume the attempt budget. Only 429s
+      # while the provider serves other calls use the elapsed-time limit alone.
       LLM_RETRY_MAX_ATTEMPTS: ${{ vars.LLM_RETRY_MAX_ATTEMPTS || '6' }}
       LLM_RETRY_LIVENESS_WINDOW: ${{ vars.LLM_RETRY_LIVENESS_WINDOW || '180' }}
       LLM_RETRY_MAX_ELAPSED_SECONDS: ${{ vars.LLM_RETRY_MAX_ELAPSED_SECONDS || '900' }}

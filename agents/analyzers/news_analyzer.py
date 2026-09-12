@@ -55,7 +55,7 @@ Return your analysis as valid JSON only:
 ```json
 {{
   "items": [
-    {{"id": "item_id", "summary": "...", "importance_score": 85, "reasoning": "...", "themes": ["theme1", "theme2"]}}
+    {{"id": "item_id", "source_title": "exact supplied title", "summary": "...", "importance_score": 85, "reasoning": "...", "themes": ["theme1", "theme2"]}}
   ],
   "themes": [
     {{"name": "Theme Name", "description": "...", "item_count": 5, "importance": 80}}
@@ -63,7 +63,7 @@ Return your analysis as valid JSON only:
   "cross_signals": ["signal1", "signal2"]
 }}
 ```
-JSON validity rules: escape double quotes/backslashes/newlines inside string values; do not copy source text verbatim; avoid quotation marks inside summaries/reasoning unless escaped.
+JSON validity rules: escape double quotes/backslashes/newlines inside string values; copy id and source_title exactly; paraphrase source text in summary/reasoning; avoid quotation marks inside summaries/reasoning unless escaped.
 
 Prioritize: model releases, breakthrough capabilities, major product launches, significant funding (>$100M), AI policy news, open source releases, safety developments.
 Deprioritize: routine updates, minor features, opinion pieces, rehashed coverage."""
@@ -122,7 +122,7 @@ Return your analysis as valid JSON only:
 ```json
 {{
   "items": [
-    {{"id": "item_id", "summary": "...", "importance_score": 85, "reasoning": "...", "themes": ["theme1", "theme2"]}}
+    {{"id": "item_id", "source_title": "exact supplied title", "summary": "...", "importance_score": 85, "reasoning": "...", "themes": ["theme1", "theme2"]}}
   ],
   "top_10": ["id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10"],
   "category_summary": "Structured summary using markdown formatting (see rules below)",
@@ -131,7 +131,7 @@ Return your analysis as valid JSON only:
   ]
 }}
 ```
-JSON validity rules: escape double quotes/backslashes/newlines inside string values; do not copy source text verbatim; avoid quotation marks inside summaries/reasoning unless escaped.
+JSON validity rules: escape double quotes/backslashes/newlines inside string values; copy id and source_title exactly; paraphrase source text in summary/reasoning; avoid quotation marks inside summaries/reasoning unless escaped.
 
 PRIORITIZE (high scores):
 - New model releases from major labs

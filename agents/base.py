@@ -1053,8 +1053,8 @@ class BaseAnalyzer(ABC):
         Content/identity failures shrink the request down to single sources.
         At singleton size, retry at most ANALYZER_RESULT_MAX_ATTEMPTS (default 3);
         exhaustion raises
-        instead of publishing guessed summaries. Transport retries already
-        happen in the client, but transient exhaustion is also recoverable here.
+        instead of publishing guessed summaries. Transport retries happen only
+        in the client; exhaustion stops analysis without multiplying its budget.
         """
         items_context = self._build_items_context(batch_items, max_items=len(batch_items))
         nonce = new_fence_nonce()
@@ -1098,15 +1098,19 @@ Every entry needs a nonempty summary and reasoning and a numeric score 0-100.
                         and isinstance(rows[0], dict) and rows[0].get('id') == batch_items[0].id):
                     records = json.loads(self._build_items_context(batch_items, max_items=1))
                     rows[0]['source_title'] = records[0]['title']
-                # Keep individually validated rows; retry only unresolved sources.
-                # Unknown/duplicate IDs invalidate the batch as a whole.
+                # Keep independently validated rows; retry unresolved sources.
+                # Never infer a missing/foreign ID from title or position, and
+                # discard ALL rows sharing a duplicate ID (not just the later
+                # one). An unrelated bad ID need not waste verified analyses.
                 if len(batch_items) > 1 and isinstance(rows, list):
                     expected = {item.id: item for item in batch_items}
                     ids = [r.get('id') if isinstance(r, dict) else None for r in rows]
-                    if (all(isinstance(i, str) and i in expected for i in ids)
-                            and len(set(ids)) == len(ids)):
+                    unique_rows = [r for r, item_id in zip(rows, ids)
+                                   if isinstance(item_id, str) and item_id in expected
+                                   and ids.count(item_id) == 1]
+                    if unique_rows:
                         accepted = []
-                        for row in rows:
+                        for row in unique_rows:
                             try:
                                 clean = self._validate_batch_identity({'items': [row]}, [expected[row['id']]])
                                 accepted.extend(clean['items'])
@@ -1147,7 +1151,12 @@ Every entry needs a nonempty summary and reasoning and a numeric score 0-100.
                     # Bad credentials/request configuration and programming errors
                     # need intervention; retrying them cannot fix the response.
                     raise AnalysisIntegrityError(f"{caller}: {type(exc).__name__}") from exc
-                reason = f"transient {type(exc).__name__}"
+                # The client already exhausted its transport retry budget.
+                # Restarting it here multiplies paid attempts and can turn an
+                # upstream outage into recursive content recovery in parents.
+                raise AnalysisRecoveryExhausted(
+                    f"{caller}: transport retries exhausted ({type(exc).__name__})"
+                ) from exc
             if attempts and attempt >= attempts:
                 raise AnalysisRecoveryExhausted(f"{caller}: no valid result after {attempt} attempts ({reason})")
             delay = min(60, base_delay * 2 ** min(attempt - 1, 6))
