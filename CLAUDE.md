@@ -334,7 +334,7 @@ ARXIV_OAI_MAX_ATTEMPTS # Attempts per OAI-PMH request, including the first (defa
 ARXIV_OAI_BACKOFF_SECONDS # Base for exponential backoff between OAI attempts (default: 5)
 ARXIV_OAI_DEADLINE_SECONDS # Wall-clock ceiling for a whole OAI harvest (default: 600)
 LLM_TRUST_ENV_PROXY   # Let LLM clients use HTTP(S)/ALL_PROXY env vars (default: false)
-LLM_TIMEOUT_SECONDS   # Override provider-config LLM request timeout (workflow fallback 240, but repo var LLM_TIMEOUT_SECONDS is set to 600 and wins — 240 deterministically timed out Monday research batches)
+LLM_TIMEOUT_SECONDS   # End-to-end bound on ONE streaming attempt (enforced by `_guard_stream`; the attempt is cancelled with a retryable LLMAttemptTimeout). Workflow fallback 240, but repo var LLM_TIMEOUT_SECONDS is set to 600 and wins — 240 deterministically timed out Monday research batches. Before 2026-09-29 it bounded nothing on the streaming path (it sat in httpx's `pool` slot), so runaway streams ran 40+ min
 LLM_MAX_CONCURRENT_REQUESTS # Async LLM request cap per provider route; 0 disables it (default: 8)
 LLM_ADAPTIVE_MAX_TOKENS # Ceiling for adaptive calls, taken as min(this, llm.max_output_tokens) — so this, not providers.yaml, bounds a normal call. On reasoning models it is SHARED with reasoning/thinking tokens (code default 65536; Actions sets 131072, z-ai/GLM-5.3-Flash's own limit)
 LLM_MAX_RETRIES       # Anthropic SDK retry count; ONLY affects mode: anthropic/openai-compatible via the SDK, NOT the openai-chat path (default: 2)
@@ -342,7 +342,7 @@ LLM_MAX_REQUESTS_PER_MINUTE # Per-route request RATE cap; 0 disables. A concurre
 LLM_RATE_LIMIT_BURST  # Tokens the rate limiter may hold, i.e. how many requests can launch back-to-back (default: 1 = evenly paced)
 LLM_RETRY_MAX_ATTEMPTS # Retry attempts spent only while the provider looks SILENT; contended 429s do not count (default: 6)
 LLM_RETRY_LIVENESS_WINDOW # Seconds since any call on this provider produced output, within which a 429 counts as contention not outage (default: 180)
-LLM_RETRY_MAX_ELAPSED_SECONDS # Per-call wall-clock ceiling on retrying; the only bound on contended retries (default: 900)
+LLM_RETRY_MAX_ELAPSED_SECONDS # Per-call wall-clock ceiling on retrying, measured from the FIRST failure (so a slow first attempt still gets retried); the only bound on contended retries (default: 900)
 LLM_RETRY_CONTENDED_DELAY # Flat pause between retries while the provider is proven alive (default: 10.0)
 LLM_RETRY_BASE_DELAY  # Base seconds for exponential retry backoff with jitter (default: 5.0)
 LLM_RETRY_MAX_DELAY   # Cap for a single retry backoff, also clamps a provider Retry-After (default: 90.0)
@@ -350,7 +350,7 @@ LLM_ROUTE_RETRY_CYCLES # Multi-route only: passes over all routes before giving 
 PUBLISH_GATE          # strict (default) fails the run when critical content is missing; lenient publishes anyway with loud logs; off disables the gate
 LLM_LOG_REQUESTS      # Log LLM queue/start/done metadata without raw prompt content (default: true)
 LLM_HEARTBEAT_SECONDS # Seconds between in-flight LLM progress logs; 0 disables it (default: 60)
-LLM_STREAM_STALL_SECONDS # Max gap between SSE chunks before a stream is considered dead (default: 120)
+LLM_STREAM_STALL_SECONDS # Max gap in MODEL OUTPUT (thinking/text deltas, or since attempt start before the first token) before the attempt is cancelled with a retryable LLMStreamStalled; OpenRouter keep-alive comments do not count (default: 120)
 LLM_REPLAY_CAPTURE    # Capture LLM stream events for the replay artifact (default: true)
 LLM_REPLAY_COALESCE_MS # Merge same-kind output deltas within this window (default: 80)
 LLM_REPLAY_MAX_DELTAS # Per-call delta cap before the call is marked truncated (default: 20000)

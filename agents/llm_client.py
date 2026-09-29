@@ -89,8 +89,10 @@ def _stream_timeout(total_timeout: float) -> httpx.Timeout:
     On a streaming response httpx's `read` timeout measures the gap between
     chunks, not the whole request, so it should be small enough to notice a
     dead connection quickly while still tolerating the quiet stretch before
-    the first token on a max-effort request. `pool` keeps the total request
-    budget, so `LLM_TIMEOUT_SECONDS` still bounds the call end to end.
+    the first token on a max-effort request. `pool` only bounds waiting for a
+    pooled connection -- it does NOT bound the call end to end, and SSE
+    keep-alive comments reset `read` without carrying model output. Both
+    real bounds live in `_guard_stream` instead.
 
     This is the fix for the deterministic long-request failures on rdsec: with
     a single flat read timeout, a non-streaming call sat silent and was killed
@@ -366,6 +368,24 @@ class OpenRouterStreamError(RuntimeError):
     def __init__(self, message: str, status_code: Optional[int] = None):
         super().__init__(message)
         self.status_code = status_code
+
+
+class LLMAttemptTimeout(httpx.TimeoutException):
+    """One streaming attempt outlived `LLM_TIMEOUT_SECONDS` end to end.
+
+    A `TimeoutException` so `_transient_retry_reason` retries it. On
+    2026-09-29 a runaway GLM-5.3-Flash stream emitted ~228k chars for 39
+    minutes -- output never paused, so no stall clock could catch it.
+    """
+
+
+class LLMStreamStalled(httpx.TimeoutException):
+    """No model output for `LLM_STREAM_STALL_SECONDS`, keep-alives notwithstanding.
+
+    OpenRouter sends SSE comments while the upstream is silent; they reset
+    httpx's read timeout, so on 2026-09-29 a stream sat at stall=2377s
+    without ever timing out.
+    """
 
 
 def _openai_chat_apply_chunk(chunk: Any, state: Dict[str, Any]) -> None:
@@ -1180,6 +1200,7 @@ class AsyncAnthropicClient:
         # Create async httpx client with mode-appropriate auth.
         # `read` is the inter-chunk gap on the streaming path, not the total
         # request duration -- see _stream_message().
+        self.stream_stall_seconds = _env_float("LLM_STREAM_STALL_SECONDS", 120.0, minimum=5.0)
         self._http_client = httpx.AsyncClient(
             auth=auth,
             timeout=_stream_timeout(self.timeout),
@@ -1492,14 +1513,67 @@ class AsyncAnthropicClient:
         `progress`, when supplied, is updated in place as blocks arrive so the
         heartbeat can report what the model is actually doing. It also carries
         `replay_call_id`, which is how the replay recorder attaches to this loop
-        without adding another parameter to the call chain.
+        without adding another parameter to the call chain. It is always
+        created here when absent, because `_guard_stream` reads the stall
+        clock (`last_chunk_at`) from it.
         """
+        if progress is None:
+            progress = {}
         if self.mode == "openai-chat":
-            return await self._stream_message_openai_chat(progress, **kwargs)
-        async with self._client.messages.stream(**kwargs) as stream:
-            if progress is None:
-                return await stream.get_final_message()
+            attempt = self._stream_message_openai_chat(progress, **kwargs)
+        else:
+            attempt = self._stream_message_anthropic(progress, **kwargs)
+        return await self._guard_stream(attempt, progress)
 
+    async def _guard_stream(self, attempt, progress: Dict[str, Any]):
+        """Run one streaming attempt under an end-to-end and an output-stall bound.
+
+        httpx cannot enforce either on SSE: its `read` timeout is reset by
+        keep-alive comments that carry no model output, and it has no
+        whole-request timeout at all. Both failures happened on 2026-09-29 --
+        a runaway stream ran 39 minutes, a silent one sat 40 -- and each
+        aborted the run. Here the attempt runs as a task and a watchdog
+        cancels it on either bound, raising a transient TimeoutException so
+        the transport retry loop starts a fresh attempt.
+
+        The stall clock is `progress["last_chunk_at"]`, which both transports
+        set only on real output, and falls back to the attempt start so a
+        stream that never produces a first token is caught too.
+        """
+        total = getattr(self, "timeout", None) or 0.0
+        stall = getattr(self, "stream_stall_seconds", None)
+        if stall is None:
+            stall = _env_float("LLM_STREAM_STALL_SECONDS", 120.0, minimum=5.0)
+        task = asyncio.ensure_future(attempt)
+        started = time.time()
+        poll = max(0.01, min([1.0, *(b / 4 for b in (total, stall) if b > 0)]))
+        try:
+            while True:
+                done, _ = await asyncio.wait({task}, timeout=poll)
+                if done:
+                    return task.result()
+                now = time.time()
+                if total > 0 and now - started >= total:
+                    raise LLMAttemptTimeout(
+                        f"LLM attempt exceeded LLM_TIMEOUT_SECONDS={total:.0f}s "
+                        f"(text={progress.get('text_chars', 0)}c "
+                        f"thinking={progress.get('thinking_chars', 0)}c)"
+                    )
+                last_output = progress.get("last_chunk_at") or started
+                if stall > 0 and now - last_output >= stall:
+                    raise LLMStreamStalled(
+                        f"No model output for {now - last_output:.0f}s "
+                        f"(LLM_STREAM_STALL_SECONDS={stall:.0f})"
+                    )
+        finally:
+            if not task.done():
+                task.cancel()
+                with suppress(asyncio.CancelledError, Exception):
+                    await task
+
+    async def _stream_message_anthropic(self, progress: Dict[str, Any], **kwargs):
+        """One request over the Anthropic Messages SSE stream (see `_stream_message`)."""
+        async with self._client.messages.stream(**kwargs) as stream:
             # Hoisted out of the loop: this runs once per token, so even a
             # module-global lookup per event is worth avoiding.
             recorder = get_recorder()
@@ -1830,7 +1904,11 @@ class AsyncAnthropicClient:
         request instead of jumping the queue.
         """
         budget = max(1, self.retry_max_attempts)
-        deadline = time.monotonic() + self.retry_max_elapsed
+        # Started at the first failure, not before the first attempt: on
+        # 2026-09-29 a 2340s attempt died with a 502 against a 900s window
+        # and got zero retries ("after 900s (1 attempts)"). Each attempt is
+        # bounded on its own by `_guard_stream`.
+        deadline: Optional[float] = None
         caller = (request_context or {}).get("caller", "unknown")
         last_error: Optional[BaseException] = None
         attempt = 0      # every try, for logging
@@ -1859,6 +1937,8 @@ class AsyncAnthropicClient:
                 if not contended:
                     consumed += 1
 
+                if deadline is None:
+                    deadline = time.monotonic() + self.retry_max_elapsed
                 remaining_time = deadline - time.monotonic()
                 if remaining_time <= 0:
                     logger.error(
