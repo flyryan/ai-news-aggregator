@@ -227,6 +227,16 @@ class CostTracker:
             self.output_price = 4.25
             self.cache_write_price = 1.25
             self.cache_hit_price = 0.15
+        elif "gemini-3.8-flash" in model.lower():
+            # google/gemini-3.8-flash -- OpenRouter's standard on-demand tier.
+            # Verified live against the OpenRouter model record on 2026-09-03:
+            # $0.75/MTok prompt, $3.75/MTok completion, $0.075/MTok cache read.
+            # No cache-write premium is published, so writes bill at the prompt
+            # rate. Reasoning tokens are billed as completion tokens.
+            self.input_price = 0.75
+            self.output_price = 3.75
+            self.cache_write_price = 0.75
+            self.cache_hit_price = 0.075
         elif "glm-5.3-flash" in model.lower():
             # z-ai/GLM-5.3-Flash -- ox-alpha's real identity after the reveal.
             # Verified live against /api/v1/models/z-ai/glm-5.3-flash/endpoints
