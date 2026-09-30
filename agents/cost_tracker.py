@@ -227,6 +227,19 @@ class CostTracker:
             self.output_price = 4.25
             self.cache_write_price = 1.25
             self.cache_hit_price = 0.15
+        elif "glm-5.3-flashx" in model.lower():
+            # z-ai/GLM-5.3-FlashX on OpenRouter (verified live against
+            # /api/v1/models/z-ai/glm-5.3-flashx/endpoints on 2026-09-30):
+            # $0.37/MTok prompt, $1.25/MTok completion, $0.09/MTok cache read.
+            # One Z.AI-served endpoint (glm-5.3-flashx-20260918), so this single
+            # row IS the whole schedule (like the muse-spark-contributor row,
+            # unlike GLM's 13 endpoints at two prices). No cache-write premium
+            # is published, so writes bill at the prompt rate. Reasoning
+            # arrives folded into output_tokens.
+            self.input_price = 0.37
+            self.output_price = 1.25
+            self.cache_write_price = 0.37
+            self.cache_hit_price = 0.09
         elif "glm-5.3-flash" in model.lower():
             # z-ai/GLM-5.3-Flash -- ox-alpha's real identity after the reveal.
             # Verified live against /api/v1/models/z-ai/glm-5.3-flash/endpoints
