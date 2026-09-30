@@ -52,13 +52,16 @@ jobs:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       ANTHROPIC_API_BASE: ${{ secrets.ANTHROPIC_API_BASE }}
       ANTHROPIC_MODEL: ${{ inputs.anthropic_model || vars.ANTHROPIC_MODEL || 'claude-5-opus-aws' }}
-      # Explicit per-run override ONLY -- deliberately excludes vars.ANTHROPIC_MODEL
-      # and the hardcoded fallback on the line above. ANTHROPIC_MODEL is ALWAYS
+      # Model override precedence: explicit dispatch input > LLM_DEFAULT_MODEL
+      # repo variable (standing default, set 2026-09-30 to z-ai/glm-5.3-flashx
+      # after GLM-Flash flapping killed the 09-29/09-30 morning runs on
+      # reddit_analyzer batches) > empty (leave the provider secret's model
+      # selection exactly as configured). Deliberately excludes vars.ANTHROPIC_MODEL
+      # and the hardcoded fallback on the line above: ANTHROPIC_MODEL is ALWAYS
       # populated, so treating "ANTHROPIC_MODEL is set" as "an override happened"
       # would pin every scheduled run to the fallback model and clobber the
-      # llm.routes in PIPELINE_PROVIDERS_YAML. Empty here == no override == leave
-      # the provider secret's model selection exactly as configured.
-      LLM_MODEL_OVERRIDE: ${{ inputs.anthropic_model }}
+      # llm.routes in PIPELINE_PROVIDERS_YAML. Empty here == no override.
+      LLM_MODEL_OVERRIDE: ${{ inputs.anthropic_model || vars.LLM_DEFAULT_MODEL || '' }}
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       # Rollback is a repository-variable change; historical replay stays isolated.
       NEWS_RELEVANCE_PROVIDER: ${{ vars.NEWS_RELEVANCE_PROVIDER || 'llm' }}
