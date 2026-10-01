@@ -355,7 +355,7 @@ LLM_REPLAY_CAPTURE    # Capture LLM stream events for the replay artifact (defau
 LLM_REPLAY_COALESCE_MS # Merge same-kind output deltas within this window (default: 80)
 LLM_REPLAY_MAX_DELTAS # Per-call delta cap before the call is marked truncated (default: 20000)
 LLM_REPLAY_MAX_TOTAL_DELTAS # Whole-run delta cap (default: 400000)
-LLM_REPLAY_MAX_BYTES  # Hard gzipped ceiling for replay-stream.json.gz (default: 600000)
+LLM_REPLAY_MAX_BYTES  # Hard gzipped ceiling for replay-stream.json.gz (default: 2000000; was 600000 until 2026-10-01, which dropped most output text on weekdays)
 LLM_METRICS_PATH      # Optional JSONL path for per-request LLM metrics (Actions default: data/llm_metrics.jsonl)
 ANALYZER_BATCH_SIZE   # Items per analyzer map batch (default: 75)
 ANALYZER_MAX_CONCURRENT_BATCHES # Per-category analyzer map concurrency (default: 3)

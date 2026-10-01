@@ -709,6 +709,7 @@
 					stream={selectedStream as ReplayCallStream | null}
 					{streamState}
 					runHasStreams={index.run.stream_available}
+					streamTruncation={index.run.stream_truncation ?? null}
 					timingsMeasured={index.run.timings_measured !== false}
 					t={frame.t}
 					{reduced}

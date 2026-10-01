@@ -22,7 +22,7 @@ Never store absolute times per event.
 | File | Size target | Committed | Purpose |
 |---|---|---|---|
 | `replay-index.json` | 15–60 KB | yes, permanent | Everything needed to render the theater, Gantt, and funnel. No prose content. |
-| `replay-stream.json.gz` | ≤ 600 KB gzipped (hard cap) | yes, prunable | Per-call token deltas for typewriter playback. |
+| `replay-stream.json.gz` | ≤ 2 MB gzipped (hard cap) | yes, prunable | Per-call token deltas for typewriter playback. |
 
 The index is self-sufficient: **if the stream file is missing or fails to load, the
 replay still fully works** — it just loses the typewriter. The frontend must treat the
@@ -389,13 +389,21 @@ Rules:
 
 ### Hard size cap
 
-The generator enforces ≤ 600 KB gzipped by escalating in order, logging each step:
+The generator enforces ≤ 2 MB gzipped by escalating in order, logging each step:
 
 1. Coalesce at 80 ms (default).
 2. Coalesce at 250 ms.
-3. Keep full deltas for *marquee* calls (`role` in `synthesize`/`reduce`/`curate`) and
+3. Drop the output text (keep thinking) of the *largest* non-marquee calls first, and
+   only as many as it takes to fit (`text_dropped_for_largest_minor_calls`).
+4. Keep full deltas for *marquee* calls (`role` in `synthesize`/`reduce`/`curate`) and
    store only thinking for the rest.
-4. Keep marquee only; set `has_stream: false` on the others.
+5. Keep marquee only; set `has_stream: false` on the others.
+
+The cap was 600 KB until 2026-10-01. Weekday runs from 2026-09-08 wrote 2–4M output
+chars (0.9–1.5 MB gzipped), and the ladder then had no rung between "everything" and
+"thinking only for every minor call", so ~150 of ~160 transcripts lost their output.
+The file is fetched only when a transcript opens, so the cap bounds git growth, not
+page weight.
 
 Truncation is never silent — the index carries `run.stream_truncation` describing which
 step fired.
@@ -416,7 +424,7 @@ Non-negotiables, in priority order over completeness:
 3. **Bounded.** Per-call delta cap (default 20 000 entries) and a global cap; overflow
    sets a `truncated` flag rather than growing without limit.
 4. **Off by default in dev, on in CI.** `LLM_REPLAY_CAPTURE` (default `true`),
-   `LLM_REPLAY_COALESCE_MS` (default `80`), `LLM_REPLAY_MAX_BYTES` (default `600000`).
+   `LLM_REPLAY_COALESCE_MS` (default `80`), `LLM_REPLAY_MAX_BYTES` (default `2000000`).
 5. **Prompts are captured and published; credentials never are.** The prompt each call
    sent is recorded off the hot path (once per call, in `start_call`, never inside the
    SSE loop) and published as `replay-prompts.json.gz`. This project is a showcase and

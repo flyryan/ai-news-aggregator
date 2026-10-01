@@ -114,6 +114,26 @@ class SecretPatternTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     ReplayGenerator._assert_publishable(blob)
 
+    def test_bearer_as_an_english_word_is_not_a_credential(self):
+        """Verbatim fragment from the GLM output that cost 2026-09-28 its stream."""
+        for prose in (
+            "phoenix rising flames embers burning brightly torch bearer holders holder grip",
+            "office holder occup bearer support sustain carry bear withstand",
+            "the standard bearer responsibilities of the lab",
+        ):
+            with self.subTest(prose=prose[:40]):
+                ReplayGenerator._assert_publishable({"text": prose})
+
+    def test_bearer_token_shapes_are_still_caught(self):
+        for header in (
+            "Authorization: Bearer abc123def456",
+            "bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOjF9.c2lnbmF0dXJl",
+            "Bearer AbCdEfGhIjKlMnOpQrStUvWxYz",
+        ):
+            with self.subTest(header=header[:30]):
+                with self.assertRaises(ValueError):
+                    ReplayGenerator._assert_publishable({"h": header})
+
     def test_private_host_is_still_caught(self):
         with mock.patch.dict("os.environ", {"ANTHROPIC_API_BASE": "https://secret.internal.corp"}):
             with self.assertRaises(ValueError) as caught:
@@ -151,6 +171,33 @@ class BlastRadiusTests(unittest.TestCase):
         _, _, kept_prompts = generator._gate_artifacts(index, stream, clean)
 
         self.assertEqual(kept_prompts, clean)
+
+    def test_stream_violation_withholds_only_that_call(self):
+        """One tainted output must not take every other call's stream with it."""
+        generator = ReplayGenerator("/tmp/does-not-need-to-exist")
+        index = {
+            "run": {"date": "2026-09-28", "stream_available": True},
+            "calls": [{"id": "c001", "has_stream": True}, {"id": "c002", "has_stream": True}],
+        }
+        stream = gzip.compress(json.dumps({
+            "schema": 1,
+            "date": "2026-09-28",
+            "calls": {
+                "c001": {"t": [1], "kind": [1], "text": ["clean output"]},
+                "c002": {"t": [1], "kind": [1], "text": ["key sk-ant-api03-" + "A" * 95]},
+            },
+        }).encode("utf-8"))
+
+        kept_index, kept_stream, _ = generator._gate_artifacts(index, stream, None)
+
+        self.assertIsNotNone(kept_stream)
+        survivors = json.loads(gzip.decompress(kept_stream))["calls"]
+        self.assertEqual(list(survivors), ["c001"])
+        self.assertTrue(kept_index["run"]["stream_available"])
+        self.assertEqual(
+            {c["id"]: c["has_stream"] for c in kept_index["calls"]},
+            {"c001": True, "c002": False},
+        )
 
     def test_tainted_index_still_aborts_everything(self):
         """An index violation is not survivable -- the index *is* the artifact."""

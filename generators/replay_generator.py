@@ -61,7 +61,12 @@ GENERATED_BY = "replay_generator/1.0"
 # samples -- fine gzipped, and finer than the eye can follow when scrubbing.
 CONCURRENCY_INTERVAL_MS = 2000
 
-DEFAULT_MAX_STREAM_BYTES = 600_000
+# The stream is fetched only when a transcript opens, so this bounds git growth
+# rather than page weight. 600 KB fit the Opus-era runs (~1M output chars/day);
+# from 2026-09-08 weekday runs wrote 2-4M chars, the full stream gzipped to
+# 0.9-1.5 MB, and every such day fell through to text_dropped_for_minor_calls --
+# publishing thinking but no output for ~150 of ~160 calls.
+DEFAULT_MAX_STREAM_BYTES = 2_000_000
 
 # Prompts are the biggest artifact -- a run sends ~2.7 MB of prompt to produce
 # ~370 KB of output, because every analyzer batch carries its items. This is a
@@ -126,7 +131,13 @@ _SECRET_PATTERNS = (
     re.compile(r"\bapikey_[a-fA-F0-9]{32}_[a-fA-F0-9]{64}\b"),
     re.compile(r"\bsk-(?:ant|proj|or|live|test)-[A-Za-z0-9_\-]{16,}"),
     re.compile(r"\bsk-[A-Za-z0-9]{20,}"),
-    re.compile(r"\bBearer\s+\S+", re.IGNORECASE),
+    # A token, not the English noun: "torch bearer holders" in a degenerate
+    # model output matched the old \bBearer\s+\S+ and cost 2026-09-28 its whole
+    # stream. Real bearer tokens are long and carry digits; demand one or the other.
+    re.compile(
+        r"\bBearer\s+(?:(?=[A-Za-z0-9._~+/\-]*\d)[A-Za-z0-9._~+/\-]{8,}|[A-Za-z0-9._~+/\-]{24,})",
+        re.IGNORECASE,
+    ),
     re.compile(r"\b(?:api[_-]?key|auth[_-]?token|secret)\s*[=:]\s*\S+", re.IGNORECASE),
     # Credentials embedded in a URL, e.g. https://user:pass@host
     re.compile(r"https?://[^/\s]*:[^/\s]*@", re.IGNORECASE),
@@ -1219,7 +1230,33 @@ class ReplayGenerator:
             ("marquee_only", {"coalesce_ms": 250, "keep": marquee}),
         ]
 
+        def text_size(call_id: str) -> int:
+            deltas = spans[call_id]["deltas"]
+            return sum(len(x) for k, x in zip(deltas["kind"], deltas["text"]) if k == 1)
+
+        # Biggest outputs first: dropping a few large analyzer batches usually
+        # buys the room, where dropping every minor call's text throws away ~85%
+        # of the output to cover an overshoot of a few hundred KB.
+        minor_by_size = sorted(
+            (i for i in spans if i not in marquee and text_size(i) > 0),
+            key=text_size,
+            reverse=True,
+        )
+
         for note, kwargs in ladder:
+            if note == "text_dropped_for_minor_calls" and minor_by_size:
+                fitted = self._fit_largest_minor_text(payload, minor_by_size)
+                if fitted is not None:
+                    blob, kept, dropped = fitted
+                    logger.warning(
+                        f"Replay stream exceeded {self.max_stream_bytes} bytes; "
+                        f"applied 'text_dropped_for_largest_minor_calls' "
+                        f"({len(blob)} bytes, text dropped for {dropped} of "
+                        f"{len(minor_by_size)} minor calls)"
+                    )
+                    for call in calls:
+                        call["has_stream"] = call["id"] in kept
+                    return blob, "text_dropped_for_largest_minor_calls"
             blob, kept = payload(**kwargs)
             if len(blob) <= self.max_stream_bytes:
                 if note != "none":
@@ -1241,6 +1278,24 @@ class ReplayGenerator:
         for call in calls:
             call["has_stream"] = call["id"] in kept
         return blob, "marquee_only_over_cap"
+
+    def _fit_largest_minor_text(self, payload, minor_by_size: List[str]):
+        """Fewest largest-first minor calls whose text must go for the stream to fit.
+
+        Binary search over the drop count -- each probe is a full gzip, so a linear
+        walk over ~150 calls would be needlessly slow. Returns ``None`` when even
+        dropping every minor call's text overflows (the ladder then continues),
+        or when that is the only fit (the ladder's own rung says so more plainly).
+        """
+        lo, hi, best = 1, len(minor_by_size) - 1, None
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            blob, kept = payload(coalesce_ms=250, thinking_only=minor_by_size[:mid])
+            if len(blob) <= self.max_stream_bytes:
+                best, hi = (blob, kept, mid), mid - 1
+            else:
+                lo = mid + 1
+        return best
 
     # -- safety ----------------------------------------------------------
 
@@ -1472,12 +1527,29 @@ class ReplayGenerator:
 
         # Typed decision responses include the exact API JSON as well as their
         # readable projection. Apply the same publish gate to all output text.
+        # Checked per call so one tainted output withholds that call, not the
+        # day: 2026-09-28 lost all 121 streams to a single false positive.
         if stream_blob is not None:
             try:
-                self._assert_publishable(
-                    json.loads(gzip.decompress(stream_blob).decode("utf-8")),
-                    what="output artifact",
-                )
+                document = json.loads(gzip.decompress(stream_blob).decode("utf-8"))
+                withheld = []
+                for call_id, entry in list((document.get("calls") or {}).items()):
+                    try:
+                        self._assert_publishable(entry, what="output artifact")
+                    except ValueError as error:
+                        logger.error("Withholding replay output for %s: %s", call_id, error)
+                        del document["calls"][call_id]
+                        withheld.append(call_id)
+                rest = {k: v for k, v in document.items() if k != "calls"}
+                self._assert_publishable(rest, what="output artifact")
+                if withheld:
+                    for call in index.get("calls", []):
+                        if call.get("id") in withheld:
+                            call["has_stream"] = False
+                    raw = json.dumps(document, ensure_ascii=False, separators=(",", ":"))
+                    stream_blob = gzip.compress(raw.encode("utf-8"), compresslevel=9)
+                if withheld and not document.get("calls"):
+                    raise ValueError("no publishable call streams remain")
             except ValueError as error:
                 logger.error("Dropping the replay output artifact: %s", error)
                 stream_blob = None

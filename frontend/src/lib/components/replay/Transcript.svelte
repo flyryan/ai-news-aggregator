@@ -41,6 +41,11 @@
 	 * two cases get different copy — "we never recorded it" is not "we dropped it".
 	 */
 	export let runHasStreams = true;
+	/**
+	 * The run's `stream_truncation` note. When set, a call that wrote text but has no
+	 * text deltas lost them to the size cap at publish time — it was captured.
+	 */
+	export let streamTruncation: string | null = null;
 	/** False for offline-reconstructed runs: no queue wait, no first-token time. */
 	export let timingsMeasured = true;
 	export let t: number;
@@ -902,7 +907,15 @@
 						{isDecision ? 'Waiting for response…' : hasThinking && thinkingText ? 'still reasoning…' : 'waiting for first token…'}
 					</p>
 				{:else if isAfter}
-					<p class="answer-text pending">{isDecision ? 'No response captured for this call.' : 'No text deltas were captured for this call.'}</p>
+					<p class="answer-text pending">
+						{#if isDecision}
+							No response captured for this call.
+						{:else if streamTruncation && call.text_chars > 0}
+							Output text was captured but trimmed from the published replay to fit its size cap.
+						{:else}
+							No text deltas were captured for this call.
+						{/if}
+					</p>
 				{/if}
 			</section>
 		{/if}
