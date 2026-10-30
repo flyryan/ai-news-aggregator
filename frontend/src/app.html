@@ -20,6 +20,11 @@
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover" class="bg-trend-gray-100 dark:bg-trend-dark text-trend-dark dark:text-trend-gray-100">
+		<!-- GEO/SEO server-side fragments (injected by nginx SSI for non-JS crawlers;
+		     harmless if absent - nginx drops a missing include, page still serves) -->
+		<!--#include virtual="/data/quick-answer.html" -->
+		<!--#include virtual="/data/edition-seo.html" -->
+
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
 </html>

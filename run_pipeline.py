@@ -39,6 +39,9 @@ from generators.json_generator import JSONGenerator
 from generators.replay_generator import generate_replay
 from generators.search_indexer import SearchIndexer
 from generators.feed_generator import FeedGenerator
+from generators.sitemap_generator import SitemapGenerator
+from generators.quick_answer_generator import QuickAnswerGenerator
+from generators.edition_seo_generator import EditionSeoGenerator
 
 logging.basicConfig(
     level=logging.INFO,
@@ -162,6 +165,21 @@ def generate_pipeline_outputs(
     logger.info("=" * 60)
     search_indexer = SearchIndexer(web_dir, rolling_window_days=30)
     search_indexer.update_index(result.to_dict())
+
+    logger.info("=" * 60)
+    logger.info("PHASE 7.5: GEO OUTPUTS (sitemap / quick-answer / edition-seo)")
+    logger.info("=" * 60)
+    # GEO/SEO: produce crawlable + AI-citable artifacts. Failures here are
+    # non-fatal (a missing sitemap must never break an otherwise-good publish).
+    try:
+        from generators.sitemap_generator import SitemapGenerator
+        from generators.quick_answer_generator import QuickAnswerGenerator
+        from generators.edition_seo_generator import EditionSeoGenerator
+        SitemapGenerator(web_dir, base_url=base_url).generate()
+        QuickAnswerGenerator(web_dir, base_url=base_url).generate()
+        EditionSeoGenerator(web_dir, base_url=base_url).generate()
+    except Exception as exc:
+        logger.warning("GEO outputs (sitemap/quick-answer/edition-seo) failed: %s", type(exc).__name__)
 
     if orchestrator is not None and hasattr(orchestrator, "capture_finished_output"):
         try:
