@@ -86,6 +86,14 @@ class EcosystemContextManager:
         'poolside': 'Poolside',
         'reflection': 'Reflection AI',
         'databricks': 'Databricks',
+        # Tier 3 (approved 2026-11-01 grounding coverage audit). Reka's real
+        # OpenRouter prefix is 'rekaai' — the audit script's 'reka' guess was a
+        # false "no prefix" classification, so Reka gets FREE discovery grounding.
+        # Zyphra genuinely has no OpenRouter listing; it's a bare yaml anchor so
+        # phase-4.8 enrichment can file a verified future release instead of
+        # discarding it.
+        'rekaai': 'Reka',
+        'zyphra': 'Zyphra',
     }
 
     # Max models per provider to keep prompt size reasonable

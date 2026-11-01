@@ -892,6 +892,17 @@ reflection:
 
 databricks:
 
+# Approved in the 2026-11-01 grounding coverage audit. Reka's real OpenRouter
+# prefix is 'rekaai' (the audit script guessed 'reka' and mis-classified it as
+# having no prefix), so discovery grounds its live models automatically.
+# Zyphra has no OpenRouter listing at all; the bare anchor just lets enrichment
+# file a verified future release instead of discarding it.
+rekaai:
+  Reka-Inverse-Dynamics-Model:
+    ga_date: "2026-10-01"  # HF RekaAI upload (apache-2.0); covered 2026-10-04
+    api_date: "unknown"
+zyphra:
+
 # Agent enrichment notes:
 # - Models marked "needs verification" should be confirmed by agent
 # - Agent should add new releases discovered in daily news
