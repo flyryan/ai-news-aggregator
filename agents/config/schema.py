@@ -43,6 +43,24 @@ class LLMRouteConfig(BaseModel):
             "alone does not bound the request rate."
         )
     )
+    refusal_fallback_model: Optional[str] = Field(
+        default=None,
+        description=(
+            "openai-chat only: model id a call is retried on, once, when the "
+            "upstream host refuses it (native_finish_reason 'sensitive' or "
+            "'content_filter'). Unset = no fallback. "
+            "LLM_REFUSAL_FALLBACK_MODEL overrides it."
+        )
+    )
+    refusal_fallback_ignore_providers: Optional[List[str]] = Field(
+        default=None,
+        description=(
+            "OpenRouter provider names/slugs the refusal fallback must skip "
+            "(sent as provider.ignore). The host that refused is always "
+            "added. LLM_REFUSAL_FALLBACK_IGNORE_PROVIDERS (comma-separated) "
+            "overrides it."
+        )
+    )
 
     @field_validator('api_key')
     @classmethod
@@ -113,6 +131,24 @@ class LLMProviderConfig(BaseModel):
                     "proxies with restrictive limits (e.g., 64000)."
     )
     timeout: float = Field(default=600.0, ge=1.0, le=600.0, description="Request timeout in seconds")
+    refusal_fallback_model: Optional[str] = Field(
+        default=None,
+        description=(
+            "openai-chat only: model id a call is retried on, once, when the "
+            "upstream host refuses it (native_finish_reason 'sensitive' or "
+            "'content_filter'). Unset = no fallback. "
+            "LLM_REFUSAL_FALLBACK_MODEL overrides it."
+        )
+    )
+    refusal_fallback_ignore_providers: Optional[List[str]] = Field(
+        default=None,
+        description=(
+            "OpenRouter provider names/slugs the refusal fallback must skip "
+            "(sent as provider.ignore). The host that refused is always "
+            "added. LLM_REFUSAL_FALLBACK_IGNORE_PROVIDERS (comma-separated) "
+            "overrides it."
+        )
+    )
     routes: Optional[List[LLMRouteConfig]] = Field(
         default=None,
         description="Optional route list for multi-provider LLM routing"
@@ -171,6 +207,8 @@ class LLMProviderConfig(BaseModel):
                     timeout=self.timeout,
                     max_concurrent_requests=None,
                     max_requests_per_minute=None,
+                    refusal_fallback_model=self.refusal_fallback_model,
+                    refusal_fallback_ignore_providers=self.refusal_fallback_ignore_providers,
                 )
             ]
 
@@ -185,6 +223,16 @@ class LLMProviderConfig(BaseModel):
                 timeout=route.timeout or self.timeout,
                 max_concurrent_requests=route.max_concurrent_requests,
                 max_requests_per_minute=route.max_requests_per_minute,
+                refusal_fallback_model=(
+                    route.refusal_fallback_model or self.refusal_fallback_model
+                ),
+                # `is not None`: an explicit empty list on a route clears the
+                # inherited one.
+                refusal_fallback_ignore_providers=(
+                    route.refusal_fallback_ignore_providers
+                    if route.refusal_fallback_ignore_providers is not None
+                    else self.refusal_fallback_ignore_providers
+                ),
             )
             for route in self.routes
         ]
@@ -202,6 +250,8 @@ class ResolvedLLMRouteConfig(BaseModel):
     timeout: float
     max_concurrent_requests: Optional[int] = None
     max_requests_per_minute: Optional[int] = None
+    refusal_fallback_model: Optional[str] = None
+    refusal_fallback_ignore_providers: Optional[List[str]] = None
 
 
 class ImageProviderConfig(BaseModel):

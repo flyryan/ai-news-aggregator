@@ -92,6 +92,24 @@ class IdentityTests(unittest.IsolatedAsyncioTestCase):
                 await self.analyzer._analyze_batch(self.items[:1], 0, 1)
         self.assertEqual(self.client.call_with_thinking.await_count, 2)
 
+    async def test_refused_single_source_stops_after_one_attempt(self):
+        # 2026-11-13: a host-side content block is deterministic; three paid
+        # retries of the identical request only delayed the same failure.
+        self.client.call_with_thinking.return_value = SimpleNamespace(content='', thinking=None, stop_reason='refusal')
+        with patch('agents.base.asyncio.sleep', new_callable=AsyncMock) as sleep:
+            with self.assertRaises(AnalysisIntegrityError) as caught:
+                await self.analyzer._analyze_batch(self.items[:1], 0, 1)
+        self.assertIn('provider refused', str(caught.exception))
+        self.assertEqual(self.client.call_with_thinking.await_count, 1)
+        sleep.assert_not_awaited()
+
+    async def test_refused_batch_still_splits_to_keep_the_other_source(self):
+        refused = SimpleNamespace(content='', thinking=None, stop_reason='refusal')
+        self.client.call_with_thinking.side_effect = [refused, response([analysis(self.items[0])]), refused]
+        with self.assertRaises(AnalysisIntegrityError):
+            await self.analyzer._analyze_batch(self.items, 0, 1)
+        self.assertEqual(self.client.call_with_thinking.await_count, 3)
+
     def test_encoding_and_typography_are_not_identity_changes(self):
         item = source('abc', 'An AI’s Q&amp;A:  5 models')
         row = analysis(item)

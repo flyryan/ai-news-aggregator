@@ -114,6 +114,13 @@ jobs:
       # Transport/server failures always consume the attempt budget. Only 429s
       # while the provider serves other calls use the elapsed-time limit alone.
       LLM_RETRY_MAX_ATTEMPTS: ${{ vars.LLM_RETRY_MAX_ATTEMPTS || '6' }}
+      # Refusal fallback (2026-11-13: Z.AI, the only host of glm-5.3-flashx,
+      # blocked one news item with an empty 200 and the run aborted). A call
+      # the upstream host refuses is retried once on this model, skipping the
+      # listed OpenRouter hosts plus the one that refused. Deliberately no
+      # default: unset means no fallback, and the refusal is only logged.
+      LLM_REFUSAL_FALLBACK_MODEL: ${{ vars.LLM_REFUSAL_FALLBACK_MODEL || '' }}
+      LLM_REFUSAL_FALLBACK_IGNORE_PROVIDERS: ${{ vars.LLM_REFUSAL_FALLBACK_IGNORE_PROVIDERS || '' }}
       LLM_RETRY_LIVENESS_WINDOW: ${{ vars.LLM_RETRY_LIVENESS_WINDOW || '180' }}
       LLM_RETRY_MAX_ELAPSED_SECONDS: ${{ vars.LLM_RETRY_MAX_ELAPSED_SECONDS || '900' }}
       LLM_RETRY_CONTENDED_DELAY: ${{ vars.LLM_RETRY_CONTENDED_DELAY || '10' }}

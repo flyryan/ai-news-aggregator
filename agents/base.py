@@ -84,6 +84,16 @@ class AnalysisIntegrityError(RuntimeError):
     """Analysis cannot be safely attached to its collected sources."""
 
 
+class ProviderRefusalError(AnalysisIntegrityError):
+    """The provider declined to answer (stop_reason "refusal").
+
+    Deterministic for a given request, and the client has already tried its
+    refusal fallback, so repeating the identical call cannot help. A batch is
+    still split -- that isolates the source that was blocked and keeps the
+    rest -- but a single refused source stops after one attempt.
+    """
+
+
 class AnalysisRecoveryExhausted(AnalysisIntegrityError):
     """A bounded child retry failed; parents must not restart its budget."""
 
@@ -1133,6 +1143,8 @@ Every entry needs a nonempty summary and reasoning and a numeric score 0-100.
                 )
                 if response.stop_reason == "max_tokens":
                     raise TruncatedJSONError("Analysis output exhausted its token budget")
+                if response.stop_reason == "refusal":
+                    raise ProviderRefusalError("Provider refused the request")
                 result = self._parse_json_response(response.content, expected_items=len(batch_items))
                 # In a one-source request, an exact ID binds the result without
                 # asking the model to faithfully reproduce a display title.
@@ -1189,6 +1201,11 @@ Every entry needs a nonempty summary and reasoning and a numeric score 0-100.
                         batch_items, batch_index, total_batches, sub_label, str(exc)
                     )
                 reason = str(exc)
+                if isinstance(exc, ProviderRefusalError):
+                    raise AnalysisRecoveryExhausted(
+                        f"{caller}: provider refused this source "
+                        f"(id={batch_items[0].id}); not retrying an identical request"
+                    ) from exc
             except Exception as exc:
                 if _is_replay_integrity_error(exc):
                     raise

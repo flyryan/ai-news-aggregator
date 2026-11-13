@@ -296,6 +296,7 @@ def _build_openai_chat_body(
     messages: List[Dict[str, Any]],
     max_tokens: int,
     effort: Optional[str],
+    provider: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Build an OpenRouter chat/completions body from this pipeline's call shape.
 
@@ -317,12 +318,18 @@ def _build_openai_chat_body(
     }
     if effort:
         body["reasoning"] = {"effort": effort}
+    if provider:
+        # OpenRouter provider preferences. Only the refusal fallback sets
+        # them (`{"ignore": [...]}`), to keep the retry off the host that
+        # just declined the request.
+        body["provider"] = provider
     return body
 
 
 def _openai_chat_new_state() -> Dict[str, Any]:
     """Fresh accumulator for one chat-completions stream."""
-    return {"thinking": [], "text": [], "usage": {}, "stop_reason": None}
+    return {"thinking": [], "text": [], "usage": {}, "stop_reason": None,
+            "upstream_provider": None}
 
 
 def _openai_chat_blocks(state: Dict[str, Any]) -> List[SimpleNamespace]:
@@ -352,6 +359,27 @@ _OPENAI_FINISH_TO_STOP = {
     "length": "max_tokens",
     "content_filter": "refusal",
 }
+
+# `native_finish_reason` values that mean the upstream host declined to answer.
+# OpenRouter normalises `finish_reason` and can flatten these to a plain
+# "stop": on 2026-11-13 Z.AI blocked one news item with HTTP 200, an empty
+# stream, finish_reason "stop" and native_finish_reason "sensitive", which read
+# as an ordinary empty answer and sent the analyzer into split-and-retry until
+# the run aborted.
+_OPENAI_NATIVE_REFUSALS = frozenset({"sensitive", "content_filter"})
+
+
+def _openai_chat_stop_reason(finish: Any, native_finish: Any = None) -> Optional[str]:
+    """Map a chat-completions choice's finish fields to a stop_reason.
+
+    The host's own reason wins when it says the content was blocked;
+    otherwise the normalised `finish_reason` decides, as before.
+    """
+    if isinstance(native_finish, str) and native_finish.lower() in _OPENAI_NATIVE_REFUSALS:
+        return "refusal"
+    if not finish:
+        return None
+    return _OPENAI_FINISH_TO_STOP.get(finish, finish)
 
 
 class OpenRouterStreamError(RuntimeError):
@@ -426,9 +454,19 @@ def _openai_chat_apply_chunk(chunk: Any, state: Dict[str, Any]) -> None:
         content = delta.get("content")
         if content:
             state["text"].append(content)
-        finish = choice.get("finish_reason")
-        if finish:
-            state["stop_reason"] = _OPENAI_FINISH_TO_STOP.get(finish, finish)
+        stop_reason = _openai_chat_stop_reason(
+            choice.get("finish_reason"), choice.get("native_finish_reason")
+        )
+        # A refusal is sticky: a trailing plain "stop" chunk must not turn a
+        # blocked response back into an ordinary empty one.
+        if stop_reason and state.get("stop_reason") != "refusal":
+            state["stop_reason"] = stop_reason
+
+    # The host OpenRouter routed this request to (e.g. "Z.AI"). Kept so a
+    # refusal can be attributed, and so the fallback can skip that host.
+    upstream = chunk.get("provider")
+    if isinstance(upstream, str) and upstream:
+        state["upstream_provider"] = upstream
 
     usage = chunk.get("usage")
     if isinstance(usage, dict):
@@ -920,7 +958,19 @@ class AnthropicClient:
             payload = resp.json()
             message = (payload.get("choices") or [{}])[0].get("message") or {}
             usage = payload.get("usage") or {}
-            finish = (payload.get("choices") or [{}])[0].get("finish_reason")
+            choice = (payload.get("choices") or [{}])[0]
+            stop_reason = _openai_chat_stop_reason(
+                choice.get("finish_reason"), choice.get("native_finish_reason")
+            ) or "end_turn"
+            if stop_reason == "refusal":
+                # Sync callers (link follower) have no refusal fallback; make
+                # the block visible instead of an unexplained empty answer.
+                logger.error(
+                    f"LLM REFUSAL: model={payload.get('model') or self.model} "
+                    f"upstream_provider={payload.get('provider')} "
+                    f"native_finish_reason={choice.get('native_finish_reason')} "
+                    f"analysis_profile={profile_name}"
+                )
             return LLMResponse(
                 content=message.get("content") or "",
                 thinking=message.get("reasoning") or None,
@@ -931,7 +981,7 @@ class AnthropicClient:
                     "cache_read_input_tokens": usage.get("cache_read_input_tokens") or 0,
                 },
                 model=payload.get("model") or self.model,
-                stop_reason=_OPENAI_FINISH_TO_STOP.get(finish, "end_turn"),
+                stop_reason=stop_reason,
                 thinking_type="adaptive" if use_adaptive else None,
                 adaptive_effort=effort,
                 analysis_profile=profile_name,
@@ -1094,6 +1144,10 @@ class AsyncAnthropicClient:
     retry_liveness_window: float = DEFAULT_LLM_RETRY_LIVENESS_WINDOW
     retry_max_elapsed: float = DEFAULT_LLM_RETRY_MAX_ELAPSED
     retry_contended_delay: float = DEFAULT_LLM_RETRY_CONTENDED_DELAY
+    # Refusal fallback (openai-chat only): where to send a call the host
+    # declined to answer. None = no fallback; the refusal is returned as-is.
+    refusal_fallback_model: Optional[str] = None
+    refusal_fallback_ignore_providers: Tuple[str, ...] = ()
     # Monotonic timestamp of the last proof this provider was serving us: a
     # streamed chunk or a completed call, from ANY concurrent caller. 0.0 means
     # "no proof yet this process", which reads as silent.
@@ -1111,8 +1165,12 @@ class AsyncAnthropicClient:
         max_concurrent_requests: Optional[int] = None,
         max_retries: Optional[int] = None,
         max_requests_per_minute: Optional[int] = None,
-        retry_max_attempts: Optional[int] = None
+        retry_max_attempts: Optional[int] = None,
+        refusal_fallback_model: Optional[str] = None,
+        refusal_fallback_ignore_providers: Optional[List[str]] = None,
     ):
+        self.refusal_fallback_model = refusal_fallback_model or None
+        self.refusal_fallback_ignore_providers = tuple(refusal_fallback_ignore_providers or ())
         self.api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
         self.base_url = base_url or os.environ.get('ANTHROPIC_API_BASE')
         self.model = model or os.environ.get('ANTHROPIC_MODEL', 'claude-5-opus-aws')
@@ -1223,6 +1281,7 @@ class AsyncAnthropicClient:
             f"max_concurrent_requests={self.max_concurrent_requests or 'unlimited'}, "
             f"max_requests_per_minute={self.max_requests_per_minute or 'unlimited'}, "
             f"retry_attempts={self.retry_max_attempts}, "
+            f"refusal_fallback={self._refusal_fallback_settings()[0] or 'none'}, "
             f"trust_env_proxy={self.trust_env_proxy}, request_logging={self.log_requests}, "
             f"metrics_path={self.metrics_path or 'disabled'}"
         )
@@ -1264,6 +1323,8 @@ class AsyncAnthropicClient:
             "attempt",
             "fallback_from",
             "retry_reason",
+            "refusal_fallback_from",
+            "refusal_upstream_provider",
             "message_count",
             "message_chars",
             "system_chars",
@@ -1349,11 +1410,13 @@ class AsyncAnthropicClient:
         text_block_count = sum(
             1 for block in content_blocks if getattr(block, "type", None) == "text"
         )
+        upstream_provider = getattr(response, "upstream_provider", None)
         logger.info(
             f"LLM done #{request_id} {self._format_request_context(request_context)} "
             f"active={active} queued={queued} duration={duration:.1f}s "
             f"stop_reason={stop_reason} input_tokens={input_tokens} output_tokens={output_tokens} "
             f"thinking_blocks={thinking_block_count} text_blocks={text_block_count}"
+            + (f" upstream_provider={upstream_provider}" if upstream_provider else "")
         )
         await self._write_metric({
             "event": "done",
@@ -1367,6 +1430,7 @@ class AsyncAnthropicClient:
             "thinking_blocks": thinking_block_count,
             "text_blocks": text_block_count,
             "response_model": getattr(response, "model", None),
+            "upstream_provider": upstream_provider,
             "usage": {
                 "input_tokens": input_tokens,
                 "output_tokens": output_tokens,
@@ -1651,15 +1715,19 @@ class AsyncAnthropicClient:
         .usage attributes, .stop_reason, and .model.
         """
         effort = None
+        provider_preferences = None
         extra_body = kwargs.get("extra_body") or {}
         if isinstance(extra_body, dict):
             effort = (extra_body.get("output_config") or {}).get("effort")
+            provider_preferences = extra_body.get("provider")
+        request_model = kwargs.get("model", self.model)
         body = _build_openai_chat_body(
-            model=kwargs.get("model", self.model),
+            model=request_model,
             system=kwargs.get("system"),
             messages=kwargs.get("messages") or [],
             max_tokens=kwargs.get("max_tokens", 4096),
             effort=effort,
+            provider=provider_preferences,
         )
         url = f"{self.base_url.rstrip('/')}/v1/chat/completions"
 
@@ -1758,7 +1826,10 @@ class AsyncAnthropicClient:
             content=blocks,
             usage=usage_ns,
             stop_reason=state["stop_reason"],
-            model=self.model,
+            # The model this request named, which on a refusal fallback is
+            # not `self.model`: cost rows and metrics key off this.
+            model=request_model,
+            upstream_provider=state.get("upstream_provider"),
         )
 
     async def _create_message(self, request_context: Optional[Dict[str, Any]] = None, **kwargs):
@@ -1886,8 +1957,142 @@ class AsyncAnthropicClient:
             if acquired and self._request_semaphore is not None:
                 self._request_semaphore.release()
 
+    def _refusal_fallback_settings(self) -> Tuple[Optional[str], List[str]]:
+        """The configured refusal fallback: (model or None, hosts to skip).
+
+        Environment variables win over providers.yaml so CI can set or change
+        the fallback through repository variables without editing the
+        providers secret. Read per call: a refusal is rare, and this keeps
+        instances built without `__init__` working.
+        """
+        model = (
+            os.environ.get("LLM_REFUSAL_FALLBACK_MODEL", "").strip()
+            or self.refusal_fallback_model
+            or None
+        )
+        raw_ignore = os.environ.get("LLM_REFUSAL_FALLBACK_IGNORE_PROVIDERS", "").strip()
+        if raw_ignore:
+            ignore = [part.strip() for part in raw_ignore.split(",") if part.strip()]
+        else:
+            ignore = [p for p in (self.refusal_fallback_ignore_providers or ()) if p]
+        return model, ignore
+
+    async def _refusal_fallback(
+        self, refused: Any, request_context: Optional[Dict[str, Any]], kwargs: Dict[str, Any]
+    ):
+        """Retry one refused openai-chat call on the configured fallback.
+
+        A refusal is the upstream host declining the content (HTTP 200, empty
+        body), so repeating the same request is pointless -- it is
+        deterministic. The one thing that can help is a different
+        destination: the fallback model, with OpenRouter told to skip the
+        configured hosts and the host that just refused.
+
+        Exactly one fallback attempt, and it is an ordinary call: its own
+        replay span, cost row, semaphore slot and rate token, with transport
+        retries. If no fallback is configured, or the fallback refuses or
+        fails too, the original refusal is returned unchanged -- callers
+        decide what a refusal means; this never invents content.
+        """
+        ctx = request_context or {}
+        caller = ctx.get("caller", "unknown")
+        refused_model = getattr(refused, "model", None) or kwargs.get("model", self.model)
+        upstream = getattr(refused, "upstream_provider", None)
+        fallback_model, ignore = self._refusal_fallback_settings()
+
+        if self.mode != "openai-chat":
+            # Provider preferences are an OpenRouter chat/completions feature.
+            return refused
+        if not fallback_model:
+            logger.error(
+                "LLM refusal caller=%s provider=%s model=%s upstream_provider=%s; "
+                "no refusal fallback configured",
+                caller, self.provider_id, refused_model, upstream,
+            )
+            return refused
+
+        if upstream and upstream not in ignore:
+            ignore = [*ignore, upstream]
+        if fallback_model == refused_model and not ignore:
+            # Same model, nothing to steer away from: it would be the same request.
+            logger.error(
+                "LLM refusal caller=%s provider=%s model=%s; refusal fallback is the "
+                "same model with no host to skip, not retrying",
+                caller, self.provider_id, refused_model,
+            )
+            return refused
+
+        # The refused attempt is not the response the caller records, so bill
+        # whatever it consumed here (normally nothing: a block emits no tokens).
+        try:
+            usage = getattr(refused, "usage", None)
+            spent = {
+                key: getattr(usage, key, 0) or 0
+                for key in ("input_tokens", "output_tokens",
+                            "cache_creation_input_tokens", "cache_read_input_tokens")
+            }
+            if any(spent.values()):
+                get_tracker().record_call(
+                    caller=caller,
+                    usage=spent,
+                    thinking_level=ctx.get("analysis_profile"),
+                    duration_seconds=0.0,
+                    model=refused_model,
+                    provider_id=self.provider_id,
+                    analysis_profile=ctx.get("analysis_profile"),
+                    adaptive_effort=ctx.get("adaptive_effort"),
+                )
+        except Exception:
+            logger.debug("Could not record spend for refused call", exc_info=True)
+
+        fallback_kwargs = dict(kwargs)
+        fallback_kwargs["model"] = fallback_model
+        extra_body = dict(fallback_kwargs.get("extra_body") or {})
+        if ignore:
+            extra_body["provider"] = {"ignore": ignore}
+        if extra_body:
+            fallback_kwargs["extra_body"] = extra_body
+        fallback_context = dict(ctx)
+        fallback_context.update({
+            "provider_model": fallback_model,
+            "retry_reason": "refusal",
+            "refusal_fallback_from": refused_model,
+            "refusal_upstream_provider": upstream,
+        })
+
+        logger.warning(
+            "LLM refusal caller=%s provider=%s model=%s upstream_provider=%s; "
+            "retrying once on refusal fallback model=%s ignoring=%s",
+            caller, self.provider_id, refused_model, upstream,
+            fallback_model, ",".join(ignore) or "none",
+        )
+        try:
+            response = await self._create_message_with_retries(
+                request_context=fallback_context,
+                _allow_refusal_fallback=False,
+                **fallback_kwargs,
+            )
+        except asyncio.CancelledError:
+            raise
+        except Exception as error:
+            logger.error(
+                "LLM refusal fallback failed caller=%s model=%s error=%s; "
+                "returning the original refusal",
+                caller, fallback_model, type(error).__name__,
+            )
+            return refused
+        if getattr(response, "stop_reason", None) == "refusal":
+            logger.error(
+                "LLM refusal fallback ALSO refused caller=%s model=%s upstream_provider=%s",
+                caller, fallback_model, getattr(response, "upstream_provider", None),
+            )
+        return response
+
     async def _create_message_with_retries(
-        self, request_context: Optional[Dict[str, Any]] = None, **kwargs
+        self,
+        request_context: Optional[Dict[str, Any]] = None,
+        _allow_refusal_fallback: bool = True,
+        **kwargs,
     ):
         """Run `_create_message`, retrying transient provider failures.
 
@@ -1992,6 +2197,8 @@ class AsyncAnthropicClient:
             # A completed call is the strongest liveness proof there is, and it
             # is what lets a *concurrent* struggling call keep its budget.
             self._mark_provider_alive()
+            if _allow_refusal_fallback and getattr(response, "stop_reason", None) == "refusal":
+                return await self._refusal_fallback(response, request_context, kwargs)
             return response
 
     @classmethod
@@ -2011,7 +2218,11 @@ class AsyncAnthropicClient:
             model=config.model,
             timeout=config.timeout,
             mode=config.mode,
-            max_output_tokens=getattr(config, 'max_output_tokens', DEFAULT_MODEL_MAX_TOKENS)
+            max_output_tokens=getattr(config, 'max_output_tokens', DEFAULT_MODEL_MAX_TOKENS),
+            refusal_fallback_model=getattr(config, 'refusal_fallback_model', None),
+            refusal_fallback_ignore_providers=getattr(
+                config, 'refusal_fallback_ignore_providers', None
+            ),
         )
 
     @classmethod
@@ -2034,6 +2245,10 @@ class AsyncAnthropicClient:
             max_retries=max_retries,
             max_requests_per_minute=config.max_requests_per_minute,
             retry_max_attempts=retry_max_attempts,
+            refusal_fallback_model=getattr(config, 'refusal_fallback_model', None),
+            refusal_fallback_ignore_providers=getattr(
+                config, 'refusal_fallback_ignore_providers', None
+            ),
         )
 
     async def call_with_thinking(
@@ -2158,7 +2373,9 @@ class AsyncAnthropicClient:
             stop_details = getattr(response, "stop_details", None)
             category = getattr(stop_details, "category", None) if stop_details else None
             logger.error(
-                f"LLM REFUSAL: model={self.model} category={category} "
+                f"LLM REFUSAL: model={getattr(response, 'model', None) or self.model} "
+                f"upstream_provider={getattr(response, 'upstream_provider', None)} "
+                f"category={category} "
                 f"analysis_profile={profile_name} -- batch will yield no items"
             )
 

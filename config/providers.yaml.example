@@ -65,6 +65,17 @@ llm:
   # Request timeout in seconds (1-600)
   timeout: 600
 
+  # Optional refusal fallback (mode: openai-chat only). When the upstream host
+  # declines a request (HTTP 200, empty answer, native_finish_reason
+  # "sensitive" or "content_filter"), that one call is retried once on this
+  # model, with OpenRouter told to skip the listed hosts and the host that
+  # refused. Unset = no fallback. Routes inherit both keys and may override
+  # them. LLM_REFUSAL_FALLBACK_MODEL / LLM_REFUSAL_FALLBACK_IGNORE_PROVIDERS
+  # (comma-separated) take precedence over these.
+  #
+  # refusal_fallback_model: "z-ai/GLM-5.3-Flash"
+  # refusal_fallback_ignore_providers: ["z-ai"]
+
   # Optional multi-provider routing. When present, async LLM calls rotate
   # across routes and retryable provider failures fail over to another route.
   # Each route inherits mode, api_key, base_url, timeout, and max_output_tokens
