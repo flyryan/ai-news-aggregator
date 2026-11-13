@@ -535,7 +535,7 @@
 						Executive Summary
 					</h2>
 					<div
-						class="prose-summary max-w-[62ch] leading-7 lg:text-lg lg:leading-8"
+						class="prose-summary max-w-[58ch] leading-7 lg:text-lg lg:leading-8"
 						use:headingIds={executiveSummaryHtml}
 					>
 						{@html executiveSummaryHtml}
