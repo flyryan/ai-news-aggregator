@@ -309,23 +309,6 @@
 		return html.replace(/<(\/?)h[2-4](\s[^>]*)?>/gi, '<$1h3>');
 	}
 
-	// Give each summary sub-heading an id so "On this page" can link to it, and
-	// read the section titles for that list. Done on the rendered nodes: the
-	// sanitizer strips id attributes from the HTML, and the DOM has the titles
-	// as text ("Safety & Regulation", not "&amp;").
-	let summarySections: string[] = [];
-	function headingIds(node: HTMLElement, _html: string) {
-		const apply = () => {
-			const headings = Array.from(node.querySelectorAll('h3'));
-			headings.forEach((h, i) => {
-				h.id = `summary-section-${i}`;
-			});
-			summarySections = headings.map((h) => h.textContent?.trim() ?? '');
-		};
-		apply();
-		return { update: () => void tick().then(apply) };
-	}
-
 	$: executiveSummaryHtml = summary
 		? sequenceHeadings(
 				safeHtml(formatExecutiveSummary(summary.executive_summary, summary.executive_summary_html))
@@ -341,9 +324,6 @@
 	// A date the site has never published: say so, rather than "failed to load".
 	$: unknownDate =
 		!!effectiveDate && $availableDates.length > 0 && !$availableDates.includes(effectiveDate);
-	$: overviewSections = summary
-		? validCategories.filter((c) => (summary?.categories[c]?.top_items.length ?? 0) > 0)
-		: [];
 </script>
 
 <svelte:head>
@@ -468,7 +448,7 @@
 						<h2 class="text-xl font-bold text-trend-gray-900 dark:text-white mb-3">
 							{config?.title} Summary
 						</h2>
-						<div class="prose-summary max-w-[66ch] leading-7">
+						<div class="prose-summary leading-7">
 							{@html categorySummaryHtml}
 						</div>
 					</div>
@@ -526,50 +506,15 @@
 			/>
 		</div>
 
-		<!-- Executive Summary: a reading column, with the page's contents beside
-		     it on desktop. -->
+		<!-- Executive Summary -->
 		<section id="executive-summary" class="mb-12 scroll-mt-20">
-			<div class="card lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-10">
-				<div class="min-w-0">
-					<h2 class="text-xl font-bold text-trend-gray-900 dark:text-white mb-4">
-						Executive Summary
-					</h2>
-					<div
-						class="prose-summary max-w-[58ch] leading-7 lg:text-lg lg:leading-8"
-						use:headingIds={executiveSummaryHtml}
-					>
-						{@html executiveSummaryHtml}
-					</div>
+			<div class="card">
+				<h2 class="text-xl font-bold text-trend-gray-900 dark:text-white mb-4">
+					Executive Summary
+				</h2>
+				<div class="prose-summary leading-7">
+					{@html executiveSummaryHtml}
 				</div>
-
-				<nav
-					aria-label="On this page"
-					class="hidden lg:block border-l border-trend-gray-200 dark:border-trend-gray-700 pl-8"
-				>
-					<div class="sticky top-20">
-						<p class="text-sm font-semibold text-trend-gray-900 dark:text-white mb-2">
-							On this page
-						</p>
-						<ul class="toc text-sm">
-							<li>
-								<a href="#executive-summary">Executive Summary</a>
-								{#if summarySections.length > 0}
-									<ul>
-										{#each summarySections as title, i}
-											<li><a href="#summary-section-{i}">{title}</a></li>
-										{/each}
-									</ul>
-								{/if}
-							</li>
-							{#if summary.top_topics && summary.top_topics.length > 0}
-								<li><a href="#top-topics">Top Topics Today</a></li>
-							{/if}
-							{#each overviewSections as category}
-								<li><a href="#section-{category}">{CATEGORY_CONFIG[category].title}</a></li>
-							{/each}
-						</ul>
-					</div>
-				</nav>
 			</div>
 		</section>
 
@@ -674,38 +619,6 @@
 </div>
 
 <style>
-	/* "On this page": quiet links, with the summary's own sections nested. */
-	.toc a {
-		display: block;
-		padding: 0.3125rem 0;
-		color: #404040;
-	}
-	.toc ul {
-		margin: 0 0 0.25rem 0.75rem;
-	}
-	.toc ul a {
-		color: #525252;
-	}
-	.toc a:hover {
-		color: var(--color-link);
-		text-decoration: underline;
-		text-underline-offset: 0.18em;
-	}
-	:global(.dark) .toc a {
-		color: #d4d4d4;
-	}
-	:global(.dark) .toc ul a {
-		color: #a3a3a3;
-	}
-	:global(.dark) .toc a:hover {
-		color: var(--color-link);
-	}
-
-	/* Summary sub-headings and sections are link targets under a sticky nav. */
-	:global(.prose-summary h3[id]) {
-		scroll-margin-top: 5rem;
-	}
-
 	.page-end {
 		display: grid;
 		gap: 0.25rem 2rem;

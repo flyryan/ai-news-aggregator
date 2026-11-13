@@ -204,7 +204,7 @@
 						</svg>
 						<span>AI Analysis</span>
 					</div>
-					<div class="prose-summary max-w-[75ch] leading-relaxed">
+					<div class="prose-summary leading-relaxed">
 						{@html safeHtml(summaryHtml)}
 					</div>
 				</div>
@@ -215,7 +215,7 @@
 				<div class="mb-3">
 					<div
 						id="excerpt-{item.id}"
-						class="prose-summary prose-quiet text-sm leading-relaxed max-w-[80ch]"
+						class="prose-summary prose-quiet text-sm leading-relaxed"
 						class:line-clamp-3={!expanded && needsTruncation}
 					>
 						{@html safeHtml(contentHtml)}
