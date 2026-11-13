@@ -72,7 +72,7 @@
 										<h3 class="font-medium text-trend-gray-800 dark:text-trend-gray-100">
 											{formatDate(dateEntry.date, 'EEEE, MMMM d, yyyy')}
 										</h3>
-										<p class="text-sm text-trend-gray-500 mt-1">
+										<p class="text-sm text-trend-gray-500 dark:text-[#8d8d8d] mt-1">
 											{dateEntry.total_items} items analyzed
 										</p>
 									</div>
@@ -83,7 +83,7 @@
 											{@const config = CATEGORY_CONFIG[category as Category]}
 											{#if config}
 												<span
-													class="text-xs px-2 py-1 rounded-full bg-trend-gray-100 dark:bg-trend-gray-700 text-trend-gray-600 dark:text-trend-gray-400 border"
+													class="text-xs px-2 py-1 rounded-full bg-trend-gray-100 dark:bg-trend-gray-700 text-trend-gray-600 dark:text-[#b4b4b4] border"
 													style="border-color: {config.color}"
 												>
 													{info.count}

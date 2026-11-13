@@ -34,7 +34,7 @@
 				{@const config = CATEGORY_CONFIG[category]}
 				<span
 					class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full"
-					style="background-color: {config.color}20; color: {config.color}"
+					style="background-color: {config.color}20; color: var(--category-{category}-text, {config.color})"
 				>
 					<span
 						aria-hidden="true"
@@ -57,7 +57,7 @@
 						style="width: {topic.importance}%"
 					></div>
 				</div>
-				<span class="text-xs text-trend-gray-500 font-medium">
+				<span class="text-xs text-trend-gray-500 dark:text-[#8d8d8d] font-medium">
 					<span class="sr-only">Importance:</span>
 					{Math.round(topic.importance)}%
 				</span>

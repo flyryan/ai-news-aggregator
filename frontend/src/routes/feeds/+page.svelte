@@ -107,7 +107,7 @@
 					<h2 class="text-lg font-semibold text-trend-gray-800 dark:text-trend-gray-100">
 						{feeds.main.name}
 					</h2>
-					<span class="text-xs px-2 py-0.5 bg-trend-red text-white rounded-full">Recommended</span>
+					<span class="text-xs px-2 py-0.5 bg-trend-red-fill text-white rounded-full">Recommended</span>
 				</div>
 				<p class="text-sm text-trend-gray-600 dark:text-trend-gray-400">
 					{feeds.main.description}
@@ -115,7 +115,7 @@
 			</div>
 			<a
 				href={feeds.main.url}
-				class="tap shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-trend-red text-white rounded-lg hover:bg-guardian-red transition-colors"
+				class="tap shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-trend-red-fill text-white rounded-lg hover:bg-guardian-red transition-colors"
 			>
 				<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
 					<circle cx="6.18" cy="17.82" r="2.18"/>
@@ -142,7 +142,7 @@
 					<h3 class="font-semibold text-trend-gray-800 dark:text-trend-gray-100">
 						{summaryFeeds.executive.name}
 					</h3>
-					<span class="text-xs px-2 py-0.5 bg-trend-red/80 text-white rounded-full">Most Popular</span>
+					<span class="text-xs px-2 py-0.5 bg-trend-red-fill text-white rounded-full">Most Popular</span>
 				</div>
 				<p class="text-sm text-trend-gray-600 dark:text-trend-gray-400">
 					{summaryFeeds.executive.description}
@@ -150,7 +150,7 @@
 			</div>
 			<a
 				href={summaryFeeds.executive.url}
-				class="tap shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-trend-red/80 text-white rounded-lg hover:bg-trend-red transition-colors"
+				class="tap shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-trend-red-fill text-white rounded-lg hover:bg-guardian-red transition-colors"
 			>
 				<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
 					<circle cx="6.18" cy="17.82" r="2.18"/>
@@ -249,7 +249,7 @@
 								</svg>
 								{variant.name}
 								{#if 'default' in variant && variant.default}
-									<span class="text-xs text-trend-gray-500">(default)</span>
+									<span class="text-xs text-trend-gray-500 dark:text-[#acacac]">(default)</span>
 								{/if}
 							</a>
 						{/each}
@@ -269,7 +269,7 @@
 			<li>Copy the URL from your browser's address bar</li>
 			<li>Paste the URL into your RSS reader (Feedly, Inoreader, NetNewsWire, etc.)</li>
 		</ol>
-		<p class="text-sm text-trend-gray-500 mt-3">
+		<p class="text-sm text-trend-gray-500 dark:text-[#8d8d8d] mt-3">
 			Most browsers will show raw XML when you click a feed link. That's normal! Just copy the URL and add it to your reader.
 		</p>
 	</div>

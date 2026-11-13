@@ -277,7 +277,7 @@
 					<button
 						type="button"
 						on:click={loadIndex}
-						class="font-medium text-trend-red hover:text-guardian-red dark:text-red-300 dark:hover:text-red-200 underline"
+						class="font-medium text-trend-red-text hover:text-guardian-red dark:text-red-300 dark:hover:text-red-200 underline"
 					>
 						Try again
 					</button>

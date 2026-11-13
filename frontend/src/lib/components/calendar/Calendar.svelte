@@ -135,7 +135,7 @@
 	</div>
 
 	<!-- Legend -->
-	<div class="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-trend-gray-200 dark:border-trend-gray-700 text-xs text-trend-gray-500">
+	<div class="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-trend-gray-200 dark:border-trend-gray-700 text-xs text-trend-gray-500 dark:text-[#8d8d8d]">
 		<div class="flex items-center gap-1.5">
 			<span class="w-3 h-3 rounded-full bg-trend-red"></span>
 			<span>Has data</span>

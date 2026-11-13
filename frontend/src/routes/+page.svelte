@@ -348,19 +348,19 @@
 		<!-- Category View Header -->
 		<div
 			class="rounded-xl p-6 mb-8 text-white"
-			style="background: linear-gradient(135deg, {config.color} 0%, {config.color}dd 100%)"
+			style="background: linear-gradient(135deg, var(--category-{categoryParam}-banner, {config.color}) 0%, color-mix(in srgb, var(--category-{categoryParam}-banner, {config.color}) 86.7%, transparent) 100%)"
 		>
 			<div class="flex items-center gap-3 mb-2">
 				<a
 					href={overviewHref}
-					class="tap text-white/80 hover:text-white transition-colors"
+					class="tap text-white hover:underline transition-colors"
 				>
 					&larr; Back
 				</a>
 			</div>
 			<h1 class="text-2xl font-bold">{config.title}</h1>
 			{#if categoryData}
-				<p class="text-white/80 mt-1">{formatCount(categoryData.total_items)} items for {effectiveDate}</p>
+				<p class="text-white mt-1">{formatCount(categoryData.total_items)} items for {effectiveDate}</p>
 			{:else if loading}
 				<!-- Holds the line's space so the count arriving moves nothing. -->
 				<p class="mt-1 invisible" aria-hidden="true">&nbsp;</p>
@@ -450,7 +450,7 @@
 						{#each categoryData.themes as theme}
 							<span
 								class="px-3 py-1.5 rounded-full text-sm font-medium"
-								style="background-color: {config?.color}20; color: {config?.color}"
+								style="background-color: {config?.color}20; color: var(--category-{categoryParam}-text, {config?.color})"
 							>
 								{theme.name} ({formatCount(theme.item_count)})
 							</span>
@@ -531,14 +531,14 @@
 							<h2 class="text-xl font-bold text-trend-gray-800 dark:text-trend-gray-100">
 								{CATEGORY_CONFIG[category].title}
 							</h2>
-							<span class="text-sm text-trend-gray-500">
+							<span class="text-sm text-trend-gray-500 dark:text-[#8d8d8d]">
 								({formatCount(catSummary.count)} items)
 							</span>
 						</div>
 						<a
 							href={categoryHref(category)}
 							aria-label="View all {CATEGORY_CONFIG[category].title}"
-							class="tap text-sm font-medium text-trend-red hover:text-guardian-red transition-colors"
+							class="tap text-sm font-medium text-trend-red-text hover:text-guardian-red transition-colors"
 						>
 							View All &rarr;
 						</a>

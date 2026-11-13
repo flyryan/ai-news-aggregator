@@ -30,7 +30,7 @@
 	{#if hasMore}
 		<div class="mt-6 text-center">
 			<slot name="view-all">
-				<span class="text-sm text-trend-gray-500">
+				<span class="text-sm text-trend-gray-500 dark:text-[#8d8d8d]">
 					Showing top {limit} of {formatCount(totalCount ?? items.length)} items
 				</span>
 			</slot>

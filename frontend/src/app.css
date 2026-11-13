@@ -6,6 +6,26 @@
 	:root {
 		--color-trend-red: #E63946;
 		--color-guardian-red: #C1272D;
+		/* Text on the amber and green category tints (score badges, chips,
+		   pills). The category colours themselves measure about 2:1 on their own
+		   tints; these are the lightest shades of the same hues that reach 4.5:1
+		   on every tint they sit on. Dots, borders and tints keep the category
+		   colours. */
+		--category-social-text: #945f06;
+		--category-research-text: #0a7753;
+		/* The same for the indigo and red category colours (about 3:1 on their
+		   tints). */
+		--category-news-text: #3857e4;
+		--category-reddit-text: #c71111;
+	}
+
+	/* On dark surfaces amber and green already pass as text; indigo and red
+	   need a lighter shade. */
+	.dark {
+		--category-social-text: #f59e0b;
+		--category-research-text: #10b981;
+		--category-news-text: #8c9eef;
+		--category-reddit-text: #f47979;
 	}
 
 	@media (prefers-reduced-motion: no-preference) {
@@ -18,12 +38,30 @@
 		@apply font-sans antialiased;
 	}
 
+	:root {
+		--guardian-red-text: 193 39 45;
+	}
+
+	.dark {
+		--guardian-red-text: 252 165 165;
+	}
+
 	/* A keyboard focus ring for links and buttons (white on the red header and
 	   the footer, see those components). Shown only while tabbing. Text fields
 	   keep the ring they had. */
 	:focus-visible:not(input):not(textarea):not(select) {
 		outline: 2px solid var(--color-trend-red);
 		outline-offset: 2px;
+	}
+
+	/* Red used as text (tailwind `trend-red-text`): #d51b29 on light surfaces,
+	   #ed727b on dark ones. */
+	:root {
+		--trend-red-text: 213 27 41;
+	}
+
+	.dark {
+		--trend-red-text: 237 114 123;
 	}
 }
 
@@ -54,6 +92,22 @@
 		@apply border-l-4 border-category-reddit;
 	}
 
+	/* Category page banner: the darkest the category colour has to go for white
+	   text to reach 4.5:1 across the whole gradient. */
+	:root {
+		--category-news-banner: #3756e4;
+		--category-research-banner: #0a7350;
+		--category-social-banner: #8a5906;
+		--category-reddit-banner: #db1313;
+	}
+
+	.dark {
+		--category-news-banner: #506be7;
+		--category-research-banner: #0c855d;
+		--category-social-banner: #a46907;
+		--category-reddit-banner: #e91414;
+	}
+
 	/* Primary button */
 	.btn-primary {
 		@apply px-4 py-2 rounded-lg
@@ -77,19 +131,28 @@
 	}
 
 	.badge-news {
-		@apply bg-category-news/20 text-category-news;
+		@apply bg-category-news/20;
+		color: var(--category-news-text);
 	}
 
 	.badge-research {
-		@apply bg-category-research/20 text-category-research;
+		@apply bg-category-research/20;
+		color: var(--category-research-text);
+	}
+
+	/* The 20% green tint on a dark card leaves the category green at 4.29:1. */
+	.dark .badge-research {
+		color: #10be84;
 	}
 
 	.badge-social {
-		@apply bg-category-social/20 text-category-social;
+		@apply bg-category-social/20;
+		color: var(--category-social-text);
 	}
 
 	.badge-reddit {
-		@apply bg-category-reddit/20 text-category-reddit;
+		@apply bg-category-reddit/20;
+		color: var(--category-reddit-text);
 	}
 
 	/* Input field */
@@ -98,7 +161,7 @@
 		       border border-trend-gray-200 dark:border-trend-gray-700
 		       bg-white dark:bg-trend-gray-800
 		       text-trend-dark dark:text-trend-gray-100
-		       placeholder-trend-gray-400
+		       placeholder-trend-gray-500 dark:placeholder-trend-gray-400
 		       focus:border-trend-red focus:ring-2 focus:ring-trend-red/20
 		       outline-none transition-all duration-200;
 	}
@@ -114,7 +177,7 @@
 	}
 
 	.nav-link-active {
-		@apply text-trend-red bg-trend-red/10;
+		@apply text-trend-red-text bg-trend-red/10;
 	}
 
 	/* Importance-driven card tiers */
@@ -135,6 +198,12 @@
 
 	.card-importance-low {
 		@apply shadow-sm border-l-2 border-l-trend-gray-200 dark:border-l-trend-gray-700 opacity-90;
+	}
+
+	/* The card's 90% opacity lightens its text. The muted lines (source, AI
+	   Analysis label) start one step darker so they still read at 4.5:1. */
+	html:not(.dark) .card-importance-low .text-trend-gray-500 {
+		color: #666666;
 	}
 
 	/* Item cards take focus from the j/k shortcuts (see +page.svelte). */
@@ -193,6 +262,16 @@
 		position: absolute;
 		inset: min(0px, calc(50% - 22px)) 0;
 	}
+
+	/* Hovered nav links sit on a grey fill: the active (red) link darkens to
+	   guardian-red on it, and the dark theme's grey label lightens a step. */
+	html:not(.dark) .nav-link[aria-current='page']:hover {
+		color: var(--color-guardian-red);
+	}
+
+	.dark .nav-link:hover {
+		color: #acacac;
+	}
 }
 
 @layer utilities {
@@ -238,13 +317,13 @@
 	}
 
 	.prose-summary a {
-		@apply text-trend-red hover:text-guardian-red underline;
+		@apply text-trend-red-text hover:text-guardian-red underline;
 	}
 
 	/* Internal links (to items on our site) - WCAG compliant contrast */
 	.prose-summary a.internal-link {
-		@apply text-trend-red/90 underline decoration-trend-red/50
-		       hover:text-trend-red hover:decoration-trend-red
+		@apply text-trend-red-text/90 underline decoration-trend-red/50
+		       hover:text-trend-red-text hover:decoration-trend-red
 		       dark:text-red-300 dark:decoration-red-300/60
 		       dark:hover:text-red-200 dark:hover:decoration-red-200;
 	}

@@ -77,7 +77,7 @@
 					href={safeUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="hover:text-trend-red transition-colors"
+					class="hover:text-trend-red-text transition-colors"
 				>
 					{item.title}
 				</a>
@@ -88,10 +88,10 @@
 		<div
 			class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold
 			       {item.importance_score >= 80
-				? 'bg-trend-red/10 text-trend-red'
+				? 'bg-trend-red/10 text-trend-red-text'
 				: item.importance_score >= 60
-					? 'bg-category-social/10 text-category-social'
-					: 'bg-trend-gray-100 dark:bg-trend-gray-700 text-trend-gray-600 dark:text-trend-gray-400'}"
+					? 'bg-category-social/10 text-[color:var(--category-social-text)]'
+					: 'bg-trend-gray-100 dark:bg-trend-gray-700 text-trend-gray-600 dark:text-[#b4b4b4]'}"
 			title="Importance score: {item.importance_score}"
 		>
 			<span class="sr-only">Importance score:</span>
@@ -129,7 +129,7 @@
 				</svg>
 				<span>AI Analysis</span>
 			</div>
-			<div class="text-trend-gray-700 dark:text-trend-gray-300 leading-relaxed font-bold prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-a:text-trend-red prose-a:no-underline hover:prose-a:underline">
+			<div class="text-trend-gray-700 dark:text-trend-gray-300 leading-relaxed font-bold prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-a:text-trend-red-text prose-a:no-underline hover:prose-a:underline">
 				{@html safeHtml(summaryHtml)}
 			</div>
 		</div>
@@ -139,7 +139,7 @@
 	{#if hasContent}
 		<div class="text-sm text-trend-gray-600 dark:text-trend-gray-400 mb-3">
 			<div
-				class="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-a:text-trend-red prose-a:no-underline hover:prose-a:underline"
+				class="prose prose-sm [overflow-wrap:anywhere] dark:prose-invert max-w-none prose-p:my-1 prose-a:text-trend-red-text prose-a:no-underline hover:prose-a:underline"
 				class:line-clamp-3={!expanded && needsTruncation}
 			>
 				{@html safeHtml(contentHtml)}
@@ -150,7 +150,7 @@
 					type="button"
 					on:click={() => (expanded = !expanded)}
 					aria-expanded={expanded}
-					class="tap text-trend-red hover:text-guardian-red mt-2 font-medium"
+					class="tap text-trend-red-text hover:text-guardian-red mt-2 font-medium"
 				>
 					{expanded ? 'Show less' : 'Read more'}
 				</button>
@@ -162,7 +162,7 @@
 	{#if item.themes && item.themes.length > 0}
 		<div class="flex flex-wrap gap-2 mb-3">
 			{#each item.themes as theme}
-				<span class="text-xs px-2 py-1 rounded-full bg-trend-gray-100 dark:bg-trend-gray-700 text-trend-gray-600 dark:text-trend-gray-400">
+				<span class="text-xs px-2 py-1 rounded-full bg-trend-gray-100 dark:bg-trend-gray-700 text-trend-gray-600 dark:text-[#b4b4b4]">
 					{theme}
 				</span>
 			{/each}
@@ -179,14 +179,14 @@
 				target="_blank"
 				rel="noopener noreferrer"
 				aria-label="{readLabel}: {item.title}"
-				class="tap text-sm font-medium text-trend-red hover:text-guardian-red transition-colors"
+				class="tap text-sm font-medium text-trend-red-text hover:text-guardian-red transition-colors"
 			>
 				{readLabel} &rarr;
 			</a>
 			<button
 				type="button"
 				on:click={copyShareLink}
-				class="tap text-sm font-medium text-trend-red hover:text-guardian-red transition-colors"
+				class="tap text-sm font-medium text-trend-red-text hover:text-guardian-red transition-colors"
 			>
 				{copied ? 'Copied!' : 'Share'}
 			</button>

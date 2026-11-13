@@ -81,7 +81,7 @@
 							{/if}
 
 							<!-- Metadata -->
-							<div class="flex items-center gap-2 mt-2 text-xs text-trend-gray-400">
+							<div class="flex items-center gap-2 mt-2 text-xs text-trend-gray-500 dark:text-trend-gray-400">
 								<span class="badge {config.badgeClass}">
 									{config.title}
 								</span>
@@ -106,7 +106,7 @@
 
 	{#if results.length > 0}
 		<div class="px-4 py-2 border-t border-trend-gray-100 dark:border-trend-gray-700">
-			<p class="text-xs text-trend-gray-400 text-center">
+			<p class="text-xs text-trend-gray-500 dark:text-trend-gray-400 text-center">
 				{results.length} result{results.length === 1 ? '' : 's'} found
 			</p>
 		</div>

@@ -39,7 +39,7 @@
 
 <svelte:window on:keydown={handleWindowKeydown} />
 
-<header class="bg-gradient-to-r from-trend-red to-guardian-red text-white shadow-lg">
+<header class="bg-gradient-to-r from-[#e32533] to-guardian-red text-white shadow-lg">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
 		<!--
 			Mobile geometry, the short version: four 36px icon buttons plus their gaps
@@ -63,7 +63,7 @@
 						<p class="text-lg sm:text-2xl font-bold tracking-tight leading-tight">
 							AATF AI News Aggregator
 						</p>
-						<p class="text-xs sm:text-sm text-white/80 leading-snug">
+						<p class="text-xs sm:text-sm text-white leading-snug">
 							{#if modelName}
 								Powered by {modelName}
 							{:else}
@@ -81,7 +81,7 @@
 				{#if dateDisplay}
 					<a
 						href="/archive"
-						class="tap hidden sm:block text-sm text-white/90 bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 transition-colors"
+						class="tap hidden sm:block text-sm text-white bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 transition-colors"
 					>
 						{dateDisplay}
 					</a>
@@ -188,14 +188,14 @@
 		padding: 2px 6px;
 		margin-left: 6px;
 		border-radius: 9999px;
-		background: rgba(255, 255, 255, 0.25);
+		background: rgba(0, 0, 0, 0.2);
 		color: white;
 		vertical-align: middle;
 		animation: badge-pulse 2s ease-in-out infinite;
 	}
 	@keyframes badge-pulse {
 		0%, 100% { opacity: 1; }
-		50% { opacity: 0.6; }
+		50% { opacity: 0.85; }
 	}
 
 	/* The badge is decorative; it must not pulse for anyone who asked motion to stop. */

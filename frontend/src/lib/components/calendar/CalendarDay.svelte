@@ -29,7 +29,7 @@
 			? 'cursor-pointer hover:bg-trend-red/10'
 			: 'cursor-default'}
 		{selected
-			? 'bg-trend-red text-white hover:bg-trend-red'
+			? 'bg-trend-red-fill !text-white hover:!bg-trend-red-fill'
 			: ''}
 		{today && !selected
 			? 'ring-2 ring-trend-red ring-inset'

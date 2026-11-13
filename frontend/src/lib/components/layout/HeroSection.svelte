@@ -171,14 +171,14 @@
 		color: #fff;
 		padding: 0.45rem 0.85rem;
 		border-radius: 999px;
-		background: rgba(230, 57, 70, 0.9);
+		background: rgba(227, 37, 51, 0.9);
 		border: 1px solid rgba(255, 255, 255, 0.28);
 		backdrop-filter: blur(6px);
 		box-shadow: 0 2px 10px -2px rgba(0, 0, 0, 0.45);
 		transition: background 160ms ease, transform 140ms ease, box-shadow 160ms ease;
 	}
 	.replay-cta:hover {
-		background: #e63946;
+		background: #e32533;
 		transform: translateY(-1px);
 		box-shadow: 0 6px 18px -4px rgba(230, 57, 70, 0.7);
 	}
@@ -222,7 +222,8 @@
 			background: linear-gradient(
 				to top,
 				rgba(0, 0, 0, 0.75) 0%,
-				rgba(0, 0, 0, 0.3) 50%,
+				rgba(0, 0, 0, 0.56) 40%,
+				rgba(0, 0, 0, 0.45) 65%,
 				transparent 100%
 			);
 			padding: 4rem 2rem 1.5rem 2rem;
@@ -240,6 +241,7 @@
 		}
 
 		.hero-meta {
+			color: #fff;
 			font-size: 0.875rem;
 			margin-top: 0.25rem;
 		}

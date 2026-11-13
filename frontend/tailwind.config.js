@@ -8,13 +8,18 @@ export default {
 				// AATF Brand Colors
 				'trend-red': '#E63946',
 				'guardian-red': '#C1272D',
+				// trend-red as TEXT. The brand red measures 4.17:1 on white and 3.63:1
+				// on a dark card; this is the nearest shade of the same hue that
+				// reaches 4.5:1 in each theme (values in app.css). Fills, borders,
+				// dots and tints keep trend-red.
+				'trend-red-text': 'rgb(var(--trend-red-text) / <alpha-value>)',
 				'trend-dark': '#1a1a1a',
 				'trend-gray': {
 					100: '#f5f5f5',
 					200: '#e5e5e5',
 					300: '#d4d4d4',
 					400: '#a3a3a3',
-					500: '#737373',
+					500: '#6f6f6f',
 					600: '#525252',
 					700: '#404040',
 					800: '#262626',
@@ -24,7 +29,10 @@ export default {
 				'category-news': '#667eea',
 				'category-research': '#10b981',
 				'category-social': '#f59e0b',
-				'category-reddit': '#ef4444'
+				'category-reddit': '#ef4444',
+				// trend-red as a FILL under white text (pills, buttons). White on the
+				// brand red is 4.17:1; this is the nearest shade that gives 4.5:1.
+				'trend-red-fill': '#e32533'
 			},
 			fontFamily: {
 				sans: [
@@ -37,6 +45,11 @@ export default {
 					'Cantarell',
 					'sans-serif'
 				]
+			},
+			textColor: {
+				// guardian-red is the hover colour of red links. On dark surfaces it is
+				// darker than the link itself (2.59:1); there it becomes red-300.
+				'guardian-red': 'rgb(var(--guardian-red-text) / <alpha-value>)'
 			},
 			boxShadow: {
 				'card': '0 2px 8px rgba(0, 0, 0, 0.08)',

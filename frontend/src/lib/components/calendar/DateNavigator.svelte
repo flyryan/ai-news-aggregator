@@ -90,7 +90,7 @@
 				{dateDisplay}
 			</svelte:element>
 			{#if isLatest}
-				<span class="ml-2 text-xs bg-trend-red text-white px-2 py-0.5 rounded-full">
+				<span class="ml-2 text-xs bg-trend-red-fill text-white px-2 py-0.5 rounded-full">
 					Latest
 				</span>
 			{/if}
@@ -138,7 +138,7 @@
 		<button
 			type="button"
 			on:click={() => goToLatestDate(currentCategory || undefined)}
-			class="tap text-sm text-trend-red hover:text-guardian-red transition-colors"
+			class="tap text-sm text-trend-red-text hover:text-guardian-red transition-colors"
 		>
 			Jump to latest &rarr;
 		</button>

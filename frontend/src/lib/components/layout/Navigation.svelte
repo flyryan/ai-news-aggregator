@@ -36,7 +36,7 @@
 				<li>
 					<a
 						href="/"
-						class="nav-link tap max-sm:flex max-sm:-mx-1.5 whitespace-nowrap hover:bg-transparent sm:hover:bg-trend-gray-200 {homeActive ? 'text-trend-red sm:bg-trend-red/10' : ''}"
+						class="nav-link tap max-sm:flex max-sm:-mx-1.5 whitespace-nowrap hover:bg-transparent sm:hover:bg-trend-gray-200 {homeActive ? 'text-trend-red-text sm:bg-trend-red/10' : ''}"
 						aria-label="Home"
 						aria-current={homeActive ? 'page' : undefined}
 					>
@@ -87,7 +87,7 @@
 				<li>
 					<a
 						href="/archive"
-						class="nav-link tap max-sm:flex max-sm:-mx-1.5 whitespace-nowrap hover:bg-transparent sm:hover:bg-trend-gray-200 {archiveActive ? 'text-trend-red sm:bg-trend-red/10' : ''}"
+						class="nav-link tap max-sm:flex max-sm:-mx-1.5 whitespace-nowrap hover:bg-transparent sm:hover:bg-trend-gray-200 {archiveActive ? 'text-trend-red-text sm:bg-trend-red/10' : ''}"
 						aria-label="Archive"
 						aria-current={archiveActive ? 'page' : undefined}
 					>
@@ -109,7 +109,7 @@
 				<li class="hidden sm:block">
 					<a
 						href="/about"
-						class="nav-link tap whitespace-nowrap {aboutActive ? 'text-trend-red bg-trend-red/10' : ''}"
+						class="nav-link tap whitespace-nowrap {aboutActive ? 'text-trend-red-text bg-trend-red/10' : ''}"
 						aria-current={aboutActive ? 'page' : undefined}
 					>
 						About
