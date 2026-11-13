@@ -28,11 +28,15 @@
 		<div class="flex items-center h-14">
 			<!-- Main navigation -->
 			<ul class="flex w-full items-center justify-evenly sm:justify-start sm:w-auto sm:gap-1">
-				<!-- Home: icon on mobile (no bg), text+bg on desktop -->
+				<!-- Home: icon on mobile (no bg), text+bg on desktop.
+				     On mobile the link is a flex box: an inline link around the block
+				     icon splits into fragments 20px wide, too small a target. The
+				     negative margin takes back the link's side padding, so the icon
+				     stays where it was. Archive below is the same. -->
 				<li>
 					<a
 						href="/"
-						class="nav-link tap whitespace-nowrap hover:bg-transparent sm:hover:bg-trend-gray-200 {homeActive ? 'text-trend-red sm:bg-trend-red/10' : ''}"
+						class="nav-link tap max-sm:flex max-sm:-mx-1.5 whitespace-nowrap hover:bg-transparent sm:hover:bg-trend-gray-200 {homeActive ? 'text-trend-red sm:bg-trend-red/10' : ''}"
 						aria-label="Home"
 						aria-current={homeActive ? 'page' : undefined}
 					>
@@ -83,7 +87,7 @@
 				<li>
 					<a
 						href="/archive"
-						class="nav-link tap whitespace-nowrap hover:bg-transparent sm:hover:bg-trend-gray-200 {archiveActive ? 'text-trend-red sm:bg-trend-red/10' : ''}"
+						class="nav-link tap max-sm:flex max-sm:-mx-1.5 whitespace-nowrap hover:bg-transparent sm:hover:bg-trend-gray-200 {archiveActive ? 'text-trend-red sm:bg-trend-red/10' : ''}"
 						aria-label="Archive"
 						aria-current={archiveActive ? 'page' : undefined}
 					>

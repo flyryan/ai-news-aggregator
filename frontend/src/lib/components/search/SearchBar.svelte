@@ -27,7 +27,8 @@
 	let indexState: 'loading' | 'ready' | 'error' = isSearchInitialized() ? 'ready' : 'loading';
 
 	// Which query+category the current `results` answer. "No results" is only
-	// true once the search for what is in the box has actually come back.
+	// true once the search for what is in the box has actually come back; until
+	// then an empty panel says "Searching…".
 	let settledKey: string | null = null;
 	const keyFor = (q: string, c: string) => `${c}\n${q}`;
 
@@ -91,7 +92,7 @@
 				? 'error'
 				: settled
 					? 'empty'
-					: null;
+					: 'searching';
 
 	// One polite announcement per state change, for readers who cannot see the panel.
 	$: announcement = !hasQuery
@@ -181,6 +182,7 @@
 		<select
 			bind:value={category}
 			on:change={handleCategoryChange}
+			id="site-search-category"
 			aria-label="Filter search by category"
 			class="input w-auto min-w-[120px] text-sm"
 		>
@@ -195,6 +197,7 @@
 			<input
 				bind:this={inputElement}
 				bind:value={query}
+				id="site-search-input"
 				on:focus={handleFocus}
 				on:blur={handleBlur}
 				on:keydown={handleKeydown}
@@ -264,9 +267,9 @@
 		/>
 	{:else if panel}
 		<div class="absolute z-[60] w-full mt-2 p-4 bg-white dark:bg-trend-gray-800 rounded-xl shadow-lg border border-trend-gray-200 dark:border-trend-gray-700">
-			{#if panel === 'loading'}
+			{#if panel === 'loading' || panel === 'searching'}
 				<p class="text-sm text-trend-gray-500 dark:text-trend-gray-400 text-center">
-					Building search index…
+					{panel === 'loading' ? 'Building search index…' : 'Searching…'}
 				</p>
 			{:else if panel === 'error'}
 				<p class="text-sm text-trend-gray-600 dark:text-trend-gray-300 text-center">

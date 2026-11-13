@@ -19,10 +19,11 @@
 </script>
 
 <button
+	type="button"
 	on:click={handleClick}
 	disabled={!available}
 	class="
-		relative aspect-square p-1 rounded-lg text-sm transition-all
+		tap relative aspect-square p-1 rounded-lg text-sm transition-all
 		{inMonth ? 'text-trend-gray-700 dark:text-trend-gray-300' : 'text-trend-gray-400 dark:text-trend-gray-600'}
 		{available
 			? 'cursor-pointer hover:bg-trend-red/10'

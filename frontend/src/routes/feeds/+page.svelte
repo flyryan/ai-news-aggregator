@@ -115,9 +115,9 @@
 			</div>
 			<a
 				href={feeds.main.url}
-				class="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-trend-red text-white rounded-lg hover:bg-guardian-red transition-colors"
+				class="tap shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-trend-red text-white rounded-lg hover:bg-guardian-red transition-colors"
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+				<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
 					<circle cx="6.18" cy="17.82" r="2.18"/>
 					<path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
 				</svg>
@@ -150,9 +150,9 @@
 			</div>
 			<a
 				href={summaryFeeds.executive.url}
-				class="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-trend-red/80 text-white rounded-lg hover:bg-trend-red transition-colors"
+				class="tap shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-trend-red/80 text-white rounded-lg hover:bg-trend-red transition-colors"
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+				<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
 					<circle cx="6.18" cy="17.82" r="2.18"/>
 					<path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
 				</svg>
@@ -176,7 +176,7 @@
 					{summaryFeeds.all.description}
 				</p>
 			</div>
-			<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-trend-gray-400 group-hover:text-trend-red transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
+			<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-trend-gray-400 group-hover:text-trend-red transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
 				<circle cx="6.18" cy="17.82" r="2.18"/>
 				<path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
 			</svg>
@@ -202,7 +202,7 @@
 							{feed.description}
 						</p>
 					</div>
-					<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-trend-gray-400 group-hover:text-trend-red transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
+					<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-trend-gray-400 group-hover:text-trend-red transition-colors shrink-0" fill="currentColor" viewBox="0 0 24 24">
 						<circle cx="6.18" cy="17.82" r="2.18"/>
 						<path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
 					</svg>
@@ -237,13 +237,13 @@
 						{#each feed.variants as variant}
 							<a
 								href={variant.url}
-								class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border transition-colors
+								class="tap inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border transition-colors
 									{'default' in variant && variant.default
 										? 'bg-trend-gray-100 dark:bg-trend-gray-700 border-trend-gray-300 dark:border-trend-gray-600 text-trend-gray-800 dark:text-trend-gray-100 hover:border-trend-red'
 										: 'border-trend-gray-200 dark:border-trend-gray-700 text-trend-gray-600 dark:text-trend-gray-400 hover:border-trend-gray-400 dark:hover:border-trend-gray-500'
 									}"
 							>
-								<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+								<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
 									<circle cx="6.18" cy="17.82" r="2.18"/>
 									<path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
 								</svg>

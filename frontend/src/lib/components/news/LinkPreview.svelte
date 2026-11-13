@@ -453,8 +453,8 @@
 					<span aria-hidden="true">&nearr;</span>
 				</a>
 			{/if}
-			<a class="secondary" href={target.href} on:click={close}>Open card</a>
-			<button class="secondary" type="button" on:click={copyLink}>
+			<a class="secondary tap" href={target.href} on:click={close}>Open card</a>
+			<button class="secondary tap" type="button" on:click={copyLink}>
 				{copied ? 'Copied' : 'Share'}
 			</button>
 		</div>
@@ -579,15 +579,8 @@
 		background: #c1121f;
 	}
 
-	/* 44px hit area without resizing the control (see .tap in app.css). */
-	.secondary::after {
-		content: '';
-		position: absolute;
-		inset: min(0px, calc(50% - 22px));
-	}
-
+	/* Smaller than 44px; the shared .tap class gives them the full hit area. */
 	.secondary {
-		position: relative;
 		flex: none;
 		padding: 0.5rem 0.25rem;
 		font-size: 0.8125rem;

@@ -30,7 +30,9 @@
 	<title>Archive | AI News Daily</title>
 </svelte:head>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- A screen tall while the date list loads, so the footer is not shown and
+     then pushed away when it arrives. -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" class:min-h-screen={loading}>
 	<h1 class="text-2xl font-bold text-trend-gray-800 dark:text-trend-gray-100 mb-8">
 		News Archive
 	</h1>

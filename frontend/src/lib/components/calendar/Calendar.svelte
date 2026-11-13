@@ -65,7 +65,8 @@
 	<div class="flex items-center justify-between mb-4">
 		<button
 			on:click={previousMonth}
-			class="p-2 rounded-lg hover:bg-trend-gray-100 dark:hover:bg-trend-gray-700 transition-colors"
+			type="button"
+			class="tap p-2 rounded-lg hover:bg-trend-gray-100 dark:hover:bg-trend-gray-700 transition-colors"
 			aria-label="Previous month"
 		>
 			<svg
@@ -80,13 +81,15 @@
 			</svg>
 		</button>
 
-		<h3 class="font-semibold text-trend-gray-800 dark:text-trend-gray-200">
+		<!-- An <h2>: on /archive it follows the page's <h1> directly. -->
+		<h2 class="font-semibold text-trend-gray-800 dark:text-trend-gray-200">
 			{monthName} {viewYear}
-		</h3>
+		</h2>
 
 		<button
 			on:click={nextMonth}
-			class="p-2 rounded-lg hover:bg-trend-gray-100 dark:hover:bg-trend-gray-700 transition-colors"
+			type="button"
+			class="tap p-2 rounded-lg hover:bg-trend-gray-100 dark:hover:bg-trend-gray-700 transition-colors"
 			aria-label="Next month"
 		>
 			<svg
