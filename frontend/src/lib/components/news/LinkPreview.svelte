@@ -25,6 +25,7 @@
 	import { portal } from '$lib/actions/portal';
 	import NewsCard from './NewsCard.svelte';
 	import { announce } from '$lib/stores/announcer';
+	import { isComposingKey } from '$lib/services/shortcuts';
 
 	/** Used when a link omits `?date=` — it inherits the page's date. */
 	export let fallbackDate: string | null = null;
@@ -324,7 +325,7 @@
 	}
 
 	function onKeydown(event: KeyboardEvent) {
-		if (event.key !== 'Escape' || !target) return;
+		if (event.key !== 'Escape' || !target || isComposingKey(event)) return;
 		event.stopPropagation();
 
 		// Remember the destination, not the element: summaries render with {@html},

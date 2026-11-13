@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { onMount, createEventDispatcher } from 'svelte';
+	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { search, initializeSearch, isSearchInitialized } from '$lib/services/searchIndex';
 	import type { SearchResult, Category } from '$lib/types';
 	import { CATEGORY_CONFIG } from '$lib/types';
 	import SearchResults from './SearchResults.svelte';
+	import { isComposingKey } from '$lib/services/shortcuts';
+	import { searchKey, enterAction, shouldOpenOnSettle } from '$lib/services/searchSubmit';
 
 	const dispatch = createEventDispatcher();
 
@@ -30,7 +32,16 @@
 	// true once the search for what is in the box has actually come back; until
 	// then an empty panel says "Searching…".
 	let settledKey: string | null = null;
-	const keyFor = (q: string, c: string) => `${c}\n${q}`;
+	const keyFor = searchKey;
+
+	// Enter pressed before the answer to what is in the box has arrived: the
+	// query+category it was pressed for. The first result opens when that answer
+	// lands; anything that changes what the reader is asking for drops it.
+	let submitIntentKey: string | null = null;
+	$: if (submitIntentKey !== null && submitIntentKey !== keyFor(query, category)) {
+		submitIntentKey = null;
+	}
+	$: if (indexState === 'error') submitIntentKey = null;
 
 	const categories: (Category | '')[] = ['', 'news', 'research', 'social', 'reddit'];
 
@@ -40,6 +51,7 @@
 	async function loadIndex() {
 		indexState = isSearchInitialized() ? 'ready' : 'loading';
 		const ok = await initializeSearch();
+		if (destroyed) return;
 		indexState = ok ? 'ready' : 'error';
 		// Answer whatever was typed while the index was building.
 		if (ok && query.length >= 2) void performSearch();
@@ -49,6 +61,15 @@
 		// Focus first: the reader can type while the index builds.
 		if (autofocus) inputElement?.focus();
 		void loadIndex();
+	});
+
+	// The header unmounts this field when search closes; a search still in
+	// flight must not act afterwards.
+	let destroyed = false;
+	onDestroy(() => {
+		destroyed = true;
+		submitIntentKey = null;
+		clearTimeout(searchTimeout);
 	});
 
 	/** Lets the header put the caret in the field when `/` is pressed again. */
@@ -75,10 +96,19 @@
 		const key = keyFor(query, category);
 		const found = await search(query, category || undefined);
 		// Ignore stale responses if the query or filter changed while awaiting.
-		if (key !== keyFor(query, category)) return;
+		if (destroyed || key !== keyFor(query, category)) return;
 		results = found;
 		settledKey = key;
 		selectedIndex = -1;
+		// Enter was pressed while this answer was on its way: open the best match.
+		const open = shouldOpenOnSettle({
+			intentKey: submitIntentKey,
+			responseKey: key,
+			currentKey: keyFor(query, category),
+			resultCount: found.length
+		});
+		submitIntentKey = null;
+		if (open) selectResult(found[0]);
 	}
 
 	$: hasQuery = query.length >= 2;
@@ -112,6 +142,8 @@
 	}
 
 	function handleBlur(event: FocusEvent) {
+		// Leaving the field withdraws a pending Enter.
+		submitIntentKey = null;
 		// Delay closing to allow click on results
 		setTimeout(() => {
 			const target = event.relatedTarget as HTMLElement;
@@ -123,32 +155,49 @@
 
 	function handleKeydown(event: KeyboardEvent) {
 		// Keys pressed while an IME composes text belong to the IME: Enter commits
-		// the composition, arrows pick a candidate. 229 covers Safari, which sends
-		// the Enter keydown after compositionend.
-		if (event.isComposing || event.keyCode === 229) return;
+		// the composition, arrows pick a candidate.
+		if (isComposingKey(event)) return;
 		switch (event.key) {
 			case 'ArrowDown':
 				event.preventDefault();
+				submitIntentKey = null;
 				isOpen = true;
 				selectedIndex = Math.min(selectedIndex + 1, results.length - 1);
 				break;
 			case 'ArrowUp':
 				event.preventDefault();
+				submitIntentKey = null;
 				selectedIndex = Math.max(selectedIndex - 1, -1);
 				break;
-			case 'Enter':
+			case 'Enter': {
 				event.preventDefault();
-				if (!settled) {
-					// Results on screen (if any) answer an earlier query; get the real
-					// ones now instead of opening something the reader did not ask for.
-					clearTimeout(searchTimeout);
-					if (hasQuery) void performSearch();
-				} else if (results.length > 0) {
-					// With nothing arrow-selected, Enter opens the best match.
-					selectResult(results[Math.max(selectedIndex, 0)]);
+				// Read the box itself, not `hasQuery`/`settled`: those are recomputed
+				// on the next flush and can still describe the previous keystroke.
+				const key = keyFor(query, category);
+				const action = enterAction({
+					hasQuery: query.length >= 2,
+					settled: settledKey === key,
+					resultCount: results.length
+				});
+				switch (action) {
+					case 'defer':
+						// Results on screen (if any) answer an earlier query. Get the real
+						// ones now, and open the best of them when they arrive, so one
+						// Enter is enough. While the index is still building, loadIndex()
+						// runs the search once it is ready.
+						submitIntentKey = key;
+						clearTimeout(searchTimeout);
+						void performSearch();
+						break;
+					case 'open':
+						// With nothing arrow-selected, Enter opens the best match.
+						selectResult(results[Math.max(selectedIndex, 0)]);
+						break;
 				}
 				break;
+			}
 			case 'Escape':
+				submitIntentKey = null;
 				isOpen = false;
 				dispatch('close');
 				break;
@@ -174,6 +223,7 @@
 	}
 
 	function clearSearch() {
+		submitIntentKey = null;
 		query = '';
 		results = [];
 		inputElement?.focus();

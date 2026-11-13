@@ -165,6 +165,58 @@
 		scrollToHashTarget(to.hash);
 	});
 
+	// A link that differs from the current URL only by its hash is left to the
+	// browser by SvelteKit, so afterNavigate never runs for it; `hashchange` is
+	// the only signal. But `hashchange` also fires for Back/Forward between hash
+	// entries, where the saved reading position must be restored, not replaced
+	// by a jump to the card. So the click is what counts as "newly activated":
+	// it names the URL it is about to open, and only the `hashchange` to that
+	// URL lands on the card.
+	let activatedHashLink: { href: string; at: number } | null = null;
+
+	function handleWindowClick(event: MouseEvent) {
+		if (event.defaultPrevented || event.button !== 0) return;
+		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+		const anchor = (event.target as Element | null)?.closest?.('a[href]');
+		if (!(anchor instanceof HTMLAnchorElement)) return;
+		if ((anchor.target && anchor.target !== '_self') || anchor.hasAttribute('download')) return;
+		let url: URL;
+		try {
+			url = new URL(anchor.href);
+		} catch {
+			return;
+		}
+		const here = window.location;
+		if (!url.hash || url.origin !== here.origin) return;
+		if (url.pathname !== here.pathname || url.search !== here.search) return;
+
+		if (url.hash === here.hash) {
+			// Already the current hash: no `hashchange` will follow.
+			activatedHashLink = null;
+			userScrolledDuringNav = false;
+			scrollToHashTarget(url.hash);
+		} else {
+			activatedHashLink = { href: url.href, at: performance.now() };
+		}
+	}
+
+	function handleHashChange(event: HashChangeEvent) {
+		const activated = activatedHashLink;
+		activatedHashLink = null;
+		const fromClick =
+			activated !== null &&
+			activated.href === event.newURL &&
+			performance.now() - activated.at < 2000;
+		if (!fromClick) {
+			// History traversal: scroll restoration owns the position. A retry loop
+			// still looking for an earlier target must not pull the page away.
+			scrollAttemptToken++;
+			return;
+		}
+		userScrolledDuringNav = false;
+		scrollToHashTarget(window.location.hash);
+	}
+
 	// j / k: step through the item cards. From a focused card they move to its
 	// neighbour; otherwise j takes the first card still in view and k the last
 	// one above it.
@@ -335,15 +387,10 @@
 	{/if}
 </svelte:head>
 
-<!-- A link that differs from the current URL only by its hash (the preview's
-     "Open card", a summary link to an item on this page) is left to the browser
-     by SvelteKit, so afterNavigate never runs for it. -->
 <svelte:window
 	on:keydown={handleWindowKeydown}
-	on:hashchange={() => {
-		userScrolledDuringNav = false;
-		scrollToHashTarget(window.location.hash);
-	}}
+	on:click={handleWindowClick}
+	on:hashchange={handleHashChange}
 />
 
 <!-- Previews for the enricher's internal links. Listens at the document level,

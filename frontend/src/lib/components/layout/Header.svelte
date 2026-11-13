@@ -4,7 +4,7 @@
 	import ThemeToggle from './ThemeToggle.svelte';
 	import SearchBar from '$lib/components/search/SearchBar.svelte';
 	import { tick } from 'svelte';
-	import { shortcutAllowed } from '$lib/services/shortcuts';
+	import { shortcutAllowed, isComposingKey, characterShortcuts } from '$lib/services/shortcuts';
 
 	$: dateDisplay = $currentDate ? formatDate($currentDate) : '';
 	$: modelName = $currentModel?.display_name ?? '';
@@ -26,7 +26,8 @@
 	// `/` opens search from anywhere on the site; Escape closes it.
 	async function handleWindowKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
-			if (showSearch && !event.defaultPrevented) closeSearch(true);
+			// Escape that cancels an IME candidate is not a request to close search.
+			if (showSearch && !event.defaultPrevented && !isComposingKey(event)) closeSearch(true);
 			return;
 		}
 		if (event.key !== '/' || event.repeat || !shortcutAllowed(event)) return;
@@ -135,8 +136,8 @@
 					aria-label="Toggle search"
 					aria-expanded={showSearch}
 					aria-controls="site-search"
-					aria-keyshortcuts="/"
-					title="Search (press /)"
+					aria-keyshortcuts={$characterShortcuts ? '/' : undefined}
+					title={$characterShortcuts ? 'Search (press /)' : 'Search'}
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"

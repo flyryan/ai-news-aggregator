@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { currentModel } from '$lib/stores/dateStore';
+	import { characterShortcuts, setCharacterShortcuts } from '$lib/services/shortcuts';
 
 	// The model currently powering the pipeline. Falls back to a neutral
 	// phrase when index.json predates per-day model attribution.
@@ -95,6 +96,22 @@
 				<kbd>&larr;</kbd> and <kbd>&rarr;</kbd> move to the previous and next day, and
 				<kbd>j</kbd> and <kbd>k</kbd> step to the next and previous item.
 			</p>
+			<!-- WCAG 2.1.4: shortcuts made of a single character can be switched off. -->
+			<div class="flex flex-wrap items-center gap-x-3">
+				<label class="inline-flex items-center gap-3 min-h-[44px] cursor-pointer">
+					<input
+						type="checkbox"
+						class="w-4 h-4 shrink-0 accent-trend-red-fill"
+						checked={$characterShortcuts}
+						on:change={(event) => setCharacterShortcuts(event.currentTarget.checked)}
+						aria-describedby="character-shortcuts-note"
+					/>
+					<span>Use the single-key shortcuts (<kbd>/</kbd>, <kbd>j</kbd>, <kbd>k</kbd>)</span>
+				</label>
+				<span id="character-shortcuts-note" class="text-sm">
+					The arrow keys and <kbd>Esc</kbd> work either way.
+				</span>
+			</div>
 		</div>
 	</section>
 

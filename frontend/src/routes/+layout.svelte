@@ -11,6 +11,7 @@
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import { isPreview, previewLabel } from '$lib/services/dataBase';
 	import { announcement } from '$lib/stores/announcer';
+	import { initializeCharacterShortcuts } from '$lib/services/shortcuts';
 	import '../app.css';
 
 	// Draft banner. Read on mount: the attribute lives on <body>, which is not
@@ -43,6 +44,7 @@
 
 	onMount(async () => {
 		initializeTheme();
+		initializeCharacterShortcuts();
 		await initializeDateStore();
 		updateModelMeta();
 	});
@@ -104,7 +106,9 @@
 	<Header />
 	<Navigation />
 
-	<main id="main" tabindex="-1" bind:this={mainElement} class="flex-1">
+	<!-- scroll-mt: the skip link must land <main> below the sticky navigation,
+	     the same 5rem the item cards keep. -->
+	<main id="main" tabindex="-1" bind:this={mainElement} class="flex-1 scroll-mt-20">
 		<slot />
 	</main>
 
@@ -149,7 +153,8 @@
 		text-align: center;
 		font-size: 0.8rem;
 		color: #fff;
-		background: #e63946;
+		/* trend-red-fill: white on the brand red (#e63946) is 4.17:1. */
+		background: #e32533;
 		/* Deliberately loud and sticky. The failure this prevents is an operator
 		   reading a draft, believing it is live, and "fixing" something that was
 		   never broken -- or approving a page they never actually looked at. */
