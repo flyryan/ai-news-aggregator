@@ -20,6 +20,7 @@
 	import { safeHtml } from '$lib/services/safeHtml';
 	import { hasReplayData } from '$lib/services/replayLoader';
 	import { dataUrl } from '$lib/services/dataBase';
+	import { shortcutAllowed } from '$lib/services/shortcuts';
 
 	// Data state
 	let summary: DaySummary | null = null;
@@ -112,6 +113,7 @@
 					cleanup();
 					if (token !== scrollAttemptToken) return;
 					el.scrollIntoView({ behavior: 'instant', block: 'start' });
+					markLanded(el);
 				});
 				return;
 			}
@@ -119,6 +121,20 @@
 			else cleanup();
 		};
 		requestAnimationFrame(attempt);
+	}
+
+	// Show the reader which card they landed on: a ring that fades (app.css) and
+	// focus on the card, so Tab and j/k carry on from it. Only item cards — other
+	// hash targets are left alone.
+	let landedTimer: ReturnType<typeof setTimeout> | undefined;
+
+	function markLanded(el: HTMLElement): void {
+		if (!el.matches('article[id^="item-"]')) return;
+		clearTimeout(landedTimer);
+		document.querySelectorAll('.item-landed').forEach((n) => n.classList.remove('item-landed'));
+		el.classList.add('item-landed');
+		el.focus({ preventScroll: true });
+		landedTimer = setTimeout(() => el.classList.remove('item-landed'), 2600);
 	}
 
 	afterNavigate((nav) => {
@@ -129,11 +145,39 @@
 			scrollAttemptToken++;
 			return;
 		}
-		if (nav.from && nav.from.url.pathname === to.pathname && nav.from.url.search === to.search) {
-			return; // hash-only navigation: the browser-native path already scrolls
-		}
+		// Same page, new hash (a search result on the category already open): the
+		// card is in the DOM, and the same instant jump serves as for a fresh load.
 		scrollToHashTarget(to.hash);
 	});
+
+	// j / k: step through the item cards. From a focused card they move to its
+	// neighbour; otherwise j takes the first card still in view and k the last
+	// one above it.
+	function handleWindowKeydown(event: KeyboardEvent) {
+		const key = event.key;
+		if ((key !== 'j' && key !== 'k') || !shortcutAllowed(event)) return;
+		const cards = Array.from(document.querySelectorAll<HTMLElement>('article[id^="item-"]'));
+		if (cards.length === 0) return;
+
+		const current = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>(
+			'article[id^="item-"]'
+		);
+		let index = current ? cards.indexOf(current) : -1;
+		if (index >= 0) {
+			index += key === 'j' ? 1 : -1;
+		} else if (key === 'j') {
+			index = cards.findIndex((card) => card.getBoundingClientRect().top >= 0);
+		} else {
+			index = cards.findLastIndex((card) => card.getBoundingClientRect().top < 0);
+		}
+		const next = cards[index];
+		if (!next) return; // already at the first or last card
+
+		event.preventDefault();
+		scrollAttemptToken++; // a pending hash scroll must not pull the page back
+		next.focus({ preventScroll: true });
+		next.scrollIntoView({ behavior: 'instant', block: 'start' });
+	}
 
 	async function handleRouteChange(rawDate: string | null, rawCategory: string | null) {
 		if (rawCategory && !validCategories.includes(rawCategory as Category)) {
@@ -250,6 +294,8 @@
 		<title>AATF AI News Aggregator</title>
 	{/if}
 </svelte:head>
+
+<svelte:window on:keydown={handleWindowKeydown} />
 
 <!-- Previews for the enricher's internal links. Listens at the document level,
      so mounting it here scopes it to this route. -->

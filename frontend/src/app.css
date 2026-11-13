@@ -126,6 +126,37 @@
 	.card-importance-low {
 		@apply shadow-sm border-l-2 border-l-trend-gray-200 dark:border-l-trend-gray-700 opacity-90;
 	}
+
+	/* Item cards take focus from the j/k shortcuts (see +page.svelte). */
+	article.card:focus-visible {
+		outline: 2px solid var(--color-trend-red);
+		outline-offset: 3px;
+	}
+
+	/* The card a search result, shared link or internal link landed on: a ring
+	   that fades, so the reader can tell which of several hundred cards it is.
+	   +page.svelte removes the class once it has played. */
+	article.card.item-landed {
+		outline: 2px solid var(--color-trend-red);
+		outline-offset: 3px;
+		animation: item-landed 2.4s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+	}
+
+	@keyframes item-landed {
+		from {
+			outline-color: var(--color-trend-red);
+		}
+		to {
+			outline-color: transparent;
+		}
+	}
+
+	/* No fade for readers who asked motion to stop: the ring holds, then goes. */
+	@media (prefers-reduced-motion: reduce) {
+		article.card.item-landed {
+			animation: none;
+		}
+	}
 }
 
 @layer utilities {

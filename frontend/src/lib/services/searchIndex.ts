@@ -73,15 +73,34 @@ async function initializeFallback(): Promise<boolean> {
 	}
 }
 
-export async function initializeSearch(): Promise<boolean> {
-	if (initialized) return true;
+// One build at a time. The search bar mounts every time it is opened, so
+// without this a reader who closes and reopens it while the index is still
+// building would start a second worker and fetch the corpus twice.
+let initPromise: Promise<boolean> | null = null;
 
+async function buildSearch(): Promise<boolean> {
 	if (await spawnWorker()) return true;
 
 	// Worker failed — tear it down and fall back to main-thread search.
 	worker?.terminate();
 	worker = null;
 	return await initializeFallback();
+}
+
+/**
+ * Resolves true once search can answer queries, false if neither the worker
+ * nor the main-thread fallback could load the corpus. A failed build is not
+ * cached, so calling again retries.
+ */
+export function initializeSearch(): Promise<boolean> {
+	if (initialized) return Promise.resolve(true);
+	if (!initPromise) {
+		initPromise = buildSearch().then((ok) => {
+			if (!ok) initPromise = null;
+			return ok;
+		});
+	}
+	return initPromise;
 }
 
 export function search(

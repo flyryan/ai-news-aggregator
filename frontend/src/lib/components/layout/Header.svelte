@@ -3,13 +3,41 @@
 	import { formatDate, isNewModelBadge } from '$lib/services/dateUtils';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import SearchBar from '$lib/components/search/SearchBar.svelte';
+	import { tick } from 'svelte';
+	import { shortcutAllowed } from '$lib/services/shortcuts';
 
 	$: dateDisplay = $currentDate ? formatDate($currentDate) : '';
 	$: modelName = $currentModel?.display_name ?? '';
 	$: showNewBadge = isNewModelBadge($currentModel?.since);
 
 	let showSearch = false;
+	let searchBar: SearchBar | undefined;
+	let searchToggle: HTMLButtonElement;
+
+	function closeSearch(restoreFocus = false) {
+		if (!showSearch) return;
+		// Only pull focus back to the button when it would otherwise be lost with
+		// the field; a reader who has moved on elsewhere keeps their place.
+		const hadFocus = document.activeElement?.closest('#site-search') != null;
+		showSearch = false;
+		if (restoreFocus && hadFocus) searchToggle?.focus();
+	}
+
+	// `/` opens search from anywhere on the site; Escape closes it.
+	async function handleWindowKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			if (showSearch && !event.defaultPrevented) closeSearch(true);
+			return;
+		}
+		if (event.key !== '/' || event.repeat || !shortcutAllowed(event)) return;
+		event.preventDefault(); // otherwise Firefox opens its quick find
+		showSearch = true;
+		await tick();
+		searchBar?.focusInput();
+	}
 </script>
+
+<svelte:window on:keydown={handleWindowKeydown} />
 
 <header class="bg-gradient-to-r from-trend-red to-guardian-red text-white shadow-lg">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
@@ -97,9 +125,15 @@
 
 				<!-- Search toggle button -->
 				<button
+					bind:this={searchToggle}
+					type="button"
 					on:click={() => showSearch = !showSearch}
 					class="p-1.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex-none"
 					aria-label="Toggle search"
+					aria-expanded={showSearch}
+					aria-controls="site-search"
+					aria-keyshortcuts="/"
+					title="Search (press /)"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -123,8 +157,13 @@
 
 		<!-- Expandable search bar -->
 		{#if showSearch}
-			<div class="mt-4 pt-4 border-t border-white/20">
-				<SearchBar on:select={() => showSearch = false} />
+			<div id="site-search" class="mt-4 pt-4 border-t border-white/20">
+				<SearchBar
+					bind:this={searchBar}
+					autofocus
+					on:select={() => showSearch = false}
+					on:close={() => closeSearch(true)}
+				/>
 			</div>
 		{/if}
 	</div>

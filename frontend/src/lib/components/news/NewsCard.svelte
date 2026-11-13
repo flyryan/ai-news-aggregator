@@ -14,6 +14,9 @@
 	// The `item-{id}` anchor must exist exactly once per page: it is what
 	// scrollToHashTarget() in +page.svelte resolves with getElementById. A preview
 	// copy of a card already on the page would shadow the real one, so it opts out.
+	// Cards are programmatically focusable (tabindex -1, so not a Tab stop):
+	// landing on an anchored one from search or a shared link, and the j/k
+	// shortcuts, move focus to the card so Tab continues from inside it.
 	export let anchor: boolean = true;
 	// The link preview pins its own read/share actions outside the scroll area, so
 	// the card's footer would be a second copy the reader has to scroll to reach.
@@ -53,6 +56,7 @@
 
 <article
 	id={anchor ? `item-${item.id}` : undefined}
+	tabindex="-1"
 	class="card {importanceTierClass}"
 	style="scroll-margin-top: 5rem;"
 >

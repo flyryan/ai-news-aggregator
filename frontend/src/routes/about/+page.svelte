@@ -84,6 +84,20 @@
 		</div>
 	</section>
 
+	<!-- Keyboard shortcuts -->
+	<section class="card mb-8">
+		<h2 class="text-lg font-semibold text-trend-gray-800 dark:text-trend-gray-100 mb-4">
+			Keyboard Shortcuts
+		</h2>
+		<div class="prose dark:prose-invert max-w-none text-trend-gray-600 dark:text-trend-gray-400">
+			<p>
+				Press <kbd>/</kbd> to search and <kbd>Esc</kbd> to close it. On a report,
+				<kbd>&larr;</kbd> and <kbd>&rarr;</kbd> move to the previous and next day, and
+				<kbd>j</kbd> and <kbd>k</kbd> step to the next and previous item.
+			</p>
+		</div>
+	</section>
+
 	<!-- AI-Generated Content Disclaimer -->
 	<section class="card mb-8 border-2 border-amber-500 dark:border-amber-600">
 		<div class="flex items-start gap-3">

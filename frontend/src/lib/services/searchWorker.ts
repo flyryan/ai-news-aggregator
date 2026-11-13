@@ -68,8 +68,12 @@ function runSearch(msg: SearchMessage): void {
 		return (b.importance ?? 0) - (a.importance ?? 0);
 	});
 
+	// MiniSearch copies stored fields over the result, so `r.id` here is the
+	// stored item id, not the corpus ref. Item ids repeat across dates (the same
+	// story can be reported twice), so the ref is rebuilt to stay unique — the
+	// results list is keyed on it.
 	const results = raw.slice(0, msg.limit).map((r) => ({
-		ref: r.id as string,
+		ref: `${r.date}:${r.category}:${r.id}`,
 		score: r.score,
 		doc: {
 			id: r.id as string,

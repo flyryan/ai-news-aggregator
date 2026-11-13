@@ -3,6 +3,7 @@
 	import { browser } from '$app/environment';
 	import { currentDate, navigation, goToPreviousDate, goToNextDate, goToLatestDate } from '$lib/stores/dateStore';
 	import { formatDate } from '$lib/services/dateUtils';
+	import { shortcutAllowed } from '$lib/services/shortcuts';
 
 	// Optional coverage date prop from parent
 	export let coverageDate: string | undefined = undefined;
@@ -13,7 +14,24 @@
 
 	// Read current category from URL to preserve it during navigation
 	$: currentCategory = browser ? $page.url.searchParams.get('category') : null;
+
+	// Left/right arrows do what the two buttons do, and nothing when the button
+	// is disabled. Shift is left alone (it extends a text selection), and a held
+	// key does not run through the archive.
+	function handleWindowKeydown(event: KeyboardEvent) {
+		if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+		if (event.shiftKey || event.repeat || !shortcutAllowed(event)) return;
+		if (event.key === 'ArrowLeft' && $navigation.hasPrevious) {
+			event.preventDefault();
+			goToPreviousDate(currentCategory || undefined);
+		} else if (event.key === 'ArrowRight' && $navigation.hasNext) {
+			event.preventDefault();
+			goToNextDate(currentCategory || undefined);
+		}
+	}
 </script>
+
+<svelte:window on:keydown={handleWindowKeydown} />
 
 <div class="flex items-center justify-between gap-4">
 	<!-- Previous button -->
@@ -25,6 +43,8 @@
 			? 'hover:bg-trend-gray-200 dark:hover:bg-trend-gray-700 text-trend-gray-700 dark:text-trend-gray-300'
 			: 'text-trend-gray-400 cursor-not-allowed'}"
 		aria-label="Previous day"
+		aria-keyshortcuts="ArrowLeft"
+		title="Previous day (left arrow)"
 	>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
@@ -66,6 +86,8 @@
 			? 'hover:bg-trend-gray-200 dark:hover:bg-trend-gray-700 text-trend-gray-700 dark:text-trend-gray-300'
 			: 'text-trend-gray-400 cursor-not-allowed'}"
 		aria-label="Next day"
+		aria-keyshortcuts="ArrowRight"
+		title="Next day (right arrow)"
 	>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
