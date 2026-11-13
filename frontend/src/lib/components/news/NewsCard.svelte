@@ -48,7 +48,13 @@
 
 	// Determine importance tier class
 	$: readLabel =
-		category === 'research' ? 'View Research' : category === 'reddit' ? 'View Discussion' : 'Read More';
+		category === 'research'
+			? 'View Research'
+			: category === 'reddit'
+				? 'View Discussion'
+				: category === 'social'
+					? 'Read More'
+					: 'Read the Article';
 
 	$: importanceTierClass =
 		item.importance_score >= 80
