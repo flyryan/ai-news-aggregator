@@ -509,6 +509,15 @@
 		border-radius: 0;
 		box-shadow: none;
 	}
+	/* …except the importance accent, which is information, not chrome. */
+	.preview :global(.card-importance-high),
+	.preview :global(.card-importance-medium),
+	.preview :global(.card-importance-standard),
+	.preview :global(.card-importance-low) {
+		border-left-width: 3px;
+		border-left-style: solid;
+	}
+
 	.body {
 		min-height: 0; /* let the flex child actually shrink and scroll */
 		overflow-y: auto;
@@ -554,11 +563,9 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.35rem;
-		min-height: 44px;
 		padding: 0.5rem 0.75rem;
 		border-radius: 8px;
-		/* White 14px text needs the darker brand red: 6.3:1 against 4.2:1. */
-		background: #b8232a;
+		background: #e63946;
 		color: #fff;
 		font-size: 0.875rem;
 		font-weight: 600;
@@ -569,30 +576,33 @@
 		text-overflow: ellipsis;
 	}
 	.primary:hover {
-		background: #971c22;
+		background: #c1121f;
+	}
+
+	/* 44px hit area without resizing the control (see .tap in app.css). */
+	.secondary::after {
+		content: '';
+		position: absolute;
+		inset: min(0px, calc(50% - 22px));
 	}
 
 	.secondary {
+		position: relative;
 		flex: none;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 44px;
-		min-width: 44px;
 		padding: 0.5rem 0.25rem;
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		font-weight: 500;
-		color: #525252;
+		color: #737373;
 		white-space: nowrap;
 		background: none;
 		border: none;
 		cursor: pointer;
 	}
 	.secondary:hover {
-		color: #b8232a;
+		color: #e63946;
 	}
 	:global(.dark) .secondary {
-		color: #d4d4d4;
+		color: #a3a3a3;
 	}
 	:global(.dark) .secondary:hover {
 		color: #fca5a5;

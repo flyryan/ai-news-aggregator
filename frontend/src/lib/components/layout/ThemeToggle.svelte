@@ -5,7 +5,7 @@
 <button
 	type="button"
 	on:click={toggleTheme}
-	class="icon-button"
+	class="tap p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
 	aria-label={$isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 	title={$isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 >

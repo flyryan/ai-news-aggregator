@@ -49,7 +49,7 @@
 <span>
 	{#each parts as part}
 		{#if part.highlight}
-			<mark class="bg-trend-red/15 text-link px-0.5 rounded">{part.text}</mark>
+			<mark class="bg-trend-red/20 text-trend-red px-0.5 rounded">{part.text}</mark>
 		{:else}
 			{part.text}
 		{/if}

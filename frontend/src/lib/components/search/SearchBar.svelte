@@ -218,7 +218,7 @@
 				<button
 					type="button"
 					on:click={clearSearch}
-					class="tap absolute right-3 top-1/2 -translate-y-1/2 text-trend-gray-600 hover:text-trend-gray-800 dark:text-trend-gray-300 dark:hover:text-white"
+					class="tap absolute right-3 top-1/2 -translate-y-1/2 text-trend-gray-400 hover:text-trend-gray-600"
 					aria-label="Clear search"
 				>
 					<svg
@@ -233,7 +233,7 @@
 					</svg>
 				</button>
 			{:else}
-				<span class="absolute right-3 top-1/2 -translate-y-1/2 text-trend-gray-500 dark:text-trend-gray-400" aria-hidden="true">
+				<span class="absolute right-3 top-1/2 -translate-y-1/2 text-trend-gray-400" aria-hidden="true">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						class="w-5 h-5"
@@ -265,7 +265,7 @@
 	{:else if panel}
 		<div class="absolute z-[60] w-full mt-2 p-4 bg-white dark:bg-trend-gray-800 rounded-xl shadow-lg border border-trend-gray-200 dark:border-trend-gray-700">
 			{#if panel === 'loading'}
-				<p class="text-sm text-trend-gray-600 dark:text-trend-gray-400 text-center">
+				<p class="text-sm text-trend-gray-500 dark:text-trend-gray-400 text-center">
 					Building search index…
 				</p>
 			{:else if panel === 'error'}
@@ -274,13 +274,13 @@
 					<button
 						type="button"
 						on:click={loadIndex}
-						class="font-medium text-link hover:text-link-hover underline"
+						class="font-medium text-trend-red hover:text-guardian-red dark:text-red-300 dark:hover:text-red-200 underline"
 					>
 						Try again
 					</button>
 				</p>
 			{:else}
-				<p class="text-sm text-trend-gray-600 dark:text-trend-gray-400 text-center">
+				<p class="text-sm text-trend-gray-500 dark:text-trend-gray-400 text-center">
 					No results found for "{query}"
 				</p>
 			{/if}

@@ -23,21 +23,16 @@
 	}
 </script>
 
-<nav
-	aria-label="Main"
-	class="bg-white dark:bg-trend-gray-800 border-b border-trend-gray-200 dark:border-trend-gray-700 sticky top-0 z-50"
->
+<nav aria-label="Main" class="bg-white dark:bg-trend-gray-800 border-b border-gray-200 dark:border-trend-gray-700 sticky top-0 z-50">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-		<div class="flex items-center h-12 sm:h-14">
+		<div class="flex items-center h-14">
 			<!-- Main navigation -->
-			<!-- One row at every width. It fits at 390px; on a narrower phone it
-			     scrolls sideways instead of pushing the page wider. -->
-			<ul class="nav-row flex w-full items-center justify-between sm:justify-start sm:w-auto sm:gap-1">
+			<ul class="flex w-full items-center justify-evenly sm:justify-start sm:w-auto sm:gap-1">
 				<!-- Home: icon on mobile (no bg), text+bg on desktop -->
 				<li>
 					<a
 						href="/"
-						class="nav-link whitespace-nowrap {homeActive ? 'nav-link-active' : ''}"
+						class="nav-link tap whitespace-nowrap hover:bg-transparent sm:hover:bg-trend-gray-200 {homeActive ? 'text-trend-red sm:bg-trend-red/10' : ''}"
 						aria-label="Home"
 						aria-current={homeActive ? 'page' : undefined}
 					>
@@ -60,12 +55,12 @@
 					<li>
 						<a
 							href={getCategoryHref(category)}
-							class="nav-link whitespace-nowrap {categoryParam === category ? 'nav-link-active' : ''}"
+							class="nav-link tap whitespace-nowrap {categoryParam === category ? 'nav-link-active' : ''}"
 							aria-current={categoryParam === category ? 'page' : undefined}
 						>
 							<span
 								aria-hidden="true"
-								class="w-2 h-2 rounded-full inline-block mr-1.5 flex-none"
+								class="w-2 h-2 rounded-full inline-block mr-1"
 								style="background-color: {CATEGORY_CONFIG[category].color}"
 							></span>
 							<!--
@@ -88,7 +83,7 @@
 				<li>
 					<a
 						href="/archive"
-						class="nav-link whitespace-nowrap {archiveActive ? 'nav-link-active' : ''}"
+						class="nav-link tap whitespace-nowrap hover:bg-transparent sm:hover:bg-trend-gray-200 {archiveActive ? 'text-trend-red sm:bg-trend-red/10' : ''}"
 						aria-label="Archive"
 						aria-current={archiveActive ? 'page' : undefined}
 					>
@@ -110,7 +105,7 @@
 				<li class="hidden sm:block">
 					<a
 						href="/about"
-						class="nav-link whitespace-nowrap {aboutActive ? 'nav-link-active' : ''}"
+						class="nav-link tap whitespace-nowrap {aboutActive ? 'text-trend-red bg-trend-red/10' : ''}"
 						aria-current={aboutActive ? 'page' : undefined}
 					>
 						About
@@ -120,17 +115,3 @@
 		</div>
 	</div>
 </nav>
-
-<style>
-	.nav-row {
-		overflow-x: auto;
-		scrollbar-width: none;
-	}
-	.nav-row::-webkit-scrollbar {
-		display: none;
-	}
-	/* Keep the focus ring of the first and last link inside the scroll box. */
-	.nav-row :global(a:focus-visible) {
-		outline-offset: -2px;
-	}
-</style>

@@ -8,15 +8,6 @@ export default {
 				// AATF Brand Colors
 				'trend-red': '#E63946',
 				'guardian-red': '#C1272D',
-				// Text-safe reds. `link` follows the theme (app.css): a darker red on
-				// light surfaces, a lighter one on dark, each at 4.5:1 or better on
-				// every surface text sits on. `brand-strong` is the fill that carries
-				// small white text (white on #E63946 is only 4.17:1).
-				link: 'var(--color-link)',
-				'link-hover': 'var(--color-link-hover)',
-				'brand-strong': '#B8232A',
-				'brand-stronger': '#971C22',
-				'header-dark': '#6B1D22',
 				'trend-dark': '#1a1a1a',
 				'trend-gray': {
 					100: '#f5f5f5',

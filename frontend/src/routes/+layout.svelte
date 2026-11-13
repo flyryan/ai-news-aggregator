@@ -104,7 +104,7 @@
 	<Header />
 	<Navigation />
 
-	<main id="main" tabindex="-1" bind:this={mainElement} class="flex-1 outline-none">
+	<main id="main" tabindex="-1" bind:this={mainElement} class="flex-1">
 		<slot />
 	</main>
 
@@ -115,6 +115,7 @@
 </div>
 
 <style>
+	/* Off screen until it takes keyboard focus. */
 	.skip-link {
 		position: absolute;
 		left: 0.5rem;
@@ -130,6 +131,14 @@
 	}
 	.skip-link:focus {
 		transform: none;
+	}
+
+	/* <main> takes focus from the skip link; it shows no ring of its own. Only
+	   while focused: a standing transparent outline changed how edges below it
+	   were anti-aliased. */
+	main:focus,
+	main:focus-visible {
+		outline: none;
 	}
 
 	.preview-banner {

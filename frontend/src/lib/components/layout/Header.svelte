@@ -39,47 +39,49 @@
 
 <svelte:window on:keydown={handleWindowKeydown} />
 
-<header class="site-header bg-brand-strong dark:bg-header-dark text-white">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-4">
+<header class="bg-gradient-to-r from-trend-red to-guardian-red text-white shadow-lg">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
 		<!--
-			Mobile geometry, the short version: four icon buttons drawn at 36px on a
-			44px pitch (each button's hit area is 44px; see .icon-button) claim 168px
-			of a 390px viewport. Whatever the brand block is given, it must fit in the
-			rest, so it needs `min-w-0` (a flex item defaults to `min-width:auto` and
-			refuses to shrink below its content) and a title that fits on one line:
-			"AI News Daily" at 18px is about 115px against about 130px of space.
+			Mobile geometry, the short version: four 36px icon buttons plus their gaps
+			claim ~190px of a 393px viewport. Whatever the brand block is given, it must
+			fit in the rest — so it needs `min-w-0` (a flex item defaults to
+			`min-width:auto` and refuses to shrink below its content) and a title small
+			enough that its longest word fits. At `text-2xl`, "Aggregator" alone is 121px
+			against ~109px of space, which is exactly how the title came to sit under the
+			GitHub icon.
 		-->
-		<div class="flex items-center justify-between gap-2 sm:gap-4">
+		<div class="header-bar flex items-center justify-between gap-2 sm:gap-4">
 			<div class="flex items-center min-w-0">
-				<!-- The site name is not a heading: each view's own <h1> names the view. -->
-				<a
-					href="/"
-					class="flex items-center gap-2 sm:gap-3 min-w-0 min-h-[44px] rounded-lg hover:opacity-90 transition-opacity"
-				>
+				<a href="/" class="flex items-center gap-2 sm:gap-3 min-w-0 hover:opacity-90 transition-opacity">
 					<img
 						src="/assets/logo.webp"
-						alt=""
-						width="48"
-						height="48"
-						class="w-9 h-9 sm:w-12 sm:h-12 flex-none rounded-full bg-white p-0.5"
+						alt="AATF Logo"
+						class="w-10 h-10 sm:w-12 sm:h-12 flex-none rounded-full bg-white p-0.5"
 					/>
-					<span class="block min-w-0">
-						<span class="block text-lg sm:text-2xl font-bold tracking-tight leading-tight whitespace-nowrap">
-							AI News Daily
-						</span>
-						<span class="block text-xs sm:text-sm text-white/90 leading-snug">
-							by AATF<span class="hidden sm:inline">{#if modelName}<span aria-hidden="true">&nbsp;&middot;&nbsp;</span><span class="sr-only">, </span>Powered by {modelName}{/if}{#if showNewBadge}
-									<span class="new-badge">NEW</span>{/if}</span>
-						</span>
-					</span>
+					<div class="min-w-0">
+						<!-- Not a heading: each view carries its own <h1>. -->
+						<p class="text-lg sm:text-2xl font-bold tracking-tight leading-tight">
+							AATF AI News Aggregator
+						</p>
+						<p class="text-xs sm:text-sm text-white/80 leading-snug">
+							{#if modelName}
+								Powered by {modelName}
+							{:else}
+								Daily AI/ML news from the AATF
+							{/if}
+							{#if showNewBadge}
+								<span class="new-badge">NEW</span>
+							{/if}
+						</p>
+					</div>
 				</a>
 			</div>
 
-			<div class="flex items-center gap-2 sm:gap-3 flex-none">
+			<div class="flex items-center gap-1.5 sm:gap-4 flex-none">
 				{#if dateDisplay}
 					<a
 						href="/archive"
-						class="hidden md:inline-flex items-center min-h-[44px] text-sm text-white bg-white/15 px-3 rounded-lg hover:bg-white/25 transition-colors"
+						class="tap hidden sm:block text-sm text-white/90 bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 transition-colors"
 					>
 						{dateDisplay}
 					</a>
@@ -90,7 +92,7 @@
 					href="https://github.com/flyryan/ai-news-aggregator"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="icon-button"
+					class="tap p-1.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex-none"
 					aria-label="GitHub Repository"
 					title="View source on GitHub"
 				>
@@ -108,7 +110,7 @@
 				<!-- RSS Feed link -->
 				<a
 					href="/feeds"
-					class="icon-button"
+					class="tap p-1.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex-none"
 					aria-label="RSS Feeds"
 					title="Subscribe to RSS feeds"
 				>
@@ -129,7 +131,7 @@
 					bind:this={searchToggle}
 					type="button"
 					on:click={() => showSearch = !showSearch}
-					class="icon-button"
+					class="tap p-1.5 sm:p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex-none"
 					aria-label="Toggle search"
 					aria-expanded={showSearch}
 					aria-controls="site-search"
@@ -159,7 +161,7 @@
 
 		<!-- Expandable search bar -->
 		{#if showSearch}
-			<div id="site-search" class="mt-2.5 pt-2.5 sm:mt-4 sm:pt-4 border-t border-white/25">
+			<div id="site-search" class="mt-4 pt-4 border-t border-white/20">
 				<SearchBar
 					bind:this={searchBar}
 					autofocus
@@ -172,73 +174,34 @@
 </header>
 
 <style>
-	/* Focus rings on the red header are white: the page's red ring would vanish. */
-	.site-header :global(:focus-visible) {
+	/* Keyboard focus rings on the red bar are white. */
+	.header-bar :global(:focus-visible) {
 		outline-color: #fff;
-	}
-	/* ...except inside the search panel, whose fields are white. */
-	.site-header :global(#site-search :focus-visible) {
-		outline-color: #fff;
-		outline-offset: 3px;
-	}
-
-	/* Header icon buttons: drawn at 36px on a phone and 40px from `sm`, with a
-	   44px hit area either way (the pseudo-element), so four of them still leave
-	   room for the title at 390px. Shared with ThemeToggle. */
-	.site-header :global(.icon-button) {
-		position: relative;
-		flex: none;
-		display: grid;
-		place-items: center;
-		width: 36px;
-		height: 36px;
-		border-radius: 0.5rem;
-		background: rgb(255 255 255 / 0.15);
-		transition: background-color 200ms;
-	}
-	.site-header :global(.icon-button:hover) {
-		background: rgb(255 255 255 / 0.25);
-	}
-	.site-header :global(.icon-button::after) {
-		content: '';
-		position: absolute;
-		inset: -4px;
-	}
-	@media (min-width: 640px) {
-		.site-header :global(.icon-button) {
-			width: 44px;
-			height: 44px;
-		}
-		.site-header :global(.icon-button::after) {
-			content: none;
-		}
 	}
 
 	.new-badge {
 		display: inline-block;
-		font-size: 0.75rem;
+		font-size: 0.625rem;
 		font-weight: 700;
-		letter-spacing: 0.04em;
+		letter-spacing: 0.05em;
 		line-height: 1;
-		padding: 3px 7px;
+		padding: 2px 6px;
 		margin-left: 6px;
 		border-radius: 9999px;
-		background: #fff;
-		color: #8f1a20;
+		background: rgba(255, 255, 255, 0.25);
+		color: white;
 		vertical-align: middle;
+		animation: badge-pulse 2s ease-in-out infinite;
+	}
+	@keyframes badge-pulse {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.6; }
 	}
 
-	/* A single short entrance, then still. Nothing for readers who asked motion
-	   to stop. */
-	@media (prefers-reduced-motion: no-preference) {
+	/* The badge is decorative; it must not pulse for anyone who asked motion to stop. */
+	@media (prefers-reduced-motion: reduce) {
 		.new-badge {
-			animation: badge-in 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
-		}
-	}
-	@keyframes badge-in {
-		from {
-			opacity: 0;
-			transform: translateY(2px);
+			animation: none;
 		}
 	}
 </style>

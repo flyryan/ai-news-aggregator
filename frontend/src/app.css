@@ -6,18 +6,6 @@
 	:root {
 		--color-trend-red: #E63946;
 		--color-guardian-red: #C1272D;
-		/* Red that is safe as TEXT. #E63946 on white is 4.17:1 and on a dark card
-		   3.63:1, so links and text buttons use these instead: 6.3:1 on white,
-		   5.8:1 on the page grey; in dark, 8:1 on a card and 5.5:1 on a pill. */
-		--color-link: #B8232A;
-		--color-link-hover: #8F1A20;
-		--color-focus: #B8232A;
-	}
-
-	.dark {
-		--color-link: #FCA5A5;
-		--color-link-hover: #FECACA;
-		--color-focus: #FCA5A5;
 	}
 
 	@media (prefers-reduced-motion: no-preference) {
@@ -30,22 +18,12 @@
 		@apply font-sans antialiased;
 	}
 
-	h1,
-	h2,
-	h3 {
-		text-wrap: balance;
-	}
-
-	/* One focus ring everywhere: 2px, offset, in the text-safe red (white on the
-	   red header, see Header.svelte). Components that draw their own ring
-	   (.input, the replay) override this by specificity. */
-	:focus-visible {
-		outline: 2px solid var(--color-focus);
+	/* A keyboard focus ring for links and buttons (white on the red header and
+	   the footer, see those components). Shown only while tabbing. Text fields
+	   keep the ring they had. */
+	:focus-visible:not(input):not(textarea):not(select) {
+		outline: 2px solid var(--color-trend-red);
 		outline-offset: 2px;
-	}
-
-	::selection {
-		background: rgb(230 57 70 / 0.22);
 	}
 }
 
@@ -59,10 +37,27 @@
 		       border border-trend-gray-200 dark:border-trend-gray-700;
 	}
 
+	/* Category accent borders */
+	.category-accent-news {
+		@apply border-l-4 border-category-news;
+	}
+
+	.category-accent-research {
+		@apply border-l-4 border-category-research;
+	}
+
+	.category-accent-social {
+		@apply border-l-4 border-category-social;
+	}
+
+	.category-accent-reddit {
+		@apply border-l-4 border-category-reddit;
+	}
+
 	/* Primary button */
 	.btn-primary {
 		@apply px-4 py-2 rounded-lg
-		       bg-brand-strong hover:bg-brand-stronger
+		       bg-trend-red hover:bg-guardian-red
 		       text-white font-medium
 		       transition-colors duration-200;
 	}
@@ -81,39 +76,20 @@
 		@apply inline-block px-2 py-0.5 rounded-full text-xs font-medium;
 	}
 
-	/* Category badges: neutral text with the category's dot. Coloured text on a
-	   tint of the same colour measured 2:1 to 3.2:1. */
-	.badge-news,
-	.badge-research,
-	.badge-social,
+	.badge-news {
+		@apply bg-category-news/20 text-category-news;
+	}
+
+	.badge-research {
+		@apply bg-category-research/20 text-category-research;
+	}
+
+	.badge-social {
+		@apply bg-category-social/20 text-category-social;
+	}
+
 	.badge-reddit {
-		@apply inline-flex items-center gap-1.5
-		       bg-trend-gray-100 dark:bg-trend-gray-700
-		       text-trend-gray-700 dark:text-trend-gray-200;
-	}
-
-	.badge-news::before,
-	.badge-research::before,
-	.badge-social::before,
-	.badge-reddit::before {
-		content: '';
-		@apply w-2 h-2 rounded-full flex-none;
-	}
-
-	.badge-news::before {
-		@apply bg-category-news;
-	}
-
-	.badge-research::before {
-		@apply bg-category-research;
-	}
-
-	.badge-social::before {
-		@apply bg-category-social;
-	}
-
-	.badge-reddit::before {
-		@apply bg-category-reddit;
+		@apply bg-category-reddit/20 text-category-reddit;
 	}
 
 	/* Input field */
@@ -122,7 +98,7 @@
 		       border border-trend-gray-200 dark:border-trend-gray-700
 		       bg-white dark:bg-trend-gray-800
 		       text-trend-dark dark:text-trend-gray-100
-		       placeholder-trend-gray-500 dark:placeholder-trend-gray-400
+		       placeholder-trend-gray-400
 		       focus:border-trend-red focus:ring-2 focus:ring-trend-red/20
 		       outline-none transition-all duration-200;
 	}
@@ -131,58 +107,54 @@
 	   Three padding tiers, not two: the tablet band (sm–lg) carries text labels for
 	   all seven items and needs tighter gutters than the desktop layout to fit. */
 	.nav-link {
-		@apply inline-flex items-center justify-center min-h-[44px] min-w-[44px]
-		       px-1 sm:px-2.5 lg:px-4 rounded-lg text-sm sm:text-base
-		       text-trend-gray-600 dark:text-trend-gray-300
+		@apply px-1.5 sm:px-2.5 lg:px-4 py-2 rounded-lg
+		       text-trend-gray-600 dark:text-trend-gray-400
 		       hover:bg-trend-gray-200 dark:hover:bg-trend-gray-700
 		       transition-colors duration-200;
 	}
 
 	.nav-link-active {
-		@apply text-link bg-trend-red/10 font-medium;
+		@apply text-trend-red bg-trend-red/10;
 	}
 
-	/* Importance tiers. Importance is carried by the labelled score on the card
-	   and by the band headings on category pages, so the tiers differ only in
-	   elevation; none draws a side stripe. */
+	/* Importance-driven card tiers */
 	.card-importance-high {
-		@apply shadow-md;
+		@apply shadow-lg border-l-4 border-l-trend-red
+		       hover:-translate-y-0.5 transition-all duration-200;
 	}
 
-	.card-importance-medium,
+	.card-importance-medium {
+		@apply shadow-md border-l-4 border-l-amber-500
+		       hover:-translate-y-0.5 transition-all duration-200;
+	}
+
 	.card-importance-standard {
-		@apply shadow-card;
+		@apply shadow-card border-l-4 border-l-trend-gray-300 dark:border-l-trend-gray-600
+		       hover:-translate-y-0.5 transition-all duration-200;
 	}
 
 	.card-importance-low {
-		@apply shadow-sm;
+		@apply shadow-sm border-l-2 border-l-trend-gray-200 dark:border-l-trend-gray-700 opacity-90;
 	}
 
-	/* Items take focus from the j/k shortcuts (see +page.svelte). An item is a
-	   full card or, on category pages, a compact row. */
-	article[id^='item-']:focus-visible {
-		outline: 2px solid var(--color-focus);
+	/* Item cards take focus from the j/k shortcuts (see +page.svelte). */
+	article.card:focus-visible {
+		outline: 2px solid var(--color-trend-red);
 		outline-offset: 3px;
 	}
 
-	/* The item a search result, shared link or internal link landed on: a ring
-	   that fades, so the reader can tell which of several hundred it is.
+	/* The card a search result, shared link or internal link landed on: a ring
+	   that fades, so the reader can tell which of several hundred cards it is.
 	   +page.svelte removes the class once it has played. */
-	article.item-landed {
-		outline: 2px solid var(--color-focus);
+	article.card.item-landed {
+		outline: 2px solid var(--color-trend-red);
 		outline-offset: 3px;
 		animation: item-landed 2.4s cubic-bezier(0.7, 0, 0.84, 0) forwards;
 	}
 
-	/* Rows sit flush in a bordered list, so their ring is drawn inside. */
-	article.item-row:focus-visible,
-	article.item-row.item-landed {
-		outline-offset: -2px;
-	}
-
 	@keyframes item-landed {
 		from {
-			outline-color: var(--color-focus);
+			outline-color: var(--color-trend-red);
 		}
 		to {
 			outline-color: transparent;
@@ -191,14 +163,14 @@
 
 	/* No fade for readers who asked motion to stop: the ring holds, then goes. */
 	@media (prefers-reduced-motion: reduce) {
-		article.item-landed {
+		article.card.item-landed {
 			animation: none;
 		}
 	}
 
-	/* A 44px hit area for a control whose visible mark is smaller (a text link in
-	   a card footer, a one-line title). The area is a pseudo-element centred on
-	   the control, so the layout does not grow. */
+	/* A 44px hit area for a control whose visible mark is smaller. The area is
+	   an invisible pseudo-element centred on the control, so nothing is resized
+	   or moved. */
 	.tap {
 		position: relative;
 	}
@@ -206,39 +178,20 @@
 	.tap::after {
 		content: '';
 		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: max(100%, 44px);
-		height: max(100%, 44px);
-		transform: translate(-50%, -50%);
+		/* Each side reaches out by half of whatever the control lacks to 44px. */
+		inset: min(0px, calc(50% - 22px));
 	}
 
-	/* Small labelled meta line: section counts, sources, timestamps. */
-	.meta {
-		@apply text-sm text-trend-gray-600 dark:text-trend-gray-400;
-	}
-
-	/* A wrapping run of facts separated by middle dots. Each dot hangs to the
-	   left of its item, so the dot of an item that wraps to a new line falls
-	   outside the box and is clipped: no dot ever starts or ends a line. */
-	.dot-list {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		column-gap: 1.125rem;
-		row-gap: 0.25rem;
-		overflow: hidden;
-	}
-
-	.dot-list > * {
+	/* The same for a link that is the only content of a heading (an item
+	   title): the area covers the heading block, grown to 44px tall. */
+	.tap-block {
 		position: relative;
 	}
 
-	.dot-list > * + *::before {
-		content: '\00b7';
+	.tap-block > a::after {
+		content: '';
 		position: absolute;
-		left: -0.7rem;
-		opacity: 0.7;
+		inset: min(0px, calc(50% - 22px)) 0;
 	}
 }
 
@@ -246,19 +199,24 @@
 	/* Summary prose styling - for formatted markdown content */
 	.prose-summary {
 		@apply text-trend-gray-700 dark:text-trend-gray-300;
-		/* A long URL or token breaks instead of widening the page on a phone. */
-		overflow-wrap: anywhere;
 	}
 
 	.prose-summary h2 {
 		@apply font-bold text-trend-gray-800 dark:text-trend-gray-100 text-lg mt-5 mb-2;
 	}
 
-	/* Sub-headings take the size of the text they sit in (the summary runs larger
-	   on desktop) and separate by weight and by the space above them. */
-	.prose-summary h3,
+	.prose-summary h3 {
+		@apply font-semibold text-trend-gray-800 dark:text-trend-gray-100 text-base mt-4 mb-2;
+	}
+
 	.prose-summary h4 {
-		@apply font-semibold text-trend-gray-900 dark:text-white mt-6 mb-2;
+		@apply font-semibold text-trend-gray-800 dark:text-trend-gray-100 text-base mt-4 mb-2;
+	}
+
+	/* Summary sub-headings are re-levelled to <h3> for the outline
+	   (+page.svelte); one that was an <h2> keeps the <h2> look. */
+	.prose-summary h3.was-h2 {
+		@apply font-bold text-lg mt-5;
 	}
 
 	.prose-summary h2:first-child,
@@ -272,24 +230,23 @@
 	}
 
 	.prose-summary ul {
-		@apply my-2 pl-5 space-y-1.5 list-disc;
+		@apply my-2 pl-5 space-y-1 list-disc;
 	}
 
 	.prose-summary li {
 		@apply text-trend-gray-700 dark:text-trend-gray-300;
 	}
 
-	/* Links stay red and underlined: the dense linking of claims to items is the
-	   point of a summary. --color-link is the red that reaches 4.5:1 in each
-	   theme; the underline is the same colour, set a little lower. */
 	.prose-summary a {
-		@apply text-link hover:text-link-hover underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.18em;
+		@apply text-trend-red hover:text-guardian-red underline;
 	}
 
-	.prose-summary a:hover {
-		text-decoration-thickness: 2px;
+	/* Internal links (to items on our site) - WCAG compliant contrast */
+	.prose-summary a.internal-link {
+		@apply text-trend-red/90 underline decoration-trend-red/50
+		       hover:text-trend-red hover:decoration-trend-red
+		       dark:text-red-300 dark:decoration-red-300/60
+		       dark:hover:text-red-200 dark:hover:decoration-red-200;
 	}
 
 	/* Keep link color for bold text inside links */
@@ -298,19 +255,7 @@
 	}
 
 	.prose-summary p {
-		@apply mb-3 text-trend-gray-700 dark:text-trend-gray-300;
-		text-wrap: pretty;
-	}
-
-	/* Quieter running text: item excerpts under the analysis. */
-	.prose-summary.prose-quiet,
-	.prose-summary.prose-quiet p,
-	.prose-summary.prose-quiet li {
-		@apply text-trend-gray-600 dark:text-trend-gray-400;
-	}
-
-	.prose-summary.prose-quiet p {
-		@apply mb-2;
+		@apply mb-3 leading-relaxed text-trend-gray-700 dark:text-trend-gray-300;
 	}
 
 	/* Inline code. `.prose` blocks get this from @tailwindcss/typography;
@@ -324,6 +269,11 @@
 
 	.prose-summary p:last-child {
 		@apply mb-0;
+	}
+
+	/* Text gradient */
+	.text-gradient {
+		@apply bg-gradient-to-r from-trend-red to-guardian-red bg-clip-text text-transparent;
 	}
 
 	/* Scroll shadows */

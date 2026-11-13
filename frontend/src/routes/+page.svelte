@@ -6,13 +6,11 @@
 	import {
 		currentDate,
 		availableDates,
-		navigation,
 		isLoading as storeLoading,
 		resolveLatestDate
 	} from '$lib/stores/dateStore';
 	import { loadDaySummary, loadCategoryData, preloadAdjacentDates } from '$lib/services/dataLoader';
 	import { parseDate, formatDate } from '$lib/services/dateUtils';
-	import { formatCount } from '$lib/services/itemDisplay';
 	import type { DaySummary, CategoryData, Category } from '$lib/types';
 	import { CATEGORY_CONFIG } from '$lib/types';
 	import DateNavigator from '$lib/components/calendar/DateNavigator.svelte';
@@ -139,9 +137,9 @@
 		requestAnimationFrame(attempt);
 	}
 
-	// Show the reader which item they landed on: a ring that fades (app.css) and
-	// focus on the item, so Tab and j/k carry on from it. Focus is also what opens
-	// a compact row (NewsCard). Only items: other hash targets are left alone.
+	// Show the reader which card they landed on: a ring that fades (app.css) and
+	// focus on the card, so Tab and j/k carry on from it. Only item cards — other
+	// hash targets are left alone.
 	let landedTimer: ReturnType<typeof setTimeout> | undefined;
 
 	function markLanded(el: HTMLElement): void {
@@ -303,10 +301,12 @@
 	}
 
 	// Summaries arrive with <h4> (sometimes <h2>) sub-headings and sit under an
-	// <h2> on the page. Re-level them to <h3> so the outline has no gaps; the
-	// styles for h3 and h4 are the same, so nothing changes to the eye.
+	// <h2> on the page. Re-level them to <h3> so the outline has no gaps; each
+	// keeps a class that pins the look of the level it came from (app.css).
 	function sequenceHeadings(html: string): string {
-		return html.replace(/<(\/?)h[2-4](\s[^>]*)?>/gi, '<$1h3>');
+		return html.replace(/<(\/?)h([2-4])(\s[^>]*)?>/gi, (_m, close, level) =>
+			close ? '</h3>' : `<h3 class="was-h${level}">`
+		);
 	}
 
 	$: executiveSummaryHtml = summary
@@ -320,17 +320,17 @@
 			)
 		: '';
 
-	$: longDate = effectiveDate ? formatDate(effectiveDate, 'EEEE, MMMM d, yyyy') : '';
 	// A date the site has never published: say so, rather than "failed to load".
 	$: unknownDate =
 		!!effectiveDate && $availableDates.length > 0 && !$availableDates.includes(effectiveDate);
+	$: longDate = effectiveDate ? formatDate(effectiveDate, 'EEEE, MMMM d, yyyy') : '';
 </script>
 
 <svelte:head>
 	{#if categoryParam && config}
-		<title>{config.title}, {effectiveDate ? formatDate(effectiveDate) : 'Latest'} | AI News Daily</title>
+		<title>{config.title} - {effectiveDate || 'Latest'} | AATF AI News Aggregator</title>
 	{:else}
-		<title>AI News Daily | AATF</title>
+		<title>AATF AI News Aggregator</title>
 	{/if}
 </svelte:head>
 
@@ -340,48 +340,41 @@
      so mounting it here scopes it to this route. -->
 <LinkPreview fallbackDate={effectiveDate} />
 
-<!-- A screen tall while the report loads, so the footer is not in view and
-     then pushed away when the report arrives (the largest measured layout shift). -->
-<div
-	class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10 sm:pt-6 sm:pb-12"
-	class:min-h-screen={loading}
->
-	<!-- Date Navigator with coverage info. On the overview its date is the <h1>. -->
-	<div class="mb-5 sm:mb-6">
-		<DateNavigator coverageDate={summary?.coverage_date} heading={!categoryParam} />
-	</div>
-
+<!-- A screen tall while the report loads, so the footer is not shown and then
+     pushed away when the report arrives. -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" class:min-h-screen={loading}>
 	{#if categoryParam && config}
 		<!-- Category View Header -->
-		<header class="mb-8">
-			<a
-				href={overviewHref}
-				class="tap inline-flex items-center gap-1 text-sm font-medium text-link hover:text-link-hover transition-colors"
-			>
-				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-				</svg>
-				Back to the overview
-			</a>
-			<div class="flex items-center gap-3 mt-3">
-				<span
-					class="w-3 h-3 rounded-full flex-none"
-					style="background-color: {config.color}"
-					aria-hidden="true"
-				></span>
-				<h1 class="text-2xl font-bold leading-tight text-trend-gray-900 dark:text-white">
-					{config.title}
-				</h1>
+		<div
+			class="rounded-xl p-6 mb-8 text-white"
+			style="background: linear-gradient(135deg, {config.color} 0%, {config.color}dd 100%)"
+		>
+			<div class="flex items-center gap-3 mb-2">
+				<a
+					href={overviewHref}
+					class="tap text-white/80 hover:text-white transition-colors"
+				>
+					&larr; Back
+				</a>
 			</div>
-			<!-- Always rendered, so the count arriving with the data moves nothing. -->
-			<p class="meta mt-1 min-h-[1.25rem]">
-				{#if categoryData}
-					{formatCount(categoryData.total_items)}
-					{categoryData.total_items === 1 ? 'item' : 'items'} in the report for {longDate}
-				{/if}
-			</p>
-		</header>
+			<h1 class="text-2xl font-bold">{config.title}</h1>
+			{#if categoryData}
+				<p class="text-white/80 mt-1">{categoryData.total_items} items for {effectiveDate}</p>
+			{:else if loading}
+				<!-- Holds the line's space so the count arriving moves nothing. -->
+				<p class="mt-1 invisible" aria-hidden="true">&nbsp;</p>
+			{/if}
+		</div>
 	{/if}
+
+	<!-- Date Navigator with coverage info -->
+	<div class="mb-8">
+		<DateNavigator
+			coverageDate={summary?.coverage_date}
+			heading={!categoryParam}
+			reserveCoverage={loading}
+		/>
+	</div>
 
 	{#if loading}
 		<div class="py-20">
@@ -401,35 +394,26 @@
 		<!-- Notice Banner (e.g., weekend arXiv notice) -->
 		{#if categoryData.notice}
 			<div
-				class="mb-6 p-4 rounded-lg border {categoryData.notice.type === 'info'
-					? 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-100'
-					: 'bg-amber-50 border-amber-300 text-amber-900 dark:bg-amber-950 dark:border-amber-800 dark:text-amber-100'}"
-				role="note"
+				class="mb-6 p-4 rounded-lg border-l-4 {categoryData.notice.type === 'info'
+					? 'bg-blue-50 border-blue-400 text-blue-800 dark:bg-blue-900/30 dark:border-blue-500 dark:text-blue-200'
+					: 'bg-amber-50 border-amber-400 text-amber-800 dark:bg-amber-900/30 dark:border-amber-500 dark:text-amber-200'}"
 			>
 				<div class="flex items-start gap-3">
 					<svg
 						class="w-5 h-5 flex-shrink-0 mt-0.5"
+						aria-hidden="true"
 						fill="currentColor"
 						viewBox="0 0 20 20"
-						aria-hidden="true"
 					>
-						{#if categoryData.notice.type === 'info'}
-							<path
-								fill-rule="evenodd"
-								d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-								clip-rule="evenodd"
-							/>
-						{:else}
-							<path
-								fill-rule="evenodd"
-								d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-								clip-rule="evenodd"
-							/>
-						{/if}
+						<path
+							fill-rule="evenodd"
+							d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+							clip-rule="evenodd"
+						/>
 					</svg>
 					<div>
 						<p class="font-semibold">{categoryData.notice.title}</p>
-						<p class="mt-1 text-sm">{categoryData.notice.message}</p>
+						<p class="mt-1 text-sm opacity-90">{categoryData.notice.message}</p>
 					</div>
 				</div>
 			</div>
@@ -438,63 +422,57 @@
 		{#if categoryData.items.length === 0}
 			<EmptyState
 				title="No {config?.title.toLowerCase()} found"
-				message="No items in this category for {longDate}."
+				message="No items in this category for {effectiveDate}."
 			/>
 		{:else}
 			<!-- Category Summary -->
 			{#if categoryData.category_summary}
-				<section class="mb-10">
-					<div class="card">
-						<h2 class="text-xl font-bold text-trend-gray-900 dark:text-white mb-3">
+				<section class="mb-8">
+					<div class="card border-l-4" style="border-left-color: {config?.color}">
+						<h2 class="font-semibold text-trend-gray-800 dark:text-trend-gray-100 mb-3">
 							{config?.title} Summary
 						</h2>
-						<div class="prose-summary leading-7">
+						<div class="prose-summary max-w-none">
 							{@html categorySummaryHtml}
 						</div>
 					</div>
 				</section>
 			{/if}
 
-			<!-- Themes: a plain list. They are labels, not filters. -->
+			<!-- Themes -->
 			{#if categoryData.themes && categoryData.themes.length > 0}
-				<section class="mb-10">
-					<h2 class="text-xl font-bold text-trend-gray-900 dark:text-white mb-3">
+				<section class="mb-8">
+					<h2 class="font-semibold text-trend-gray-800 dark:text-trend-gray-100 mb-4">
 						Key Themes
 					</h2>
-					<ul class="flex flex-wrap gap-x-6 gap-y-2 text-trend-gray-800 dark:text-trend-gray-200">
+					<div class="flex flex-wrap gap-2">
 						{#each categoryData.themes as theme}
-							<li>
-								{theme.name}
-								<span class="meta tabular-nums">
-									{formatCount(theme.item_count)}<span class="sr-only">
-										{theme.item_count === 1 ? 'item' : 'items'}</span>
-								</span>
-							</li>
+							<span
+								class="px-3 py-1.5 rounded-full text-sm font-medium"
+								style="background-color: {config?.color}20; color: {config?.color}"
+							>
+								{theme.name} ({theme.item_count})
+							</span>
 						{/each}
-					</ul>
+					</div>
 				</section>
 			{/if}
 
 			<!-- All Items -->
 			<section>
-				<h2 class="text-xl font-bold text-trend-gray-900 dark:text-white mb-5">
-					All Items
-					<span class="meta font-normal ml-1">{formatCount(categoryData.items.length)}</span>
+				<h2 class="font-semibold text-trend-gray-800 dark:text-trend-gray-100 mb-6">
+					All Items ({categoryData.items.length})
 				</h2>
-				<NewsList
-					items={categoryData.items}
-					category={categoryParam}
-					date={effectiveDate || ''}
-					banded
-				/>
+				<NewsList items={categoryData.items} category={categoryParam} date={effectiveDate || ''} />
 			</section>
 		{/if}
 	{:else if summary}
 		<!-- Overview View -->
 		<!-- Hero Section -->
-		<div class="mb-8">
+		<section class="mb-8">
 			<HeroSection
 				date={summary.date}
+				coverageDate={summary.coverage_date}
 				totalItems={summary.total_items_analyzed}
 				heroImageUrl={summary.hero_image_url ? dataUrl(summary.hero_image_url) : null}
 				collectionStatus={summary.collection_status?.overall || 'success'}
@@ -504,15 +482,20 @@
 				{replayUrl}
 				{replayPending}
 			/>
-		</div>
+		</section>
 
 		<!-- Executive Summary -->
-		<section id="executive-summary" class="mb-12 scroll-mt-20">
-			<div class="card">
-				<h2 class="text-xl font-bold text-trend-gray-900 dark:text-white mb-4">
-					Executive Summary
-				</h2>
-				<div class="prose-summary leading-7">
+		<section class="mb-12">
+			<div class="card border-l-4 border-trend-red dark:border-trend-red">
+				<div class="flex items-center justify-between mb-4">
+					<h2 class="text-xl font-bold text-trend-gray-800 dark:text-trend-gray-100">
+						Executive Summary
+					</h2>
+					<span class="text-sm text-trend-gray-500 dark:text-trend-gray-400">
+						{summary.total_items_analyzed} items analyzed
+					</span>
+				</div>
+				<div class="prose-summary max-w-none">
 					{@html executiveSummaryHtml}
 				</div>
 			</div>
@@ -520,8 +503,8 @@
 
 		<!-- Top Topics -->
 		{#if summary.top_topics && summary.top_topics.length > 0}
-			<section id="top-topics" class="mb-12 scroll-mt-20">
-				<h2 class="text-xl font-bold text-trend-gray-900 dark:text-white mb-5">
+			<section class="mb-12">
+				<h2 class="text-xl font-bold text-trend-gray-800 dark:text-trend-gray-100 mb-6">
 					Top Topics Today
 				</h2>
 				<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -536,27 +519,27 @@
 		{#each validCategories as category}
 			{@const catSummary = summary.categories[category]}
 			{#if catSummary && catSummary.top_items.length > 0}
-				<section id="section-{category}" class="mb-12 scroll-mt-20">
-					<div class="flex items-center justify-between gap-4 mb-5">
-						<div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 min-w-0">
-							<h2 class="flex items-center gap-2.5 text-xl font-bold text-trend-gray-900 dark:text-white">
-								<span
-									class="w-3 h-3 rounded-full flex-none"
-									style="background-color: {CATEGORY_CONFIG[category].color}"
-									aria-hidden="true"
-								></span>
+				<section class="mb-12">
+					<div class="flex items-center justify-between mb-6">
+						<div class="flex items-center gap-3">
+							<span
+								aria-hidden="true"
+								class="w-3 h-3 rounded-full"
+								style="background-color: {CATEGORY_CONFIG[category].color}"
+							></span>
+							<h2 class="text-xl font-bold text-trend-gray-800 dark:text-trend-gray-100">
 								{CATEGORY_CONFIG[category].title}
 							</h2>
-							<span class="meta">
-								{formatCount(catSummary.count)} {catSummary.count === 1 ? 'item' : 'items'}
+							<span class="text-sm text-trend-gray-500">
+								({catSummary.count} items)
 							</span>
 						</div>
 						<a
 							href={categoryHref(category)}
 							aria-label="View all {CATEGORY_CONFIG[category].title}"
-							class="tap flex-none text-sm font-medium text-link hover:text-link-hover transition-colors"
+							class="tap text-sm font-medium text-trend-red hover:text-guardian-red transition-colors"
 						>
-							View All <span aria-hidden="true">&rarr;</span>
+							View All &rarr;
 						</a>
 					</div>
 
@@ -564,80 +547,10 @@
 				</section>
 			{/if}
 		{/each}
-
-		<!-- Page end: where to go from here. Real destinations only. -->
-		<nav
-			aria-label="Continue"
-			class="mt-16 pt-6 border-t border-trend-gray-300 dark:border-trend-gray-700"
-		>
-			<p class="meta mb-3">End of the report for {longDate}.</p>
-			<ul class="page-end">
-				{#if $navigation.previousDate}
-					<li>
-						<a href="/?date={$navigation.previousDate}">
-							<span class="page-end-title">Previous report</span>
-							<span class="meta">{formatDate($navigation.previousDate, 'EEEE, MMMM d, yyyy')}</span>
-						</a>
-					</li>
-				{/if}
-				{#if replayUrl}
-					<li>
-						<a href={replayUrl}>
-							<span class="page-end-title">Watch the replay</span>
-							<span class="meta">The pipeline run that produced this report</span>
-						</a>
-					</li>
-				{/if}
-				<li>
-					<a href="/feeds">
-						<span class="page-end-title">Subscribe by feed</span>
-						<span class="meta">Atom feeds of the daily report</span>
-					</a>
-				</li>
-				<li>
-					<a href="/archive">
-						<span class="page-end-title">Browse the archive</span>
-						<span class="meta">
-							{#if $availableDates.length > 0}
-								{formatCount($availableDates.length)} daily reports
-							{:else}
-								Every daily report
-							{/if}
-						</span>
-					</a>
-				</li>
-			</ul>
-		</nav>
 	{:else}
 		<EmptyState
-			title="No report for this date"
-			message={longDate ? `Nothing was published for ${longDate}.` : 'No report is available yet.'}
-			actionHref="/"
-			actionLabel="Go to the latest report"
+			title="No data available"
+			message="Run the pipeline to generate news data."
 		/>
 	{/if}
 </div>
-
-<style>
-	.page-end {
-		display: grid;
-		gap: 0.25rem 2rem;
-		grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-	}
-	.page-end a {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		min-height: 44px;
-		padding: 0.375rem 0;
-	}
-	.page-end-title {
-		font-weight: 600;
-		color: var(--color-link);
-	}
-	.page-end a:hover .page-end-title {
-		color: var(--color-link-hover);
-		text-decoration: underline;
-		text-underline-offset: 0.18em;
-	}
-</style>

@@ -9,14 +9,17 @@
 		goToNextDate,
 		goToLatestDate
 	} from '$lib/stores/dateStore';
-	import { formatDate } from '$lib/services/dateUtils';
+	import { formatDate, getPreviousDay } from '$lib/services/dateUtils';
 	import { shortcutAllowed } from '$lib/services/shortcuts';
 
 	// Optional coverage date prop from parent
 	export let coverageDate: string | undefined = undefined;
-	// On the overview the report date is the view's <h1>. Category pages name
-	// the category in their own <h1>, so there the date is plain text.
+	// On the overview the report date is the view's <h1> (it looks the same).
+	// Category pages name the category in their own <h1>.
 	export let heading: boolean = false;
+	// While the report loads, hold the coverage line's space so its arrival
+	// moves nothing. Coverage is the day before the report date.
+	export let reserveCoverage: boolean = false;
 
 	$: dateDisplay = $currentDate ? formatDate($currentDate, 'EEEE, MMMM d, yyyy') : '';
 	$: coverageDisplay = coverageDate ? formatDate(coverageDate, 'EEEE, MMMM d, yyyy') : '';
@@ -24,6 +27,10 @@
 	// "Latest" then would flash on every older report.
 	$: datesKnown = $availableDates.length > 0;
 	$: isLatest = datesKnown && !$navigation.hasNext;
+
+	$: expectedCoverage = $currentDate
+		? formatDate(getPreviousDay($currentDate), 'EEEE, MMMM d, yyyy')
+		: '';
 
 	// Read current category from URL to preserve it during navigation
 	$: currentCategory = browser ? $page.url.searchParams.get('category') : null;
@@ -46,13 +53,16 @@
 
 <svelte:window on:keydown={handleWindowKeydown} />
 
-<div class="flex items-center justify-between gap-2 sm:gap-4">
+<div class="flex items-center justify-between gap-4">
 	<!-- Previous button -->
 	<button
 		type="button"
 		on:click={() => goToPreviousDate(currentCategory || undefined)}
 		disabled={!$navigation.hasPrevious}
-		class="date-arrow {$navigation.hasPrevious ? 'is-enabled' : ''}"
+		class="tap p-2 rounded-lg transition-colors
+		       {$navigation.hasPrevious
+			? 'hover:bg-trend-gray-200 dark:hover:bg-trend-gray-700 text-trend-gray-700 dark:text-trend-gray-300'
+			: 'text-trend-gray-400 cursor-not-allowed'}"
 		aria-label="Previous day"
 		aria-keyshortcuts="ArrowLeft"
 		title="Previous day (left arrow)"
@@ -71,26 +81,29 @@
 	</button>
 
 	<!-- Date display -->
-	<div class="text-center flex-1 min-w-0">
-		<div class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 min-h-[1.75rem]">
+	<div class="text-center flex-1">
+		<div>
 			<svelte:element
-				this={heading ? 'h1' : 'p'}
-				class="text-xl sm:text-2xl font-bold leading-tight text-trend-gray-900 dark:text-white"
+				this={heading ? 'h1' : 'span'}
+				class="inline font-medium text-trend-gray-800 dark:text-trend-gray-200"
 			>
 				{dateDisplay}
 			</svelte:element>
 			{#if isLatest}
-				<span class="text-xs font-medium bg-brand-strong text-white px-2 py-0.5 rounded-full">
+				<span class="ml-2 text-xs bg-trend-red text-white px-2 py-0.5 rounded-full">
 					Latest
 				</span>
 			{/if}
 		</div>
-		<!-- Always rendered, so the line arriving with the data moves nothing. -->
-		<p class="meta mt-1 min-h-[1.25rem]">
-			{#if coverageDisplay}
+		{#if coverageDisplay}
+			<div class="text-sm text-trend-gray-500 dark:text-trend-gray-400 mt-1">
 				Coverage: {coverageDisplay}, 00:00–23:59 ET
-			{/if}
-		</p>
+			</div>
+		{:else if reserveCoverage && expectedCoverage}
+			<div class="text-sm mt-1 invisible" aria-hidden="true">
+				Coverage: {expectedCoverage}, 00:00–23:59 ET
+			</div>
+		{/if}
 	</div>
 
 	<!-- Next button -->
@@ -98,7 +111,10 @@
 		type="button"
 		on:click={() => goToNextDate(currentCategory || undefined)}
 		disabled={!$navigation.hasNext}
-		class="date-arrow {$navigation.hasNext ? 'is-enabled' : ''}"
+		class="tap p-2 rounded-lg transition-colors
+		       {$navigation.hasNext
+			? 'hover:bg-trend-gray-200 dark:hover:bg-trend-gray-700 text-trend-gray-700 dark:text-trend-gray-300'
+			: 'text-trend-gray-400 cursor-not-allowed'}"
 		aria-label="Next day"
 		aria-keyshortcuts="ArrowRight"
 		title="Next day (right arrow)"
@@ -118,43 +134,13 @@
 </div>
 
 {#if datesKnown && $navigation.hasNext}
-	<div class="text-center mt-1">
+	<div class="text-center mt-2">
 		<button
 			type="button"
 			on:click={() => goToLatestDate(currentCategory || undefined)}
-			class="tap text-sm font-medium text-link hover:text-link-hover transition-colors"
+			class="tap text-sm text-trend-red hover:text-guardian-red transition-colors"
 		>
-			Jump to latest <span aria-hidden="true">&rarr;</span>
+			Jump to latest &rarr;
 		</button>
 	</div>
 {/if}
-
-<style>
-	.date-arrow {
-		flex: none;
-		display: grid;
-		place-items: center;
-		width: 44px;
-		height: 44px;
-		border-radius: 0.5rem;
-		color: #737373;
-		cursor: not-allowed;
-		transition: background-color 200ms;
-	}
-	.date-arrow.is-enabled {
-		color: #404040;
-		cursor: pointer;
-	}
-	.date-arrow.is-enabled:hover {
-		background: #e5e5e5;
-	}
-	:global(.dark) .date-arrow {
-		color: #737373;
-	}
-	:global(.dark) .date-arrow.is-enabled {
-		color: #d4d4d4;
-	}
-	:global(.dark) .date-arrow.is-enabled:hover {
-		background: #404040;
-	}
-</style>
