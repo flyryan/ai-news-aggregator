@@ -93,7 +93,7 @@
 
 						<!-- Score indicator -->
 						<span
-							class="text-xs px-1.5 py-0.5 rounded bg-trend-gray-100 dark:bg-trend-gray-700 text-trend-gray-500"
+							class="text-xs px-1.5 py-0.5 rounded bg-trend-gray-100 dark:bg-trend-gray-700 text-trend-gray-500 dark:text-trend-gray-300"
 							title="Importance score: {Math.round(doc.importance)}"
 						>
 							{Math.round(doc.importance)}
