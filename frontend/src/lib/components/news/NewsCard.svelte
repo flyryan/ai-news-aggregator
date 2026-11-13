@@ -53,7 +53,7 @@
 			: category === 'reddit'
 				? 'View Discussion'
 				: category === 'social'
-					? 'Read More'
+					? 'View Post'
 					: 'Read the Article';
 
 	$: importanceTierClass =
