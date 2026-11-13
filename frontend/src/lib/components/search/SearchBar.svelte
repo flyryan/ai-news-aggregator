@@ -122,6 +122,10 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
+		// Keys pressed while an IME composes text belong to the IME: Enter commits
+		// the composition, arrows pick a candidate. 229 covers Safari, which sends
+		// the Enter keydown after compositionend.
+		if (event.isComposing || event.keyCode === 229) return;
 		switch (event.key) {
 			case 'ArrowDown':
 				event.preventDefault();
@@ -219,6 +223,7 @@
 
 			{#if query}
 				<button
+					on:mousedown|preventDefault
 					type="button"
 					on:click={clearSearch}
 					class="tap absolute right-3 top-1/2 -translate-y-1/2 text-trend-gray-400 hover:text-trend-gray-600"
@@ -276,6 +281,7 @@
 					Search is unavailable: the search index could not be loaded.
 					<button
 						type="button"
+						on:mousedown|preventDefault
 						on:click={loadIndex}
 						class="font-medium text-trend-red-text hover:text-guardian-red dark:text-red-300 dark:hover:text-red-200 underline"
 					>

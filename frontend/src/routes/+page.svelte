@@ -335,7 +335,16 @@
 	{/if}
 </svelte:head>
 
-<svelte:window on:keydown={handleWindowKeydown} />
+<!-- A link that differs from the current URL only by its hash (the preview's
+     "Open card", a summary link to an item on this page) is left to the browser
+     by SvelteKit, so afterNavigate never runs for it. -->
+<svelte:window
+	on:keydown={handleWindowKeydown}
+	on:hashchange={() => {
+		userScrolledDuringNav = false;
+		scrollToHashTarget(window.location.hash);
+	}}
+/>
 
 <!-- Previews for the enricher's internal links. Listens at the document level,
      so mounting it here scopes it to this route. -->

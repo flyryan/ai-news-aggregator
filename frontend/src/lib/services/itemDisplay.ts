@@ -15,10 +15,10 @@ export function formatCount(n: number | null | undefined): string {
  * render time, in plain text and in pre-rendered HTML alike.
  */
 const ARXIV_PREFIX =
-	/^(\s*(?:<p>)?\s*)arXiv:\d{4}\.\d{4,5}(?:v\d+)?\s+Announce Type:\s*[\w-]+\s+Abstract:\s*/i;
+	/^(\s*(?:<p>\s*)?)arXiv:\d{4}\.\d{4,5}(?:v\d+)?\s+Announce Type:\s*[\w-]+\s+Abstract:\s*/i;
 
 export function stripArxivBoilerplate(text: string | undefined | null): string {
-	if (!text) return '';
+	if (typeof text !== 'string' || !text) return '';
 	return text.replace(ARXIV_PREFIX, '$1');
 }
 
@@ -27,7 +27,7 @@ export function stripArxivBoilerplate(text: string | undefined | null): string {
  * gatherers' placeholder, not a name.
  */
 export function displayAuthor(author: string | undefined | null): string | null {
-	const name = (author ?? '').trim();
+	const name = typeof author === 'string' ? author.trim() : '';
 	if (!name || /^unknown$/i.test(name)) return null;
 	return name;
 }
