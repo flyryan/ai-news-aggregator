@@ -33,7 +33,16 @@ const config = {
 			mode: 'hash',
 			directives: {
 				'default-src': ['self'],
-				'script-src': ['self', 'https://static.cloudflareinsights.com/beacon.min.js'],
+				// Cloudflare Web Analytics. Cloudflare injects the beacon as
+				// beacon.min.js/v<hash>; a CSP source path without a trailing slash
+				// matches that exact path only, so the versioned URL needs the
+				// trailing-slash form (a path prefix). The bare form stays for the
+				// unversioned URL.
+				'script-src': [
+					'self',
+					'https://static.cloudflareinsights.com/beacon.min.js',
+					'https://static.cloudflareinsights.com/beacon.min.js/'
+				],
 				'style-src': ['self', 'unsafe-inline'],
 				'img-src': ['self', 'data:'],
 				'font-src': ['self'],
