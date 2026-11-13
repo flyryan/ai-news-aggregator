@@ -10,6 +10,7 @@
 	import Navigation from '$lib/components/layout/Navigation.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import { isPreview, previewLabel } from '$lib/services/dataBase';
+	import { announcement } from '$lib/stores/announcer';
 	import '../app.css';
 
 	// Draft banner. Read on mount: the attribute lives on <body>, which is not
@@ -45,6 +46,14 @@
 		await initializeDateStore();
 		updateModelMeta();
 	});
+
+	// Skip link: move focus into <main> without leaving a #hash in the URL (the
+	// report page treats a hash as an item to scroll to).
+	let mainElement: HTMLElement;
+	function skipToMain() {
+		mainElement?.focus({ preventScroll: true });
+		mainElement?.scrollIntoView({ block: 'start' });
+	}
 
 	// Keep the static social/description meta tags (app.html) in step with the
 	// current model. Prerendered pages bake a neutral fallback; once index.json
@@ -85,6 +94,7 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col">
+	<a href="#main" class="skip-link" on:click|preventDefault={skipToMain}>Skip to main content</a>
 	{#if showPreviewBanner}
 		<div class="preview-banner" role="status">
 			<strong>Draft.</strong>
@@ -94,14 +104,34 @@
 	<Header />
 	<Navigation />
 
-	<main class="flex-1">
+	<main id="main" tabindex="-1" bind:this={mainElement} class="flex-1 outline-none">
 		<slot />
 	</main>
 
 	<Footer />
+
+	<!-- One polite live region for the app; see $lib/stores/announcer. -->
+	<p class="sr-only" role="status" aria-live="polite">{$announcement}</p>
 </div>
 
 <style>
+	.skip-link {
+		position: absolute;
+		left: 0.5rem;
+		top: 0.5rem;
+		z-index: 70;
+		padding: 0.625rem 1rem;
+		border-radius: 0.5rem;
+		background: #fff;
+		color: #171717;
+		font-weight: 600;
+		box-shadow: 0 2px 10px rgb(0 0 0 / 0.3);
+		transform: translateY(-200%);
+	}
+	.skip-link:focus {
+		transform: none;
+	}
+
 	.preview-banner {
 		position: sticky;
 		top: 0;

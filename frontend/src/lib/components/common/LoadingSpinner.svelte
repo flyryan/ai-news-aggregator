@@ -10,6 +10,7 @@
 
 <div class="flex items-center justify-center" role="status" aria-label="Loading">
 	<svg
+		aria-hidden="true"
 		class="{sizeClasses[size]} animate-spin text-trend-red"
 		xmlns="http://www.w3.org/2000/svg"
 		fill="none"
