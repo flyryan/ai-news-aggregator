@@ -206,6 +206,34 @@
 		color: #666666;
 	}
 
+	/* The same dimming takes the category badge text under 4.5:1 (3.9 to 4.2
+	   in both themes), so on these cards it starts one step further from its
+	   tint. Each value is the nearest shade of its hue that passes at 90%. */
+	html:not(.dark) .card-importance-low .badge-news {
+		color: #2648e2;
+	}
+	html:not(.dark) .card-importance-low .badge-research {
+		color: #096949;
+	}
+	html:not(.dark) .card-importance-low .badge-social {
+		color: #805205;
+	}
+	html:not(.dark) .card-importance-low .badge-reddit {
+		color: #bb1010;
+	}
+	.dark .card-importance-low .badge-news {
+		color: #9cabf1;
+	}
+	.dark .card-importance-low .badge-research {
+		color: #11cc8e;
+	}
+	.dark .card-importance-low .badge-social {
+		color: #f6a823;
+	}
+	.dark .card-importance-low .badge-reddit {
+		color: #f68c8c;
+	}
+
 	/* Item cards take focus from the j/k shortcuts (see +page.svelte). */
 	article.card:focus-visible {
 		outline: 2px solid var(--color-trend-red);
