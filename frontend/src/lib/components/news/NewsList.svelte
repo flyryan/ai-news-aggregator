@@ -2,6 +2,7 @@
 	import type { NewsItem, Category } from '$lib/types';
 	import NewsCard from './NewsCard.svelte';
 	import EmptyState from '$lib/components/common/EmptyState.svelte';
+	import { formatCount } from '$lib/services/itemDisplay';
 
 	export let items: NewsItem[];
 	export let category: Category;
@@ -30,7 +31,7 @@
 		<div class="mt-6 text-center">
 			<slot name="view-all">
 				<span class="text-sm text-trend-gray-500">
-					Showing top {limit} of {totalCount ?? items.length} items
+					Showing top {limit} of {formatCount(totalCount ?? items.length)} items
 				</span>
 			</slot>
 		</div>

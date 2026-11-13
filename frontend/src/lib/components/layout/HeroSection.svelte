@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { formatDate, formatDayOfWeek } from '$lib/services/dateUtils';
+	import { formatCount } from '$lib/services/itemDisplay';
 
 	export let date: string;
 	export let coverageDate: string | undefined = undefined;
@@ -58,7 +59,7 @@
 						Coverage: {formattedCoverage}
 						{#if totalItems > 0}
 							<span class="mx-2">•</span>
-							{totalItems.toLocaleString()} items analyzed
+							{formatCount(totalItems)} items analyzed
 						{/if}
 						{#if modelDisplayName}
 							<span class="mx-2">•</span>

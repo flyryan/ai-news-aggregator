@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { NewsItem, Category } from '$lib/types';
-	import { CATEGORY_CONFIG } from '$lib/types';
 	import { formatRelativeTime } from '$lib/services/dateUtils';
 	import { markdownToHtml } from '$lib/services/markdown';
 	import { safeHtml } from '$lib/services/safeHtml';
 	import { isSafeUrl } from '$lib/services/sanitize';
+	import { displayAuthor, stripArxivBoilerplate } from '$lib/services/itemDisplay';
 	import CategoryBadge from './CategoryBadge.svelte';
 	import { announce } from '$lib/stores/announcer';
 
@@ -34,16 +34,17 @@
 		setTimeout(() => (copied = false), 2000);
 	}
 
-	$: config = CATEGORY_CONFIG[category];
 	$: safeUrl = isSafeUrl(item.url) ? item.url : undefined;
-	$: hasContent = item.content && item.content.length > 0;
-	$: truncatedContent = item.content?.slice(0, 300);
-	$: needsTruncation = item.content?.length > 300;
+	// The excerpt without arXiv's feed prefix; the published data keeps it.
+	$: content = stripArxivBoilerplate(item.content);
+	$: hasContent = content.length > 0;
+	$: needsTruncation = content.length > 300;
+	$: author = displayAuthor(item.author);
 	$: freshness = item.freshness;
 
 	// Use pre-rendered HTML if available, otherwise convert client-side
 	$: summaryHtml = item.summary_html || markdownToHtml(item.summary || '');
-	$: contentHtml = item.content_html || markdownToHtml(item.content || '');
+	$: contentHtml = stripArxivBoilerplate(item.content_html) || markdownToHtml(content);
 
 	// Determine importance tier class
 	$: readLabel =
@@ -109,9 +110,9 @@
 				{freshness.label}
 			</span>
 		{/if}
-		{#if item.author}
+		{#if author}
 			<span aria-hidden="true">&middot;</span>
-			<span>{item.author}</span>
+			<span>{author}</span>
 		{/if}
 		{#if item.published}
 			<span aria-hidden="true">&middot;</span>

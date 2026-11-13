@@ -26,6 +26,7 @@
 	import { hasReplayData } from '$lib/services/replayLoader';
 	import { dataUrl } from '$lib/services/dataBase';
 	import { shortcutAllowed } from '$lib/services/shortcuts';
+	import { formatCount } from '$lib/services/itemDisplay';
 
 	// Data state
 	let summary: DaySummary | null = null;
@@ -359,7 +360,7 @@
 			</div>
 			<h1 class="text-2xl font-bold">{config.title}</h1>
 			{#if categoryData}
-				<p class="text-white/80 mt-1">{categoryData.total_items} items for {effectiveDate}</p>
+				<p class="text-white/80 mt-1">{formatCount(categoryData.total_items)} items for {effectiveDate}</p>
 			{:else if loading}
 				<!-- Holds the line's space so the count arriving moves nothing. -->
 				<p class="mt-1 invisible" aria-hidden="true">&nbsp;</p>
@@ -451,7 +452,7 @@
 								class="px-3 py-1.5 rounded-full text-sm font-medium"
 								style="background-color: {config?.color}20; color: {config?.color}"
 							>
-								{theme.name} ({theme.item_count})
+								{theme.name} ({formatCount(theme.item_count)})
 							</span>
 						{/each}
 					</div>
@@ -461,7 +462,7 @@
 			<!-- All Items -->
 			<section>
 				<h2 class="font-semibold text-trend-gray-800 dark:text-trend-gray-100 mb-6">
-					All Items ({categoryData.items.length})
+					All Items ({formatCount(categoryData.items.length)})
 				</h2>
 				<NewsList items={categoryData.items} category={categoryParam} date={effectiveDate || ''} />
 			</section>
@@ -492,7 +493,7 @@
 						Executive Summary
 					</h2>
 					<span class="text-sm text-trend-gray-500 dark:text-trend-gray-400">
-						{summary.total_items_analyzed} items analyzed
+						{formatCount(summary.total_items_analyzed)} items analyzed
 					</span>
 				</div>
 				<div class="prose-summary max-w-none">
@@ -531,7 +532,7 @@
 								{CATEGORY_CONFIG[category].title}
 							</h2>
 							<span class="text-sm text-trend-gray-500">
-								({catSummary.count} items)
+								({formatCount(catSummary.count)} items)
 							</span>
 						</div>
 						<a

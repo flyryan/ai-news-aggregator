@@ -3,6 +3,7 @@
 	import type { SearchResult, Category } from '$lib/types';
 	import { CATEGORY_CONFIG } from '$lib/types';
 	import { formatDate } from '$lib/services/dateUtils';
+	import { plainSnippet } from '$lib/services/itemDisplay';
 
 	export let results: SearchResult[];
 	export let selectedIndex: number = -1;
@@ -75,7 +76,7 @@
 							<!-- Summary preview -->
 							{#if doc.summary}
 								<p class="text-sm text-trend-gray-500 dark:text-trend-gray-400 line-clamp-2 mt-1">
-									{doc.summary}
+									{plainSnippet(doc.summary)}
 								</p>
 							{/if}
 
