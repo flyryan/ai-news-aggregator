@@ -166,7 +166,6 @@ export const CATEGORY_CONFIG: Record<
 		bgClass: string;
 		textClass: string;
 		badgeClass: string;
-		accentClass: string;
 	}
 > = {
 	news: {
@@ -176,8 +175,7 @@ export const CATEGORY_CONFIG: Record<
 		color: '#667eea',
 		bgClass: 'bg-category-news',
 		textClass: 'text-category-news',
-		badgeClass: 'badge-news',
-		accentClass: 'category-accent-news'
+		badgeClass: 'badge-news'
 	},
 	research: {
 		title: 'Research',
@@ -186,8 +184,7 @@ export const CATEGORY_CONFIG: Record<
 		color: '#10b981',
 		bgClass: 'bg-category-research',
 		textClass: 'text-category-research',
-		badgeClass: 'badge-research',
-		accentClass: 'category-accent-research'
+		badgeClass: 'badge-research'
 	},
 	social: {
 		title: 'Social Media',
@@ -196,8 +193,7 @@ export const CATEGORY_CONFIG: Record<
 		color: '#f59e0b',
 		bgClass: 'bg-category-social',
 		textClass: 'text-category-social',
-		badgeClass: 'badge-social',
-		accentClass: 'category-accent-social'
+		badgeClass: 'badge-social'
 	},
 	reddit: {
 		title: 'Reddit Discussions',
@@ -206,7 +202,6 @@ export const CATEGORY_CONFIG: Record<
 		color: '#ef4444',
 		bgClass: 'bg-category-reddit',
 		textClass: 'text-category-reddit',
-		badgeClass: 'badge-reddit',
-		accentClass: 'category-accent-reddit'
+		badgeClass: 'badge-reddit'
 	}
 };

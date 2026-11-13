@@ -3,8 +3,9 @@
 </script>
 
 <button
+	type="button"
 	on:click={toggleTheme}
-	class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+	class="icon-button"
 	aria-label={$isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 	title={$isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 >
@@ -13,6 +14,7 @@
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			class="w-5 h-5"
+			aria-hidden="true"
 			fill="none"
 			viewBox="0 0 24 24"
 			stroke="currentColor"
@@ -29,6 +31,7 @@
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			class="w-5 h-5"
+			aria-hidden="true"
 			fill="none"
 			viewBox="0 0 24 24"
 			stroke="currentColor"

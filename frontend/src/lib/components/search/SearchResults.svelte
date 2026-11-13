@@ -61,6 +61,7 @@
 					<div class="flex items-start gap-3">
 						<!-- Category indicator -->
 						<span
+							aria-hidden="true"
 							class="mt-1 w-2 h-2 rounded-full flex-shrink-0"
 							style="background-color: {config.color}"
 						></span>
@@ -73,13 +74,13 @@
 
 							<!-- Summary preview -->
 							{#if doc.summary}
-								<p class="text-sm text-trend-gray-500 dark:text-trend-gray-400 line-clamp-2 mt-1">
+								<p class="text-sm text-trend-gray-600 dark:text-trend-gray-400 line-clamp-2 mt-1">
 									{doc.summary}
 								</p>
 							{/if}
 
 							<!-- Metadata -->
-							<div class="flex items-center gap-2 mt-2 text-xs text-trend-gray-400">
+							<div class="flex items-center gap-2 mt-2 text-xs text-trend-gray-600 dark:text-trend-gray-400">
 								<span class="badge {config.badgeClass}">
 									{config.title}
 								</span>
@@ -91,7 +92,7 @@
 
 						<!-- Score indicator -->
 						<span
-							class="text-xs px-1.5 py-0.5 rounded bg-trend-gray-100 dark:bg-trend-gray-700 text-trend-gray-500"
+							class="text-xs px-1.5 py-0.5 rounded bg-trend-gray-100 dark:bg-trend-gray-700 text-trend-gray-700 dark:text-trend-gray-200 tabular-nums"
 							title="Importance score: {Math.round(doc.importance)}"
 						>
 							{Math.round(doc.importance)}
@@ -104,7 +105,7 @@
 
 	{#if results.length > 0}
 		<div class="px-4 py-2 border-t border-trend-gray-100 dark:border-trend-gray-700">
-			<p class="text-xs text-trend-gray-400 text-center">
+			<p class="text-xs text-trend-gray-600 dark:text-trend-gray-400 text-center">
 				{results.length} result{results.length === 1 ? '' : 's'} found
 			</p>
 		</div>
