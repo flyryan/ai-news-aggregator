@@ -25,6 +25,52 @@ logger = logging.getLogger(__name__)
 TWITTERAPI_IO_KEY = os.getenv('TWITTERAPI_IO_KEY', '')
 TWITTERAPI_IO_BASE = "https://api.twitterapi.io"
 
+# TwitterAPI.io rejects an advanced_search query longer than this with HTTP 400
+# ("query is too long (523 characters). The maximum length is 512 characters").
+# Chunks used to be a fixed 25 accounts; one of them came to 523 characters and
+# its 25 accounts were silently missing from every report until 2026-11-15.
+TWITTER_QUERY_MAX_CHARS = 512
+
+# A Twitter handle is 1-15 letters, digits or underscores. Anything else can
+# never match a `from:` clause, so it only spends query length.
+_TWITTER_HANDLE_RE = re.compile(r'[A-Za-z0-9_]{1,15}')
+
+
+def build_twitter_queries(
+    usernames: List[str],
+    since_date: str,
+    until_date: str,
+    max_chars: int = TWITTER_QUERY_MAX_CHARS,
+) -> List[str]:
+    """Pack `from:` clauses into as few search queries as fit under `max_chars`.
+
+    Each query is `(from:a OR from:b ...) since:D until:D`. Invalid handles are
+    dropped with a warning rather than sent, since they cannot match anything.
+    """
+    suffix = f" since:{since_date} until:{until_date}"
+    queries: List[str] = []
+    clauses: List[str] = []
+
+    def render(parts: List[str]) -> str:
+        return f"({' OR '.join(parts)}){suffix}"
+
+    for raw in usernames:
+        handle = raw.strip().lstrip('@')
+        if not _TWITTER_HANDLE_RE.fullmatch(handle):
+            logger.warning(
+                "Skipping invalid Twitter handle %r in twitter_accounts.txt "
+                "(handles are 1-15 letters, digits or underscores)", raw
+            )
+            continue
+        clause = f"from:{handle}"
+        if clauses and len(render(clauses + [clause])) > max_chars:
+            queries.append(render(clauses))
+            clauses = []
+        clauses.append(clause)
+    if clauses:
+        queries.append(render(clauses))
+    return queries
+
 
 class SocialGatherer(BaseGatherer):
     """Gathers posts from Twitter, Bluesky, and Mastodon."""
@@ -256,22 +302,19 @@ class SocialGatherer(BaseGatherer):
         if not usernames:
             return []
 
-        # Build search query chunks (max ~25 users per query)
-        max_users = 25
-        chunks = [usernames[i:i + max_users] for i in range(0, len(usernames), max_users)]
-
         # Format dates for search
         since_date = self.start_time.strftime('%Y-%m-%d')
         until_date = (self.end_time + timedelta(days=1)).strftime('%Y-%m-%d')
+
+        # Chunks are bounded by the API's query length, not an account count.
+        chunks = build_twitter_queries(usernames, since_date, until_date)
 
         headers = {
             "X-API-Key": TWITTERAPI_IO_KEY,
             "Content-Type": "application/json"
         }
 
-        for chunk_idx, chunk in enumerate(chunks):
-            from_clauses = [f"from:{u}" for u in chunk]
-            query = f"({' OR '.join(from_clauses)}) since:{since_date} until:{until_date}"
+        for chunk_idx, query in enumerate(chunks):
             logger.info(f"Twitter search query (chunk {chunk_idx + 1}/{len(chunks)})")
             chunk_error = None
 
