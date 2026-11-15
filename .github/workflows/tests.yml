@@ -59,6 +59,8 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'shadow_*_test.py' -v
       - name: Production Jev selection and replay contracts
         run: python3 -m unittest discover -s tests -p 'jev_*_test.py' -v
+      - name: A dead Mullvad tunnel never becomes the pipeline proxy (2026-11-15)
+        run: python3 -m unittest tests.mullvad_tunnel_workflow_test -v
 
   guard:
     name: Signature lockstep guard
