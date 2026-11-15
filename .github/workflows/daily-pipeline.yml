@@ -498,6 +498,10 @@ jobs:
           proxy_url="socks5h://10.64.0.1:1080"
           max_attempts="${MULLVAD_MAX_RELAY_ATTEMPTS:-6}"
           selected=""
+          # Last relay that returned an external IP through the SOCKS proxy,
+          # i.e. proved the tunnel actually carries traffic.
+          alive_relay=""
+          alive_conf=""
           up_conf=""
           attempt=0
           for conf in "${ordered[@]}"; do
@@ -522,6 +526,8 @@ jobs:
               up_conf=""
               continue
             fi
+            alive_relay="$relay"
+            alive_conf="$conf"
 
             # A blocked exit fails only at LessWrong, so probe LessWrong itself
             # (same request fingerprint as the gatherer's first-try direct path).
@@ -538,17 +544,34 @@ jobs:
           if [[ -n "$selected" ]]; then
             mkdir -p .mullvad-state
             printf '%s\n' "$selected" > .mullvad-state/known_good_relay
+          elif [[ -z "$alive_relay" ]]; then
+            # No relay returned an external IP: the tunnel itself is dead
+            # (expired Mullvad account, or a Mullvad-side outage), not merely
+            # LessWrong-blocked. Exporting the proxy anyway sent every source
+            # through a black hole on 2026-11-15 (news/research/social all 0,
+            # hero timed out). Run direct instead: most sources work from the
+            # runner IP, LessWrong probably won't.
+            echo "::error::No Mullvad relay returned an external IP in ${max_attempts} attempts; the tunnel has no connectivity (check the Mullvad account has not expired). Running this pipeline WITHOUT the proxy; LessWrong will likely collect 0 posts."
+            exit 0
           else
-            # Every probed relay is LessWrong-blocked. The tunnel still serves
-            # the rest of the pipeline's egress, so bring one up rather than
-            # running naked — but say so loudly, and keep the cached relay
-            # unchanged so a recovered exit is retried next run.
+            # Every relay that had connectivity is LessWrong-blocked. The
+            # tunnel still serves the rest of the pipeline's egress, so keep a
+            # working relay up rather than running naked — but say so loudly,
+            # and keep the cached relay unchanged so a recovered exit is
+            # retried next run. Only relays that proved connectivity are
+            # eligible, so a dead tunnel can never become the egress.
             echo "::warning::No Mullvad relay passed the LessWrong probe within ${max_attempts} attempts; LessWrong will likely collect 0 posts this run."
             if [[ -z "$up_conf" ]]; then
-              sudo wg-quick up "${ordered[0]}"
-              up_conf="${ordered[0]}"
+              sudo wg-quick up "$alive_conf"
+              up_conf="$alive_conf"
             fi
-            echo "Proceeding with relay $(basename "$up_conf" .conf) for general egress."
+            proxy_ip="$(curl -fsSL --max-time 20 --proxy "$proxy_url" https://am.i.mullvad.net/ip || true)"
+            if [[ -z "$proxy_ip" ]]; then
+              echo "::error::Relay ${alive_relay} lost connectivity on re-check; running this pipeline WITHOUT the proxy."
+              sudo wg-quick down "$up_conf" || true
+              exit 0
+            fi
+            echo "Proceeding with relay $(basename "$up_conf" .conf) ($proxy_ip) for general egress."
           fi
 
           {
