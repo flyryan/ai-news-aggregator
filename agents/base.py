@@ -655,10 +655,70 @@ class BaseGatherer(ABC):
             self.degradation_reasons.append(reason)
 
     def get_degradation(self) -> Optional[str]:
-        """One human-readable summary of why this source is short, or None."""
-        if not self.degradation_reasons:
+        """One human-readable summary of why this source is short, or None.
+
+        Combines what the gatherer noted itself with what its own per-unit steps
+        prove: a source key whose every recorded fetch failed is degraded even if
+        no code path remembered to say so (see `step_failure_reasons`).
+        """
+        reasons = list(self.degradation_reasons)
+        for reason in self.step_failure_reasons():
+            if reason not in reasons:
+                reasons.append(reason)
+        if not reasons:
             return None
-        return "; ".join(self.degradation_reasons)
+        return "; ".join(reasons)
+
+    # Gatherers whose status is better described some other way (the social
+    # gatherer reports per platform) opt out of deriving degradation from steps.
+    derive_failures_from_steps: bool = True
+
+    # Human label per step source key, for the "all N <label> fetches failed"
+    # message. Unlisted keys fall back to the key with underscores as spaces.
+    step_failure_labels: Dict[str, str] = {}
+
+    def step_failure_reasons(self) -> List[str]:
+        """One reason per source key whose every recorded step failed.
+
+        On 2026-11-15 a dead SOCKS proxy failed every RSS and research-blog fetch.
+        Each feed caught its own error and returned an empty list, so news and
+        research published as `success, count 0` -- indistinguishable from a quiet
+        day. A step that ran and failed is direct evidence; a source where *all* of
+        them failed collected nothing because it could not, not because nothing
+        happened.
+
+        Deliberately narrow:
+        - a key with no steps (arXiv skipped on a weekend) says nothing;
+        - one success among the steps (a quiet but reachable source) says nothing;
+        - a key whose steps were capped (`_source_steps_dropped`) says nothing,
+          because the unrecorded steps might have succeeded.
+        """
+        if not self.derive_failures_from_steps:
+            return []
+        with self._source_steps_lock:
+            snapshot = {key: list(entries) for key, entries in self.source_steps.items()}
+            dropped = dict(self._source_steps_dropped)
+        reasons = []
+        for key in sorted(snapshot):
+            entries = snapshot[key]
+            if not entries or dropped.get(key):
+                continue
+            if all(entry.get('status') == 'failed' for entry in entries):
+                label = self.step_failure_labels.get(key, key.replace('_', ' '))
+                n = len(entries)
+                reasons.append(
+                    f"all {n} {label} fetches failed" if n > 1 else f"the only {label} fetch failed"
+                )
+        return reasons
+
+    def degraded_status(self, item_count: int) -> str:
+        """Status for a source that reported degradation: 'partial' or 'failed'.
+
+        Default: failed only when nothing came back. Gatherers that aggregate
+        independent sub-sources (social) override this so one dead sub-source
+        beside quiet-but-healthy ones reads as partial, not failed.
+        """
+        return 'partial' if item_count else 'failed'
 
     @contextmanager
     def time_source(self, key: str):

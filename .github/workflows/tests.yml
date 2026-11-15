@@ -191,6 +191,11 @@ jobs:
         run: python3 -m unittest tests.partial_spend_capture_test -v
       - name: Reddit collection, publication and bounded analysis recovery
         run: python3 -m unittest tests.reddit_reliability_test tests.reddit_analysis_recovery_test tests.analysis_identity_test -v
+      # 2026-11-15: a dead SOCKS proxy failed every news, research and social
+      # fetch; each source reported success with 0 items and the report
+      # published with Reddit alone.
+      - name: A source whose every fetch failed is failed and blocks publication
+        run: python3 -m unittest tests.zero_source_gate_test -v
       # 2026-08-24: a provider rate-limit brownout 429'd 40 of 57 LLM calls.
       # The openai-chat path had no transport retry at all, a concurrency cap
       # was standing in for a rate limit, and the publish gate never looked at

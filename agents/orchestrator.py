@@ -1755,7 +1755,11 @@ class MainOrchestrator:
 
         if degradation:
             logger.warning(f"    {name} gatherer degraded: {degradation}")
-            return {'status': 'partial' if items else 'failed', 'count': len(items), 'error': degradation}
+            if hasattr(gatherer, 'degraded_status'):
+                status = gatherer.degraded_status(len(items))
+            else:
+                status = 'partial' if items else 'failed'
+            return {'status': status, 'count': len(items), 'error': degradation}
 
         return {'status': 'success', 'count': len(items), 'error': None}
 

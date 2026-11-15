@@ -56,9 +56,41 @@ class SocialGatherer(BaseGatherer):
 
         logger.info(f"Loaded {len(self.twitter_users)} Twitter, {len(self.bluesky_handles)} Bluesky, {len(self.mastodon_accounts)} Mastodon accounts")
 
+    # Social status is reported per platform (`collection_status`), which already
+    # knows the difference between a dead platform and a quiet one, so per-step
+    # inference is not needed here.
+    derive_failures_from_steps = False
+
     @property
     def category(self) -> str:
         return 'social'
+
+    def _enabled_platforms(self) -> List[str]:
+        return [p for p, row in self.collection_status.items() if row.get('status') != 'skipped']
+
+    def _note_platform_failures(self) -> None:
+        """Surface every failed platform as a source-level degradation.
+
+        Before 2026-11-15 the `social` row ignored its platforms entirely: Twitter,
+        Bluesky and Mastodon all failed behind a dead proxy and the source still
+        published as `success, count 0`.
+        """
+        for platform, row in self.collection_status.items():
+            if row.get('status') == 'failed':
+                self.note_degradation(f"{platform} failed: {row.get('error') or 'unknown error'}")
+
+    def degraded_status(self, item_count: int) -> str:
+        """Failed only when every enabled platform failed; otherwise partial.
+
+        One dead platform beside healthy ones (even quiet, 0-post ones) is a
+        thinner report, not a missing source.
+        """
+        enabled = self._enabled_platforms()
+        if not item_count and enabled and all(
+            self.collection_status[p].get('status') == 'failed' for p in enabled
+        ):
+            return 'failed'
+        return 'partial'
 
     async def gather(self) -> List[CollectedItem]:
         """Gather posts from all social platforms."""
@@ -119,6 +151,7 @@ class SocialGatherer(BaseGatherer):
 
         # Log collection status summary
         self._log_collection_summary()
+        self._note_platform_failures()
 
         # Save to file
         self.save_to_file(all_items, f'social_{self.target_date}.json')
@@ -161,13 +194,14 @@ class SocialGatherer(BaseGatherer):
             tweets = self._twitter_search(self.twitter_users)
             all_tweets.extend(tweets)
 
-            if all_tweets:
+            self.collection_status['twitter']['count'] = len(all_tweets)
+            # `_twitter_search` records 'failed' (every chunk errored) or 'partial'
+            # (some did) itself. Only a search that recorded neither is a success --
+            # overwriting it here is how "All 7 API requests failed" published as a
+            # green 0-tweet day on 2026-11-15. Zero tweets from clean requests is a
+            # quiet day, still a success.
+            if self.collection_status['twitter']['status'] not in ('failed', 'partial'):
                 self.collection_status['twitter']['status'] = 'success'
-                self.collection_status['twitter']['count'] = len(all_tweets)
-            else:
-                # Got 0 tweets - might be an API issue or just no recent tweets
-                self.collection_status['twitter']['status'] = 'success'
-                self.collection_status['twitter']['count'] = 0
 
             logger.info(f"Collected {len(all_tweets)} tweets from Twitter")
         except Exception as e:

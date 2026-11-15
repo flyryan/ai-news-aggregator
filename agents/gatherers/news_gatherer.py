@@ -43,6 +43,8 @@ class NewsGatherer(BaseGatherer):
     3. Deduplicates across both sources
     """
 
+    step_failure_labels = {'news': 'RSS feed'}
+
     def __init__(
         self,
         config_dir: str = './config',
@@ -138,7 +140,16 @@ class NewsGatherer(BaseGatherer):
             Labelled by host, never by URL -- see `step_label_for_url`.
             """
             with self.time_step('news', step_label_for_url(getattr(spec, 'url', spec))) as step:
-                articles = self._fetch_feed(spec)
+                try:
+                    articles = self._fetch_feed(spec, raise_errors=True)
+                except Exception as e:
+                    # A fetch that threw is a failed step, not an empty feed. The
+                    # step record is what lets `step_failure_reasons` tell a dead
+                    # transport (2026-11-15: every feed hit a SOCKS timeout) from a
+                    # quiet day. Swallowed so one dead feed never sinks the rest.
+                    logger.error(f"Error fetching feed {getattr(spec, 'url', spec)}: {e}")
+                    step.status = 'failed'
+                    return []
                 step.items = len(articles)
                 return articles
 
@@ -156,11 +167,15 @@ class NewsGatherer(BaseGatherer):
 
         return articles
 
-    def _fetch_feed(self, feed) -> List[CollectedItem]:
+    def _fetch_feed(self, feed, raise_errors: bool = False) -> List[CollectedItem]:
         """Fetch and parse a single RSS feed.
 
         Accepts a FeedSpec (preferred) or a bare URL string. When a proxy is
         configured, feeds tagged proxy=off are fetched via the direct session.
+
+        With ``raise_errors`` a fetch/parse failure propagates instead of being
+        logged and returned as an empty list, so the caller can record the feed as
+        failed. Per-entry errors are still tolerated either way.
         """
         articles = []
 
@@ -244,6 +259,8 @@ class NewsGatherer(BaseGatherer):
             logger.debug(f"Collected {len(articles)} articles from {feed_url}")
 
         except Exception as e:
+            if raise_errors:
+                raise
             logger.error(f"Error fetching feed {feed_url}: {e}")
 
         return articles

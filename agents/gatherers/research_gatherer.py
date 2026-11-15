@@ -13,6 +13,7 @@ arXiv publishing schedule:
 """
 
 import asyncio
+import functools
 import logging
 import os
 import re
@@ -57,6 +58,11 @@ class ResearchGatherer(BaseGatherer):
         'cs.NE': 'Neural and Evolutionary Computing',
         'cs.RO': 'Robotics',
         'stat.ML': 'Machine Learning (Statistics)'
+    }
+
+    step_failure_labels = {
+        'research_blogs': 'research blog feed',
+        'research_arxiv': 'arXiv',
     }
 
     API_BASE = "https://export.arxiv.org/api/query"
@@ -465,7 +471,11 @@ class ResearchGatherer(BaseGatherer):
                 # warm-up fallback, so it fails and stalls independently of the
                 # plain RSS feeds beside it.
                 with self.time_step('research_blogs', 'LessWrong') as step:
-                    lesswrong_posts = await loop.run_in_executor(None, self._fetch_lesswrong_graphql)
+                    # raise_errors: a request that failed must record a failed
+                    # step, not a successful one with 0 posts (2026-11-15).
+                    lesswrong_posts = await loop.run_in_executor(
+                        None, functools.partial(self._fetch_lesswrong_graphql, raise_errors=True)
+                    )
                     step.items = len(lesswrong_posts)
                 for post in lesswrong_posts:
                     if post.url not in seen_urls:
@@ -480,7 +490,13 @@ class ResearchGatherer(BaseGatherer):
             def fetch_timed(spec):
                 """One research feed, timed as its own replay step."""
                 with self.time_step('research_blogs', step_label_for_url(spec.url)) as step:
-                    posts = self._fetch_research_feed(spec)
+                    try:
+                        posts = self._fetch_research_feed(spec, raise_errors=True)
+                    except Exception as e:
+                        # Failed step, not an empty feed -- see `step_failure_reasons`.
+                        logger.error(f"Error fetching research feed {spec.url}: {e}")
+                        step.status = 'failed'
+                        return []
                     step.items = len(posts)
                     return posts
 
@@ -503,12 +519,15 @@ class ResearchGatherer(BaseGatherer):
         logger.info(f"Collected {len(all_posts)} posts from research blogs")
         return all_posts
 
-    def _fetch_research_feed(self, feed) -> List[CollectedItem]:
+    def _fetch_research_feed(self, feed, raise_errors: bool = False) -> List[CollectedItem]:
         """Fetch and parse a research blog RSS feed.
 
         Accepts a FeedSpec (preferred) or a bare URL string. Feeds tagged
         proxy=off bypass any ambient *_PROXY env (e.g. the Mullvad tunnel) by
         using a trust_env=False session that fetches direct.
+
+        With ``raise_errors`` a fetch/parse failure propagates instead of being
+        logged and returned as an empty list, so the caller can mark the step failed.
         """
         posts = []
 
@@ -628,6 +647,8 @@ class ResearchGatherer(BaseGatherer):
             logger.info(f"Collected {len(posts)} posts from {feed_title}")
 
         except Exception as e:
+            if raise_errors:
+                raise
             logger.error(f"Error fetching research feed {feed_url}: {e}")
 
         return posts
@@ -642,12 +663,15 @@ class ResearchGatherer(BaseGatherer):
         text = f"{title} {content} {' '.join(tags)}".lower()
         return any(re.search(pattern, text) for pattern in self.TREND_AI_RELEVANCE_PATTERNS)
 
-    def _fetch_lesswrong_graphql(self) -> List[CollectedItem]:
+    def _fetch_lesswrong_graphql(self, raise_errors: bool = False) -> List[CollectedItem]:
         """Fetch posts from LessWrong using GraphQL API for date-range queries.
 
         The RSS feed only contains the ~10-20 most recent posts, which scroll off
         within hours. The GraphQL API allows date-range queries to fetch historical
         posts that are no longer in the RSS feed.
+
+        With ``raise_errors`` a failed request or a GraphQL error response raises
+        instead of returning an empty list, so the caller can mark the step failed.
         """
         posts = []
 
@@ -694,6 +718,8 @@ class ResearchGatherer(BaseGatherer):
 
             if 'errors' in data:
                 logger.error(f"LessWrong GraphQL errors: {data['errors']}")
+                if raise_errors:
+                    raise RuntimeError("LessWrong GraphQL returned errors")
                 return posts
 
             results = data.get('data', {}).get('posts', {}).get('results', [])
@@ -762,8 +788,12 @@ class ResearchGatherer(BaseGatherer):
 
         except requests.exceptions.RequestException as e:
             logger.error(f"LessWrong GraphQL request failed: {e}")
+            if raise_errors:
+                raise
         except Exception as e:
             logger.error(f"Error fetching LessWrong GraphQL: {e}")
+            if raise_errors:
+                raise
 
         return posts
 

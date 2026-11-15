@@ -156,6 +156,24 @@ def validate(summary: dict, date_str: str) -> dict:
     if reddit_source is None or not _rs_ok:
         failures.append('required Reddit collection is missing, failed or incomplete'
                         + (f": {_rs_reason}" if reddit_source is not None and _rs_reason else ''))
+    # 5a) A source that FAILED and returned nothing is an outage, not a quiet day.
+    #     On 2026-11-15 a dead SOCKS proxy failed every news, research and social
+    #     fetch and the report published green with only Reddit in it. The
+    #     gatherers now mark such a source `failed` (every fetch errored); `partial`
+    #     (some fetches failed, or some items came back) stays a warning below, and
+    #     `success, count 0` (reachable but quiet, e.g. weekend arXiv) passes.
+    #     Reddit is covered by its own stricter check above.
+    for source in sources:
+        if not isinstance(source, dict) or source.get('name') == 'reddit':
+            continue
+        count = source.get('count') or 0
+        if source.get('status') == 'failed' and (isinstance(count, bool) or not isinstance(count, int) or count <= 0):
+            name = source.get('name') or 'unknown'
+            failures.append(f"{name} collection failed with 0 items"
+                            + (f": {source.get('error')}" if source.get('error') else ''))
+        elif source.get('status') in ('failed', 'partial'):
+            warnings.append(f"{source.get('name') or 'unknown'} collection {source.get('status')}"
+                            + (f": {source.get('error')}" if source.get('error') else ''))
     degraded_categories = []
     if isinstance(categories, dict):
         for name in sorted(categories):
