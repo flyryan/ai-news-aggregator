@@ -19,9 +19,13 @@ import requests
 from urllib3.exceptions import InvalidHeader
 from urllib3.util.retry import Retry
 
+from scripts.source_egress import TRANSIENT_STATUS, get_with_retry, routed_get
+
 from ..base import BaseGatherer, CollectedItem
 
 logger = logging.getLogger(__name__)
+
+DIRECT_MASTODON_HOSTS = {'mastodon.social', 'dair-community.social'}
 
 # TwitterAPI.io configuration
 TWITTERAPI_IO_KEY = os.getenv('TWITTERAPI_IO_KEY', '')
@@ -38,10 +42,8 @@ _TWITTER_HANDLE_RE = re.compile(r'[A-Za-z0-9_]{1,15}')
 
 
 def _twitter_get(path: str, **kwargs) -> requests.Response:
-    """Call TwitterAPI.io directly even when other collectors use Mullvad."""
-    with requests.Session() as session:
-        session.trust_env = False
-        return session.get(f"{TWITTERAPI_IO_BASE}{path}", **kwargs)
+    """Send one budgeted Twitter search attempt."""
+    return routed_get(f"{TWITTERAPI_IO_BASE}{path}", **kwargs)
 
 
 def build_twitter_queries(
@@ -292,8 +294,8 @@ class SocialGatherer(BaseGatherer):
         if not TWITTERAPI_IO_KEY:
             return None
         try:
-            resp = _twitter_get(
-                "/oapi/my/info",
+            resp = get_with_retry(
+                f"{TWITTERAPI_IO_BASE}/oapi/my/info", retry_status=TRANSIENT_STATUS,
                 headers={"X-API-Key": TWITTERAPI_IO_KEY},
                 timeout=30,
             )
@@ -314,13 +316,13 @@ class SocialGatherer(BaseGatherer):
             try:
                 response = _twitter_get(
                     "/twitter/tweet/advanced_search",
-                    params=params, headers=headers, timeout=(10, 60),
+                    params=params, headers=headers, timeout=(10, 60), attempt=attempt,
                 )
                 response.raise_for_status()
             except requests.HTTPError as exc:
                 status = exc.response.status_code
                 reason = f"HTTP {status}"
-                if status not in (408, 429, 500, 502, 503, 504):
+                if status not in TRANSIENT_STATUS:
                     raise TwitterPageError(reason) from exc
                 try:
                     retry_after = Retry().get_retry_after(exc.response)
@@ -543,7 +545,7 @@ class SocialGatherer(BaseGatherer):
 
             logger.info(f"Fetching Bluesky posts for @{handle}")
 
-            response = requests.get(
+            response = get_with_retry(
                 f"{base_url}/app.bsky.feed.getAuthorFeed",
                 params={'actor': handle, 'limit': 30},
                 timeout=30
@@ -687,7 +689,8 @@ class SocialGatherer(BaseGatherer):
 
             # Look up account ID
             lookup_url = f"https://{instance}/api/v1/accounts/lookup"
-            response = requests.get(lookup_url, params={'acct': username}, timeout=30)
+            get = get_with_retry if instance.lower() in DIRECT_MASTODON_HOSTS else requests.get
+            response = get(lookup_url, params={'acct': username}, timeout=30)
             response.raise_for_status()
             account_data = response.json()
             account_id = account_data.get('id')
@@ -697,7 +700,7 @@ class SocialGatherer(BaseGatherer):
 
             # Get statuses
             statuses_url = f"https://{instance}/api/v1/accounts/{account_id}/statuses"
-            response = requests.get(
+            response = get(
                 statuses_url,
                 params={'limit': 40, 'exclude_replies': False, 'exclude_reblogs': True},
                 timeout=30

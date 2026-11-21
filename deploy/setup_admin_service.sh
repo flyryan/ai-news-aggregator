@@ -88,6 +88,7 @@ echo "Syncing application code..."
 # a live process.
 rsync -a --delete --exclude '__pycache__' \
     "$REPO_DIR/admin_service/" "$APP_DIR/admin_service/"
+install -D -m 0644 "$REPO_DIR/scripts/source_egress.py" "$APP_DIR/scripts/source_egress.py"
 
 if [ ! -d "$APP_DIR/venv" ]; then
     echo "Creating venv..."

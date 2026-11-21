@@ -15,6 +15,7 @@ User=root
 
 ExecStart=/usr/bin/rsync -a --delete --exclude __pycache__ \
     /home/ubuntu/ai-news-aggregator/admin_service/ /opt/aatf-admin/admin_service/
+ExecStart=/usr/bin/install -D -m 0644 /home/ubuntu/ai-news-aggregator/scripts/source_egress.py /opt/aatf-admin/scripts/source_egress.py
 ExecStart=/opt/aatf-admin/venv/bin/pip install --quiet -r \
     /home/ubuntu/ai-news-aggregator/admin_service/requirements.txt
 ExecStart=/usr/bin/systemctl restart aatf-admin.service

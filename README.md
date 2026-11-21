@@ -218,7 +218,7 @@ Set these on the publishing repository:
 | `ANTHROPIC_API_BASE` | OpenAI-compatible proxy base URL when used |
 | `TWITTERAPI_IO_KEY` | Optional Twitter/X collection |
 | `SCRAPECREATORS_API_KEY` | Reddit collection via the ScrapeCreators API (replaces the dead free Reddit `.json` endpoint); required for Reddit data |
-| `REDDIT_PROXY_URL` | Legacy proxy for direct Reddit requests; no longer used by the Reddit gatherer (ScrapeCreators goes direct) |
+| `REDDIT_PROXY_URL` | Legacy proxy for direct Reddit requests; no longer used by the Reddit gatherer (ScrapeCreators has its own routing) |
 | `LESSWRONG_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for LessWrong GraphQL/browser fallback requests |
 | `PIPELINE_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for the whole pipeline; useful when hosted runner egress is blocked by multiple sources |
 | `MULLVAD_ACCOUNT` | Optional Mullvad account number; used to create a WireGuard tunnel when neither `PIPELINE_PROXY_URL` nor `REDDIT_PROXY_URL` is set |
@@ -293,9 +293,11 @@ Runtime scrape data, checkpoints, and logs under `data/**` and `logs/**` stay ig
 
 ### Reddit Collection on Hosted Runners
 
-The Reddit gatherer collects via the **ScrapeCreators API** (`SCRAPECREATORS_API_KEY`), which unblocks Reddit server-side. Reddit's free `.json` endpoint and OAuth are both dead, so this is required for Reddit data. The gatherer sends its requests directly (`requests` `trust_env=False`) and ignores `REDDIT_PROXY_URL` and the pipeline-wide `ALL_PROXY` exports; set `SCRAPECREATORS_PROXY_URL` only if that specific traffic must be proxied. Per-run credit usage and the remaining balance are logged and shown in the end-of-run cost summary.
+The Reddit gatherer collects via the **ScrapeCreators API** (`SCRAPECREATORS_API_KEY`), which unblocks Reddit server-side. Reddit's free `.json` endpoint and OAuth are both dead, so this is required for Reddit data. ScrapeCreators uses a direct primary route. An explicit `SCRAPECREATORS_PROXY_URL` selects a different primary. Every listing or detail attempt counts toward the existing credit cap, including attempts on the fallback route. Per-run credit usage and the remaining balance appear in the cost summary.
 
-If multiple sources block hosted runner egress, set `PIPELINE_PROXY_URL`; the workflow exports it as the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` variables for the pipeline process (with `api.scrapecreators.com` and `api.twitterapi.io` in `NO_PROXY`). TwitterAPI.io search and balance requests also use a direct client when proxy variables are set locally. The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed. LLM clients bypass those proxy environment variables by default; set `LLM_TRUST_ENV_PROXY=true` only when LLM traffic should also use the runner proxy.
+The hosted collector tries the direct route first for TwitterAPI.io search and balance, ScrapeCreators, Bluesky, the tested Mastodon instances (`mastodon.social` and `dair-community.social`), the arXiv export and OAI-PMH APIs, and feeds marked `proxy=off` (Berkeley BAIR and Artificial Intelligence News). After a retryable failure, the remaining attempts for that request use `PIPELINE_PROXY_URL` when available. Each new page or request starts on its primary route. Twitter retains three attempts with a 10-second connect timeout and a 60-second read timeout. A feed challenge page counts as a fetch failure, while valid empty feeds are accepted.
+
+Set the GitHub Actions repository variable `PIPELINE_NO_FALLBACK_HOSTS` to comma-separated exact hostnames, e.g. `api.twitterapi.io,bair.berkeley.edu`, to keep all attempts for those hosts on their primary route. Set it to `*` to pin every source to its primary route. The same variable can be set in the local process environment. An empty value enables fallback for the direct-first sources. LessWrong, arXiv RSS and the other default-routed feeds continue through the configured proxy. The RSS gatherer fetches feeds with `requests`, so SOCKS proxy URLs are honored when `PySocks` is installed. LLM clients bypass those proxy environment variables by default; set `LLM_TRUST_ENV_PROXY=true` only when LLM traffic should also use the runner proxy.
 
 LessWrong uses GraphQL for date-range research collection. The LessWrong helper tries direct GraphQL first, then cached cookies, then a browser cookie warm-up only if needed. If hosted egress is blocked only for LessWrong, set `LESSWRONG_PROXY_URL`; otherwise `PIPELINE_PROXY_URL` is reused for direct GraphQL, cached-cookie requests, and the Playwright browser fallback.
 
@@ -385,7 +387,7 @@ export SCRAPECREATORS_API_KEY="your-key-here"  # For Reddit collection
 | `GOOGLE_API_KEY` | Google AI API key | No (hero images) |
 | `TWITTERAPI_IO_KEY` | TwitterAPI.io key ($0.15/1000 tweets) | No |
 | `SCRAPECREATORS_API_KEY` | ScrapeCreators key for Reddit (~$0.99/1000 calls) | For Reddit |
-| `REDDIT_PROXY_URL` | Legacy; no longer used for Reddit (ScrapeCreators goes direct) | No |
+| `REDDIT_PROXY_URL` | Legacy; no longer used for Reddit (ScrapeCreators has its own routing) | No |
 | `REDDIT_USER_AGENT` | User-Agent for Reddit requests | No |
 | `LESSWRONG_PROXY_URL` | HTTP(S) or SOCKS proxy for LessWrong requests | No |
 | `PIPELINE_PROXY_URL` | HTTP(S) or SOCKS proxy for the whole pipeline | No |

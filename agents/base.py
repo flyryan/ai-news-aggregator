@@ -55,7 +55,7 @@ class FeedSpec:
     use_proxy:
         None  -> use the gatherer's default routing (proxied when a proxy is set)
         True  -> always route through the configured proxy
-        False -> always fetch direct (bypass the proxy)
+        False -> try direct first (eligible retries may use the pipeline proxy)
     """
     url: str
     use_proxy: Optional[bool] = None
@@ -894,7 +894,7 @@ class BaseGatherer(ABC):
 
         Line format:
             https://example.com/feed                  # default routing
-            https://example.com/feed   proxy=off      # bypass proxy, fetch direct
+            https://example.com/feed   proxy=off      # try direct first
             https://example.com/feed   proxy=on        # force proxy
             https://example.com/feed   direct          # shorthand for proxy=off
 

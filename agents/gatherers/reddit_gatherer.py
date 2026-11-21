@@ -29,6 +29,8 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
+from scripts.source_egress import TRANSIENT_STATUS, get_with_retry, routed_get
+
 from ..base import BaseGatherer, CollectedItem, deduplicate_items
 
 logger = logging.getLogger(__name__)
@@ -47,10 +49,7 @@ def _env_int(name: str, default: int, minimum: int = 0) -> int:
 SCRAPECREATORS_API_KEY = os.getenv("SCRAPECREATORS_API_KEY", "")
 SCRAPECREATORS_BASE = os.getenv("SCRAPECREATORS_BASE", "https://api.scrapecreators.com")
 
-# Egress: ScrapeCreators unblocks Reddit server-side, so its calls go DIRECT and must
-# NOT be captured by the pipeline-wide HTTPS_PROXY/ALL_PROXY exports (Mullvad). The old
-# REDDIT_PROXY_URL is now a no-op for Reddit; a dedicated override is provided for the
-# rare case the ScrapeCreators traffic itself should be proxied.
+# Optional explicit primary route for ScrapeCreators.
 SCRAPECREATORS_PROXY_URL = os.getenv("SCRAPECREATORS_PROXY_URL", "")
 REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "AI-News-Aggregator/1.0")
 
@@ -67,7 +66,7 @@ REDDIT_OLDER_STOP_THRESHOLD = _env_int("REDDIT_OLDER_STOP_THRESHOLD", 3, minimum
 REDDIT_REQUEST_TIMEOUT = _env_int("REDDIT_REQUEST_TIMEOUT", 60, minimum=5)
 
 # Listing/detail status codes that are retryable transient failures
-_RETRYABLE_STATUS = (429, 500, 502, 503, 504)
+_RETRYABLE_STATUS = TRANSIENT_STATUS
 # 2026-10-15: ScrapeCreators intermittently returned HTTP 404 on after-cursor
 # listing pages (always a busy subreddit's 2nd+ page; page 1 and every other
 # subreddit stayed 200). Three consecutive runs died because a single 404
@@ -486,24 +485,19 @@ class RedditGatherer(BaseGatherer):
         """Create a session that ignores ambient proxy env vars (direct egress by default)."""
         session = requests.Session()
         session.headers.update({"User-Agent": REDDIT_USER_AGENT})
-        # Ignore HTTPS_PROXY/ALL_PROXY exported pipeline-wide (Mullvad) - ScrapeCreators
-        # unblocks server-side and must go direct.
         session.trust_env = False
-        if SCRAPECREATORS_PROXY_URL:
-            session.proxies.update({"http": SCRAPECREATORS_PROXY_URL, "https": SCRAPECREATORS_PROXY_URL})
-            logger.info("ScrapeCreators session using explicit SCRAPECREATORS_PROXY_URL")
         return session
 
     def _fetch_credit_balance(self) -> Optional[int]:
         """Read the real account balance (does not consume a credit)."""
         try:
-            session = self._make_session()
-            resp = session.get(
-                f"{SCRAPECREATORS_BASE}/v1/account/credit-balance",
-                headers={"x-api-key": SCRAPECREATORS_API_KEY},
-                timeout=self.timeout,
-            )
-            session.close()
+            with self._make_session() as session:
+                resp = get_with_retry(
+                    f"{SCRAPECREATORS_BASE}/v1/account/credit-balance", retry_status=TRANSIENT_STATUS,
+                    headers={"x-api-key": SCRAPECREATORS_API_KEY},
+                    primary_proxy=SCRAPECREATORS_PROXY_URL,
+                    timeout=self.timeout, session=session,
+                )
             if resp.status_code == 200:
                 data = resp.json()
                 return data.get("creditCount", data.get("credits_remaining"))
@@ -545,7 +539,8 @@ class RedditGatherer(BaseGatherer):
                     return None
                 self._calls_made += 1
             try:
-                resp = session.get(url, params=params, headers=headers, timeout=self.timeout)
+                resp = routed_get(url, session=session, primary_proxy=SCRAPECREATORS_PROXY_URL,
+                                  attempt=attempt + 1, params=params, headers=headers, timeout=self.timeout)
             except requests.exceptions.RequestException as e:
                 delay = 2 ** attempt
                 logger.warning(f"ScrapeCreators request error for {path} ({e}); retrying in {delay}s")

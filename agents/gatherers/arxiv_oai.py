@@ -19,6 +19,8 @@ from xml.etree import ElementTree as ET
 
 import requests
 
+from scripts.source_egress import PUBLIC_RETRY_STATUS, routed_get
+
 logger = logging.getLogger(__name__)
 
 OAI_BASE_URL = "https://oaipmh.arxiv.org/oai"
@@ -187,7 +189,7 @@ class ArxivOAIHarvester:
     # HTTP statuses worth another attempt. arXiv's OAI endpoint answers 503 with
     # a Retry-After when it is shedding load, which is a request to wait, not a
     # reason to give up.
-    RETRYABLE_STATUS = frozenset({429, 500, 502, 503, 504})
+    RETRYABLE_STATUS = PUBLIC_RETRY_STATUS
 
     def _budget_left(self) -> float:
         """Seconds remaining before the whole-harvest deadline."""
@@ -224,7 +226,7 @@ class ArxivOAIHarvester:
             timeout = min(self.timeout, budget)
 
             try:
-                response = requests.get(url, timeout=timeout)
+                response = routed_get(url, timeout=timeout, attempt=attempt)
             except requests.exceptions.RequestException as e:
                 # Transport-level failure (timeout, DNS, reset) -- always worth
                 # another go; this is the 2026-08-17 case.

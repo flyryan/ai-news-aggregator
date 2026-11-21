@@ -1,7 +1,7 @@
 # AI News RSS/Atom feeds (one per line). Lines starting with # are comments.
 # Optional per-feed routing directive (default = proxied when a proxy is set):
 #   <url>            -> default routing
-#   <url>  proxy=off -> fetch direct, bypass the Mullvad/pipeline proxy
+#   <url>  proxy=off -> try direct first; eligible retries can use the pipeline proxy
 #   <url>  proxy=on  -> force routing through the proxy
 https://feeds.arstechnica.com/arstechnica/index
 https://www.wired.com/feed/tag/ai/latest/rss
@@ -9,7 +9,7 @@ https://venturebeat.com/category/ai/feed/
 https://www.theguardian.com/technology/artificialintelligenceai/rss
 # artificialintelligence-news.com moved its feed from /feed/rss/ to /feed/
 # (old path 301s/403s), and the site drops connections from Mullvad exit IPs,
-# so this feed bypasses the pipeline proxy (verified 2026-07-07).
+# so this feed prefers the direct route (verified 2026-07-07).
 https://www.artificialintelligence-news.com/feed/  proxy=off
 https://techcrunch.com/category/artificial-intelligence/feed/
 https://www.theverge.com/rss/ai-artificial-intelligence/index.xml

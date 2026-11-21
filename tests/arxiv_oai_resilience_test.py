@@ -68,13 +68,9 @@ _exceptions.ReadTimeout = _ReadTimeout
 
 _requests = types.ModuleType("requests")
 _requests.exceptions = _exceptions
-_requests.get = None  # every test installs its own
 
 sys.modules["requests"] = _requests
 sys.modules["requests.exceptions"] = _exceptions
-
-# The stub the harvester is bound to -- tests set `requests.get` on this.
-requests = _requests
 
 _spec = importlib.util.spec_from_file_location(
     "_arxiv_oai", REPO_ROOT / "agents" / "gatherers" / "arxiv_oai.py"
@@ -87,7 +83,7 @@ ArxivOAIHarvester = _mod.ArxivOAIHarvester
 
 # Drop our stubs from sys.modules now that the harvester has loaded: it bound
 # the module object at import time, and every test below reaches it through
-# the `requests` alias above. Leaving them installed poisoned a full local
+# its exception handlers. Leaving them installed poisoned a full local
 # discovery run -- modules loading after us alphabetically (e.g.
 # staleness_checker_ssrf_test) bound the stub and died in setUp with
 # "module 'requests' has no attribute 'Session'" (14 errors, found 2026-08-21).
@@ -179,7 +175,7 @@ class _Clock:
 
 def _harvester(transport, clock=None, **kw):
     clock = clock or _Clock()
-    requests.get = transport
+    _mod.routed_get = transport
     kw.setdefault("backoff_seconds", 5.0)
     kw.setdefault("timeout", 180.0)
     kw.setdefault("deadline_seconds", 600.0)

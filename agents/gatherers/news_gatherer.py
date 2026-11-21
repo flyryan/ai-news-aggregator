@@ -15,6 +15,8 @@ import feedparser
 import requests
 from dateutil import parser as date_parser
 
+from scripts.source_egress import get_with_retry, read_feed
+
 from ..base import BaseGatherer, CollectedItem, deduplicate_items, step_label_for_url
 from ..llm_client import AnthropicClient
 from .link_follower import LinkFollower
@@ -67,8 +69,7 @@ class NewsGatherer(BaseGatherer):
         # Proxied session (default route). Used unless a feed is tagged proxy=off.
         self.feed_session = requests.Session()
         self.feed_session.headers.update(_feed_headers)
-        # Direct session: never carries the proxy, and ignores ambient *_PROXY env
-        # (trust_env=False) so a feed tagged proxy=off truly bypasses Mullvad.
+        # Explicit per-request routing for direct-first feeds.
         self.direct_session = requests.Session()
         self.direct_session.headers.update(_feed_headers)
         self.direct_session.trust_env = False
@@ -182,20 +183,15 @@ class NewsGatherer(BaseGatherer):
         # Accept either a FeedSpec or a plain URL for backward compatibility.
         feed_url = getattr(feed, 'url', feed)
         use_proxy = getattr(feed, 'use_proxy', None)
-        # Default: proxied session (which only carries a proxy if one is set).
-        # proxy=off -> direct session that bypasses the proxy entirely.
-        session = self.direct_session if use_proxy is False else self.feed_session
-
         try:
-            logger.debug(f"Fetching feed: {feed_url} (proxy={'direct' if use_proxy is False else 'default'})")
-            response = session.get(feed_url, timeout=30)
-            response.raise_for_status()
-            feed = feedparser.parse(
-                response.content,
-                response_headers={
+            if use_proxy is False:
+                feed = get_with_retry(feed_url, session=self.direct_session, timeout=30, read=read_feed)
+            else:
+                response = self.feed_session.get(feed_url, timeout=30)
+                response.raise_for_status()
+                feed = feedparser.parse(response.content, response_headers={
                     "content-type": response.headers.get("content-type", "")
-                }
-            )
+                })
 
             if feed.bozo:
                 # CharacterEncodingOverride is benign - feedparser handles it correctly

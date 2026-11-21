@@ -56,7 +56,7 @@ class TwitterRecoveryTests(unittest.TestCase):
         return gatherer, items, get, sleep
 
     def test_slow_pages_can_finish_on_the_first_attempt(self):
-        def slow_response(url, *, params, headers, timeout):
+        def slow_response(url, *, params, headers, timeout, attempt):
             connect_timeout, read_timeout = timeout
             self.assertEqual(connect_timeout, 10)
             if read_timeout < 55:

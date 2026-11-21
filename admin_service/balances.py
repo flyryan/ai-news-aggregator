@@ -17,10 +17,13 @@ collection_status would still read success.
 from __future__ import annotations
 
 import logging
+import os
 from datetime import datetime
 from typing import Any
 
-import httpx
+from requests import HTTPError
+
+from scripts.source_egress import TRANSIENT_STATUS, get_with_retry
 
 from .store import AdminStore
 
@@ -71,12 +74,16 @@ def _probe_scrapecreators(key: str) -> tuple[int | None, str]:
     if not key:
         return None, "SCRAPECREATORS_API_KEY not configured"
     try:
-        response = httpx.get(SCRAPECREATORS_URL, headers={"x-api-key": key}, timeout=15)
+        response = get_with_retry(SCRAPECREATORS_URL, headers={"x-api-key": key}, timeout=15,
+                                  primary_proxy=os.getenv("SCRAPECREATORS_PROXY_URL"),
+                                  retry_status=TRANSIENT_STATUS, allow_redirects=False)
         if response.status_code != 200:
             return None, f"probe returned HTTP {response.status_code}"
         payload = response.json()
         value = payload.get("creditCount", payload.get("credits_remaining"))
         return (int(value), "") if value is not None else (None, "no balance in response")
+    except HTTPError as exc:
+        return None, f"probe returned HTTP {exc.response.status_code}"
     except Exception as exc:  # noqa: BLE001 - a probe failure must not break the page
         return None, type(exc).__name__
 
@@ -85,13 +92,16 @@ def _probe_twitter(key: str) -> tuple[int | None, str]:
     if not key:
         return None, "TWITTERAPI_IO_KEY not configured"
     try:
-        response = httpx.get(TWITTERAPI_URL, headers={"x-api-key": key}, timeout=15, trust_env=False)
+        response = get_with_retry(TWITTERAPI_URL, headers={"x-api-key": key}, timeout=15,
+                                  retry_status=TRANSIENT_STATUS, allow_redirects=False)
         if response.status_code != 200:
             return None, f"probe returned HTTP {response.status_code}"
         payload = response.json()
         data = payload.get("data") or payload
         value = data.get("recharge_credits")
         return (int(value), "") if value is not None else (None, "no balance in response")
+    except HTTPError as exc:
+        return None, f"probe returned HTTP {exc.response.status_code}"
     except Exception as exc:  # noqa: BLE001
         return None, type(exc).__name__
 

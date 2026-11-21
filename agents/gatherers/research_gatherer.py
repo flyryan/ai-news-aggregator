@@ -25,6 +25,8 @@ from typing import List, Optional
 import feedparser
 import requests
 
+from scripts.source_egress import get_with_retry, read_feed, routed_get
+
 from ..base import BaseGatherer, CollectedItem, step_label_for_url
 from ..html_text import html_to_text
 from .arxiv_oai import ArxivOAIHarvester
@@ -107,11 +109,7 @@ class ResearchGatherer(BaseGatherer):
         self.research_feeds = [spec.url for spec in self.research_feed_specs]
         if self.research_feeds:
             logger.info(f"Loaded {len(self.research_feeds)} research blog feeds")
-        # Direct session for feeds tagged proxy=off. trust_env=False makes requests
-        # ignore ALL_PROXY/HTTPS_PROXY/HTTP_PROXY so these feeds truly bypass the
-        # Mullvad tunnel. (An empty proxies={} dict is insufficient: requests still
-        # merges env proxies via setdefault.) Default feeds use bare requests.get
-        # below and continue to inherit the env proxy, preserving prior behavior.
+        # Explicit per-request routing for direct-first feeds.
         self.direct_session = requests.Session()
         self.direct_session.trust_env = False
 
@@ -523,8 +521,7 @@ class ResearchGatherer(BaseGatherer):
         """Fetch and parse a research blog RSS feed.
 
         Accepts a FeedSpec (preferred) or a bare URL string. Feeds tagged
-        proxy=off bypass any ambient *_PROXY env (e.g. the Mullvad tunnel) by
-        using a trust_env=False session that fetches direct.
+        proxy=off try the direct route first.
 
         With ``raise_errors`` a fetch/parse failure propagates instead of being
         logged and returned as an empty list, so the caller can mark the step failed.
@@ -544,16 +541,13 @@ class ResearchGatherer(BaseGatherer):
             # unresponsive feed can't hang the gatherer. Mirrors _fetch_category_rss; a
             # browser-ish UA avoids 403s from feeds like Nature.
             headers = {'User-Agent': os.environ.get('NEWS_USER_AGENT') or LESSWRONG_USER_AGENT}
-            # proxy=off -> use the trust_env=False session so requests ignores all
-            # ambient *_PROXY env vars (incl. ALL_PROXY) and fetches direct.
-            # Otherwise use the module-level requests (inherits env, default behavior).
-            requester = self.direct_session if use_proxy is False else requests
-            response = requester.get(
-                feed_url, headers=headers, timeout=RESEARCH_FEED_TIMEOUT,
-                allow_redirects=True
-            )
-            response.raise_for_status()
-            feed = feedparser.parse(response.content)
+            if use_proxy is False:
+                feed = get_with_retry(feed_url, session=self.direct_session, headers=headers,
+                                      timeout=RESEARCH_FEED_TIMEOUT, read=read_feed)
+            else:
+                response = requests.get(feed_url, headers=headers, timeout=RESEARCH_FEED_TIMEOUT)
+                response.raise_for_status()
+                feed = feedparser.parse(response.content)
 
             if feed.bozo:
                 # CharacterEncodingOverride is benign - feedparser handles it correctly
@@ -965,7 +959,7 @@ class ResearchGatherer(BaseGatherer):
         for attempt in range(max_retries):
             try:
                 logger.info(f"Fetching arXiv category: {category}" + (f" (attempt {attempt + 1})" if attempt > 0 else ""))
-                response = requests.get(self.API_BASE, params=params, timeout=60)
+                response = routed_get(self.API_BASE, params=params, timeout=60, attempt=attempt + 1)
                 response.raise_for_status()
                 break  # Success, exit retry loop
             except requests.exceptions.RequestException as e:

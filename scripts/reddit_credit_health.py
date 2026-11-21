@@ -5,11 +5,12 @@ import json
 import math
 import os
 import statistics
-import urllib.request
 from pathlib import Path
 try:
+    from .source_egress import TRANSIENT_STATUS, get_with_retry
     from .pipeline_alert import post_alert
 except ImportError:
+    from source_egress import TRANSIENT_STATUS, get_with_retry
     from pipeline_alert import post_alert
 
 
@@ -58,11 +59,11 @@ def main():
             print('::error::Reddit preflight: SCRAPECREATORS_API_KEY is missing')
             return 1
         base = os.environ.get('SCRAPECREATORS_BASE', 'https://api.scrapecreators.com').rstrip('/')
-        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-        req = urllib.request.Request(base + '/v1/account/credit-balance', headers={'x-api-key': key})
         try:
-            with opener.open(req, timeout=30) as response:
-                data = json.load(response)
+            response = get_with_retry(base + '/v1/account/credit-balance', headers={'x-api-key': key},
+                                      primary_proxy=os.getenv('SCRAPECREATORS_PROXY_URL'),
+                                      retry_status=TRANSIENT_STATUS, timeout=30)
+            data = response.json()
             balance = data.get('creditCount', data.get('credits_remaining'))
         except Exception as exc:
             # Unknown is not zero. Collection still gets its bounded retries.

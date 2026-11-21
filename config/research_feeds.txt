@@ -1,7 +1,7 @@
 # AI research RSS/Atom feeds (one per line). Lines starting with # are comments.
 # Optional per-feed routing directive (default = proxied when a proxy is set):
 #   <url>            -> default routing
-#   <url>  proxy=off -> fetch direct, bypass the Mullvad/pipeline proxy
+#   <url>  proxy=off -> try direct first; eligible retries can use the pipeline proxy
 #   <url>  proxy=on  -> force routing through the proxy
 https://www.lesswrong.com/feed.xml?view=frontpage-rss&karmaThreshold=2
 https://research.google/blog/rss/
@@ -16,7 +16,7 @@ https://www.microsoft.com/en-us/research/blog/feed/
 # https://research.facebook.com/feed/  proxy=off
 https://www.amazon.science/index.rss
 https://allenai.org/rss.xml
-https://bair.berkeley.edu/blog/feed.xml
+https://bair.berkeley.edu/blog/feed.xml  proxy=off
 https://metr.org/feed.xml
 https://www.alignmentforum.org/feed.xml?view=frontpage-rss&karmaThreshold=2
 https://news.mit.edu/rss/topic/artificial-intelligence2
