@@ -200,8 +200,8 @@ jobs:
         run: python3 -m unittest tests.zero_source_gate_test -v
       # A fixed 25-account chunk came to 523 characters; TwitterAPI.io caps
       # queries at 512 and 400'd that chunk on every run until 2026-11-15.
-      - name: Twitter search queries stay under the API's length limit
-        run: python3 -m unittest tests.twitter_query_length_test -v
+      - name: Twitter search query limits and recovery from page failures
+        run: python3 -m unittest tests.twitter_query_length_test tests.twitter_recovery_test -v
       # 2026-08-24: a provider rate-limit brownout 429'd 40 of 57 LLM calls.
       # The openai-chat path had no transport retry at all, a concurrency cap
       # was standing in for a rate limit, and the publish gate never looked at

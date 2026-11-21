@@ -97,6 +97,15 @@ control same-day suppression. Persistent outages re-alert on each report date. T
 receiver's authenticated readiness probe sends no notification; actual alerts go directly
 to the existing private Signal recipient without depending on an LLM credential.
 
+Twitter search retries a transient timeout, connection error, or HTTP 408, 429, 500,
+502, 503, or 504 on the same page and proxy route. Up to three attempts use read
+timeouts of 30, 45, and 60 seconds. A server-requested delay over 60 seconds
+ends that batch. The collector retains earlier pages and continues with the next
+batch. In `summary.json`, the Twitter row under `collection_status.social_platforms`
+includes its final status, a short reason for incomplete batches, and
+`recovered_pages` for pages fetched successfully after a retry. Older editions
+can omit the counter.
+
 Analysis normalizes HTML entities, whitespace and quote typography for title checks,
 but preserves exact source IDs. Ambiguous rows are retried separately while validated
 rows are checkpointed. A singleton request binds its exact ID to the sole input source

@@ -488,13 +488,16 @@ class JSONGenerator:
                 count = val.get('count', 0)
                 error = val.get('error')
 
-                social_platforms.append({
+                platform = {
                     'name': platform_name,
                     'display_name': platform_name.capitalize(),
                     'status': status_val,
                     'count': count,
                     'error': error
-                })
+                }
+                if 'recovered_pages' in val:
+                    platform['recovered_pages'] = val['recovered_pages']
+                social_platforms.append(platform)
 
                 if status_val == 'failed':
                     has_failures = True

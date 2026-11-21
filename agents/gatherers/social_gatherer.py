@@ -16,6 +16,8 @@ from typing import List, Dict, Any, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
+from urllib3.exceptions import InvalidHeader
+from urllib3.util.retry import Retry
 
 from ..base import BaseGatherer, CollectedItem
 
@@ -72,6 +74,10 @@ def build_twitter_queries(
     return queries
 
 
+class TwitterPageError(Exception):
+    """A terminal page failure with a reason suitable for the public report."""
+
+
 class SocialGatherer(BaseGatherer):
     """Gathers posts from Twitter, Bluesky, and Mastodon."""
 
@@ -97,7 +103,7 @@ class SocialGatherer(BaseGatherer):
         }
 
         # TwitterAPI.io usage accounting (surfaced in the end-of-run cost summary)
-        self._twitter_calls = 0          # billable API requests issued
+        self._twitter_calls = 0          # search HTTP attempts, including retries
         self._twitter_tweets_billed = 0  # raw tweets returned (TwitterAPI.io bills per tweet)
 
         logger.info(f"Loaded {len(self.twitter_users)} Twitter, {len(self.bluesky_handles)} Bluesky, {len(self.mastodon_accounts)} Mastodon accounts")
@@ -237,15 +243,13 @@ class SocialGatherer(BaseGatherer):
 
         try:
             # Use search endpoint for efficiency
+            self.collection_status['twitter'].update(status='pending', error=None, recovered_pages=0)
             tweets = self._twitter_search(self.twitter_users)
             all_tweets.extend(tweets)
 
             self.collection_status['twitter']['count'] = len(all_tweets)
-            # `_twitter_search` records 'failed' (every chunk errored) or 'partial'
-            # (some did) itself. Only a search that recorded neither is a success --
-            # overwriting it here is how "All 7 API requests failed" published as a
-            # green 0-tweet day on 2026-11-15. Zero tweets from clean requests is a
-            # quiet day, still a success.
+            # Empty results on a clean search are valid. Preserve any failure
+            # recorded by pagination, including when earlier pages yielded posts.
             if self.collection_status['twitter']['status'] not in ('failed', 'partial'):
                 self.collection_status['twitter']['status'] = 'success'
 
@@ -294,10 +298,56 @@ class SocialGatherer(BaseGatherer):
             logger.warning(f"Could not fetch TwitterAPI.io balance: {e}")
         return None
 
+    def _twitter_page(self, params: dict, headers: dict, chunk_number: int, page_number: int) -> dict:
+        """Fetch one search page, reusing its cursor for bounded retries."""
+        read_timeouts = (30, 45, 60)
+        for attempt, read_timeout in enumerate(read_timeouts, start=1):
+            delay = 2 ** attempt
+            self._twitter_calls += 1
+            try:
+                response = requests.get(
+                    f"{TWITTERAPI_IO_BASE}/twitter/tweet/advanced_search",
+                    params=params, headers=headers, timeout=(10, read_timeout),
+                )
+                response.raise_for_status()
+            except requests.HTTPError as exc:
+                status = exc.response.status_code
+                reason = f"HTTP {status}"
+                if status not in (408, 429, 500, 502, 503, 504):
+                    raise TwitterPageError(reason) from exc
+                try:
+                    retry_after = Retry().get_retry_after(exc.response)
+                except InvalidHeader:
+                    retry_after = None
+                if retry_after and retry_after > 60:
+                    raise TwitterPageError(f"{reason} (Retry-After exceeds 60s)") from exc
+                delay = max(delay, retry_after or 0)
+            except requests.ReadTimeout:
+                reason = 'read timeout'
+            except requests.ConnectTimeout:
+                reason = 'connect timeout'
+            except requests.ConnectionError:
+                reason = 'connection error'
+            else:
+                data = response.json()
+                if attempt > 1:
+                    row = self.collection_status['twitter']
+                    row['recovered_pages'] = row.get('recovered_pages', 0) + 1
+                    logger.info("Twitter batch %d page %d recovered on attempt %d",
+                                chunk_number, page_number, attempt)
+                return data
+
+            if attempt == len(read_timeouts):
+                raise TwitterPageError(f"{reason} after {attempt} attempts")
+            logger.warning("Twitter batch %d page %d: %s; retrying in %ss",
+                           chunk_number, page_number, reason, delay)
+            time.sleep(delay)
+
     def _twitter_search(self, usernames: List[str]) -> List[CollectedItem]:
         """Use Twitter advanced search to collect from multiple users."""
         all_tweets = []
         failed_chunks = 0
+        failure_reasons = set()
 
         if not usernames:
             return []
@@ -335,15 +385,7 @@ class SocialGatherer(BaseGatherer):
                         if cursor:
                             params["cursor"] = cursor
 
-                        response = requests.get(
-                            f"{TWITTERAPI_IO_BASE}/twitter/tweet/advanced_search",
-                            params=params,
-                            headers=headers,
-                            timeout=30
-                        )
-                        response.raise_for_status()
-                        self._twitter_calls += 1
-                        data = response.json()
+                        data = self._twitter_page(params, headers, chunk_idx + 1, page + 1)
 
                         tweets_data = data.get('tweets', [])
                         if not tweets_data:
@@ -372,8 +414,10 @@ class SocialGatherer(BaseGatherer):
                         time.sleep(0.3)
 
                     except Exception as e:
-                        logger.error(f"Error in Twitter search: {e}")
-                        chunk_error = str(e)
+                        chunk_error = str(e) if isinstance(e, TwitterPageError) else type(e).__name__
+                        logger.error("Twitter batch %d page %d stopped: %s",
+                                     chunk_idx + 1, page + 1, chunk_error)
+                        failure_reasons.add(chunk_error)
                         failed_chunks += 1
                         break
 
@@ -381,19 +425,17 @@ class SocialGatherer(BaseGatherer):
                 # The chunk caught its own error and did not re-raise, so `time_step`
                 # cannot infer failure from an exception -- say so explicitly.
                 if chunk_error:
-                    step.status = 'failed'
+                    step.status = 'partial' if step.items else 'failed'
 
             if chunk_idx < len(chunks) - 1:
                 time.sleep(0.5)
 
         # Track partial failures
-        if failed_chunks > 0:
-            if failed_chunks == len(chunks):
-                self.collection_status['twitter']['status'] = 'failed'
-                self.collection_status['twitter']['error'] = f"All {failed_chunks} API requests failed"
-            else:
-                self.collection_status['twitter']['status'] = 'partial'
-                self.collection_status['twitter']['error'] = f"{failed_chunks}/{len(chunks)} API requests failed"
+        if failed_chunks:
+            row = self.collection_status['twitter']
+            row['status'] = 'failed' if failed_chunks == len(chunks) and not all_tweets else 'partial'
+            reasons = ', '.join(sorted(failure_reasons))
+            row['error'] = f"{failed_chunks}/{len(chunks)} search batches incomplete ({reasons})"
 
         return all_tweets
 

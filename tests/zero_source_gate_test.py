@@ -226,7 +226,7 @@ class SocialZeroSourceTests(unittest.TestCase):
             self._run(g, twitter_exc=requests.exceptions.ConnectTimeout('SOCKS'))
             row = g.collection_status['twitter']
             self.assertEqual(row['status'], 'failed')
-            self.assertEqual(row['error'], 'All 1 API requests failed')
+            self.assertEqual(row['error'], '1/1 search batches incomplete (connect timeout after 3 attempts)')
             self.assertEqual(row['count'], 0)
 
     def test_twitter_clean_zero_tweets_is_success(self):
