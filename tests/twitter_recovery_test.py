@@ -38,6 +38,19 @@ class TwitterRecoveryTests(unittest.TestCase):
                 items = gatherer._collect_twitter()
         return gatherer, items, get, sleep
 
+    def test_slow_pages_can_finish_on_the_first_attempt(self):
+        def slow_response(url, *, params, headers, timeout):
+            connect_timeout, read_timeout = timeout
+            self.assertEqual(connect_timeout, 10)
+            if read_timeout < 55:
+                raise requests.ReadTimeout()
+            return page('b') if 'cursor' in params else page('a', 'next')
+
+        g, items, get, _ = self.pull(slow_response)
+        self.assertEqual([i.content for i in items], ['a', 'b'])
+        self.assertEqual(get.call_count, 2)
+        self.assertEqual(g.collection_status['twitter']['recovered_pages'], 0)
+
     def test_retry_same_cursor_recovers_without_duplication_or_partial_status(self):
         g, items, get, sleep = self.pull([page('a', 'next'), requests.ReadTimeout(),
                                           response(503, retry_after='7'), page('b')])

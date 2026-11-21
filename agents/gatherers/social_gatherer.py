@@ -300,14 +300,15 @@ class SocialGatherer(BaseGatherer):
 
     def _twitter_page(self, params: dict, headers: dict, chunk_number: int, page_number: int) -> dict:
         """Fetch one search page, reusing its cursor for bounded retries."""
-        read_timeouts = (30, 45, 60)
-        for attempt, read_timeout in enumerate(read_timeouts, start=1):
+        max_attempts = 3
+        for attempt in range(1, max_attempts + 1):
             delay = 2 ** attempt
             self._twitter_calls += 1
+            started = time.monotonic()
             try:
                 response = requests.get(
                     f"{TWITTERAPI_IO_BASE}/twitter/tweet/advanced_search",
-                    params=params, headers=headers, timeout=(10, read_timeout),
+                    params=params, headers=headers, timeout=(10, 60),
                 )
                 response.raise_for_status()
             except requests.HTTPError as exc:
@@ -330,14 +331,14 @@ class SocialGatherer(BaseGatherer):
                 reason = 'connection error'
             else:
                 data = response.json()
+                logger.info("Twitter batch %d page %d completed on attempt %d in %.1fs",
+                            chunk_number, page_number, attempt, time.monotonic() - started)
                 if attempt > 1:
                     row = self.collection_status['twitter']
                     row['recovered_pages'] = row.get('recovered_pages', 0) + 1
-                    logger.info("Twitter batch %d page %d recovered on attempt %d",
-                                chunk_number, page_number, attempt)
                 return data
 
-            if attempt == len(read_timeouts):
+            if attempt == max_attempts:
                 raise TwitterPageError(f"{reason} after {attempt} attempts")
             logger.warning("Twitter batch %d page %d: %s; retrying in %ss",
                            chunk_number, page_number, reason, delay)

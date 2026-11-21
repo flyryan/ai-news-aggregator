@@ -98,8 +98,9 @@ receiver's authenticated readiness probe sends no notification; actual alerts go
 to the existing private Signal recipient without depending on an LLM credential.
 
 Twitter search retries a transient timeout, connection error, or HTTP 408, 429, 500,
-502, 503, or 504 on the same page and proxy route. Up to three attempts use read
-timeouts of 30, 45, and 60 seconds. A server-requested delay over 60 seconds
+502, 503, or 504 on the same page and proxy route. Each of the three attempts
+allows 10 seconds to connect and 60 seconds to read. Successful request logs
+include the batch, page, attempt, and elapsed time. A server-requested delay over 60 seconds
 ends that batch. The collector retains earlier pages and continues with the next
 batch. In `summary.json`, the Twitter row under `collection_status.social_platforms`
 includes its final status, a short reason for incomplete batches, and
