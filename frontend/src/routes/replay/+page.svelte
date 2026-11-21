@@ -476,33 +476,15 @@
 			).size || index.run.models.length
 		: 0;
 
-	// The run status is derived from phase statuses, and "partial" only ever means
-	// "some phase did not fully succeed" — it says nothing about whether the reader
-	// got a complete briefing. On 2026-07-28 the hero image failed mid-run and was
-	// regenerated afterwards; every word of the report shipped. Labelling that
-	// "Partial" with no other text reads as "your report is missing something".
-	//
-	// So the chip states the outcome the reader cares about (did the briefing
-	// publish?) and the affected phases are named beneath it.
-	$: statusPhases = index
-		? (index.phases ?? []).filter((p) => p.status === 'failed' || p.status === 'partial')
-		: [];
-	$: publishedOk = index ? index.run.status !== 'failed' : false;
-	$: statusWord = !index
-		? ''
-		: index.run.status === 'failed'
-			? 'Incomplete'
-			: statusPhases.length > 0
-				? 'Published'
-				: 'Clean';
-	$: statusExplainer = (() => {
-		if (!index) return '';
-		if (statusPhases.length === 0) return 'Every phase succeeded.';
-		const parts = statusPhases.map(
-			(p) => `${p.ordinal} ${p.label}${p.detail ? ` — ${p.detail}` : ''}`
-		);
-		return `${publishedOk ? 'The briefing published in full. One step needed retrying: ' : 'A phase failed outright: '}${parts.join('; ')}`;
-	})();
+	$: phaseIssues = (index?.phases ?? [])
+		.filter((p) => p.status === 'failed' || p.status === 'partial')
+		.map((p) => `${p.label} ${p.status}${p.detail ? ` (${p.detail})` : ''}`);
+	$: sourceIssues = (index?.sources ?? [])
+		.filter((s) => s.status === 'failed' || s.status === 'partial')
+		.map((s) => `${s.name} ${s.status}`);
+	$: statusWord = index?.run.status === 'failed' ? 'Incomplete'
+		: index?.run.status === 'partial' ? 'Published' : 'Clean';
+	$: statusDetail = [...phaseIssues, ...sourceIssues].join(' · ');
 </script>
 
 <svelte:head>
@@ -614,24 +596,15 @@
 			</div>
 			<div>
 				<span class="rs-label">Briefing</span>
-				<span class="rs-value" data-status={index.run.status} title={statusExplainer}
+				<span class="rs-value" data-status={index.run.status} title={statusDetail || statusWord}
 					>{statusWord}</span
 				>
 			</div>
 		</div>
 
-		{#if statusPhases.length > 0}
-			<!-- Lead with what shipped, then name the step that had to be retried. -->
+		{#if statusDetail}
 			<p class="status-why" data-status={index.run.status}>
-				<strong
-					>{publishedOk
-						? 'Published in full.'
-						: 'A phase failed and the report is incomplete.'}</strong
-				>
-				{publishedOk ? 'One step needed retrying:' : ''}
-				{#each statusPhases as p, i (p.id)}{i > 0 ? '; ' : ' '}<span class="sw-phase"
-						>{p.ordinal} {p.label}</span
-					>{p.detail ? ` — ${p.detail}` : ''}{/each}
+				<strong>{statusWord}.</strong> {statusDetail}
 			</p>
 		{/if}
 
@@ -835,8 +808,7 @@
 	:global(.dark) .rs-value {
 		color: #f5f5f5;
 	}
-	/* A run that published its briefing reads as success even when a step retried —
-	   amber here implied the reader was missing content, which was never true. */
+	/* This chip describes publication. The detail below shows coverage issues. */
 	.rs-value[data-status='partial'],
 	.rs-value[data-status='success'] {
 		color: #10b981;
@@ -871,14 +843,6 @@
 	:global(.dark) .status-why[data-status='failed'] strong {
 		color: #f87171;
 	}
-	.sw-phase {
-		font-weight: 600;
-		color: #525252;
-	}
-	:global(.dark) .sw-phase {
-		color: #d4d4d4;
-	}
-
 	.viewswitch {
 		display: inline-flex;
 		border-radius: 8px;

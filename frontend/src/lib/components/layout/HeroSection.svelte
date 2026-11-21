@@ -77,7 +77,7 @@
 				{#if collectionStatus !== 'success'}
 					<div class="flex items-center gap-2 text-sm text-white/80">
 						<span class={`w-2 h-2 rounded-full ${statusColor}`} aria-hidden="true"></span>
-						<span class="capitalize">{collectionStatus}</span>
+						<span>{collectionStatus === 'partial' ? 'Partial collection' : `Collection ${collectionStatus}`}</span>
 					</div>
 				{/if}
 
