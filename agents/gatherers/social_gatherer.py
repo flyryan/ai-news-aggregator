@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 # TwitterAPI.io configuration
 TWITTERAPI_IO_KEY = os.getenv('TWITTERAPI_IO_KEY', '')
 TWITTERAPI_IO_BASE = "https://api.twitterapi.io"
-
 # TwitterAPI.io rejects an advanced_search query longer than this with HTTP 400
 # ("query is too long (523 characters). The maximum length is 512 characters").
 # Chunks used to be a fixed 25 accounts; one of them came to 523 characters and
@@ -36,6 +35,13 @@ TWITTER_QUERY_MAX_CHARS = 512
 # A Twitter handle is 1-15 letters, digits or underscores. Anything else can
 # never match a `from:` clause, so it only spends query length.
 _TWITTER_HANDLE_RE = re.compile(r'[A-Za-z0-9_]{1,15}')
+
+
+def _twitter_get(path: str, **kwargs) -> requests.Response:
+    """Call TwitterAPI.io directly even when other collectors use Mullvad."""
+    with requests.Session() as session:
+        session.trust_env = False
+        return session.get(f"{TWITTERAPI_IO_BASE}{path}", **kwargs)
 
 
 def build_twitter_queries(
@@ -286,8 +292,8 @@ class SocialGatherer(BaseGatherer):
         if not TWITTERAPI_IO_KEY:
             return None
         try:
-            resp = requests.get(
-                f"{TWITTERAPI_IO_BASE}/oapi/my/info",
+            resp = _twitter_get(
+                "/oapi/my/info",
                 headers={"X-API-Key": TWITTERAPI_IO_KEY},
                 timeout=30,
             )
@@ -306,8 +312,8 @@ class SocialGatherer(BaseGatherer):
             self._twitter_calls += 1
             started = time.monotonic()
             try:
-                response = requests.get(
-                    f"{TWITTERAPI_IO_BASE}/twitter/tweet/advanced_search",
+                response = _twitter_get(
+                    "/twitter/tweet/advanced_search",
                     params=params, headers=headers, timeout=(10, 60),
                 )
                 response.raise_for_status()

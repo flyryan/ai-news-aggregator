@@ -212,7 +212,7 @@ class SocialZeroSourceTests(unittest.TestCase):
             session.get.return_value.json.return_value = {'tweets': []}
             session.get.side_effect = None
         with patch.object(social_mod, 'TWITTERAPI_IO_KEY', twitter_key), \
-                patch.object(social_mod.requests, 'get', session.get), \
+                patch.object(social_mod, '_twitter_get', session.get), \
                 patch.object(social_mod.time, 'sleep'), \
                 patch.object(g, '_fetch_twitter_balance', return_value=None), \
                 patch.object(g, '_fetch_bluesky_user', side_effect=bluesky), \

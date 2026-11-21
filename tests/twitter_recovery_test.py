@@ -1,5 +1,6 @@
 """Twitter search recovers individual pages and reports the final batch outcome."""
 import json
+import os
 import unittest
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -26,13 +27,29 @@ def page(tweet_id, cursor=None):
 
 
 class TwitterRecoveryTests(unittest.TestCase):
+    def test_search_retry_and_balance_bypass_pipeline_proxy(self):
+        proxy = 'socks5h://127.0.0.1:19876'
+        with TemporaryDirectory() as tmp, patch.dict(os.environ, {
+                'HTTPS_PROXY': proxy, 'ALL_PROXY': proxy, 'NO_PROXY': ''}, clear=True):
+            gatherer = SocialGatherer(config_dir=tmp, data_dir=tmp, target_date='2026-11-21')
+            gatherer.twitter_users = ['someone']
+            with patch.object(social, 'TWITTERAPI_IO_KEY', 'test'), patch.object(social.time, 'sleep'), \
+                    patch.object(requests.adapters.HTTPAdapter, 'send', side_effect=[
+                        response(503), page('a'), response(200, {'recharge_credits': 25})
+                    ]) as send:
+                items = gatherer._collect_twitter()
+            self.assertEqual([i.content for i in items], ['a'])
+            self.assertEqual([c.args[0].path_url.split('?')[0] for c in send.call_args_list], [
+                '/twitter/tweet/advanced_search', '/twitter/tweet/advanced_search', '/oapi/my/info'])
+            self.assertEqual([c.kwargs['proxies'] for c in send.call_args_list], [{}, {}, {}])
+
     def pull(self, responses, queries=('first',)):
         with TemporaryDirectory() as tmp:
             gatherer = SocialGatherer(config_dir=tmp, data_dir=tmp, target_date='2026-11-21')
             gatherer.twitter_users = ['someone']
             with patch.object(social, 'TWITTERAPI_IO_KEY', 'test'), \
                     patch.object(social, 'build_twitter_queries', return_value=queries), \
-                    patch.object(social.requests, 'get', side_effect=responses) as get, \
+                    patch.object(social, '_twitter_get', side_effect=responses) as get, \
                     patch.object(social.time, 'sleep') as sleep, \
                     patch.object(gatherer, '_fetch_twitter_balance', return_value=None):
                 items = gatherer._collect_twitter()

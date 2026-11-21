@@ -85,7 +85,7 @@ def _probe_twitter(key: str) -> tuple[int | None, str]:
     if not key:
         return None, "TWITTERAPI_IO_KEY not configured"
     try:
-        response = httpx.get(TWITTERAPI_URL, headers={"x-api-key": key}, timeout=15)
+        response = httpx.get(TWITTERAPI_URL, headers={"x-api-key": key}, timeout=15, trust_env=False)
         if response.status_code != 200:
             return None, f"probe returned HTTP {response.status_code}"
         payload = response.json()

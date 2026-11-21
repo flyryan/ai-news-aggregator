@@ -92,7 +92,7 @@ class TwitterSearchSendsBoundedQueriesTests(unittest.TestCase):
             get = Mock()
             get.return_value.json.return_value = {'tweets': []}
             with patch.object(social_mod, 'TWITTERAPI_IO_KEY', 'key'), \
-                    patch.object(social_mod.requests, 'get', get), \
+                    patch.object(social_mod, '_twitter_get', get), \
                     patch.object(social_mod.time, 'sleep'):
                 g._twitter_search(g.twitter_users)
         queries = [call.kwargs['params']['query'] for call in get.call_args_list]

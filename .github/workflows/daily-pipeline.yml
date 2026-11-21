@@ -619,10 +619,8 @@ jobs:
             export all_proxy="$PIPELINE_PROXY_URL"
             export https_proxy="$PIPELINE_PROXY_URL"
             export http_proxy="$PIPELINE_PROXY_URL"
-            # ScrapeCreators (Reddit) unblocks server-side and must go direct, not through
-            # the Mullvad tunnel. The gatherer sets requests trust_env=False as the primary
-            # guard; this NO_PROXY entry is belt-and-suspenders.
-            export NO_PROXY="localhost,127.0.0.1,::1,api.scrapecreators.com"
+            # The Reddit and Twitter API clients also disable ambient proxies themselves.
+            export NO_PROXY="localhost,127.0.0.1,::1,api.scrapecreators.com,api.twitterapi.io"
             export no_proxy="$NO_PROXY"
             echo "Pipeline-wide proxy is configured."
           fi
