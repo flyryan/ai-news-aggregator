@@ -497,6 +497,9 @@ class JSONGenerator:
                 }
                 if 'recovered_pages' in val:
                     platform['recovered_pages'] = val['recovered_pages']
+                for field in ('recovered_batches', 'unavailable_accounts'):
+                    if field in val:
+                        platform[field] = val[field]
                 social_platforms.append(platform)
 
                 if status_val == 'failed':

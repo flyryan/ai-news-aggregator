@@ -105,7 +105,15 @@ ends that batch. The collector retains earlier pages and continues with the next
 batch. In `summary.json`, the Twitter row under `collection_status.social_platforms`
 includes its final status, a short reason for incomplete batches, and
 `recovered_pages` for pages fetched successfully after a retry. Older editions
-can omit the counter.
+can omit the counter. When search exhausts its server-error retries or still has a
+cursor at its page cap, the collector resolves the affected handles and reads their
+public timelines by user ID, including replies. Recovery deduplicates against saved
+search pages and respects the source routing policy. It tracks confirmed unavailable
+profiles separately from failed lookups. Partial recovery preserves collected posts
+and lists unresolved handles. The Twitter row includes `recovered_batches` and
+`unavailable_accounts` when applicable. Timeline recovery uses at most four
+concurrent workers, 40 pages per account, 650 HTTP attempts per run, and a
+20-minute recovery window.
 
 Analysis normalizes HTML entities, whitespace and quote typography for title checks,
 but preserves exact source IDs. Ambiguous rows are retried separately while validated

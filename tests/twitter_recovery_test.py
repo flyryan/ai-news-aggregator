@@ -106,3 +106,88 @@ class TwitterRecoveryTests(unittest.TestCase):
         g, items, _, _ = self.pull([page('a', 'next'), response(400)])
         self.assertEqual(len(items), 1)
         self.assertEqual(g.collection_status['twitter']['status'], 'partial')
+
+    def test_exhausted_503_recovers_accounts_and_deduplicates_earlier_search_pages(self):
+        def tweet(tweet_id, day=20, author='alice', **kwargs):
+            return {'id': tweet_id, 'text': tweet_id, 'author': {'userName': author},
+                    'createdAt': f'{day} Nov 2026 10:00:00 GMT', **kwargs}
+
+        def fetch(path, *, params, **kwargs):
+            if path.endswith('advanced_search'):
+                return response(503) if params.get('cursor') else page('already', 'search-next')
+            if path.endswith('/user/info'):
+                return response(200, {'status': 'success', 'data': {'id': params['userName'] + '-id'}})
+            self.assertEqual(path, '/twitter/user/tweet_timeline')
+            self.assertEqual(params['includeReplies'], 'true')
+            if params['userId'] == 'bob-id':
+                rows = []
+            elif 'cursor' not in params:
+                rows = [tweet('pinned', 1, isPinned=True), tweet('already'), tweet('other', author='other'),
+                        tweet('native-retweet', isRetweet=True)]
+                return response(200, {'status': 'success', 'data': {'tweets': rows},
+                                      'has_next_page': True, 'next_cursor': 'timeline-next'})
+            else:
+                self.assertEqual(params['cursor'], 'timeline-next')
+                rows = [tweet('recovered'), tweet('too-old', 19)]
+            return response(200, {'status': 'success', 'data': {'tweets': rows}, 'has_next_page': False})
+
+        g, items, _, _ = self.pull(fetch, queries=('(from:alice OR from:bob) since:2026-11-20 until:2026-11-21',))
+        self.assertCountEqual([i.content for i in items], ['already', 'recovered'])
+        self.assertEqual(g.collection_status['twitter']['status'], 'success')
+        self.assertEqual(g.source_steps['social_twitter'][0]['status'], 'success')
+        self.assertEqual(g._twitter_calls, 9)
+        self.assertEqual(g.collection_status['twitter']['recovered_batches'], 1)
+        self.assertEqual(g._twitter_tweets_billed, 7)
+
+    def test_incomplete_account_recovery_keeps_posts_and_reports_the_missing_account(self):
+        def fetch(path, *, params, **kwargs):
+            if path.endswith('advanced_search'):
+                return response(503)
+            if path.endswith('/user/info'):
+                return response(200, {'status': 'success', 'data': {'id': '1'}})
+            if params.get('cursor'):
+                return response(200, {'status': 'error', 'msg': 'unavailable'})
+            row = {'id': 'one', 'text': 'one', 'createdAt': '20 Nov 2026 10:00:00 GMT',
+                   'author': {'userName': 'alice'}}
+            return response(200, {'status': 'success', 'data': {'tweets': [row]},
+                                  'has_next_page': True, 'next_cursor': 'next'})
+
+        g, items, _, _ = self.pull(fetch, queries=('(from:alice) since:2026-11-20 until:2026-11-21',))
+        self.assertEqual([i.content for i in items], ['one'])
+        self.assertEqual(g.collection_status['twitter']['status'], 'partial')
+        self.assertIn('alice', g.collection_status['twitter']['error'])
+
+    def test_provider_confirmed_suspension_is_reported_separately_from_a_failed_lookup(self):
+        def fetch(path, *, params, **kwargs):
+            if path.endswith('advanced_search'):
+                return response(503)
+            if params.get('userName') == 'alice':
+                return response(200, {'status': 'success', 'data': {'unavailable': True,
+                                                                    'unavailableReason': 'Suspended'}})
+            return response(200, {'status': 'error', 'msg': 'backend unavailable'})
+
+        g, _, _, _ = self.pull(fetch, queries=('(from:alice OR from:bob) since:2026-11-20 until:2026-11-21',))
+        row = g.collection_status['twitter']
+        self.assertEqual(row.get('unavailable_accounts'), {'alice': 'suspended'})
+        self.assertIn('bob', row['error'])
+        self.assertNotEqual(row['status'], 'success')
+
+    def test_search_page_cap_requires_verified_account_coverage(self):
+        pages = [page(str(i), 'cursor-' + str(i)) for i in range(10)]
+        g, items, _, _ = self.pull(pages + [response(401)], queries=('(from:alice) since:X until:Y',))
+        self.assertEqual(len(items), 10)
+        self.assertEqual(g.collection_status['twitter']['status'], 'partial')
+        self.assertIn('alice', g.collection_status['twitter']['error'])
+
+    def test_account_recovery_stops_at_the_shared_paid_request_limit(self):
+        replies = [response(503)] * 3 + [response(200, {'status': 'success', 'data': {'id': '1'}})]
+        with patch.object(social, 'TWITTER_TIMELINE_CALL_LIMIT', 1):
+            g, items, _, _ = self.pull(replies, queries=('(from:alice) since:X until:Y',))
+        self.assertEqual(items, [])
+        self.assertEqual(g._twitter_calls, 4)
+        self.assertEqual(g.collection_status['twitter']['status'], 'failed')
+
+    def test_overlapping_search_pages_count_each_published_post_once(self):
+        g, items, _, _ = self.pull([page('same', 'again'), page('same')])
+        self.assertEqual([i.content for i in items], ['same'])
+        self.assertEqual(g._twitter_tweets_billed, 2)

@@ -12,6 +12,7 @@ import re
 import time
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
+from threading import Lock
 from typing import List, Dict, Any, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -35,6 +36,10 @@ TWITTERAPI_IO_BASE = "https://api.twitterapi.io"
 # Chunks used to be a fixed 25 accounts; one of them came to 523 characters and
 # its 25 accounts were silently missing from every report until 2026-11-15.
 TWITTER_QUERY_MAX_CHARS = 512
+# Bound the extra paid work when search is unavailable across many batches.
+TWITTER_TIMELINE_CALL_LIMIT = 650
+TWITTER_TIMELINE_PAGE_LIMIT = 40
+TWITTER_TIMELINE_TIME_LIMIT = 20 * 60
 
 # A Twitter handle is 1-15 letters, digits or underscores. Anything else can
 # never match a `from:` clause, so it only spends query length.
@@ -86,6 +91,10 @@ class TwitterPageError(Exception):
     """A terminal page failure with a reason suitable for the public report."""
 
 
+class TwitterSearchUnavailable(TwitterPageError):
+    """Search exhausted its server-error retries; account timelines may still work."""
+
+
 class SocialGatherer(BaseGatherer):
     """Gathers posts from Twitter, Bluesky, and Mastodon."""
 
@@ -111,8 +120,12 @@ class SocialGatherer(BaseGatherer):
         }
 
         # TwitterAPI.io usage accounting (surfaced in the end-of-run cost summary)
-        self._twitter_calls = 0          # search HTTP attempts, including retries
+        self._twitter_calls = 0          # search and timeline HTTP attempts, including retries
         self._twitter_tweets_billed = 0  # raw tweets returned (TwitterAPI.io bills per tweet)
+        self._twitter_lock = Lock()
+        self._timeline_calls = 0
+        self._twitter_profiles_read = 0
+        self._timeline_deadline = None
 
         logger.info(f"Loaded {len(self.twitter_users)} Twitter, {len(self.bluesky_handles)} Bluesky, {len(self.mastodon_accounts)} Mastodon accounts")
 
@@ -282,7 +295,7 @@ class SocialGatherer(BaseGatherer):
                 items=self._twitter_tweets_billed,
                 balance=balance,
                 balance_usd=(balance / 100000) if balance is not None else None,
-                est_cost_usd=round(self._twitter_tweets_billed * 0.15 / 1000, 4),
+                est_cost_usd=round((self._twitter_tweets_billed * 0.15 + self._twitter_profiles_read * 0.18) / 1000, 4),
             )
         except Exception as e:  # never let reporting break collection
             logger.debug(f"Could not record TwitterAPI.io usage: {e}")
@@ -306,16 +319,27 @@ class SocialGatherer(BaseGatherer):
             logger.warning(f"Could not fetch TwitterAPI.io balance: {e}")
         return None
 
-    def _twitter_page(self, params: dict, headers: dict, chunk_number: int, page_number: int) -> dict:
-        """Fetch one search page, reusing its cursor for bounded retries."""
+    def _twitter_page(self, params: dict, headers: dict, chunk_number: int, page_number: int,
+                      *, path: str = "/twitter/tweet/advanced_search", handle: str = '') -> dict:
+        """Fetch one page, reusing its endpoint and cursor for bounded retries."""
+        label = f"Twitter batch {chunk_number} page {page_number}"
+        if handle:
+            label = f"Twitter {path.rsplit('/', 1)[-1]} @{handle} page {page_number}"
         max_attempts = 3
         for attempt in range(1, max_attempts + 1):
             delay = 2 ** attempt
-            self._twitter_calls += 1
+            error_type = TwitterPageError
+            with self._twitter_lock:
+                if handle:
+                    if (self._timeline_calls >= TWITTER_TIMELINE_CALL_LIMIT
+                            or time.monotonic() >= self._timeline_deadline):
+                        raise TwitterPageError("account recovery budget exhausted")
+                    self._timeline_calls += 1
+                self._twitter_calls += 1
             started = time.monotonic()
             try:
                 response = _twitter_get(
-                    "/twitter/tweet/advanced_search",
+                    path,
                     params=params, headers=headers, timeout=(10, 60), attempt=attempt,
                 )
                 response.raise_for_status()
@@ -324,6 +348,8 @@ class SocialGatherer(BaseGatherer):
                 reason = f"HTTP {status}"
                 if status not in TRANSIENT_STATUS:
                     raise TwitterPageError(reason) from exc
+                if status >= 500 and not handle:
+                    error_type = TwitterSearchUnavailable
                 try:
                     retry_after = Retry().get_retry_after(exc.response)
                 except InvalidHeader:
@@ -339,22 +365,110 @@ class SocialGatherer(BaseGatherer):
                 reason = 'connection error'
             else:
                 data = response.json()
-                logger.info("Twitter batch %d page %d completed on attempt %d in %.1fs",
-                            chunk_number, page_number, attempt, time.monotonic() - started)
-                if attempt > 1:
+                logger.info("%s completed on attempt %d in %.1fs", label, attempt, time.monotonic() - started)
+                if attempt > 1 and not handle:
                     row = self.collection_status['twitter']
                     row['recovered_pages'] = row.get('recovered_pages', 0) + 1
                 return data
 
             if attempt == max_attempts:
-                raise TwitterPageError(f"{reason} after {attempt} attempts")
-            logger.warning("Twitter batch %d page %d: %s; retrying in %ss",
-                           chunk_number, page_number, reason, delay)
+                raise error_type(f"{reason} after {attempt} attempts")
+            logger.warning("%s: %s; retrying in %ss", label, reason, delay)
             time.sleep(delay)
+
+    def _twitter_account_timeline(self, handle: str, headers: dict, chunk_number: int) -> tuple[list, Optional[str]]:
+        """Return in-window posts and any reason we could not cover this account."""
+        items = []
+        cursors = set()
+        try:
+            lookup = self._twitter_page({'userName': handle}, headers, chunk_number, 1,
+                                        path='/twitter/user/info', handle=handle)
+            profile = lookup.get('data') or {}
+            reason = None
+            if lookup.get('status') == 'error' and lookup.get('msg') == 'user not found':
+                reason = 'not found'
+            elif lookup.get('status') == 'success':
+                if profile.get('protected') is True:
+                    reason = 'protected'
+                elif profile.get('unavailable') and profile.get('unavailableReason') == 'Suspended':
+                    reason = 'suspended'
+            if reason:
+                logger.info("Twitter profile @%s has no public timeline (%s)", handle, reason)
+                with self._twitter_lock:
+                    self.collection_status['twitter'].setdefault('unavailable_accounts', {})[handle] = reason
+                return items, None
+            if lookup.get('status') != 'success' or not profile.get('id'):
+                raise TwitterPageError("account lookup failed")
+            with self._twitter_lock:
+                self._twitter_profiles_read += 1
+            params = {'userId': profile['id'], 'includeReplies': 'true', 'includeParentTweet': 'false'}
+            pinned = set(profile.get('pinnedTweetIds') or [])
+            for page in range(1, TWITTER_TIMELINE_PAGE_LIMIT + 1):
+                data = self._twitter_page(params, headers, chunk_number, page,
+                                          path='/twitter/user/tweet_timeline', handle=handle)
+                # Both the documented top-level shape and the live nested shape occur.
+                tweets = data.get('tweets', (data.get('data') or {}).get('tweets'))
+                if data.get('status') != 'success' or not isinstance(tweets, list):
+                    raise TwitterPageError("invalid account response")
+                with self._twitter_lock:
+                    self._twitter_tweets_billed += len(tweets)
+                dates = []
+                for tweet in tweets:
+                    author = tweet.get('author') or {}
+                    if str(author.get('userName', '')).lower() != handle.lower() or tweet.get('isRetweet'):
+                        continue
+                    if not tweet.get('id') or not tweet.get('createdAt'):
+                        raise TwitterPageError("account post missing ID or timestamp")
+                    published = parsedate_to_datetime(tweet['createdAt']).replace(tzinfo=None)
+                    if (not tweet.get('isPinned') and tweet['id'] not in pinned
+                            and tweet['id'] not in (author.get('pinnedTweetIds') or [])):
+                        dates.append(published)
+                    if self.is_in_date_range(published):
+                        items.append(self._parse_twitter_tweet(tweet))
+                # Replies may be grouped with earlier posts out of timestamp order.
+                # A whole page of older unpinned posts puts the cursor past the window.
+                crossed_start = dates and max(dates) < self.start_time
+                if data.get('has_next_page') is False or crossed_start:
+                    return items, None
+                cursor = data.get('next_cursor')
+                if not cursor or cursor in cursors:
+                    raise TwitterPageError("missing or repeated account cursor")
+                cursors.add(cursor)
+                params['cursor'] = cursor
+            raise TwitterPageError("account page limit reached")
+        except Exception as exc:
+            reason = str(exc) if isinstance(exc, TwitterPageError) else type(exc).__name__
+            logger.warning("Twitter timeline @%s incomplete: %s", handle, reason)
+            return items, reason
+
+    def _recover_twitter_batch(self, query: str, headers: dict, chunk_number: int, tweets_by_id: dict[str, CollectedItem]) -> Optional[str]:
+        """Recover each distinct author in the failed search, retaining earlier pages."""
+        handles = list(dict.fromkeys(h.lower() for h in re.findall(r'from:([A-Za-z0-9_]+)', query)))
+        if not handles:
+            return 'no recoverable accounts'
+        logger.warning("Recovering Twitter batch %d via %d account timelines", chunk_number, len(handles))
+        if self._timeline_deadline is None:
+            self._timeline_deadline = time.monotonic() + TWITTER_TIMELINE_TIME_LIMIT
+        unresolved = []
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = {handle: executor.submit(self._twitter_account_timeline, handle, headers, chunk_number)
+                       for handle in handles}
+            for handle, future in futures.items():
+                items, error = future.result()
+                for item in items:
+                    tweets_by_id.setdefault(item.id, item)
+                if error:
+                    unresolved.append(handle)
+        if unresolved:
+            return f"{len(unresolved)}/{len(handles)} accounts unresolved ({', '.join(unresolved)})"
+        row = self.collection_status['twitter']
+        row['recovered_batches'] = row.get('recovered_batches', 0) + 1
+        logger.info("Twitter batch %d fully recovered via account timelines", chunk_number)
+        return None
 
     def _twitter_search(self, usernames: List[str]) -> List[CollectedItem]:
         """Use Twitter advanced search to collect from multiple users."""
-        all_tweets = []
+        tweets_by_id: dict[str, CollectedItem] = {}
         failed_chunks = 0
         failure_reasons = set()
 
@@ -380,7 +494,7 @@ class SocialGatherer(BaseGatherer):
             cursor = ""
             page = 0
             max_pages = 10
-            before = len(all_tweets)
+            before = len(tweets_by_id)
 
             # One replay step per chunk. Chunks are the real unit of work here --
             # the 167 configured accounts are collapsed into ~7 search queries, so
@@ -410,7 +524,7 @@ class SocialGatherer(BaseGatherer):
                             try:
                                 item = self._parse_twitter_tweet(tweet_data)
                                 if item and self.is_in_date_range(datetime.fromisoformat(item.published)):
-                                    all_tweets.append(item)
+                                    tweets_by_id.setdefault(item.id, item)
                             except Exception as e:
                                 logger.error(f"Error parsing tweet: {e}")
 
@@ -420,20 +534,26 @@ class SocialGatherer(BaseGatherer):
 
                         cursor = data['next_cursor']
                         page += 1
+                        if page == max_pages:
+                            raise TwitterSearchUnavailable("search page limit reached with a continuation")
                         time.sleep(0.3)
 
+                    except TwitterSearchUnavailable as e:
+                        logger.warning("Twitter batch %d page %d stopped: %s", chunk_idx + 1, page + 1, e)
+                        chunk_error = self._recover_twitter_batch(query, headers, chunk_idx + 1, tweets_by_id)
+                        break
                     except Exception as e:
                         chunk_error = str(e) if isinstance(e, TwitterPageError) else type(e).__name__
                         logger.error("Twitter batch %d page %d stopped: %s",
                                      chunk_idx + 1, page + 1, chunk_error)
-                        failure_reasons.add(chunk_error)
-                        failed_chunks += 1
                         break
 
-                step.items = len(all_tweets) - before
+                step.items = len(tweets_by_id) - before
                 # The chunk caught its own error and did not re-raise, so `time_step`
                 # cannot infer failure from an exception -- say so explicitly.
                 if chunk_error:
+                    failure_reasons.add(chunk_error)
+                    failed_chunks += 1
                     step.status = 'partial' if step.items else 'failed'
 
             if chunk_idx < len(chunks) - 1:
@@ -442,11 +562,11 @@ class SocialGatherer(BaseGatherer):
         # Track partial failures
         if failed_chunks:
             row = self.collection_status['twitter']
-            row['status'] = 'failed' if failed_chunks == len(chunks) and not all_tweets else 'partial'
+            row['status'] = 'failed' if failed_chunks == len(chunks) and not tweets_by_id else 'partial'
             reasons = ', '.join(sorted(failure_reasons))
             row['error'] = f"{failed_chunks}/{len(chunks)} search batches incomplete ({reasons})"
 
-        return all_tweets
+        return list(tweets_by_id.values())
 
     def _parse_twitter_tweet(self, tweet_data: Dict[str, Any]) -> Optional[CollectedItem]:
         """Parse a tweet into CollectedItem."""
