@@ -611,6 +611,9 @@ jobs:
 
       - name: Run pipeline
         if: steps.schedule_gate.outputs.should_run == 'true'
+        env:
+          SOCIALDATA_API_KEY: ${{ secrets.SOCIALDATA_API_KEY }}
+          SOCIALDATA_MAX_CALLS: ${{ vars.SOCIALDATA_MAX_CALLS || '40' }}
         shell: bash
         run: |
           set -euo pipefail

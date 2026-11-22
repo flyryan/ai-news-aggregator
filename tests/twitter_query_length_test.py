@@ -40,7 +40,7 @@ class BuildTwitterQueriesTests(unittest.TestCase):
         for query in queries:
             self.assertLessEqual(len(query), TWITTER_QUERY_MAX_CHARS, query)
         sent = [h for q in queries for h in _handles_in(q)]
-        self.assertEqual(sorted(sent), sorted(a.lstrip('@') for a in accounts))
+        self.assertCountEqual([h.lower() for h in sent], {a.lstrip('@').lower() for a in accounts})
 
     def test_configured_accounts_are_valid_handles(self):
         bad = [a for a in _configured_accounts()
@@ -99,8 +99,8 @@ class TwitterSearchSendsBoundedQueriesTests(unittest.TestCase):
         self.assertTrue(queries)
         for query in queries:
             self.assertLessEqual(len(query), TWITTER_QUERY_MAX_CHARS, query)
-        self.assertEqual(sorted(h for q in queries for h in _handles_in(q)),
-                         sorted(a.lstrip('@') for a in accounts))
+        self.assertCountEqual([h.lower() for q in queries for h in _handles_in(q)],
+                              {a.lstrip('@').lower() for a in accounts})
         self.assertNotIn(g.collection_status['twitter']['status'], ('failed', 'partial'))
 
 

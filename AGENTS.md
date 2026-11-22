@@ -115,6 +115,16 @@ and lists unresolved handles. The Twitter row includes `recovered_batches` and
 concurrent workers, 40 pages per account, 650 HTTP attempts per run, and a
 20-minute recovery window.
 
+With `SOCIALDATA_API_KEY` configured, exhausted search transport errors also enter
+TwitterAPI.io account recovery. Only handles still unresolved after their primary
+timeline attempt go to SocialData’s public tweets-and-replies timeline. Accounts
+confirmed missing, suspended, or protected skip the backup. Both providers’ results
+are merged by post ID. The Twitter row records backup outcomes in `socialdata_accounts`
+and stays incomplete until the collector reaches the date boundary or the end of
+the timeline for every unresolved account. The cost report lists SocialData usage separately.
+The backup allows 20 pages per account and `SOCIALDATA_MAX_CALLS` HTTP attempts per run
+(default 40, including retries; 0 disables it).
+
 Analysis normalizes HTML entities, whitespace and quote typography for title checks,
 but preserves exact source IDs. Ambiguous rows are retried separately while validated
 rows are checkpointed. A singleton request binds its exact ID to the sole input source
@@ -261,6 +271,8 @@ ANTHROPIC_API_BASE    # Anthropic API endpoint (no /v1 suffix)
 ANTHROPIC_API_KEY     # Bearer token for authentication
 ANTHROPIC_MODEL       # Legacy single-provider model name (default: claude-5-opus-aws)
 TWITTERAPI_IO_KEY     # TwitterAPI.io API key
+SOCIALDATA_API_KEY    # Optional last resort for unresolved Twitter accounts
+SOCIALDATA_MAX_CALLS  # SocialData HTTP attempts per run including retries (default 40, 0 disables)
 SCRAPECREATORS_API_KEY # ScrapeCreators API key for Reddit collection (required for Reddit data)
 SCRAPECREATORS_BASE   # ScrapeCreators base URL (default: https://api.scrapecreators.com)
 SCRAPECREATORS_PROXY_URL # Optional primary proxy for ScrapeCreators; default direct

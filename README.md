@@ -217,6 +217,7 @@ Set these on the publishing repository:
 | `ANTHROPIC_API_KEY` | LLM/proxy API key, also used by the fallback generated provider config |
 | `ANTHROPIC_API_BASE` | OpenAI-compatible proxy base URL when used |
 | `TWITTERAPI_IO_KEY` | Optional Twitter/X collection |
+| `SOCIALDATA_API_KEY` | Optional backup for individual accounts TwitterAPI.io could not recover. `SOCIALDATA_MAX_CALLS` caps requests per run (default 40 including retries, 0 disables). |
 | `SCRAPECREATORS_API_KEY` | Reddit collection via the ScrapeCreators API (replaces the dead free Reddit `.json` endpoint); required for Reddit data |
 | `REDDIT_PROXY_URL` | Legacy proxy for direct Reddit requests; no longer used by the Reddit gatherer (ScrapeCreators has its own routing) |
 | `LESSWRONG_PROXY_URL` | Optional HTTP(S) or SOCKS proxy URL for LessWrong GraphQL/browser fallback requests |

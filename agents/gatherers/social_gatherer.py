@@ -23,6 +23,7 @@ from urllib3.util.retry import Retry
 from scripts.source_egress import TRANSIENT_STATUS, get_with_retry, routed_get
 
 from ..base import BaseGatherer, CollectedItem
+from .socialdata import SocialDataError, SocialDataTimelines
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +66,7 @@ def build_twitter_queries(
     suffix = f" since:{since_date} until:{until_date}"
     queries: List[str] = []
     clauses: List[str] = []
+    seen_handles = set()
 
     def render(parts: List[str]) -> str:
         return f"({' OR '.join(parts)}){suffix}"
@@ -77,6 +79,9 @@ def build_twitter_queries(
                 "(handles are 1-15 letters, digits or underscores)", raw
             )
             continue
+        if handle.lower() in seen_handles:
+            continue
+        seen_handles.add(handle.lower())
         clause = f"from:{handle}"
         if clauses and len(render(clauses + [clause])) > max_chars:
             queries.append(render(clauses))
@@ -126,6 +131,16 @@ class SocialGatherer(BaseGatherer):
         self._timeline_calls = 0
         self._twitter_profiles_read = 0
         self._timeline_deadline = None
+        self._socialdata = None
+        backup_key = os.getenv('SOCIALDATA_API_KEY', '').strip()
+        if backup_key:
+            try:
+                max_calls = int(os.getenv('SOCIALDATA_MAX_CALLS') or '40')
+            except ValueError:
+                logger.warning("Invalid SOCIALDATA_MAX_CALLS; disabling SocialData for this run")
+                max_calls = 0
+            if max_calls > 0:
+                self._socialdata = SocialDataTimelines(backup_key, max_calls)
 
         logger.info(f"Loaded {len(self.twitter_users)} Twitter, {len(self.bluesky_handles)} Bluesky, {len(self.mastodon_accounts)} Mastodon accounts")
 
@@ -283,6 +298,13 @@ class SocialGatherer(BaseGatherer):
         # Surface TwitterAPI.io usage + balance in the end-of-run cost summary.
         try:
             from ..cost_tracker import get_tracker
+            if self._socialdata and self._socialdata.calls:
+                backup = self._socialdata
+                get_tracker().record_external_api(
+                    "SocialData (Twitter fallback)", calls=backup.calls, items=backup.tweets,
+                    est_cost_usd=round((backup.tweets + backup.profiles) * 0.0002, 4),
+                    note=f"{backup.profiles} profiles read",
+                )
             balance = self._fetch_twitter_balance()
             # TwitterAPI.io bills ~$0.15 / 1000 tweets; credits are $1 / 100,000 units.
             logger.info(
@@ -348,7 +370,7 @@ class SocialGatherer(BaseGatherer):
                 reason = f"HTTP {status}"
                 if status not in TRANSIENT_STATUS:
                     raise TwitterPageError(reason) from exc
-                if status >= 500 and not handle:
+                if not handle and (status >= 500 or (status == 408 and self._socialdata)):
                     error_type = TwitterSearchUnavailable
                 try:
                     retry_after = Retry().get_retry_after(exc.response)
@@ -357,12 +379,15 @@ class SocialGatherer(BaseGatherer):
                 if retry_after and retry_after > 60:
                     raise TwitterPageError(f"{reason} (Retry-After exceeds 60s)") from exc
                 delay = max(delay, retry_after or 0)
-            except requests.ReadTimeout:
-                reason = 'read timeout'
-            except requests.ConnectTimeout:
-                reason = 'connect timeout'
-            except requests.ConnectionError:
-                reason = 'connection error'
+            except (requests.Timeout, requests.ConnectionError) as exc:
+                if isinstance(exc, requests.ConnectTimeout):
+                    reason = 'connect timeout'
+                elif isinstance(exc, requests.Timeout):
+                    reason = 'read timeout'
+                else:
+                    reason = 'connection error'
+                if self._socialdata and not handle:
+                    error_type = TwitterSearchUnavailable
             else:
                 data = response.json()
                 logger.info("%s completed on attempt %d in %.1fs", label, attempt, time.monotonic() - started)
@@ -459,12 +484,31 @@ class SocialGatherer(BaseGatherer):
                     tweets_by_id.setdefault(item.id, item)
                 if error:
                     unresolved.append(handle)
+        if unresolved and self._socialdata:
+            unresolved = self._recover_with_socialdata(unresolved, tweets_by_id)
         if unresolved:
             return f"{len(unresolved)}/{len(handles)} accounts unresolved ({', '.join(unresolved)})"
         row = self.collection_status['twitter']
         row['recovered_batches'] = row.get('recovered_batches', 0) + 1
         logger.info("Twitter batch %d fully recovered via account timelines", chunk_number)
         return None
+
+    def _recover_with_socialdata(self, handles: list[str], tweets_by_id: dict) -> list[str]:
+        outcomes = self.collection_status['twitter'].setdefault('socialdata_accounts', {})
+        unresolved = []
+        for handle in handles:
+            try:
+                for tweet in self._socialdata.posts(handle, self.start_time, self.end_time):
+                    item = self._parse_twitter_tweet(tweet)
+                    tweets_by_id.setdefault(item.id, item)
+                outcomes[handle] = 'recovered'
+                logger.info("SocialData recovered @%s", handle)
+            except (SocialDataError, ValueError, TypeError, KeyError, AttributeError) as exc:
+                reason = str(exc) if isinstance(exc, SocialDataError) else "invalid timeline data"
+                outcomes[handle] = reason
+                unresolved.append(handle)
+                logger.warning("SocialData could not finish @%s: %s", handle, reason)
+        return unresolved
 
     def _twitter_search(self, usernames: List[str]) -> List[CollectedItem]:
         """Use Twitter advanced search to collect from multiple users."""

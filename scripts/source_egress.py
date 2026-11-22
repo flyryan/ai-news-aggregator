@@ -38,13 +38,15 @@ def routed_get(url, *, attempt=1, session=None, primary_proxy=None, **kwargs):
         return client.get(url, **kwargs)
 
 
-def get_with_retry(url, *, read=None, retry_status=PUBLIC_RETRY_STATUS, **kwargs):
+def get_with_retry(url, *, read=None, retry_status=PUBLIC_RETRY_STATUS, before_attempt=None, **kwargs):
     """Two attempts for sources without their own retry loop, including feeds."""
     import requests
     from urllib3.exceptions import InvalidHeader
     from urllib3.util.retry import Retry
 
     for attempt in (1, 2):
+        if before_attempt is not None:
+            before_attempt()
         try:
             response = routed_get(url, attempt=attempt, **kwargs)
             response.raise_for_status()

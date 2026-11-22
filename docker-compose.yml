@@ -20,6 +20,8 @@ services:
 
       # Twitter API (optional - skip Twitter collection if not set)
       - TWITTERAPI_IO_KEY=${TWITTERAPI_IO_KEY:-}
+      - SOCIALDATA_API_KEY=${SOCIALDATA_API_KEY:-}
+      - SOCIALDATA_MAX_CALLS=${SOCIALDATA_MAX_CALLS:-40}
 
       # Collection Settings
       - ENABLE_CRON=${ENABLE_CRON:-false}
